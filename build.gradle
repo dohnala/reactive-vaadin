@@ -10,7 +10,11 @@ repositories {
 }
 
 dependencies {
+    compile "com.google.code.findbugs:jsr305:3.0.2"
+
     compile "io.reactivex.rxjava2:rxjava:2.1.12"
+
+    compile "com.vaadin:vaadin-server:8.3.2"
 }
 
 task wrapper(type: Wrapper) {
