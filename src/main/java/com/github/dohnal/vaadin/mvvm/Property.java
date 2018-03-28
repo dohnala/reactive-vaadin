@@ -28,9 +28,33 @@ public class Property<T>
      *
      * @param defaultValue default value
      */
-    public Property(final @Nonnull T defaultValue)
+    public Property(final @Nullable T defaultValue)
     {
         this.subject = BehaviorSubject.create(defaultValue);
+    }
+
+    /**
+     * Creates new property with observable bound to it
+     *
+     * @param observable observable
+     */
+    public Property(final @Nonnull Observable<T> observable)
+    {
+        this();
+
+        BindUtils.bind(observable, this);
+    }
+
+    /**
+     * Creates new property with another property bound to it
+     *
+     * @param anotherProperty another property
+     */
+    public Property(final @Nonnull Property<T> anotherProperty)
+    {
+        this(anotherProperty.getValue());
+
+        BindUtils.bind(anotherProperty, this);
     }
 
     /**

@@ -25,7 +25,16 @@ public class BindUtils
     public static void bind(final @Nonnull Observable<String> observable,
                             final @Nonnull Label label)
     {
-        observable.subscribe(value -> label.getUI().access(() -> label.setValue(value)));
+        observable.subscribe(value -> {
+            if (label.getUI() != null)
+            {
+                label.getUI().access(() -> label.setValue(value));
+            }
+            else
+            {
+                label.setValue(value);
+            }
+        });
     }
 
     /**
@@ -38,7 +47,16 @@ public class BindUtils
     public static <T> void bind(final @Nonnull Observable<T> observable,
                                 final @Nonnull AbstractField<T> field)
     {
-        observable.subscribe(value -> field.getUI().access(() -> field.setValue(value)));
+        observable.subscribe(value -> {
+            if (field.getUI() != null)
+            {
+                field.getUI().access(() -> field.setValue(value));
+            }
+            else
+            {
+                field.setValue(value);
+            }
+        });
     }
 
     /**
@@ -51,7 +69,29 @@ public class BindUtils
     public static <T> void bind(final @Nonnull Observable<T> observable,
                                 final @Nonnull AbstractSingleSelect<T> select)
     {
-        observable.subscribe(value -> select.getUI().access(() -> select.setValue(value)));
+        observable.subscribe(value -> {
+            if (select.getUI() != null)
+            {
+                select.getUI().access(() -> select.setValue(value));
+            }
+            else
+            {
+                select.setValue(value);
+            }
+        });
+    }
+
+    /**
+     * Binds given observable to property
+     *
+     * @param observable observable
+     * @param property property
+     * @param <T> type of value
+     */
+    public static <T> void bind(final @Nonnull Observable<T> observable,
+                                final @Nonnull Property<T> property)
+    {
+        observable.subscribe(property::setValue);
     }
 
     /**
@@ -101,9 +141,22 @@ public class BindUtils
     }
 
     /**
-     * Binds given field component which has user-editable value to property
+     * Binds given property to another property
      *
-     * @param hasValue field component which has user-editable value
+     * @param property property
+     * @param anotherProperty anotherProperty
+     * @param <T> type of value
+     */
+    public static <T> void bind(final @Nonnull Property<T> property,
+                                final @Nonnull Property<T> anotherProperty)
+    {
+        bind(property.asObservable(), anotherProperty);
+    }
+
+    /**
+     * Binds given component which has user-editable value to property
+     *
+     * @param hasValue component which has user-editable value
      * @param property property
      * @param <T> type of value
      * @return registration object to remove added listener
