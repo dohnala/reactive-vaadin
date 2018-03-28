@@ -10,11 +10,11 @@ import com.vaadin.ui.Label;
 import rx.Observable;
 
 /**
- * Utility class for binding reactive primitives to Vaadin components
+ * Reactive binder for binding reactive primitives
  *
  * @author dohnal
  */
-public class BindUtils
+public class ReactiveBinder
 {
     /**
      * Binds given observable to label
@@ -22,8 +22,8 @@ public class BindUtils
      * @param observable observable
      * @param label label
      */
-    public static void bind(final @Nonnull Observable<String> observable,
-                            final @Nonnull Label label)
+    public static void bindObservable(final @Nonnull Observable<String> observable,
+                                      final @Nonnull Label label)
     {
         observable.subscribe(value -> {
             if (label.getUI() != null)
@@ -44,8 +44,8 @@ public class BindUtils
      * @param field field
      * @param <T> type of value
      */
-    public static <T> void bind(final @Nonnull Observable<T> observable,
-                                final @Nonnull AbstractField<T> field)
+    public static <T> void bindObservable(final @Nonnull Observable<T> observable,
+                                          final @Nonnull AbstractField<T> field)
     {
         observable.subscribe(value -> {
             if (field.getUI() != null)
@@ -66,8 +66,8 @@ public class BindUtils
      * @param select select
      * @param <T> type of value
      */
-    public static <T> void bind(final @Nonnull Observable<T> observable,
-                                final @Nonnull AbstractSingleSelect<T> select)
+    public static <T> void bindObservable(final @Nonnull Observable<T> observable,
+                                          final @Nonnull AbstractSingleSelect<T> select)
     {
         observable.subscribe(value -> {
             if (select.getUI() != null)
@@ -88,82 +88,82 @@ public class BindUtils
      * @param property property
      * @param <T> type of value
      */
-    public static <T> void bind(final @Nonnull Observable<T> observable,
-                                final @Nonnull Property<T> property)
+    public static <T> void bindObservable(final @Nonnull Observable<T> observable,
+                                          final @Nonnull ReactiveProperty<T> property)
     {
         observable.subscribe(property::setValue);
     }
 
     /**
-     * Binds given property to label
+     * Binds given reactive property to label
      *
-     * @param property property
+     * @param property reactive property
      * @param label label
      */
-    public static void bind(final @Nonnull Property<String> property,
-                            final @Nonnull Label label)
+    public static void bindProperty(final @Nonnull ReactiveProperty<String> property,
+                                    final @Nonnull Label label)
     {
-        bind(property.asObservable(), label);
+        bindObservable(property.asObservable(), label);
     }
 
     /**
-     * Binds given property to field
+     * Binds given reactive property to field
      *
-     * @param property property
+     * @param property reactive property
      * @param field field
      * @param <T> type of value
      * @return registration object to remove added listener
      */
     @Nonnull
-    public static <T> Registration bind(final @Nonnull Property<T> property,
-                                        final @Nonnull AbstractField<T> field)
+    public static <T> Registration bindProperty(final @Nonnull ReactiveProperty<T> property,
+                                                final @Nonnull AbstractField<T> field)
     {
-        bind(property.asObservable(), field);
+        bindObservable(property.asObservable(), field);
 
-        return bind(field, property);
+        return bindComponent(field, property);
     }
 
     /**
-     * Binds given property to field
+     * Binds given reactive property to field
      *
-     * @param property property
+     * @param property reactive property
      * @param select select
      * @param <T> type of value
      * @return registration object to remove added listener
      */
     @Nonnull
-    public static <T> Registration bind(final @Nonnull Property<T> property,
-                                        final @Nonnull AbstractSingleSelect<T> select)
+    public static <T> Registration bindProperty(final @Nonnull ReactiveProperty<T> property,
+                                                final @Nonnull AbstractSingleSelect<T> select)
     {
-        bind(property.asObservable(), select);
+        bindObservable(property.asObservable(), select);
 
-        return bind(select, property);
+        return bindComponent(select, property);
     }
 
     /**
-     * Binds given property to another property
+     * Binds given reactive property to another reactive property
      *
-     * @param property property
-     * @param anotherProperty anotherProperty
+     * @param property reactive property
+     * @param anotherProperty another reactive property
      * @param <T> type of value
      */
-    public static <T> void bind(final @Nonnull Property<T> property,
-                                final @Nonnull Property<T> anotherProperty)
+    public static <T> void bindProperty(final @Nonnull ReactiveProperty<T> property,
+                                        final @Nonnull ReactiveProperty<T> anotherProperty)
     {
-        bind(property.asObservable(), anotherProperty);
+        bindObservable(property.asObservable(), anotherProperty);
     }
 
     /**
      * Binds given component which has user-editable value to property
      *
      * @param hasValue component which has user-editable value
-     * @param property property
+     * @param property reactive property
      * @param <T> type of value
      * @return registration object to remove added listener
      */
     @Nonnull
-    private static <T> Registration bind(final @Nonnull HasValue<T> hasValue,
-                                         final @Nonnull Property<T> property)
+    private static <T> Registration bindComponent(final @Nonnull HasValue<T> hasValue,
+                                                  final @Nonnull ReactiveProperty<T> property)
     {
         return hasValue.addValueChangeListener(event -> property.setValue(event.getValue()));
     }
