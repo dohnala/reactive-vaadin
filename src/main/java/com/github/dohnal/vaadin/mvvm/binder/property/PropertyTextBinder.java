@@ -24,11 +24,12 @@ public final class PropertyTextBinder extends AbstractPropertyBinder<String>
         return this;
     }
 
+    @Nonnull
     @Override
-    public PropertyTextBinder unbind()
+    public final PropertyTextBinder unbind()
     {
         super.unbind();
 
-        return null;
+        return this;
     }
 }

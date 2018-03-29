@@ -32,11 +32,12 @@ public final class ObservableTextBinder extends AbstractObservableBinder<String>
         return this;
     }
 
+    @Nonnull
     @Override
-    public ObservableTextBinder unbind()
+    public final ObservableTextBinder unbind()
     {
         super.unbind();
 
-        return null;
+        return this;
     }
 }

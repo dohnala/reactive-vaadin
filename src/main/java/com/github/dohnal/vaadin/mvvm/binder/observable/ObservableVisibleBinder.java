@@ -32,11 +32,12 @@ public final class ObservableVisibleBinder extends AbstractObservableBinder<Bool
         return this;
     }
 
+    @Nonnull
     @Override
-    public ObservableVisibleBinder unbind()
+    public final ObservableVisibleBinder unbind()
     {
         super.unbind();
 
-        return null;
+        return this;
     }
 }

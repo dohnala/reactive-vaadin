@@ -37,11 +37,12 @@ public final class PropertyValueBinder<T> extends AbstractPropertyBinder<T>
         return this;
     }
 
+    @Nonnull
     @Override
-    public PropertyValueBinder<T> unbind()
+    public final PropertyValueBinder<T> unbind()
     {
         super.unbind();
 
-        return null;
+        return this;
     }
 }

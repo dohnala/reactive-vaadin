@@ -50,11 +50,12 @@ public final class ObservableValueBinder<T> extends AbstractObservableBinder<T>
         return this;
     }
 
+    @Nonnull
     @Override
-    public ObservableValueBinder<T> unbind()
+    public final ObservableValueBinder<T> unbind()
     {
         super.unbind();
 
-        return null;
+        return this;
     }
 }

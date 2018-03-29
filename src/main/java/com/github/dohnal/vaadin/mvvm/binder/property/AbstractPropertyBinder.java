@@ -4,14 +4,15 @@ import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.github.dohnal.vaadin.mvvm.Disposable;
 import com.github.dohnal.vaadin.mvvm.ReactiveProperty;
-import com.github.dohnal.vaadin.mvvm.binder.Disposable;
+import com.github.dohnal.vaadin.mvvm.binder.ReactiveBinder;
 import com.vaadin.shared.Registration;
 
 /**
  * @author dohnal
  */
-public abstract class AbstractPropertyBinder<T> implements Disposable<AbstractPropertyBinder<T>>
+public abstract class AbstractPropertyBinder<T> extends ReactiveBinder
 {
     protected final ReactiveProperty<T> property;
 
@@ -26,6 +27,7 @@ public abstract class AbstractPropertyBinder<T> implements Disposable<AbstractPr
         this.registrations = new ArrayList<>();
     }
 
+    @Nonnull
     @Override
     public AbstractPropertyBinder<T> unbind()
     {
@@ -35,7 +37,7 @@ public abstract class AbstractPropertyBinder<T> implements Disposable<AbstractPr
         disposables.clear();
         registrations.clear();
 
-        return null;
+        return this;
     }
 
     protected void addDisposable(final @Nonnull Disposable<?> disposable)

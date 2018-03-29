@@ -2,6 +2,7 @@ package com.github.dohnal.vaadin.mvvm.binder;
 
 import javax.annotation.Nonnull;
 
+import com.github.dohnal.vaadin.mvvm.Disposable;
 import com.github.dohnal.vaadin.mvvm.ReactiveProperty;
 import com.github.dohnal.vaadin.mvvm.binder.observable.ObservableBinder;
 import com.github.dohnal.vaadin.mvvm.binder.observable.ObservableEnabledBinder;
@@ -19,7 +20,7 @@ import rx.Observable;
  *
  * @author dohnal
  */
-public class ReactiveBinder
+public abstract class ReactiveBinder implements Disposable<ReactiveBinder>
 {
     /**
      * Return binder for given observable

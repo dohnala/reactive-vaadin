@@ -2,6 +2,8 @@ package com.github.dohnal.vaadin.mvvm;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.github.dohnal.vaadin.mvvm.binder.ReactiveBinder;
 import rx.Observable;
@@ -12,9 +14,11 @@ import rx.subjects.BehaviorSubject;
  *
  * @author dohnal
  */
-public final class ReactiveProperty<T>
+public final class ReactiveProperty<T> implements Disposable<ReactiveProperty<T>>
 {
     private BehaviorSubject<T> subject;
+
+    private List<Disposable<?>> disposables;
 
     /**
      * Creates new property with no value
@@ -73,6 +77,7 @@ public final class ReactiveProperty<T>
     private ReactiveProperty()
     {
         this.subject = BehaviorSubject.create();
+        this.disposables = new ArrayList<>();
     }
 
     /**
@@ -83,6 +88,7 @@ public final class ReactiveProperty<T>
     private ReactiveProperty(final @Nullable T defaultValue)
     {
         this.subject = BehaviorSubject.create(defaultValue);
+        this.disposables = new ArrayList<>();
     }
 
     /**
@@ -94,7 +100,7 @@ public final class ReactiveProperty<T>
     {
         this();
 
-        ReactiveBinder.bind(observable).to(this);
+        this.disposables.add(ReactiveBinder.bind(observable).to(this));
     }
 
     /**
@@ -106,7 +112,7 @@ public final class ReactiveProperty<T>
     {
         this(anotherProperty.getValue());
 
-        ReactiveBinder.bind(anotherProperty).to(this);
+        this.disposables.add(ReactiveBinder.bind(anotherProperty).to(this));
     }
 
     /**
@@ -139,5 +145,14 @@ public final class ReactiveProperty<T>
     public final Observable<T> asObservable()
     {
         return subject;
+    }
+
+    @Nonnull
+    @Override
+    public final ReactiveProperty<T> unbind()
+    {
+        this.disposables.forEach(Disposable::unbind);
+
+        return this;
     }
 }

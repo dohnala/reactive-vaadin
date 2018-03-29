@@ -4,14 +4,14 @@ import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.github.dohnal.vaadin.mvvm.binder.Disposable;
+import com.github.dohnal.vaadin.mvvm.binder.ReactiveBinder;
 import rx.Observable;
 import rx.Subscription;
 
 /**
  * @author dohnal
  */
-public abstract class AbstractObservableBinder<T> implements Disposable<AbstractObservableBinder<T>>
+public abstract class AbstractObservableBinder<T> extends ReactiveBinder
 {
     protected final Observable<T> observable;
 
@@ -23,6 +23,7 @@ public abstract class AbstractObservableBinder<T> implements Disposable<Abstract
         this.subscriptions = new ArrayList<>();
     }
 
+    @Nonnull
     @Override
     public AbstractObservableBinder<T> unbind()
     {
@@ -32,7 +33,7 @@ public abstract class AbstractObservableBinder<T> implements Disposable<Abstract
 
         subscriptions.clear();
 
-        return null;
+        return this;
     }
 
     protected void addSubscription(final @Nonnull Subscription subscription)

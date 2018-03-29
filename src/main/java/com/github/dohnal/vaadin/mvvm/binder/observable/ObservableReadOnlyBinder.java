@@ -32,11 +32,12 @@ public final class ObservableReadOnlyBinder extends AbstractObservableBinder<Boo
         return this;
     }
 
+    @Nonnull
     @Override
-    public ObservableReadOnlyBinder unbind()
+    public final ObservableReadOnlyBinder unbind()
     {
         super.unbind();
 
-        return null;
+        return this;
     }
 }
