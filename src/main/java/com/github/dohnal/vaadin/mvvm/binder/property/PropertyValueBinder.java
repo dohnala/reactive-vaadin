@@ -20,9 +20,9 @@ public final class PropertyValueBinder<T> extends AbstractPropertyBinder<T>
     @Nonnull
     public final PropertyValueBinder<T> to(final @Nonnull AbstractField<T> field)
     {
-        ReactiveBinder.bindValue(this.property.asObservable()).to(field);
+        addDisposable(ReactiveBinder.bindValue(this.property.asObservable()).to(field));
 
-        field.addValueChangeListener(event -> property.setValue(event.getValue()));
+        addRegistration(field.addValueChangeListener(event -> property.setValue(event.getValue())));
 
         return this;
     }
@@ -30,10 +30,18 @@ public final class PropertyValueBinder<T> extends AbstractPropertyBinder<T>
     @Nonnull
     public final PropertyValueBinder<T> to(final @Nonnull AbstractSingleSelect<T> select)
     {
-        ReactiveBinder.bindValue(this.property.asObservable()).to(select);
+        addDisposable(ReactiveBinder.bindValue(this.property.asObservable()).to(select));
 
-        select.addValueChangeListener(event -> property.setValue(event.getValue()));
+        addRegistration(select.addValueChangeListener(event -> property.setValue(event.getValue())));
 
         return this;
+    }
+
+    @Override
+    public PropertyValueBinder<T> unbind()
+    {
+        super.unbind();
+
+        return null;
     }
 }

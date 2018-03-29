@@ -19,8 +19,16 @@ public final class ObservableBinder<T> extends AbstractObservableBinder<T>
     @Nonnull
     public final ObservableBinder<T> to(final @Nonnull ReactiveProperty<T> property)
     {
-        observable.subscribe(property::setValue);
+        addSubscription(observable.subscribe(property::setValue));
 
         return this;
+    }
+
+    @Override
+    public ObservableBinder<T> unbind()
+    {
+        super.unbind();
+
+        return null;
     }
 }

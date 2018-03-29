@@ -19,7 +19,7 @@ public final class ObservableValueBinder<T> extends AbstractObservableBinder<T>
     @Nonnull
     public final ObservableValueBinder<T> to(final @Nonnull AbstractField<T> field)
     {
-        observable.subscribe(value -> {
+        addSubscription(observable.subscribe(value -> {
             if (field.getUI() != null)
             {
                 field.getUI().access(() -> field.setValue(value));
@@ -28,7 +28,7 @@ public final class ObservableValueBinder<T> extends AbstractObservableBinder<T>
             {
                 field.setValue(value);
             }
-        });
+        }));
 
         return this;
     }
@@ -36,7 +36,7 @@ public final class ObservableValueBinder<T> extends AbstractObservableBinder<T>
     @Nonnull
     public final ObservableValueBinder<T> to(final @Nonnull AbstractSingleSelect<T> select)
     {
-        observable.subscribe(value -> {
+        addSubscription(observable.subscribe(value -> {
             if (select.getUI() != null)
             {
                 select.getUI().access(() -> select.setValue(value));
@@ -45,8 +45,16 @@ public final class ObservableValueBinder<T> extends AbstractObservableBinder<T>
             {
                 select.setValue(value);
             }
-        });
+        }));
 
         return this;
+    }
+
+    @Override
+    public ObservableValueBinder<T> unbind()
+    {
+        super.unbind();
+
+        return null;
     }
 }

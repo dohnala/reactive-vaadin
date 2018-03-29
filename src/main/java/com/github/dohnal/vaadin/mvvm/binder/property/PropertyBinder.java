@@ -18,8 +18,16 @@ public final class PropertyBinder<T> extends AbstractPropertyBinder<T>
     @Nonnull
     public final PropertyBinder<T> to(final @Nonnull ReactiveProperty<T> property)
     {
-        ReactiveBinder.bind(this.property.asObservable()).to(property);
+        addDisposable(ReactiveBinder.bind(this.property.asObservable()).to(property));
 
         return this;
+    }
+
+    @Override
+    public PropertyBinder<T> unbind()
+    {
+        super.unbind();
+
+        return null;
     }
 }

@@ -18,7 +18,7 @@ public final class ObservableEnabledBinder extends AbstractObservableBinder<Bool
     @Nonnull
     public final ObservableEnabledBinder to(final @Nonnull AbstractComponent component)
     {
-        observable.subscribe(value -> {
+        addSubscription(observable.subscribe(value -> {
             if (component.getUI() != null)
             {
                 component.getUI().access(() -> component.setEnabled(value));
@@ -27,8 +27,16 @@ public final class ObservableEnabledBinder extends AbstractObservableBinder<Bool
             {
                 component.setEnabled(value);
             }
-        });
+        }));
 
         return this;
+    }
+
+    @Override
+    public ObservableEnabledBinder unbind()
+    {
+        super.unbind();
+
+        return null;
     }
 }

@@ -18,7 +18,7 @@ public final class ObservableVisibleBinder extends AbstractObservableBinder<Bool
     @Nonnull
     public final ObservableVisibleBinder to(final @Nonnull AbstractComponent component)
     {
-        observable.subscribe(value -> {
+        addSubscription(observable.subscribe(value -> {
             if (component.getUI() != null)
             {
                 component.getUI().access(() -> component.setVisible(value));
@@ -27,8 +27,16 @@ public final class ObservableVisibleBinder extends AbstractObservableBinder<Bool
             {
                 component.setVisible(value);
             }
-        });
+        }));
 
         return this;
+    }
+
+    @Override
+    public ObservableVisibleBinder unbind()
+    {
+        super.unbind();
+
+        return null;
     }
 }

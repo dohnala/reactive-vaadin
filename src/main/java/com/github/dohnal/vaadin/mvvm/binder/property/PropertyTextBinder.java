@@ -19,8 +19,16 @@ public final class PropertyTextBinder extends AbstractPropertyBinder<String>
     @Nonnull
     public final PropertyTextBinder to(final @Nonnull Label label)
     {
-        ReactiveBinder.bindText(this.property.asObservable()).to(label);
+        addDisposable(ReactiveBinder.bindText(this.property.asObservable()).to(label));
 
         return this;
+    }
+
+    @Override
+    public PropertyTextBinder unbind()
+    {
+        super.unbind();
+
+        return null;
     }
 }

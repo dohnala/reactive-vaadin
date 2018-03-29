@@ -18,7 +18,7 @@ public final class ObservableReadOnlyBinder extends AbstractObservableBinder<Boo
     @Nonnull
     public final <T> ObservableReadOnlyBinder to(final @Nonnull AbstractField<T> field)
     {
-        observable.subscribe(value -> {
+        addSubscription(observable.subscribe(value -> {
             if (field.getUI() != null)
             {
                 field.getUI().access(() -> field.setReadOnly(value));
@@ -27,8 +27,16 @@ public final class ObservableReadOnlyBinder extends AbstractObservableBinder<Boo
             {
                 field.setReadOnly(value);
             }
-        });
+        }));
 
         return this;
+    }
+
+    @Override
+    public ObservableReadOnlyBinder unbind()
+    {
+        super.unbind();
+
+        return null;
     }
 }

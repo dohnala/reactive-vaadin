@@ -18,7 +18,7 @@ public final class ObservableTextBinder extends AbstractObservableBinder<String>
     @Nonnull
     public final ObservableTextBinder to(final @Nonnull Label label)
     {
-        observable.subscribe(value -> {
+        addSubscription(observable.subscribe(value -> {
             if (label.getUI() != null)
             {
                 label.getUI().access(() -> label.setValue(value));
@@ -27,8 +27,16 @@ public final class ObservableTextBinder extends AbstractObservableBinder<String>
             {
                 label.setValue(value);
             }
-        });
+        }));
 
         return this;
+    }
+
+    @Override
+    public ObservableTextBinder unbind()
+    {
+        super.unbind();
+
+        return null;
     }
 }
