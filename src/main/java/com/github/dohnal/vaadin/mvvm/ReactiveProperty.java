@@ -3,6 +3,7 @@ package com.github.dohnal.vaadin.mvvm;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import com.github.dohnal.vaadin.mvvm.binder.ReactiveBinder;
 import rx.Observable;
 import rx.subjects.BehaviorSubject;
 
@@ -93,7 +94,7 @@ public final class ReactiveProperty<T>
     {
         this();
 
-        ReactiveBinder.bindObservable(observable, this);
+        ReactiveBinder.bind(observable).to(this);
     }
 
     /**
@@ -105,7 +106,7 @@ public final class ReactiveProperty<T>
     {
         this(anotherProperty.getValue());
 
-        ReactiveBinder.bindProperty(anotherProperty, this);
+        ReactiveBinder.bind(anotherProperty).to(this);
     }
 
     /**
