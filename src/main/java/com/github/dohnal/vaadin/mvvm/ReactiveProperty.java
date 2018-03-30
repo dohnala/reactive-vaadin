@@ -5,7 +5,6 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.github.dohnal.vaadin.mvvm.binder.ReactiveBinder;
 import rx.Observable;
 import rx.subjects.BehaviorSubject;
 

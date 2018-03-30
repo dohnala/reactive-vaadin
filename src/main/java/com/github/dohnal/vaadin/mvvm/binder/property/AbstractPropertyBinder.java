@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.github.dohnal.vaadin.mvvm.Disposable;
+import com.github.dohnal.vaadin.mvvm.ReactiveBinder;
 import com.github.dohnal.vaadin.mvvm.ReactiveProperty;
-import com.github.dohnal.vaadin.mvvm.binder.ReactiveBinder;
 import com.vaadin.shared.Registration;
 
 /**

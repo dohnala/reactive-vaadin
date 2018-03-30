@@ -4,7 +4,7 @@ import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.github.dohnal.vaadin.mvvm.binder.ReactiveBinder;
+import com.github.dohnal.vaadin.mvvm.ReactiveBinder;
 import rx.Observable;
 import rx.Subscription;
 
