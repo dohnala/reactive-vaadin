@@ -4,6 +4,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 import rx.Observable;
 import rx.subjects.BehaviorSubject;
@@ -122,6 +123,16 @@ public final class ReactiveProperty<T> implements Disposable<ReactiveProperty<T>
     public final void setValue(final @Nullable T value)
     {
         subject.onNext(value);
+    }
+
+    /**
+     * Updates a value by given update function and notifies all subscribers
+     *
+     * @param update update function
+     */
+    public final void updateValue(final @Nonnull Function<T, T> update)
+    {
+        setValue(update.apply(getValue()));
     }
 
     /**
