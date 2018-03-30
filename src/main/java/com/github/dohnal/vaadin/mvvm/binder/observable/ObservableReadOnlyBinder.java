@@ -6,6 +6,8 @@ import com.vaadin.ui.AbstractField;
 import rx.Observable;
 
 /**
+ * Binder for binding observable to read-only property of some Vaadin field
+ *
  * @author dohnal
  */
 public final class ObservableReadOnlyBinder extends AbstractObservableBinder<Boolean>
@@ -15,6 +17,12 @@ public final class ObservableReadOnlyBinder extends AbstractObservableBinder<Boo
         super(observable);
     }
 
+    /**
+     * Binds observable to read-only property of given field
+     *
+     * @param field field
+     * @return this binder
+     */
     @Nonnull
     public final <T> ObservableReadOnlyBinder to(final @Nonnull AbstractField<T> field)
     {

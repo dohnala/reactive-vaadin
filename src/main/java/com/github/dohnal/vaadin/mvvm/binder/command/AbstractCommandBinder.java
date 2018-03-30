@@ -9,7 +9,7 @@ import com.github.dohnal.vaadin.mvvm.ReactiveCommand;
 import com.vaadin.shared.Registration;
 
 /**
- * Base binder for binding reactive commands
+ * Base binder for binding reactive command
  *
  * @param <R> type of command result
  *

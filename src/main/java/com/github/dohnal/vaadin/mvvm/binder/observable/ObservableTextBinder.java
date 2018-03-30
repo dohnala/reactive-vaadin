@@ -6,6 +6,8 @@ import com.vaadin.ui.Label;
 import rx.Observable;
 
 /**
+ * Binder for binding observable to text property of some Vaadin component
+ *
  * @author dohnal
  */
 public final class ObservableTextBinder extends AbstractObservableBinder<String>
@@ -15,6 +17,12 @@ public final class ObservableTextBinder extends AbstractObservableBinder<String>
         super(observable);
     }
 
+    /**
+     * Binds observable to text property of given label
+     *
+     * @param label label
+     * @return this binder
+     */
     @Nonnull
     public final ObservableTextBinder to(final @Nonnull Label label)
     {

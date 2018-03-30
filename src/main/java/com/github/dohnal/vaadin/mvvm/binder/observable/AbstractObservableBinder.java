@@ -9,6 +9,10 @@ import rx.Observable;
 import rx.Subscription;
 
 /**
+ * Base binder for binding observable
+ *
+ * @param <T> type of observable
+ *
  * @author dohnal
  */
 public abstract class AbstractObservableBinder<T> extends ReactiveBinder
@@ -17,6 +21,11 @@ public abstract class AbstractObservableBinder<T> extends ReactiveBinder
 
     protected final List<Subscription> subscriptions;
 
+    /**
+     * Creates a new observable binder for observable
+     *
+     * @param observable observable
+     */
     public AbstractObservableBinder(final @Nonnull Observable<T> observable)
     {
         this.observable = observable;
@@ -36,6 +45,11 @@ public abstract class AbstractObservableBinder<T> extends ReactiveBinder
         return this;
     }
 
+    /**
+     * Adds given observable subscription object to this binder
+     *
+     * @param subscription subscription
+     */
     protected void addSubscription(final @Nonnull Subscription subscription)
     {
         subscriptions.add(subscription);

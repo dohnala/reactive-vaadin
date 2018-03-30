@@ -10,6 +10,10 @@ import com.github.dohnal.vaadin.mvvm.ReactiveProperty;
 import com.vaadin.shared.Registration;
 
 /**
+ * Base binder for binding reactive property
+ *
+ * @param <T> type of reactive property
+ *
  * @author dohnal
  */
 public abstract class AbstractPropertyBinder<T> extends ReactiveBinder
@@ -20,6 +24,11 @@ public abstract class AbstractPropertyBinder<T> extends ReactiveBinder
 
     protected final List<Registration> registrations;
 
+    /**
+     * Creates a new reactive property binder for reactive property
+     *
+     * @param property reactive property
+     */
     public AbstractPropertyBinder(final @Nonnull ReactiveProperty<T> property)
     {
         this.property = property;
@@ -40,11 +49,21 @@ public abstract class AbstractPropertyBinder<T> extends ReactiveBinder
         return this;
     }
 
+    /**
+     * Adds given disposable object to this binder
+     *
+     * @param disposable disposable
+     */
     protected void addDisposable(final @Nonnull Disposable<?> disposable)
     {
         disposables.add(disposable);
     }
 
+    /**
+     * Adds given Vaadin registration object to this binder
+     *
+     * @param registration registration
+     */
     protected void addRegistration(final @Nonnull Registration registration)
     {
         registrations.add(registration);

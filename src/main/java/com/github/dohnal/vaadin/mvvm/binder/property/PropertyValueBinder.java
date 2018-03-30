@@ -8,6 +8,10 @@ import com.vaadin.ui.AbstractField;
 import com.vaadin.ui.AbstractSingleSelect;
 
 /**
+ * Binder for binding observable to value property of some Vaadin field
+ *
+ * @param <T> type of reactive property
+ *
  * @author dohnal
  */
 public final class PropertyValueBinder<T> extends AbstractPropertyBinder<T>
@@ -17,6 +21,12 @@ public final class PropertyValueBinder<T> extends AbstractPropertyBinder<T>
         super(property);
     }
 
+    /**
+     * Binds reactive property to value property of given field
+     *
+     * @param field field
+     * @return this binder
+     */
     @Nonnull
     public final PropertyValueBinder<T> to(final @Nonnull AbstractField<T> field)
     {
@@ -26,7 +36,12 @@ public final class PropertyValueBinder<T> extends AbstractPropertyBinder<T>
 
         return this;
     }
-
+    /**
+     * Binds reactive property to value property of given select
+     *
+     * @param select select
+     * @return this binder
+     */
     @Nonnull
     public final PropertyValueBinder<T> to(final @Nonnull AbstractSingleSelect<T> select)
     {

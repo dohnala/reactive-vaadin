@@ -7,6 +7,10 @@ import com.vaadin.ui.AbstractSingleSelect;
 import rx.Observable;
 
 /**
+ * Binder for binding observable to value property of some Vaadin field
+ *
+ * @param <T> type of observable
+ *
  * @author dohnal
  */
 public final class ObservableValueBinder<T> extends AbstractObservableBinder<T>
@@ -16,6 +20,12 @@ public final class ObservableValueBinder<T> extends AbstractObservableBinder<T>
         super(observable);
     }
 
+    /**
+     * Binds observable to value property of given field
+     *
+     * @param field field
+     * @return this binder
+     */
     @Nonnull
     public final ObservableValueBinder<T> to(final @Nonnull AbstractField<T> field)
     {
@@ -33,6 +43,12 @@ public final class ObservableValueBinder<T> extends AbstractObservableBinder<T>
         return this;
     }
 
+    /**
+     * Binds observable to value property of given select
+     *
+     * @param select select
+     * @return this binder
+     */
     @Nonnull
     public final ObservableValueBinder<T> to(final @Nonnull AbstractSingleSelect<T> select)
     {

@@ -10,7 +10,6 @@ import com.github.dohnal.vaadin.mvvm.binder.observable.ObservableTextBinder;
 import com.github.dohnal.vaadin.mvvm.binder.observable.ObservableValueBinder;
 import com.github.dohnal.vaadin.mvvm.binder.observable.ObservableVisibleBinder;
 import com.github.dohnal.vaadin.mvvm.binder.property.PropertyBinder;
-import com.github.dohnal.vaadin.mvvm.binder.property.PropertyTextBinder;
 import com.github.dohnal.vaadin.mvvm.binder.property.PropertyValueBinder;
 import rx.Observable;
 
@@ -66,9 +65,9 @@ public abstract class ReactiveBinder implements Disposable<ReactiveBinder>
      * @return binder
      */
     @Nonnull
-    public static PropertyTextBinder bindText(final @Nonnull ReactiveProperty<String> property)
+    public static ObservableTextBinder bindText(final @Nonnull ReactiveProperty<String> property)
     {
-        return new PropertyTextBinder(property);
+        return new ObservableTextBinder(property.asObservable());
     }
 
     /**

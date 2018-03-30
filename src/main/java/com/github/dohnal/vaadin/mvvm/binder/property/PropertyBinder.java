@@ -7,6 +7,10 @@ import com.github.dohnal.vaadin.mvvm.ReactiveBinder;
 import com.github.dohnal.vaadin.mvvm.ReactiveProperty;
 
 /**
+ * Binder for binding reactive property
+ *
+ * @param <T> type of reactive property
+ *
  * @author dohnal
  */
 public final class PropertyBinder<T> extends AbstractPropertyBinder<T>
@@ -16,6 +20,12 @@ public final class PropertyBinder<T> extends AbstractPropertyBinder<T>
         super(property);
     }
 
+    /**
+     * Binds reactive property to given reactive property
+     *
+     * @param property reactive property
+     * @return this binder
+     */
     @Nonnull
     public final PropertyBinder<T> to(final @Nonnull ReactiveProperty<T> property)
     {
@@ -24,6 +34,12 @@ public final class PropertyBinder<T> extends AbstractPropertyBinder<T>
         return this;
     }
 
+    /**
+     * Binds reactive property to given consumer
+     *
+     * @param consumer consumer
+     * @return this binder
+     */
     @Nonnull
     public final PropertyBinder<T> to(final @Nonnull Consumer<T> consumer)
     {

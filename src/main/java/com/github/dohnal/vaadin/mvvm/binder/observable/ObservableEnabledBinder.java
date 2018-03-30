@@ -6,6 +6,8 @@ import com.vaadin.ui.AbstractComponent;
 import rx.Observable;
 
 /**
+ * Binder for binding observable to enabled property of some Vaadin component
+ *
  * @author dohnal
  */
 public final class ObservableEnabledBinder extends AbstractObservableBinder<Boolean>
@@ -15,6 +17,12 @@ public final class ObservableEnabledBinder extends AbstractObservableBinder<Bool
         super(observable);
     }
 
+    /**
+     * Binds observable to enabled property of given component
+     *
+     * @param component component
+     * @return this binder
+     */
     @Nonnull
     public final ObservableEnabledBinder to(final @Nonnull AbstractComponent component)
     {
