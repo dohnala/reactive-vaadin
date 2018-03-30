@@ -2,6 +2,7 @@ package com.github.dohnal.vaadin.mvvm;
 
 import javax.annotation.Nonnull;
 
+import com.github.dohnal.vaadin.mvvm.binder.command.CommandExecutionBinder;
 import com.github.dohnal.vaadin.mvvm.binder.observable.ObservableBinder;
 import com.github.dohnal.vaadin.mvvm.binder.observable.ObservableEnabledBinder;
 import com.github.dohnal.vaadin.mvvm.binder.observable.ObservableReadOnlyBinder;
@@ -166,5 +167,31 @@ public abstract class ReactiveBinder implements Disposable<ReactiveBinder>
     public static ObservableReadOnlyBinder bindReadOnly(final @Nonnull ReactiveProperty<Boolean> property)
     {
         return new ObservableReadOnlyBinder(property.asObservable());
+    }
+
+    /**
+     * Return command execution binder for given reactive command
+     *
+     * @param command reactive command
+     * @param <R> type of command result
+     * @return binder
+     */
+    @Nonnull
+    public static <R> CommandExecutionBinder<R> bindCommand(final @Nonnull ReactiveCommand<R> command)
+    {
+        return new CommandExecutionBinder<>(command);
+    }
+
+    /**
+     * Return command result binder for given reactive command
+     *
+     * @param command reactive command
+     * @param <R> type of command result
+     * @return binder
+     */
+    @Nonnull
+    public static <R> ObservableValueBinder<R> bindCommandResult(final @Nonnull ReactiveCommand<R> command)
+    {
+        return new ObservableValueBinder<>(command.getResult());
     }
 }
