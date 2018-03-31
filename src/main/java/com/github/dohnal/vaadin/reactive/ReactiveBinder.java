@@ -1,16 +1,16 @@
-package com.github.dohnal.vaadin.mvvm;
+package com.github.dohnal.vaadin.reactive;
 
 import javax.annotation.Nonnull;
 
-import com.github.dohnal.vaadin.mvvm.binder.command.CommandExecutionBinder;
-import com.github.dohnal.vaadin.mvvm.binder.observable.ObservableBinder;
-import com.github.dohnal.vaadin.mvvm.binder.observable.ObservableEnabledBinder;
-import com.github.dohnal.vaadin.mvvm.binder.observable.ObservableReadOnlyBinder;
-import com.github.dohnal.vaadin.mvvm.binder.observable.ObservableTextBinder;
-import com.github.dohnal.vaadin.mvvm.binder.observable.ObservableValueBinder;
-import com.github.dohnal.vaadin.mvvm.binder.observable.ObservableVisibleBinder;
-import com.github.dohnal.vaadin.mvvm.binder.property.PropertyBinder;
-import com.github.dohnal.vaadin.mvvm.binder.property.PropertyValueBinder;
+import com.github.dohnal.vaadin.reactive.binder.command.CommandExecutionBinder;
+import com.github.dohnal.vaadin.reactive.binder.observable.ObservableBinder;
+import com.github.dohnal.vaadin.reactive.binder.observable.ObservableEnabledBinder;
+import com.github.dohnal.vaadin.reactive.binder.observable.ObservableReadOnlyBinder;
+import com.github.dohnal.vaadin.reactive.binder.observable.ObservableTextBinder;
+import com.github.dohnal.vaadin.reactive.binder.observable.ObservableValueBinder;
+import com.github.dohnal.vaadin.reactive.binder.observable.ObservableVisibleBinder;
+import com.github.dohnal.vaadin.reactive.binder.property.PropertyBinder;
+import com.github.dohnal.vaadin.reactive.binder.property.PropertyValueBinder;
 import rx.Observable;
 
 /**

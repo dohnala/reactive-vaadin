@@ -1,4 +1,4 @@
-package com.github.dohnal.vaadin.mvvm;
+package com.github.dohnal.vaadin.reactive;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

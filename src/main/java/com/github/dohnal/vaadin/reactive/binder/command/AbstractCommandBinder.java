@@ -1,11 +1,11 @@
-package com.github.dohnal.vaadin.mvvm.binder.command;
+package com.github.dohnal.vaadin.reactive.binder.command;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.github.dohnal.vaadin.mvvm.ReactiveBinder;
-import com.github.dohnal.vaadin.mvvm.ReactiveCommand;
+import com.github.dohnal.vaadin.reactive.ReactiveBinder;
+import com.github.dohnal.vaadin.reactive.ReactiveCommand;
 import com.vaadin.shared.Registration;
 
 /**

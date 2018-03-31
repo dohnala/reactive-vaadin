@@ -1,12 +1,12 @@
-package com.github.dohnal.vaadin.mvvm.binder.property;
+package com.github.dohnal.vaadin.reactive.binder.property;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.github.dohnal.vaadin.mvvm.Disposable;
-import com.github.dohnal.vaadin.mvvm.ReactiveBinder;
-import com.github.dohnal.vaadin.mvvm.ReactiveProperty;
+import com.github.dohnal.vaadin.reactive.Disposable;
+import com.github.dohnal.vaadin.reactive.ReactiveBinder;
+import com.github.dohnal.vaadin.reactive.ReactiveProperty;
 import com.vaadin.shared.Registration;
 
 /**

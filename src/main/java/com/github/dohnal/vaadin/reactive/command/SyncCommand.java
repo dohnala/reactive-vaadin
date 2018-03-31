@@ -1,9 +1,9 @@
-package com.github.dohnal.vaadin.mvvm.command;
+package com.github.dohnal.vaadin.reactive.command;
 
 import javax.annotation.Nonnull;
 import java.util.function.Supplier;
 
-import com.github.dohnal.vaadin.mvvm.ReactiveCommand;
+import com.github.dohnal.vaadin.reactive.ReactiveCommand;
 
 /**
  * Synchronous implementation of {@link ReactiveCommand}

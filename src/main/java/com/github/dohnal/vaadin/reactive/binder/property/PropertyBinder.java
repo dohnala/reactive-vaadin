@@ -1,10 +1,10 @@
-package com.github.dohnal.vaadin.mvvm.binder.property;
+package com.github.dohnal.vaadin.reactive.binder.property;
 
 import javax.annotation.Nonnull;
 import java.util.function.Consumer;
 
-import com.github.dohnal.vaadin.mvvm.ReactiveBinder;
-import com.github.dohnal.vaadin.mvvm.ReactiveProperty;
+import com.github.dohnal.vaadin.reactive.ReactiveBinder;
+import com.github.dohnal.vaadin.reactive.ReactiveProperty;
 
 /**
  * Binder for binding reactive property

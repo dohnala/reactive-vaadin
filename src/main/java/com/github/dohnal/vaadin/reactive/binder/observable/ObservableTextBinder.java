@@ -1,4 +1,4 @@
-package com.github.dohnal.vaadin.mvvm.binder.observable;
+package com.github.dohnal.vaadin.reactive.binder.observable;
 
 import javax.annotation.Nonnull;
 

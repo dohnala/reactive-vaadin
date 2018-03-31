@@ -1,10 +1,10 @@
-package com.github.dohnal.vaadin.mvvm.binder.observable;
+package com.github.dohnal.vaadin.reactive.binder.observable;
 
 
 import javax.annotation.Nonnull;
 import java.util.function.Consumer;
 
-import com.github.dohnal.vaadin.mvvm.ReactiveProperty;
+import com.github.dohnal.vaadin.reactive.ReactiveProperty;
 import rx.Observable;
 
 /**

@@ -1,10 +1,10 @@
-package com.github.dohnal.vaadin.mvvm.binder.observable;
+package com.github.dohnal.vaadin.reactive.binder.observable;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.github.dohnal.vaadin.mvvm.ReactiveBinder;
+import com.github.dohnal.vaadin.reactive.ReactiveBinder;
 import rx.Observable;
 import rx.Subscription;
 

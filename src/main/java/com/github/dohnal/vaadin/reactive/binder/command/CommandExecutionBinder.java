@@ -1,8 +1,8 @@
-package com.github.dohnal.vaadin.mvvm.binder.command;
+package com.github.dohnal.vaadin.reactive.binder.command;
 
 import javax.annotation.Nonnull;
 
-import com.github.dohnal.vaadin.mvvm.ReactiveCommand;
+import com.github.dohnal.vaadin.reactive.ReactiveCommand;
 import com.vaadin.ui.Button;
 
 /**
