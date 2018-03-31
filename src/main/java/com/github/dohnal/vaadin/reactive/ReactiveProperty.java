@@ -2,10 +2,10 @@ package com.github.dohnal.vaadin.reactive;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
+import com.google.common.collect.Lists;
 import rx.Observable;
 import rx.subjects.BehaviorSubject;
 
@@ -77,7 +77,7 @@ public final class ReactiveProperty<T> implements Disposable<ReactiveProperty<T>
     private ReactiveProperty()
     {
         this.subject = BehaviorSubject.create();
-        this.disposables = new ArrayList<>();
+        this.disposables = Lists.newArrayList();
     }
 
     /**
@@ -88,7 +88,7 @@ public final class ReactiveProperty<T> implements Disposable<ReactiveProperty<T>
     private ReactiveProperty(final @Nullable T defaultValue)
     {
         this.subject = BehaviorSubject.create(defaultValue);
-        this.disposables = new ArrayList<>();
+        this.disposables = Lists.newArrayList();
     }
 
     /**

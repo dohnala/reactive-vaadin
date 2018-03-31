@@ -1,11 +1,11 @@
 package com.github.dohnal.vaadin.reactive.binder;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
 import java.util.List;
 
 import com.github.dohnal.vaadin.reactive.Disposable;
 import com.github.dohnal.vaadin.reactive.ReactiveBinder;
+import com.google.common.collect.Lists;
 import com.vaadin.shared.Registration;
 import rx.Subscription;
 
@@ -24,9 +24,9 @@ public abstract class AbstractBinder extends ReactiveBinder
 
     public AbstractBinder()
     {
-        this.subscriptions = new ArrayList<>();
-        this.registrations = new ArrayList<>();
-        this.disposables = new ArrayList<>();
+        this.subscriptions = Lists.newArrayList();
+        this.registrations = Lists.newArrayList();
+        this.disposables = Lists.newArrayList();
     }
 
     @Nonnull

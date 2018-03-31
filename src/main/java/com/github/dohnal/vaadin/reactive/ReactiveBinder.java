@@ -1,10 +1,12 @@
 package com.github.dohnal.vaadin.reactive;
 
 import javax.annotation.Nonnull;
+import java.util.Collection;
 
 import com.github.dohnal.vaadin.reactive.binder.command.CommandExecutionBinder;
 import com.github.dohnal.vaadin.reactive.binder.observable.ObservableBinder;
 import com.github.dohnal.vaadin.reactive.binder.observable.ObservableEnabledBinder;
+import com.github.dohnal.vaadin.reactive.binder.observable.ObservableItemsBinder;
 import com.github.dohnal.vaadin.reactive.binder.observable.ObservableReadOnlyBinder;
 import com.github.dohnal.vaadin.reactive.binder.observable.ObservableTextBinder;
 import com.github.dohnal.vaadin.reactive.binder.observable.ObservableValueBinder;
@@ -166,6 +168,32 @@ public abstract class ReactiveBinder implements Disposable<ReactiveBinder>
     public static ObservableReadOnlyBinder bindReadOnly(final @Nonnull ReactiveProperty<Boolean> property)
     {
         return new ObservableReadOnlyBinder(property.asObservable());
+    }
+
+    /**
+     * Return items binder for given observable
+     *
+     * @param observable observable
+     * @param <T> type of item
+     * @return binder
+     */
+    @Nonnull
+    public static <T> ObservableItemsBinder<T> bindItems(final @Nonnull Observable<Collection<T>> observable)
+    {
+        return new ObservableItemsBinder<>(observable);
+    }
+
+    /**
+     * Return items binder for given reactive property
+     *
+     * @param property reactive property
+     * @param <T> type of item
+     * @return binder
+     */
+    @Nonnull
+    public static <T> ObservableItemsBinder<T> bindItems(final @Nonnull ReactiveProperty<Collection<T>> property)
+    {
+        return new ObservableItemsBinder<>(property.asObservable());
     }
 
     /**
