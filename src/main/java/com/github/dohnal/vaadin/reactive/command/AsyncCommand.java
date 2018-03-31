@@ -47,13 +47,23 @@ public class AsyncCommand<R> extends ReactiveCommand<R>
     @Override
     public final void execute()
     {
+        this.isExecuting.setValue(true);
+
         if (executor != null)
         {
-            execution.get().whenCompleteAsync(this::handleResult, executor);
+            execution.get().whenCompleteAsync((result, error) -> {
+                handleResult(result, error);
+
+                this.isExecuting.setValue(false);
+            }, executor);
         }
         else
         {
-            execution.get().whenCompleteAsync(this::handleResult);
+            execution.get().whenCompleteAsync((result, error) -> {
+                handleResult(result, error);
+
+                this.isExecuting.setValue(false);
+            });
         }
     }
 }

@@ -23,6 +23,8 @@ public abstract class ReactiveCommand<R>
 {
     protected final ReactiveProperty<R> result;
 
+    protected final ReactiveProperty<Boolean> isExecuting;
+
     /**
      * Executes this reactive command
      */
@@ -37,6 +39,17 @@ public abstract class ReactiveCommand<R>
     public Observable<R> getResult()
     {
         return result.asObservable();
+    }
+
+    /**
+     * Returns an observable of whether command is executing right now
+     *
+     * @return an observable of whether command is executing right now
+     */
+    @Nonnull
+    public Observable<Boolean> isExecuting()
+    {
+        return isExecuting.asObservable();
     }
 
     /**
@@ -172,6 +185,7 @@ public abstract class ReactiveCommand<R>
     protected ReactiveCommand()
     {
         this.result = ReactiveProperty.empty();
+        this.isExecuting = ReactiveProperty.withValue(false);
     }
 
     protected void handleResult(final @Nullable R result, final @Nullable Throwable error)

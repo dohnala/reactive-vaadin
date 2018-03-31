@@ -33,11 +33,17 @@ public final class SyncCommand<R> extends ReactiveCommand<R>
     {
         try
         {
+            this.isExecuting.setValue(true);
+
             handleResult(execution.get(), null);
         }
         catch (final Throwable error)
         {
             handleResult(null, error);
+        }
+        finally
+        {
+            this.isExecuting.setValue(false);
         }
     }
 }
