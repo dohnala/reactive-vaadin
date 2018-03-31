@@ -23,6 +23,8 @@ public abstract class ReactiveCommand<R>
 {
     protected final ReactiveProperty<R> result;
 
+    protected final ReactiveProperty<Throwable> error;
+
     protected final ReactiveProperty<Boolean> isExecuting;
 
     /**
@@ -39,6 +41,17 @@ public abstract class ReactiveCommand<R>
     public Observable<R> getResult()
     {
         return result.asObservable();
+    }
+
+    /**
+     * Returns an observable of errors produces during execution
+     *
+     * @return observable of errors
+     */
+    @Nonnull
+    public Observable<Throwable> getError()
+    {
+        return error.asObservable();
     }
 
     /**
@@ -185,16 +198,24 @@ public abstract class ReactiveCommand<R>
     protected ReactiveCommand()
     {
         this.result = ReactiveProperty.empty();
+        this.error = ReactiveProperty.empty();
         this.isExecuting = ReactiveProperty.withValue(false);
     }
 
     protected void handleResult(final @Nullable R result, final @Nullable Throwable error)
     {
+        this.result.setValue(result);
+
         if (error != null)
         {
-            throw new RuntimeException("Unexpected error during command execution", error);
+            if (this.error.hasObservers())
+            {
+                this.error.setValue(error);
+            }
+            else
+            {
+                throw new RuntimeException("Unexpected error during command execution", error);
+            }
         }
-
-        this.result.setValue(result);
     }
 }

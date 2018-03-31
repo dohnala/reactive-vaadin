@@ -221,4 +221,30 @@ public abstract class ReactiveBinder implements Disposable<ReactiveBinder>
     {
         return new ObservableValueBinder<>(command.getResult());
     }
+
+    /**
+     * Return command success binder for given reactive command
+     *
+     * @param command reactive command
+     * @param <R> type of command result
+     * @return binder
+     */
+    @Nonnull
+    public static <R> ObservableBinder<R> bindCommandSuccess(final @Nonnull ReactiveCommand<R> command)
+    {
+        return new ObservableBinder<>(command.getResult());
+    }
+
+    /**
+     * Return command error binder for given reactive command
+     *
+     * @param command reactive command
+     * @param <R> type of command result
+     * @return binder
+     */
+    @Nonnull
+    public static <R> ObservableBinder<Throwable> bindCommandError(final @Nonnull ReactiveCommand<R> command)
+    {
+        return new ObservableBinder<>(command.getError());
+    }
 }

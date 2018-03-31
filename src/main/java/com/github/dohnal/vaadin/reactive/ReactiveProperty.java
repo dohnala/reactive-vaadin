@@ -21,6 +21,67 @@ public final class ReactiveProperty<T> implements Disposable<ReactiveProperty<T>
     private List<Disposable<?>> disposables;
 
     /**
+     * Sets new value and notifies all subscribers
+     *
+     * @param value value
+     */
+    public final void setValue(final @Nullable T value)
+    {
+        subject.onNext(value);
+    }
+
+    /**
+     * Updates a value by given update function and notifies all subscribers
+     *
+     * @param update update function
+     */
+    public final void updateValue(final @Nonnull Function<T, T> update)
+    {
+        setValue(update.apply(getValue()));
+    }
+
+    /**
+     * Returns current value
+     *
+     * @return current value
+     */
+    @Nullable
+    public final T getValue()
+    {
+        return subject.getValue();
+    }
+
+    /**
+     * Return observable for this property which can be subscribed to
+     *
+     * @return observable for this property
+     */
+    @Nonnull
+    public final Observable<T> asObservable()
+    {
+        return subject;
+    }
+
+    /**
+     * Return whether this property has observers
+     *
+     * @return whether this property has observers
+     */
+    public boolean hasObservers()
+    {
+        return subject.hasObservers();
+    }
+
+    @Nonnull
+    @Override
+    public final ReactiveProperty<T> unbind()
+    {
+        this.disposables.forEach(Disposable::unbind);
+
+        return this;
+    }
+
+    /**
      * Creates new property with no value
      *
      * @param <T> type of property
@@ -113,56 +174,5 @@ public final class ReactiveProperty<T> implements Disposable<ReactiveProperty<T>
         this(anotherProperty.getValue());
 
         this.disposables.add(ReactiveBinder.bind(anotherProperty).to(this));
-    }
-
-    /**
-     * Sets new value and notifies all subscribers
-     *
-     * @param value value
-     */
-    public final void setValue(final @Nullable T value)
-    {
-        subject.onNext(value);
-    }
-
-    /**
-     * Updates a value by given update function and notifies all subscribers
-     *
-     * @param update update function
-     */
-    public final void updateValue(final @Nonnull Function<T, T> update)
-    {
-        setValue(update.apply(getValue()));
-    }
-
-    /**
-     * Returns current value
-     *
-     * @return current value
-     */
-    @Nullable
-    public final T getValue()
-    {
-        return subject.getValue();
-    }
-
-    /**
-     * Return observable for this property which can be subscribed to
-     *
-     * @return observable for this property
-     */
-    @Nonnull
-    public final Observable<T> asObservable()
-    {
-        return subject;
-    }
-
-    @Nonnull
-    @Override
-    public final ReactiveProperty<T> unbind()
-    {
-        this.disposables.forEach(Disposable::unbind);
-
-        return this;
     }
 }
