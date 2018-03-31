@@ -1,8 +1,13 @@
 package com.github.dohnal.vaadin.reactive;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.function.Supplier;
 
+import com.github.dohnal.vaadin.reactive.command.AsyncCommand;
+import com.github.dohnal.vaadin.reactive.command.AsyncSupplier;
 import com.github.dohnal.vaadin.reactive.command.SyncCommand;
 import rx.Observable;
 
@@ -16,9 +21,7 @@ import rx.Observable;
  */
 public abstract class ReactiveCommand<R>
 {
-    protected final Supplier<R> execution;
-
-    protected final ReactiveProperty<R> value;
+    protected final ReactiveProperty<R> result;
 
     /**
      * Executes this reactive command
@@ -33,7 +36,7 @@ public abstract class ReactiveCommand<R>
     @Nonnull
     public Observable<R> getResult()
     {
-        return value.asObservable();
+        return result.asObservable();
     }
 
     /**
@@ -76,9 +79,108 @@ public abstract class ReactiveCommand<R>
         return new SyncCommand<>(execution);
     }
 
-    protected ReactiveCommand(final @Nonnull Supplier<R> execution)
+    /**
+     * Creates a new asynchronous reactive command with given execution
+     *
+     * @param execution execution which will be executed
+     * @return created reactive command
+     */
+    @Nonnull
+    public static ReactiveCommand<Void> createAsync(final @Nonnull Runnable execution)
     {
-        this.execution = execution;
-        this.value = ReactiveProperty.empty();
+        return createAsync(() -> CompletableFuture.supplyAsync(() -> {
+            execution.run();
+
+            return null;
+        }));
+    }
+
+    /**
+     * Creates a new asynchronous reactive command with given execution
+     *
+     * @param execution execution which will be executed
+     * @param executor executor where the execution will be executed
+     * @return created reactive command
+     */
+    @Nonnull
+    public static ReactiveCommand<Void> createAsync(final @Nonnull Runnable execution,
+                                                    final @Nonnull Executor executor)
+    {
+        return createAsync(() -> CompletableFuture.supplyAsync(() -> {
+            execution.run();
+
+            return null;
+        }, executor));
+    }
+
+    /**
+     * Creates a new asynchronous reactive command with given execution
+     *
+     * @param execution execution which will be executed
+     * @param <T> type of command result
+     * @return created reactive command
+     */
+    @Nonnull
+    public static <T> ReactiveCommand<T> createAsync(final @Nonnull Supplier<T> execution)
+    {
+        return createAsync(() -> CompletableFuture.supplyAsync(execution));
+    }
+
+    /**
+     * Creates a new asynchronous reactive command with given execution and executor
+     *
+     * @param execution execution which will be executed
+     * @param executor executor where the execution will be executed
+     * @param <T> type of command result
+     * @return created reactive command
+     */
+    @Nonnull
+    public static <T> ReactiveCommand<T> createAsync(final @Nonnull Supplier<T> execution,
+                                                     final @Nonnull Executor executor)
+    {
+        return createAsync(() -> CompletableFuture.supplyAsync(execution, executor));
+    }
+
+    /**
+     * Creates a new asynchronous reactive command with given execution
+     *
+     * @param execution execution which will be executed
+     * @param <T> type of command result
+     * @return created reactive command
+     */
+    @Nonnull
+    public static <T> ReactiveCommand<T> createAsync(final @Nonnull AsyncSupplier<T> execution)
+    {
+        return new AsyncCommand<>(execution);
+    }
+
+    /**
+     * Creates a new asynchronous reactive command with given execution and executor
+     *
+     * @param execution execution which will be executed
+     * @param executor executor where the execution will be executed
+     * @param <T> type of command result
+     * @return created reactive command
+     */
+    @Nonnull
+    public static <T> ReactiveCommand<T> createAsync(final @Nonnull AsyncSupplier<T> execution,
+                                                     final @Nonnull Executor executor)
+    {
+        return new AsyncCommand<>(execution, executor);
+    }
+
+    protected ReactiveCommand()
+    {
+        this.result = ReactiveProperty.empty();
+    }
+
+    protected void handleResult(final @Nullable R result, final @Nullable Throwable error)
+    {
+        if (error != null)
+        {
+            throw new RuntimeException("Unexpected error during command execution", error);
+        }
+
+        this.result.setValue(result);
     }
 }

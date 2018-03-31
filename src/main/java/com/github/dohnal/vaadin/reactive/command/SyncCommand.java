@@ -14,6 +14,8 @@ import com.github.dohnal.vaadin.reactive.ReactiveCommand;
  */
 public final class SyncCommand<R> extends ReactiveCommand<R>
 {
+    protected final Supplier<R> execution;
+
     /**
      * Creates new synchronous reactive command with given execution
      *
@@ -21,12 +23,21 @@ public final class SyncCommand<R> extends ReactiveCommand<R>
      */
     public SyncCommand(final @Nonnull Supplier<R> execution)
     {
-        super(execution);
+        super();
+
+        this.execution = execution;
     }
 
     @Override
-    public void execute()
+    public final void execute()
     {
-        value.setValue(execution.get());
+        try
+        {
+            handleResult(execution.get(), null);
+        }
+        catch (final Throwable error)
+        {
+            handleResult(null, error);
+        }
     }
 }
