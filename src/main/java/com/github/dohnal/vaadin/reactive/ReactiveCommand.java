@@ -51,6 +51,22 @@ public abstract class ReactiveCommand<R>
      * Creates a new synchronous reactive command with given execution
      *
      * @param execution execution which will be executed
+     * @return created reactive command
+     */
+    @Nonnull
+    public static ReactiveCommand<Void> create(final @Nonnull Runnable execution)
+    {
+        return create(() -> {
+            execution.run();
+
+            return null;
+        });
+    }
+
+    /**
+     * Creates a new synchronous reactive command with given execution
+     *
+     * @param execution execution which will be executed
      * @param <T> type of command result
      * @return created reactive command
      */
