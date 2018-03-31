@@ -1,12 +1,9 @@
 package com.github.dohnal.vaadin.reactive.binder.observable;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.List;
 
-import com.github.dohnal.vaadin.reactive.ReactiveBinder;
+import com.github.dohnal.vaadin.reactive.binder.AbstractBinder;
 import rx.Observable;
-import rx.Subscription;
 
 /**
  * Base binder for binding observable
@@ -15,11 +12,9 @@ import rx.Subscription;
  *
  * @author dohnal
  */
-public abstract class AbstractObservableBinder<T> extends ReactiveBinder
+public abstract class AbstractObservableBinder<T> extends AbstractBinder
 {
     protected final Observable<T> observable;
-
-    protected final List<Subscription> subscriptions;
 
     /**
      * Creates a new observable binder for observable
@@ -28,30 +23,8 @@ public abstract class AbstractObservableBinder<T> extends ReactiveBinder
      */
     public AbstractObservableBinder(final @Nonnull Observable<T> observable)
     {
+        super();
+
         this.observable = observable;
-        this.subscriptions = new ArrayList<>();
-    }
-
-    @Nonnull
-    @Override
-    public AbstractObservableBinder<T> unbind()
-    {
-        subscriptions.stream()
-                .filter(Subscription::isUnsubscribed)
-                .forEach(Subscription::unsubscribe);
-
-        subscriptions.clear();
-
-        return this;
-    }
-
-    /**
-     * Adds given observable subscription object to this binder
-     *
-     * @param subscription subscription
-     */
-    protected void addSubscription(final @Nonnull Subscription subscription)
-    {
-        subscriptions.add(subscription);
     }
 }
