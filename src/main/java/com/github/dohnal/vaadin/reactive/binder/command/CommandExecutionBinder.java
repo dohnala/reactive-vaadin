@@ -2,6 +2,7 @@ package com.github.dohnal.vaadin.reactive.binder.command;
 
 import javax.annotation.Nonnull;
 
+import com.github.dohnal.vaadin.reactive.ReactiveBinder;
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
 import com.github.dohnal.vaadin.reactive.ReactiveProperty;
 import com.vaadin.ui.Button;
@@ -31,6 +32,8 @@ public final class CommandExecutionBinder<R> extends AbstractCommandBinder<R>
     public final CommandExecutionBinder<R> to(final @Nonnull Button button)
     {
         addRegistration(button.addClickListener(event -> command.execute()));
+
+        addDisposable(ReactiveBinder.bindEnabled(command.canExecute()).to(button));
 
         return this;
     }

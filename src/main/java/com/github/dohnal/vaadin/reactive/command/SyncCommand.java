@@ -4,6 +4,7 @@ import javax.annotation.Nonnull;
 import java.util.function.Supplier;
 
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
+import rx.Observable;
 
 /**
  * Synchronous implementation of {@link ReactiveCommand}
@@ -19,17 +20,19 @@ public final class SyncCommand<R> extends ReactiveCommand<R>
     /**
      * Creates new synchronous reactive command with given execution
      *
+     * @param canExecute observable which controls command executability
      * @param execution execution
      */
-    public SyncCommand(final @Nonnull Supplier<R> execution)
+    public SyncCommand(final @Nonnull Observable<Boolean> canExecute,
+                       final @Nonnull Supplier<R> execution)
     {
-        super();
+        super(canExecute);
 
         this.execution = execution;
     }
 
     @Override
-    public final void execute()
+    public final void executeInternal()
     {
         try
         {

@@ -27,10 +27,14 @@ public abstract class ReactiveCommand<R>
 
     protected final ReactiveProperty<Boolean> isExecuting;
 
+    protected final ReactiveProperty<Integer> executionCount;
+
+    protected final ReactiveProperty<Boolean> canExecute;
+
     /**
-     * Executes this reactive command
+     * Internally executes this command
      */
-    public abstract void execute();
+    protected abstract void executeInternal();
 
     /**
      * Returns an observable of execution result
@@ -38,7 +42,7 @@ public abstract class ReactiveCommand<R>
      * @return observable of execution result
      */
     @Nonnull
-    public Observable<R> getResult()
+    public final Observable<R> getResult()
     {
         return result.asObservable();
     }
@@ -49,7 +53,7 @@ public abstract class ReactiveCommand<R>
      * @return observable of errors
      */
     @Nonnull
-    public Observable<Throwable> getError()
+    public final Observable<Throwable> getError()
     {
         return error.asObservable();
     }
@@ -60,9 +64,55 @@ public abstract class ReactiveCommand<R>
      * @return an observable of whether command is executing right now
      */
     @Nonnull
-    public Observable<Boolean> isExecuting()
+    public final Observable<Boolean> isExecuting()
     {
         return isExecuting.asObservable();
+    }
+
+    /**
+     * Returns an observable of number of executions for this command
+     *
+     * @return an observable of number of executions for this command
+     */
+    @Nonnull
+    public final Observable<Integer> getExecutionCount()
+    {
+        return executionCount.asObservable();
+    }
+
+    /**
+     * Returns an observable of whether command has been executed
+     *
+     * @return an observable of whether command has been executed
+     */
+    @Nonnull
+    public final Observable<Boolean> hasBeenExecuted()
+    {
+        return getExecutionCount()
+                .map(count -> count > 0)
+                .distinctUntilChanged();
+    }
+
+    /**
+     * Returns an observable of whether command can be executed right now
+     *
+     * @return an observable of whether command can be executed right now
+     */
+    @Nonnull
+    public final Observable<Boolean> canExecute()
+    {
+        return canExecute.asObservable();
+    }
+
+    /**
+     * Executes this reactive command
+     */
+    public final void execute()
+    {
+        if (Boolean.TRUE.equals(canExecute.getValue()))
+        {
+            executeInternal();
+        }
     }
 
     /**
@@ -73,7 +123,19 @@ public abstract class ReactiveCommand<R>
     @Nonnull
     public static ReactiveCommand<Void> create()
     {
-        return create(() -> null);
+        return create(Observable.just(true));
+    }
+
+    /**
+     * Creates a new synchronous reactive command with no execution
+     *
+     * @param canExecute observable which controls command executability
+     * @return created reactive command
+     */
+    @Nonnull
+    public static ReactiveCommand<Void> create(final @Nonnull Observable<Boolean> canExecute)
+    {
+        return create(canExecute, () -> null);
     }
 
     /**
@@ -85,7 +147,21 @@ public abstract class ReactiveCommand<R>
     @Nonnull
     public static ReactiveCommand<Void> create(final @Nonnull Runnable execution)
     {
-        return create(() -> {
+        return create(Observable.just(true), execution);
+    }
+
+    /**
+     * Creates a new synchronous reactive command with given execution
+     *
+     * @param canExecute observable which controls command executability
+     * @param execution execution which will be executed
+     * @return created reactive command
+     */
+    @Nonnull
+    public static ReactiveCommand<Void> create(final @Nonnull Observable<Boolean> canExecute,
+                                               final @Nonnull Runnable execution)
+    {
+        return create(canExecute, () -> {
             execution.run();
 
             return null;
@@ -102,7 +178,45 @@ public abstract class ReactiveCommand<R>
     @Nonnull
     public static <T> ReactiveCommand<T> create(final @Nonnull Supplier<T> execution)
     {
-        return new SyncCommand<>(execution);
+        return create(Observable.just(true), execution);
+    }
+
+    /**
+     * Creates a new synchronous reactive command with given execution
+     *
+     * @param canExecute observable which controls command executability
+     * @param execution execution which will be executed
+     * @param <T> type of command result
+     * @return created reactive command
+     */
+    @Nonnull
+    public static <T> ReactiveCommand<T> create(final @Nonnull Observable<Boolean> canExecute,
+                                                final @Nonnull Supplier<T> execution)
+    {
+        return new SyncCommand<>(canExecute, execution);
+    }
+
+    /**
+     * Creates a new asynchronous reactive command with no execution
+     *
+     * @return created reactive command
+     */
+    @Nonnull
+    public static ReactiveCommand<Void> createAsync()
+    {
+        return createAsync(Observable.just(true));
+    }
+
+    /**
+     * Creates a new asynchronous reactive command with no execution
+     *
+     * @param canExecute observable which controls command executability
+     * @return created reactive command
+     */
+    @Nonnull
+    public static ReactiveCommand<Void> createAsync(final @Nonnull Observable<Boolean> canExecute)
+    {
+        return createAsync(canExecute, () -> {});
     }
 
     /**
@@ -114,7 +228,21 @@ public abstract class ReactiveCommand<R>
     @Nonnull
     public static ReactiveCommand<Void> createAsync(final @Nonnull Runnable execution)
     {
-        return createAsync(() -> CompletableFuture.supplyAsync(() -> {
+        return createAsync(Observable.just(true), execution);
+    }
+
+    /**
+     * Creates a new asynchronous reactive command with given execution
+     *
+     * @param canExecute observable which controls command executability
+     * @param execution execution which will be executed
+     * @return created reactive command
+     */
+    @Nonnull
+    public static ReactiveCommand<Void> createAsync(final @Nonnull Observable<Boolean> canExecute,
+                                                    final @Nonnull Runnable execution)
+    {
+        return createAsync(canExecute, () -> CompletableFuture.supplyAsync(() -> {
             execution.run();
 
             return null;
@@ -132,7 +260,27 @@ public abstract class ReactiveCommand<R>
     public static ReactiveCommand<Void> createAsync(final @Nonnull Runnable execution,
                                                     final @Nonnull Executor executor)
     {
-        return createAsync(() -> CompletableFuture.supplyAsync(() -> {
+        return createAsync(Observable.just(true), () -> CompletableFuture.supplyAsync(() -> {
+            execution.run();
+
+            return null;
+        }, executor));
+    }
+
+    /**
+     * Creates a new asynchronous reactive command with given execution
+     *
+     * @param canExecute observable which controls command executability
+     * @param execution execution which will be executed
+     * @param executor executor where the execution will be executed
+     * @return created reactive command
+     */
+    @Nonnull
+    public static ReactiveCommand<Void> createAsync(final @Nonnull Observable<Boolean> canExecute,
+                                                    final @Nonnull Runnable execution,
+                                                    final @Nonnull Executor executor)
+    {
+        return createAsync(canExecute, () -> CompletableFuture.supplyAsync(() -> {
             execution.run();
 
             return null;
@@ -149,7 +297,22 @@ public abstract class ReactiveCommand<R>
     @Nonnull
     public static <T> ReactiveCommand<T> createAsync(final @Nonnull Supplier<T> execution)
     {
-        return createAsync(() -> CompletableFuture.supplyAsync(execution));
+        return createAsync(Observable.just(true), () -> CompletableFuture.supplyAsync(execution));
+    }
+
+    /**
+     * Creates a new asynchronous reactive command with given execution
+     *
+     * @param canExecute observable which controls command executability
+     * @param execution execution which will be executed
+     * @param <T> type of command result
+     * @return created reactive command
+     */
+    @Nonnull
+    public static <T> ReactiveCommand<T> createAsync(final @Nonnull Observable<Boolean> canExecute,
+                                                     final @Nonnull Supplier<T> execution)
+    {
+        return createAsync(canExecute, () -> CompletableFuture.supplyAsync(execution));
     }
 
     /**
@@ -164,7 +327,24 @@ public abstract class ReactiveCommand<R>
     public static <T> ReactiveCommand<T> createAsync(final @Nonnull Supplier<T> execution,
                                                      final @Nonnull Executor executor)
     {
-        return createAsync(() -> CompletableFuture.supplyAsync(execution, executor));
+        return createAsync(Observable.just(true), () -> CompletableFuture.supplyAsync(execution, executor));
+    }
+
+    /**
+     * Creates a new asynchronous reactive command with given execution and executor
+     *
+     * @param canExecute observable which controls command executability
+     * @param execution execution which will be executed
+     * @param executor executor where the execution will be executed
+     * @param <T> type of command result
+     * @return created reactive command
+     */
+    @Nonnull
+    public static <T> ReactiveCommand<T> createAsync(final @Nonnull Observable<Boolean> canExecute,
+                                                     final @Nonnull Supplier<T> execution,
+                                                     final @Nonnull Executor executor)
+    {
+        return createAsync(canExecute, () -> CompletableFuture.supplyAsync(execution, executor));
     }
 
     /**
@@ -177,7 +357,22 @@ public abstract class ReactiveCommand<R>
     @Nonnull
     public static <T> ReactiveCommand<T> createAsync(final @Nonnull AsyncSupplier<T> execution)
     {
-        return new AsyncCommand<>(execution);
+        return createAsync(Observable.just(true), execution);
+    }
+
+    /**
+     * Creates a new asynchronous reactive command with given execution
+     *
+     * @param canExecute observable which controls command executability
+     * @param execution execution which will be executed
+     * @param <T> type of command result
+     * @return created reactive command
+     */
+    @Nonnull
+    public static <T> ReactiveCommand<T> createAsync(final @Nonnull Observable<Boolean> canExecute,
+                                                     final @Nonnull AsyncSupplier<T> execution)
+    {
+        return new AsyncCommand<>(canExecute, execution);
     }
 
     /**
@@ -192,17 +387,46 @@ public abstract class ReactiveCommand<R>
     public static <T> ReactiveCommand<T> createAsync(final @Nonnull AsyncSupplier<T> execution,
                                                      final @Nonnull Executor executor)
     {
-        return new AsyncCommand<>(execution, executor);
+        return createAsync(Observable.just(true), execution, executor);
     }
 
-    protected ReactiveCommand()
+    /**
+     * Creates a new asynchronous reactive command with given execution and executor
+     *
+     * @param canExecute observable which controls command executability
+     * @param execution execution which will be executed
+     * @param executor executor where the execution will be executed
+     * @param <T> type of command result
+     * @return created reactive command
+     */
+    @Nonnull
+    public static <T> ReactiveCommand<T> createAsync(final @Nonnull Observable<Boolean> canExecute,
+                                                     final @Nonnull AsyncSupplier<T> execution,
+                                                     final @Nonnull Executor executor)
+    {
+        return new AsyncCommand<>(canExecute, execution, executor);
+    }
+
+
+    protected ReactiveCommand(final @Nonnull Observable<Boolean> canExecute)
     {
         this.result = ReactiveProperty.empty();
         this.error = ReactiveProperty.empty();
         this.isExecuting = ReactiveProperty.withValue(false);
+        this.executionCount = ReactiveProperty.withValue(0);
+
+        // By default, command cannot be executed while it is executing
+        final Observable<Boolean> defaultCanExecute = this.isExecuting.asObservable().map(value -> !value);
+
+        // Combine default command executability with custom one by performing logical and
+        this.canExecute = ReactiveProperty.fromObservable(
+                Observable.combineLatest(
+                        defaultCanExecute,
+                        canExecute,
+                        (x, y) -> x && y));
     }
 
-    protected void handleResult(final @Nullable R result, final @Nullable Throwable error)
+    protected final void handleResult(final @Nullable R result, final @Nullable Throwable error)
     {
         this.result.setValue(result);
 
@@ -217,5 +441,7 @@ public abstract class ReactiveCommand<R>
                 throw new RuntimeException("Unexpected error during command execution", error);
             }
         }
+
+        this.executionCount.updateValue(count -> count + 1);
     }
 }

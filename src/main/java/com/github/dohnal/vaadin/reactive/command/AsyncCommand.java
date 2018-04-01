@@ -5,6 +5,7 @@ import javax.annotation.Nullable;
 import java.util.concurrent.Executor;
 
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
+import rx.Observable;
 
 /**
  * Asynchronous implementation of {@link ReactiveCommand}
@@ -22,30 +23,34 @@ public class AsyncCommand<R> extends ReactiveCommand<R>
     /**
      * Creates new asynchronous reactive command with given execution
      *
+     * @param canExecute observable which controls command executability
      * @param execution execution
      */
-    public AsyncCommand(final @Nonnull AsyncSupplier<R> execution)
+    public AsyncCommand(final @Nonnull Observable<Boolean> canExecute,
+                        final @Nonnull AsyncSupplier<R> execution)
     {
-        this(execution, null);
+        this(canExecute, execution, null);
     }
 
     /**
      * Creates new asynchronous reactive command with given execution and executor
      *
+     * @param canExecute observable which controls command executability
      * @param execution execution
      * @param executor executor
      */
-    public AsyncCommand(final @Nonnull AsyncSupplier<R> execution,
+    public AsyncCommand(final @Nonnull Observable<Boolean> canExecute,
+                        final @Nonnull AsyncSupplier<R> execution,
                         final @Nullable Executor executor)
     {
-        super();
+        super(canExecute);
 
         this.execution = execution;
         this.executor = executor;
     }
 
     @Override
-    public final void execute()
+    public final void executeInternal()
     {
         this.isExecuting.setValue(true);
 
