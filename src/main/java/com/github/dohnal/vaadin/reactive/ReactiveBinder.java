@@ -204,7 +204,7 @@ public abstract class ReactiveBinder implements Disposable<ReactiveBinder>
      * @return binder
      */
     @Nonnull
-    public static <R> CommandExecutionBinder<R> bindCommand(final @Nonnull ReactiveCommand<R> command)
+    public static <R> CommandExecutionBinder<R> bindCommandExecution(final @Nonnull ReactiveCommand<R> command)
     {
         return new CommandExecutionBinder<>(command);
     }
