@@ -4,6 +4,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.concurrent.Executor;
 
+import com.github.dohnal.vaadin.reactive.AsyncSupplier;
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
 import rx.Observable;
 
@@ -11,10 +12,9 @@ import rx.Observable;
  * Asynchronous implementation of {@link ReactiveCommand}
  *
  * @param <R> type of command result
- *
  * @author dohnal
  */
-public class AsyncCommand<R> extends ReactiveCommand<R>
+public final class AsyncCommand<R> extends AbstractCommand<R>
 {
     protected final AsyncSupplier<R> execution;
 

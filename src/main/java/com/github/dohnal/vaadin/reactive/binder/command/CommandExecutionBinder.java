@@ -12,7 +12,6 @@ import rx.Observable;
  * Binder for binging command execution
  *
  * @param <R> type of command result
- *
  * @author dohnal
  */
 public final class CommandExecutionBinder<R> extends AbstractCommandBinder<R>
@@ -68,7 +67,7 @@ public final class CommandExecutionBinder<R> extends AbstractCommandBinder<R>
 
     @Nonnull
     @Override
-    public CommandExecutionBinder<R> unbind()
+    public final CommandExecutionBinder<R> unbind()
     {
         super.unbind();
 

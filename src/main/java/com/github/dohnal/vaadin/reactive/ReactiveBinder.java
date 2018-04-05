@@ -20,7 +20,7 @@ import rx.Observable;
  *
  * @author dohnal
  */
-public abstract class ReactiveBinder implements Disposable<ReactiveBinder>
+public interface ReactiveBinder extends Disposable<ReactiveBinder>
 {
     /**
      * Return binder for given observable
@@ -30,7 +30,7 @@ public abstract class ReactiveBinder implements Disposable<ReactiveBinder>
      * @return binder
      */
     @Nonnull
-    public static <T> ObservableBinder<T> bind(final @Nonnull Observable<T> observable)
+    static <T> ObservableBinder<T> bind(final @Nonnull Observable<T> observable)
     {
         return new ObservableBinder<>(observable);
     }
@@ -43,7 +43,7 @@ public abstract class ReactiveBinder implements Disposable<ReactiveBinder>
      * @return binder
      */
     @Nonnull
-    public static <T> PropertyBinder<T> bind(final @Nonnull ReactiveProperty<T> property)
+    static <T> PropertyBinder<T> bind(final @Nonnull ReactiveProperty<T> property)
     {
         return new PropertyBinder<>(property);
     }
@@ -55,7 +55,7 @@ public abstract class ReactiveBinder implements Disposable<ReactiveBinder>
      * @return binder
      */
     @Nonnull
-    public static ObservableTextBinder bindText(final @Nonnull Observable<String> observable)
+    static ObservableTextBinder bindText(final @Nonnull Observable<String> observable)
     {
         return new ObservableTextBinder(observable);
     }
@@ -67,7 +67,7 @@ public abstract class ReactiveBinder implements Disposable<ReactiveBinder>
      * @return binder
      */
     @Nonnull
-    public static ObservableTextBinder bindText(final @Nonnull ReactiveProperty<String> property)
+    static ObservableTextBinder bindText(final @Nonnull ReactiveProperty<String> property)
     {
         return new ObservableTextBinder(property.asObservable());
     }
@@ -80,7 +80,7 @@ public abstract class ReactiveBinder implements Disposable<ReactiveBinder>
      * @return binder
      */
     @Nonnull
-    public static <T> ObservableValueBinder<T> bindValue(final @Nonnull Observable<T> observable)
+    static <T> ObservableValueBinder<T> bindValue(final @Nonnull Observable<T> observable)
     {
         return new ObservableValueBinder<>(observable);
     }
@@ -93,7 +93,7 @@ public abstract class ReactiveBinder implements Disposable<ReactiveBinder>
      * @return binder
      */
     @Nonnull
-    public static <T> PropertyValueBinder<T> bindValue(final @Nonnull ReactiveProperty<T> property)
+    static <T> PropertyValueBinder<T> bindValue(final @Nonnull ReactiveProperty<T> property)
     {
         return new PropertyValueBinder<>(property);
     }
@@ -105,7 +105,7 @@ public abstract class ReactiveBinder implements Disposable<ReactiveBinder>
      * @return binder
      */
     @Nonnull
-    public static ObservableVisibleBinder bindVisible(final @Nonnull Observable<Boolean> observable)
+    static ObservableVisibleBinder bindVisible(final @Nonnull Observable<Boolean> observable)
     {
         return new ObservableVisibleBinder(observable);
     }
@@ -117,7 +117,7 @@ public abstract class ReactiveBinder implements Disposable<ReactiveBinder>
      * @return binder
      */
     @Nonnull
-    public static ObservableVisibleBinder bindVisible(final @Nonnull ReactiveProperty<Boolean> property)
+    static ObservableVisibleBinder bindVisible(final @Nonnull ReactiveProperty<Boolean> property)
     {
         return new ObservableVisibleBinder(property.asObservable());
     }
@@ -129,7 +129,7 @@ public abstract class ReactiveBinder implements Disposable<ReactiveBinder>
      * @return binder
      */
     @Nonnull
-    public static ObservableEnabledBinder bindEnabled(final @Nonnull Observable<Boolean> observable)
+    static ObservableEnabledBinder bindEnabled(final @Nonnull Observable<Boolean> observable)
     {
         return new ObservableEnabledBinder(observable);
     }
@@ -141,7 +141,7 @@ public abstract class ReactiveBinder implements Disposable<ReactiveBinder>
      * @return binder
      */
     @Nonnull
-    public static ObservableEnabledBinder bindEnabled(final @Nonnull ReactiveProperty<Boolean> property)
+    static ObservableEnabledBinder bindEnabled(final @Nonnull ReactiveProperty<Boolean> property)
     {
         return new ObservableEnabledBinder(property.asObservable());
     }
@@ -153,7 +153,7 @@ public abstract class ReactiveBinder implements Disposable<ReactiveBinder>
      * @return binder
      */
     @Nonnull
-    public static ObservableReadOnlyBinder bindReadOnly(final @Nonnull Observable<Boolean> observable)
+    static ObservableReadOnlyBinder bindReadOnly(final @Nonnull Observable<Boolean> observable)
     {
         return new ObservableReadOnlyBinder(observable);
     }
@@ -165,7 +165,7 @@ public abstract class ReactiveBinder implements Disposable<ReactiveBinder>
      * @return binder
      */
     @Nonnull
-    public static ObservableReadOnlyBinder bindReadOnly(final @Nonnull ReactiveProperty<Boolean> property)
+    static ObservableReadOnlyBinder bindReadOnly(final @Nonnull ReactiveProperty<Boolean> property)
     {
         return new ObservableReadOnlyBinder(property.asObservable());
     }
@@ -178,7 +178,7 @@ public abstract class ReactiveBinder implements Disposable<ReactiveBinder>
      * @return binder
      */
     @Nonnull
-    public static <T> ObservableItemsBinder<T> bindItems(final @Nonnull Observable<Collection<T>> observable)
+    static <T> ObservableItemsBinder<T> bindItems(final @Nonnull Observable<Collection<T>> observable)
     {
         return new ObservableItemsBinder<>(observable);
     }
@@ -191,7 +191,7 @@ public abstract class ReactiveBinder implements Disposable<ReactiveBinder>
      * @return binder
      */
     @Nonnull
-    public static <T> ObservableItemsBinder<T> bindItems(final @Nonnull ReactiveProperty<Collection<T>> property)
+    static <T> ObservableItemsBinder<T> bindItems(final @Nonnull ReactiveProperty<Collection<T>> property)
     {
         return new ObservableItemsBinder<>(property.asObservable());
     }
@@ -204,7 +204,7 @@ public abstract class ReactiveBinder implements Disposable<ReactiveBinder>
      * @return binder
      */
     @Nonnull
-    public static <R> CommandExecutionBinder<R> bindCommandExecution(final @Nonnull ReactiveCommand<R> command)
+    static <R> CommandExecutionBinder<R> bindCommandExecution(final @Nonnull ReactiveCommand<R> command)
     {
         return new CommandExecutionBinder<>(command);
     }
@@ -217,7 +217,7 @@ public abstract class ReactiveBinder implements Disposable<ReactiveBinder>
      * @return binder
      */
     @Nonnull
-    public static <R> ObservableValueBinder<R> bindCommandResult(final @Nonnull ReactiveCommand<R> command)
+    static <R> ObservableValueBinder<R> bindCommandResult(final @Nonnull ReactiveCommand<R> command)
     {
         return new ObservableValueBinder<>(command.getResult());
     }
@@ -230,7 +230,7 @@ public abstract class ReactiveBinder implements Disposable<ReactiveBinder>
      * @return binder
      */
     @Nonnull
-    public static <R> ObservableBinder<R> bindCommandSuccess(final @Nonnull ReactiveCommand<R> command)
+    static <R> ObservableBinder<R> bindCommandSuccess(final @Nonnull ReactiveCommand<R> command)
     {
         return new ObservableBinder<>(command.getResult());
     }
@@ -243,7 +243,7 @@ public abstract class ReactiveBinder implements Disposable<ReactiveBinder>
      * @return binder
      */
     @Nonnull
-    public static <R> ObservableBinder<Throwable> bindCommandError(final @Nonnull ReactiveCommand<R> command)
+    static <R> ObservableBinder<Throwable> bindCommandError(final @Nonnull ReactiveCommand<R> command)
     {
         return new ObservableBinder<>(command.getError());
     }

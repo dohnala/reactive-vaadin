@@ -9,7 +9,6 @@ import rx.Observable;
  * Base binder for binding observable
  *
  * @param <T> type of observable
- *
  * @author dohnal
  */
 public abstract class AbstractObservableBinder<T> extends AbstractBinder

@@ -9,7 +9,6 @@ import com.github.dohnal.vaadin.reactive.binder.AbstractBinder;
  * Base binder for binding reactive property
  *
  * @param <T> type of reactive property
- *
  * @author dohnal
  */
 public abstract class AbstractPropertyBinder<T> extends AbstractBinder

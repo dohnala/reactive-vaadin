@@ -10,7 +10,6 @@ import rx.Observable;
  * Binder for binding observable to value property of some Vaadin field
  *
  * @param <T> type of observable
- *
  * @author dohnal
  */
 public final class ObservableValueBinder<T> extends AbstractObservableBinder<T>

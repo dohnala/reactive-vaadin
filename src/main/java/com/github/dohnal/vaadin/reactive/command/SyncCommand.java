@@ -10,10 +10,9 @@ import rx.Observable;
  * Synchronous implementation of {@link ReactiveCommand}
  *
  * @param <R> type of command result
- *
  * @author dohnal
  */
-public final class SyncCommand<R> extends ReactiveCommand<R>
+public final class SyncCommand<R> extends AbstractCommand<R>
 {
     protected final Supplier<R> execution;
 
@@ -43,8 +42,7 @@ public final class SyncCommand<R> extends ReactiveCommand<R>
         catch (final Throwable error)
         {
             handleResult(null, error);
-        }
-        finally
+        } finally
         {
             this.isExecuting.setValue(false);
         }

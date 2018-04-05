@@ -10,7 +10,6 @@ import com.github.dohnal.vaadin.reactive.ReactiveProperty;
  * Binder for binding reactive property
  *
  * @param <T> type of reactive property
- *
  * @author dohnal
  */
 public final class PropertyBinder<T> extends AbstractPropertyBinder<T>

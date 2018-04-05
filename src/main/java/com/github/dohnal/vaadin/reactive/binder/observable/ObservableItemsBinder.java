@@ -7,9 +7,12 @@ import com.vaadin.data.HasItems;
 import rx.Observable;
 
 /**
+ * Binder for binding observable to items property of some Vaadin component
+ *
+ * @param <T> type of observable
  * @author dohnal
  */
-public class ObservableItemsBinder<T> extends AbstractObservableBinder<Collection<T>>
+public final class ObservableItemsBinder<T> extends AbstractObservableBinder<Collection<T>>
 {
     public ObservableItemsBinder(final @Nonnull Observable<Collection<T>> observable)
     {

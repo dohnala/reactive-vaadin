@@ -9,7 +9,6 @@ import com.github.dohnal.vaadin.reactive.binder.AbstractBinder;
  * Base binder for binding reactive command
  *
  * @param <R> type of command result
- *
  * @author dohnal
  */
 public abstract class AbstractCommandBinder<R> extends AbstractBinder

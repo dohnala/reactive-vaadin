@@ -14,7 +14,7 @@ import rx.Subscription;
  *
  * @author dohnal
  */
-public abstract class AbstractBinder extends ReactiveBinder
+public abstract class AbstractBinder implements ReactiveBinder
 {
     protected final List<Subscription> subscriptions;
 

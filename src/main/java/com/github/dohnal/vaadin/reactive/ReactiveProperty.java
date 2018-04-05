@@ -2,85 +2,19 @@ package com.github.dohnal.vaadin.reactive;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.List;
 import java.util.function.Function;
 
-import com.google.common.collect.Lists;
+import com.github.dohnal.vaadin.reactive.property.Property;
 import rx.Observable;
-import rx.subjects.BehaviorSubject;
 
 /**
  * Reactive property stores single editable value and also acts as observable
  *
+ * @param <T> type of property
  * @author dohnal
  */
-public final class ReactiveProperty<T> implements Disposable<ReactiveProperty<T>>
+public interface ReactiveProperty<T> extends Disposable<ReactiveProperty<T>>
 {
-    private BehaviorSubject<T> subject;
-
-    private List<Disposable<?>> disposables;
-
-    /**
-     * Sets new value and notifies all subscribers
-     *
-     * @param value value
-     */
-    public final void setValue(final @Nullable T value)
-    {
-        subject.onNext(value);
-    }
-
-    /**
-     * Updates a value by given update function and notifies all subscribers
-     *
-     * @param update update function
-     */
-    public final void updateValue(final @Nonnull Function<T, T> update)
-    {
-        setValue(update.apply(getValue()));
-    }
-
-    /**
-     * Returns current value
-     *
-     * @return current value
-     */
-    @Nullable
-    public final T getValue()
-    {
-        return subject.getValue();
-    }
-
-    /**
-     * Return observable for this property which can be subscribed to
-     *
-     * @return observable for this property
-     */
-    @Nonnull
-    public final Observable<T> asObservable()
-    {
-        return subject;
-    }
-
-    /**
-     * Return whether this property has observers
-     *
-     * @return whether this property has observers
-     */
-    public boolean hasObservers()
-    {
-        return subject.hasObservers();
-    }
-
-    @Nonnull
-    @Override
-    public final ReactiveProperty<T> unbind()
-    {
-        this.disposables.forEach(Disposable::unbind);
-
-        return this;
-    }
-
     /**
      * Creates new property with no value
      *
@@ -88,9 +22,9 @@ public final class ReactiveProperty<T> implements Disposable<ReactiveProperty<T>
      * @return created property
      */
     @Nonnull
-    public static <T> ReactiveProperty<T> empty()
+    static <T> ReactiveProperty<T> empty()
     {
-        return new ReactiveProperty<>();
+        return new Property<>();
     }
 
     /**
@@ -101,9 +35,9 @@ public final class ReactiveProperty<T> implements Disposable<ReactiveProperty<T>
      * @return created property
      */
     @Nonnull
-    public static <T> ReactiveProperty<T> withValue(final @Nullable T defaultValue)
+    static <T> ReactiveProperty<T> withValue(final @Nullable T defaultValue)
     {
-        return new ReactiveProperty<>(defaultValue);
+        return new Property<>(defaultValue);
     }
 
     /**
@@ -114,9 +48,9 @@ public final class ReactiveProperty<T> implements Disposable<ReactiveProperty<T>
      * @return created property
      */
     @Nonnull
-    public static <T> ReactiveProperty<T> fromObservable(final @Nonnull Observable<T> observable)
+    static <T> ReactiveProperty<T> fromObservable(final @Nonnull Observable<T> observable)
     {
-        return new ReactiveProperty<>(observable);
+        return new Property<>(observable);
     }
 
     /**
@@ -127,52 +61,45 @@ public final class ReactiveProperty<T> implements Disposable<ReactiveProperty<T>
      * @return created property
      */
     @Nonnull
-    public static <T> ReactiveProperty<T> fromProperty(final @Nonnull Observable<T> property)
+    static <T> ReactiveProperty<T> fromProperty(final @Nonnull Observable<T> property)
     {
-        return new ReactiveProperty<>(property);
+        return new Property<>(property);
     }
 
     /**
-     * Creates new property with no value
-     */
-    private ReactiveProperty()
-    {
-        this.subject = BehaviorSubject.create();
-        this.disposables = Lists.newArrayList();
-    }
-
-    /**
-     * Creates new property with given default value
+     * Returns current value
      *
-     * @param defaultValue default value
+     * @return current value
      */
-    private ReactiveProperty(final @Nullable T defaultValue)
-    {
-        this.subject = BehaviorSubject.create(defaultValue);
-        this.disposables = Lists.newArrayList();
-    }
+    @Nullable
+    T getValue();
 
     /**
-     * Creates new property with observable bound to it
+     * Sets new value and notifies all subscribers
      *
-     * @param observable observable
+     * @param value value
      */
-    private ReactiveProperty(final @Nonnull Observable<T> observable)
-    {
-        this();
-
-        this.disposables.add(ReactiveBinder.bind(observable).to(this));
-    }
+    void setValue(final @Nullable T value);
 
     /**
-     * Creates new property with another property bound to it
+     * Updates a value by given update function and notifies all subscribers
      *
-     * @param anotherProperty another property
+     * @param update update function
      */
-    private ReactiveProperty(final @Nonnull ReactiveProperty<T> anotherProperty)
-    {
-        this(anotherProperty.getValue());
+    void updateValue(final @Nonnull Function<T, T> update);
 
-        this.disposables.add(ReactiveBinder.bind(anotherProperty).to(this));
-    }
+    /**
+     * Return observable for this property which can be subscribed to
+     *
+     * @return observable for this property
+     */
+    @Nonnull
+    Observable<T> asObservable();
+
+    /**
+     * Return whether this property has observers
+     *
+     * @return whether this property has observers
+     */
+    boolean hasObservers();
 }
