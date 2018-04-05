@@ -1,7 +1,8 @@
 package com.github.dohnal.vaadin.reactive.command;
 
 import javax.annotation.Nonnull;
-import java.util.function.Supplier;
+import javax.annotation.Nullable;
+import java.util.function.Function;
 
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
 import rx.Observable;
@@ -9,12 +10,13 @@ import rx.Observable;
 /**
  * Synchronous implementation of {@link ReactiveCommand}
  *
+ * @param <T> type of command input parameter
  * @param <R> type of command result
  * @author dohnal
  */
-public final class SyncCommand<R> extends AbstractCommand<R>
+public final class SyncCommand<T, R> extends AbstractCommand<T, R>
 {
-    protected final Supplier<R> execution;
+    protected final Function<T, R> execution;
 
     /**
      * Creates new synchronous reactive command with given execution
@@ -23,7 +25,7 @@ public final class SyncCommand<R> extends AbstractCommand<R>
      * @param execution execution
      */
     public SyncCommand(final @Nonnull Observable<Boolean> canExecute,
-                       final @Nonnull Supplier<R> execution)
+                       final @Nonnull Function<T, R> execution)
     {
         super(canExecute);
 
@@ -31,18 +33,19 @@ public final class SyncCommand<R> extends AbstractCommand<R>
     }
 
     @Override
-    public final void executeInternal()
+    public final void executeInternal(final @Nullable T input)
     {
         try
         {
             this.isExecuting.setValue(true);
 
-            handleResult(execution.get(), null);
+            handleResult(execution.apply(input), null);
         }
         catch (final Throwable error)
         {
             handleResult(null, error);
-        } finally
+        }
+        finally
         {
             this.isExecuting.setValue(false);
         }

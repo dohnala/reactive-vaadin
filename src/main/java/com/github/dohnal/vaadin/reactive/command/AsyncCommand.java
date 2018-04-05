@@ -4,19 +4,20 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.concurrent.Executor;
 
-import com.github.dohnal.vaadin.reactive.AsyncSupplier;
+import com.github.dohnal.vaadin.reactive.AsyncFunction;
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
 import rx.Observable;
 
 /**
  * Asynchronous implementation of {@link ReactiveCommand}
  *
+ * @param <T> type of command input parameter
  * @param <R> type of command result
  * @author dohnal
  */
-public final class AsyncCommand<R> extends AbstractCommand<R>
+public final class AsyncCommand<T, R> extends AbstractCommand<T, R>
 {
-    protected final AsyncSupplier<R> execution;
+    protected final AsyncFunction<T, R> execution;
 
     protected final Executor executor;
 
@@ -27,7 +28,7 @@ public final class AsyncCommand<R> extends AbstractCommand<R>
      * @param execution execution
      */
     public AsyncCommand(final @Nonnull Observable<Boolean> canExecute,
-                        final @Nonnull AsyncSupplier<R> execution)
+                        final @Nonnull AsyncFunction<T, R> execution)
     {
         this(canExecute, execution, null);
     }
@@ -40,7 +41,7 @@ public final class AsyncCommand<R> extends AbstractCommand<R>
      * @param executor executor
      */
     public AsyncCommand(final @Nonnull Observable<Boolean> canExecute,
-                        final @Nonnull AsyncSupplier<R> execution,
+                        final @Nonnull AsyncFunction<T, R> execution,
                         final @Nullable Executor executor)
     {
         super(canExecute);
@@ -50,13 +51,13 @@ public final class AsyncCommand<R> extends AbstractCommand<R>
     }
 
     @Override
-    public final void executeInternal()
+    public final void executeInternal(final @Nullable T input)
     {
         this.isExecuting.setValue(true);
 
         if (executor != null)
         {
-            execution.get().whenCompleteAsync((result, error) -> {
+            execution.apply(input).whenCompleteAsync((result, error) -> {
                 handleResult(result, error);
 
                 this.isExecuting.setValue(false);
@@ -64,7 +65,7 @@ public final class AsyncCommand<R> extends AbstractCommand<R>
         }
         else
         {
-            execution.get().whenCompleteAsync((result, error) -> {
+            execution.apply(input).whenCompleteAsync((result, error) -> {
                 handleResult(result, error);
 
                 this.isExecuting.setValue(false);

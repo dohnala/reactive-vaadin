@@ -10,10 +10,11 @@ import rx.Observable;
 /**
  * Abstract implementation of {@link ReactiveCommand}
  *
+ * @param <T> type of command input parameter
  * @param <R> type of command result
  * @author dohnal
  */
-public abstract class AbstractCommand<R> implements ReactiveCommand<R>
+public abstract class AbstractCommand<T, R> implements ReactiveCommand<T, R>
 {
     protected final ReactiveProperty<R> result;
 
@@ -51,7 +52,7 @@ public abstract class AbstractCommand<R> implements ReactiveCommand<R>
     /**
      * Internally executes this command
      */
-    protected abstract void executeInternal();
+    protected abstract void executeInternal(final @Nullable T input);
 
     @Nonnull
     @Override
@@ -98,11 +99,11 @@ public abstract class AbstractCommand<R> implements ReactiveCommand<R>
     }
 
     @Override
-    public final void execute()
+    public final void execute(final @Nullable T input)
     {
         if (Boolean.TRUE.equals(canExecute.getValue()))
         {
-            executeInternal();
+            executeInternal(input);
         }
     }
 

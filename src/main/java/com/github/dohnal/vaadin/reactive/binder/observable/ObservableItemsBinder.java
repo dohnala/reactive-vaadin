@@ -9,12 +9,13 @@ import rx.Observable;
 /**
  * Binder for binding observable to items property of some Vaadin component
  *
- * @param <T> type of observable
+ * @param <T> type of value
+ * @param <U> type of collection
  * @author dohnal
  */
-public final class ObservableItemsBinder<T> extends AbstractObservableBinder<Collection<T>>
+public final class ObservableItemsBinder<T, U extends Collection<T>> extends AbstractObservableBinder<U>
 {
-    public ObservableItemsBinder(final @Nonnull Observable<Collection<T>> observable)
+    public ObservableItemsBinder(final @Nonnull Observable<U> observable)
     {
         super(observable);
     }
@@ -26,7 +27,7 @@ public final class ObservableItemsBinder<T> extends AbstractObservableBinder<Col
      * @return this binder
      */
     @Nonnull
-    public final ObservableItemsBinder<T> to(final @Nonnull HasItems<T> component)
+    public final ObservableItemsBinder<T, U> to(final @Nonnull HasItems<T> component)
     {
         addSubscription(observable.subscribe(value -> {
             if (component.getUI() != null)

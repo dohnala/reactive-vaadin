@@ -174,11 +174,12 @@ public interface ReactiveBinder extends Disposable<ReactiveBinder>
      * Return items binder for given observable
      *
      * @param observable observable
-     * @param <T> type of item
+     * @param <T> type of value
+     * @param <U> type of collection
      * @return binder
      */
     @Nonnull
-    static <T> ObservableItemsBinder<T> bindItems(final @Nonnull Observable<Collection<T>> observable)
+    static <T, U extends Collection<T>> ObservableItemsBinder<T, U> bindItems(final @Nonnull Observable<U> observable)
     {
         return new ObservableItemsBinder<>(observable);
     }
@@ -187,11 +188,12 @@ public interface ReactiveBinder extends Disposable<ReactiveBinder>
      * Return items binder for given reactive property
      *
      * @param property reactive property
-     * @param <T> type of item
+     * @param <T> type of value
+     * @param <U> type of collection
      * @return binder
      */
     @Nonnull
-    static <T> ObservableItemsBinder<T> bindItems(final @Nonnull ReactiveProperty<Collection<T>> property)
+    static <T, U extends Collection<T>> ObservableItemsBinder<T, U> bindItems(final @Nonnull ReactiveProperty<U> property)
     {
         return new ObservableItemsBinder<>(property.asObservable());
     }
@@ -200,11 +202,12 @@ public interface ReactiveBinder extends Disposable<ReactiveBinder>
      * Return command execution binder for given reactive command
      *
      * @param command reactive command
+     * @param <T> type of command input
      * @param <R> type of command result
      * @return binder
      */
     @Nonnull
-    static <R> CommandExecutionBinder<R> bindCommandExecution(final @Nonnull ReactiveCommand<R> command)
+    static <T, R> CommandExecutionBinder<T, R> bindCommandExecution(final @Nonnull ReactiveCommand<T, R> command)
     {
         return new CommandExecutionBinder<>(command);
     }
@@ -217,7 +220,7 @@ public interface ReactiveBinder extends Disposable<ReactiveBinder>
      * @return binder
      */
     @Nonnull
-    static <R> ObservableValueBinder<R> bindCommandResult(final @Nonnull ReactiveCommand<R> command)
+    static <R> ObservableValueBinder<R> bindCommandResult(final @Nonnull ReactiveCommand<?, R> command)
     {
         return new ObservableValueBinder<>(command.getResult());
     }
@@ -230,7 +233,7 @@ public interface ReactiveBinder extends Disposable<ReactiveBinder>
      * @return binder
      */
     @Nonnull
-    static <R> ObservableBinder<R> bindCommandSuccess(final @Nonnull ReactiveCommand<R> command)
+    static <R> ObservableBinder<R> bindCommandSuccess(final @Nonnull ReactiveCommand<?, R> command)
     {
         return new ObservableBinder<>(command.getResult());
     }
@@ -243,7 +246,7 @@ public interface ReactiveBinder extends Disposable<ReactiveBinder>
      * @return binder
      */
     @Nonnull
-    static <R> ObservableBinder<Throwable> bindCommandError(final @Nonnull ReactiveCommand<R> command)
+    static <R> ObservableBinder<Throwable> bindCommandError(final @Nonnull ReactiveCommand<?, R> command)
     {
         return new ObservableBinder<>(command.getError());
     }
