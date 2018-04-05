@@ -3,6 +3,7 @@ package com.github.dohnal.vaadin.reactive;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -98,7 +99,41 @@ public interface ReactiveCommand<T, R>
     static <R> ReactiveCommand<Void, R> create(final @Nonnull Observable<Boolean> canExecute,
                                                final @Nonnull Supplier<R> execution)
     {
-        return create(canExecute, input -> execution.get());
+        return create(canExecute, input -> {
+            return execution.get();
+        });
+    }
+
+    /**
+     * Creates a new synchronous reactive command from given consumer
+     *
+     * @param execution execution which will be executed
+     * @param <T> type of command input
+     * @return created reactive command
+     */
+    @Nonnull
+    static <T> ReactiveCommand<T, Void> create(final @Nonnull Consumer<T> execution)
+    {
+        return create(Observable.just(true), execution);
+    }
+
+    /**
+     * Creates a new synchronous reactive command from given consumer
+     *
+     * @param canExecute observable which controls command executability
+     * @param execution execution which will be executed
+     * @param <T> type of command input
+     * @return created reactive command
+     */
+    @Nonnull
+    static <T> ReactiveCommand<T, Void> create(final @Nonnull Observable<Boolean> canExecute,
+                                               final @Nonnull Consumer<T> execution)
+    {
+        return create(canExecute, input -> {
+            execution.accept(input);
+
+            return null;
+        });
     }
 
     /**
@@ -130,7 +165,6 @@ public interface ReactiveCommand<T, R>
     {
         return new SyncCommand<>(canExecute, execution);
     }
-
 
     /**
      * Creates a new asynchronous reactive command with no execution
@@ -211,7 +245,6 @@ public interface ReactiveCommand<T, R>
         return createFromAsyncFunction(canExecute, AsyncFunction.create(execution, executor), executor);
     }
 
-
     /**
      * Creates a new asynchronous reactive command from given supplier
      *
@@ -272,6 +305,65 @@ public interface ReactiveCommand<T, R>
         return createFromAsyncFunction(canExecute, AsyncFunction.create(execution, executor), executor);
     }
 
+    /**
+     * Creates a new asynchronous reactive command from given consumer
+     *
+     * @param execution execution which will be executed
+     * @param <T> type of command input
+     * @return created reactive command
+     */
+    @Nonnull
+    static <T> ReactiveCommand<T, Void> createAsync(final @Nonnull Consumer<T> execution)
+    {
+        return createAsync(Observable.just(true), execution);
+    }
+
+    /**
+     * Creates a new asynchronous reactive command from given consumer
+     *
+     * @param canExecute observable which controls command executability
+     * @param execution execution which will be executed
+     * @param <T> type of command input
+     * @return created reactive command
+     */
+    @Nonnull
+    static <T> ReactiveCommand<T, Void> createAsync(final @Nonnull Observable<Boolean> canExecute,
+                                                    final @Nonnull Consumer<T> execution)
+    {
+        return createFromAsyncFunction(canExecute, AsyncFunction.create(execution));
+    }
+
+    /**
+     * Creates a new asynchronous reactive command from given consumer
+     *
+     * @param execution execution which will be executed
+     * @param executor executor where the execution will be executed
+     * @param <T> type of command input
+     * @return created reactive command
+     */
+    @Nonnull
+    static <T> ReactiveCommand<T, Void> createAsync(final @Nonnull Consumer<T> execution,
+                                                    final @Nonnull Executor executor)
+    {
+        return createAsync(Observable.just(true), execution, executor);
+    }
+
+    /**
+     * Creates a new asynchronous reactive command from given consumer
+     *
+     * @param canExecute observable which controls command executability
+     * @param execution execution which will be executed
+     * @param executor executor where the execution will be executed
+     * @param <T> type of command input
+     * @return created reactive command
+     */
+    @Nonnull
+    static <T> ReactiveCommand<T, Void> createAsync(final @Nonnull Observable<Boolean> canExecute,
+                                                    final @Nonnull Consumer<T> execution,
+                                                    final @Nonnull Executor executor)
+    {
+        return createFromAsyncFunction(canExecute, AsyncFunction.create(execution, executor), executor);
+    }
 
     /**
      * Creates a new asynchronous reactive command from given asynchronous supplier
@@ -332,7 +424,6 @@ public interface ReactiveCommand<T, R>
     {
         return createFromAsyncFunction(canExecute, AsyncFunction.create(execution), executor);
     }
-
 
     /**
      * Creates a new asynchronous reactive command from given function
@@ -398,7 +489,6 @@ public interface ReactiveCommand<T, R>
         return createFromAsyncFunction(canExecute, AsyncFunction.create(execution, executor), executor);
     }
 
-
     /**
      * Creates a new asynchronous reactive command from given asynchronous function
      *
@@ -462,7 +552,6 @@ public interface ReactiveCommand<T, R>
     {
         return new AsyncCommand<>(canExecute, execution, executor);
     }
-
 
     /**
      * Returns an observable of execution result

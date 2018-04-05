@@ -1,6 +1,5 @@
 package com.github.dohnal.vaadin.reactive.binder.observable;
 
-
 import javax.annotation.Nonnull;
 import java.util.function.Consumer;
 
