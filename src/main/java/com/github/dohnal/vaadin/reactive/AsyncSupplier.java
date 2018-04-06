@@ -18,6 +18,7 @@ public interface AsyncSupplier<T> extends Supplier<CompletableFuture<T>>
      *
      * @return asynchronous supplier
      */
+    @Nonnull
     static AsyncSupplier<Void> create()
     {
         return create(() -> {
@@ -30,13 +31,10 @@ public interface AsyncSupplier<T> extends Supplier<CompletableFuture<T>>
      * @param runnable runnable
      * @return asynchronous supplier
      */
+    @Nonnull
     static AsyncSupplier<Void> create(final @Nonnull Runnable runnable)
     {
-        return create(() -> {
-            runnable.run();
-
-            return null;
-        });
+        return () -> CompletableFuture.runAsync(runnable);
     }
 
     /**
@@ -46,23 +44,21 @@ public interface AsyncSupplier<T> extends Supplier<CompletableFuture<T>>
      * @param executor executor where the runnable will be executed
      * @return asynchronous supplier
      */
+    @Nonnull
     static AsyncSupplier<Void> create(final @Nonnull Runnable runnable,
                                       final @Nonnull Executor executor)
     {
-        return create(() -> {
-            runnable.run();
-
-            return null;
-        }, executor);
+        return () -> CompletableFuture.runAsync(runnable, executor);
     }
 
     /**
      * Creates asynchronous supplier from synchronous supplier
      *
      * @param supplier supplier
-     * @param <T> type of input
+     * @param <T> type of result
      * @return asynchronous supplier
      */
+    @Nonnull
     static <T> AsyncSupplier<T> create(final @Nonnull Supplier<T> supplier)
     {
         return () -> CompletableFuture.supplyAsync(supplier);
@@ -73,9 +69,10 @@ public interface AsyncSupplier<T> extends Supplier<CompletableFuture<T>>
      *
      * @param supplier supplier
      * @param executor executor where the supplier will be executed
-     * @param <T> type of input
+     * @param <T> type of result
      * @return asynchronous supplier
      */
+    @Nonnull
     static <T> AsyncSupplier<T> create(final @Nonnull Supplier<T> supplier,
                                        final @Nonnull Executor executor)
     {
