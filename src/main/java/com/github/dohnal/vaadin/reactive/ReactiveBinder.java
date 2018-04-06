@@ -7,6 +7,7 @@ import com.github.dohnal.vaadin.reactive.binder.command.CommandExecutionBinder;
 import com.github.dohnal.vaadin.reactive.binder.observable.ObservableBinder;
 import com.github.dohnal.vaadin.reactive.binder.observable.ObservableEnabledBinder;
 import com.github.dohnal.vaadin.reactive.binder.observable.ObservableItemsBinder;
+import com.github.dohnal.vaadin.reactive.binder.observable.ObservableProgressBinder;
 import com.github.dohnal.vaadin.reactive.binder.observable.ObservableReadOnlyBinder;
 import com.github.dohnal.vaadin.reactive.binder.observable.ObservableTextBinder;
 import com.github.dohnal.vaadin.reactive.binder.observable.ObservableValueBinder;
@@ -96,6 +97,30 @@ public interface ReactiveBinder extends Disposable<ReactiveBinder>
     static <T> PropertyValueBinder<T> bindValue(final @Nonnull ReactiveProperty<T> property)
     {
         return new PropertyValueBinder<>(property);
+    }
+
+    /**
+     * Return progress binder for given observable
+     *
+     * @param observable observable
+     * @return binder
+     */
+    @Nonnull
+    static ObservableProgressBinder bindProgress(final @Nonnull Observable<Float> observable)
+    {
+        return new ObservableProgressBinder(observable);
+    }
+
+    /**
+     * Return progress binder for given property
+     *
+     * @param property property
+     * @return binder
+     */
+    @Nonnull
+    static ObservableProgressBinder bindProgress(final @Nonnull ReactiveProperty<Float> property)
+    {
+        return new ObservableProgressBinder(property.asObservable());
     }
 
     /**
@@ -249,5 +274,17 @@ public interface ReactiveBinder extends Disposable<ReactiveBinder>
     static <R> ObservableBinder<Throwable> bindCommandError(final @Nonnull ReactiveCommand<?, R> command)
     {
         return new ObservableBinder<>(command.getError());
+    }
+
+    /**
+     * Return command progress binder for given reactive command
+     *
+     * @param command reactive command
+     * @return binder
+     */
+    @Nonnull
+    static ObservableProgressBinder bindCommandProgress(final @Nonnull ReactiveCommand<?, ?> command)
+    {
+        return new ObservableProgressBinder(command.getProgress());
     }
 }

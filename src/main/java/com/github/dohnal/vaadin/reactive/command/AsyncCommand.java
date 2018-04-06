@@ -53,6 +53,7 @@ public final class AsyncCommand<T, R> extends AbstractCommand<T, R>
     @Override
     public final void executeInternal(final @Nullable T input)
     {
+        this.progress.setValue(0.0f);
         this.isExecuting.setValue(true);
 
         if (executor != null)
@@ -60,6 +61,7 @@ public final class AsyncCommand<T, R> extends AbstractCommand<T, R>
             execution.apply(input).whenCompleteAsync((result, error) -> {
                 handleResult(result, error);
 
+                this.progress.setValue(1.0f);
                 this.isExecuting.setValue(false);
             }, executor);
         }
@@ -68,6 +70,7 @@ public final class AsyncCommand<T, R> extends AbstractCommand<T, R>
             execution.apply(input).whenCompleteAsync((result, error) -> {
                 handleResult(result, error);
 
+                this.progress.setValue(1.0f);
                 this.isExecuting.setValue(false);
             });
         }

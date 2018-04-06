@@ -602,6 +602,14 @@ public interface ReactiveCommand<T, R>
     Observable<Boolean> canExecute();
 
     /**
+     * Returns an observable of command execution progress if it is currently executing
+     *
+     * @return an observable of command execution progress if it is currently executing
+     */
+    @Nonnull
+    Observable<Float> getProgress();
+
+    /**
      * Executes this reactive command
      */
     void execute(final @Nullable T input);

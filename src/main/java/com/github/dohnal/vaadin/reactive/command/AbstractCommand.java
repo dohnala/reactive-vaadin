@@ -26,6 +26,8 @@ public abstract class AbstractCommand<T, R> implements ReactiveCommand<T, R>
 
     protected final ReactiveProperty<Boolean> canExecute;
 
+    protected final ReactiveProperty<Float> progress;
+
     /**
      * Creates new command reactive command
      *
@@ -47,6 +49,8 @@ public abstract class AbstractCommand<T, R> implements ReactiveCommand<T, R>
                         defaultCanExecute,
                         canExecute,
                         (x, y) -> x && y));
+
+        this.progress = ReactiveProperty.withValue(0.0f);
     }
 
     /**
@@ -96,6 +100,13 @@ public abstract class AbstractCommand<T, R> implements ReactiveCommand<T, R>
     public final Observable<Boolean> canExecute()
     {
         return canExecute.asObservable();
+    }
+
+    @Nonnull
+    @Override
+    public final Observable<Float> getProgress()
+    {
+        return progress.asObservable();
     }
 
     @Override
