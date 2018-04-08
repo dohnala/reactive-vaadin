@@ -2,13 +2,9 @@ package com.github.dohnal.vaadin.reactive.property;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.List;
 import java.util.function.Function;
 
-import com.github.dohnal.vaadin.reactive.Disposable;
-import com.github.dohnal.vaadin.reactive.ReactiveBinder;
 import com.github.dohnal.vaadin.reactive.ReactiveProperty;
-import com.google.common.collect.Lists;
 import rx.Observable;
 import rx.subjects.BehaviorSubject;
 
@@ -18,19 +14,16 @@ import rx.subjects.BehaviorSubject;
  * @param <T> type of property
  * @author dohnal
  */
-public final class Property<T> implements ReactiveProperty<T>
+public final class BehaviorSubjectProperty<T> implements ReactiveProperty<T>
 {
     private BehaviorSubject<T> subject;
-
-    private List<Disposable<?>> disposables;
 
     /**
      * Creates new property with no value
      */
-    public Property()
+    public BehaviorSubjectProperty()
     {
         this.subject = BehaviorSubject.create();
-        this.disposables = Lists.newArrayList();
     }
 
     /**
@@ -38,10 +31,9 @@ public final class Property<T> implements ReactiveProperty<T>
      *
      * @param defaultValue default value
      */
-    public Property(final @Nullable T defaultValue)
+    public BehaviorSubjectProperty(final @Nullable T defaultValue)
     {
         this.subject = BehaviorSubject.create(defaultValue);
-        this.disposables = Lists.newArrayList();
     }
 
     /**
@@ -49,11 +41,11 @@ public final class Property<T> implements ReactiveProperty<T>
      *
      * @param observable observable
      */
-    public Property(final @Nonnull Observable<T> observable)
+    public BehaviorSubjectProperty(final @Nonnull Observable<T> observable)
     {
         this();
 
-        this.disposables.add(ReactiveBinder.bind(observable).to(this));
+        observable.subscribe(this::setValue);
     }
 
     /**
@@ -61,11 +53,11 @@ public final class Property<T> implements ReactiveProperty<T>
      *
      * @param anotherProperty another property
      */
-    public Property(final @Nonnull ReactiveProperty<T> anotherProperty)
+    public BehaviorSubjectProperty(final @Nonnull ReactiveProperty<T> anotherProperty)
     {
         this(anotherProperty.getValue());
 
-        this.disposables.add(ReactiveBinder.bind(anotherProperty).to(this));
+        anotherProperty.asObservable().subscribe(this::setValue);
     }
 
     @Nullable
@@ -98,14 +90,5 @@ public final class Property<T> implements ReactiveProperty<T>
     public final boolean hasObservers()
     {
         return subject.hasObservers();
-    }
-
-    @Nonnull
-    @Override
-    public final ReactiveProperty<T> unbind()
-    {
-        this.disposables.forEach(Disposable::unbind);
-
-        return this;
     }
 }

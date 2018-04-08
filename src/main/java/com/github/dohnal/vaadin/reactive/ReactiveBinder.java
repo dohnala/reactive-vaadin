@@ -1,290 +1,82 @@
 package com.github.dohnal.vaadin.reactive;
 
 import javax.annotation.Nonnull;
-import java.util.Collection;
 
-import com.github.dohnal.vaadin.reactive.binder.command.CommandExecutionBinder;
-import com.github.dohnal.vaadin.reactive.binder.observable.ObservableBinder;
-import com.github.dohnal.vaadin.reactive.binder.observable.ObservableEnabledBinder;
-import com.github.dohnal.vaadin.reactive.binder.observable.ObservableItemsBinder;
-import com.github.dohnal.vaadin.reactive.binder.observable.ObservableProgressBinder;
-import com.github.dohnal.vaadin.reactive.binder.observable.ObservableReadOnlyBinder;
-import com.github.dohnal.vaadin.reactive.binder.observable.ObservableTextBinder;
-import com.github.dohnal.vaadin.reactive.binder.observable.ObservableValueBinder;
-import com.github.dohnal.vaadin.reactive.binder.observable.ObservableVisibleBinder;
-import com.github.dohnal.vaadin.reactive.binder.property.PropertyBinder;
-import com.github.dohnal.vaadin.reactive.binder.property.PropertyValueBinder;
+import com.github.dohnal.vaadin.reactive.binder.EventBinder;
+import com.github.dohnal.vaadin.reactive.binder.ObservableBinder;
+import com.github.dohnal.vaadin.reactive.observable.ObservableChangedEvent;
 import rx.Observable;
 
 /**
- * Reactive binder for binding reactive primitives
+ * Base interface for binders which can bind observables to properties or call actions as a reaction
+ * to events that happened
  *
  * @author dohnal
  */
 public interface ReactiveBinder extends Disposable<ReactiveBinder>
 {
     /**
-     * Return binder for given observable
+     * Creates binder for binding observable of values
      *
      * @param observable observable
-     * @param <T> type of observable
+     * @param <T> type of values
      * @return binder
      */
     @Nonnull
-    static <T> ObservableBinder<T> bind(final @Nonnull Observable<T> observable)
+    default <T> ObservableBinder<T> bind(final @Nonnull Observable<T> observable)
     {
         return new ObservableBinder<>(observable);
     }
 
     /**
-     * Return binder for given property
+     * Creates binder for binding something what can be observed
      *
-     * @param property property
-     * @param <T> type of property
+     * @param isObservable something what can be observed
+     * @param <T> type of values
      * @return binder
      */
     @Nonnull
-    static <T> PropertyBinder<T> bind(final @Nonnull ReactiveProperty<T> property)
+    default <T> ObservableBinder<T> bind(final @Nonnull IsObservable<T> isObservable)
     {
-        return new PropertyBinder<>(property);
+        return new ObservableBinder<>(isObservable.asObservable());
     }
 
     /**
-     * Return text binder for given observable
+     * Creates binder which can call action as a reaction to change of given observable
      *
      * @param observable observable
+     * @param <T> type of values
      * @return binder
      */
     @Nonnull
-    static ObservableTextBinder bindText(final @Nonnull Observable<String> observable)
+    default <T> EventBinder<T> whenChanged(final @Nonnull Observable<T> observable)
     {
-        return new ObservableTextBinder(observable);
+        return when(new ObservableChangedEvent<>(observable));
     }
 
     /**
-     * Return text binder for given property
+     * Creates binder which can call action as a reaction to change of something what can be observed
      *
-     * @param property property
+     * @param isObservable something what can be observed
+     * @param <T> type of values
      * @return binder
      */
     @Nonnull
-    static ObservableTextBinder bindText(final @Nonnull ReactiveProperty<String> property)
+    default <T> EventBinder<T> whenChanged(final @Nonnull IsObservable<T> isObservable)
     {
-        return new ObservableTextBinder(property.asObservable());
+        return whenChanged(isObservable.asObservable());
     }
 
     /**
-     * Return value binder for given observable
+     * Creates binder which can call action as a reaction to some event
      *
-     * @param observable observable
-     * @param <T> type of observable
+     * @param event event
+     * @param <T> type of values
      * @return binder
      */
     @Nonnull
-    static <T> ObservableValueBinder<T> bindValue(final @Nonnull Observable<T> observable)
+    default <T> EventBinder<T> when(final @Nonnull Event<T> event)
     {
-        return new ObservableValueBinder<>(observable);
-    }
-
-    /**
-     * Return value binder for given property
-     *
-     * @param property property
-     * @param <T> type of property
-     * @return binder
-     */
-    @Nonnull
-    static <T> PropertyValueBinder<T> bindValue(final @Nonnull ReactiveProperty<T> property)
-    {
-        return new PropertyValueBinder<>(property);
-    }
-
-    /**
-     * Return progress binder for given observable
-     *
-     * @param observable observable
-     * @return binder
-     */
-    @Nonnull
-    static ObservableProgressBinder bindProgress(final @Nonnull Observable<Float> observable)
-    {
-        return new ObservableProgressBinder(observable);
-    }
-
-    /**
-     * Return progress binder for given property
-     *
-     * @param property property
-     * @return binder
-     */
-    @Nonnull
-    static ObservableProgressBinder bindProgress(final @Nonnull ReactiveProperty<Float> property)
-    {
-        return new ObservableProgressBinder(property.asObservable());
-    }
-
-    /**
-     * Return visible binder for given observable
-     *
-     * @param observable observable
-     * @return binder
-     */
-    @Nonnull
-    static ObservableVisibleBinder bindVisible(final @Nonnull Observable<Boolean> observable)
-    {
-        return new ObservableVisibleBinder(observable);
-    }
-
-    /**
-     * Return value binder for given property
-     *
-     * @param property property
-     * @return binder
-     */
-    @Nonnull
-    static ObservableVisibleBinder bindVisible(final @Nonnull ReactiveProperty<Boolean> property)
-    {
-        return new ObservableVisibleBinder(property.asObservable());
-    }
-
-    /**
-     * Return enabled binder for given observable
-     *
-     * @param observable observable
-     * @return binder
-     */
-    @Nonnull
-    static ObservableEnabledBinder bindEnabled(final @Nonnull Observable<Boolean> observable)
-    {
-        return new ObservableEnabledBinder(observable);
-    }
-
-    /**
-     * Return enabled binder for given property
-     *
-     * @param property property
-     * @return binder
-     */
-    @Nonnull
-    static ObservableEnabledBinder bindEnabled(final @Nonnull ReactiveProperty<Boolean> property)
-    {
-        return new ObservableEnabledBinder(property.asObservable());
-    }
-
-    /**
-     * Return read-only binder for given observable
-     *
-     * @param observable observable
-     * @return binder
-     */
-    @Nonnull
-    static ObservableReadOnlyBinder bindReadOnly(final @Nonnull Observable<Boolean> observable)
-    {
-        return new ObservableReadOnlyBinder(observable);
-    }
-
-    /**
-     * Return read-only binder for given property
-     *
-     * @param property property
-     * @return binder
-     */
-    @Nonnull
-    static ObservableReadOnlyBinder bindReadOnly(final @Nonnull ReactiveProperty<Boolean> property)
-    {
-        return new ObservableReadOnlyBinder(property.asObservable());
-    }
-
-    /**
-     * Return items binder for given observable
-     *
-     * @param observable observable
-     * @param <T> type of value
-     * @param <U> type of collection
-     * @return binder
-     */
-    @Nonnull
-    static <T, U extends Collection<T>> ObservableItemsBinder<T, U> bindItems(final @Nonnull Observable<U> observable)
-    {
-        return new ObservableItemsBinder<>(observable);
-    }
-
-    /**
-     * Return items binder for given reactive property
-     *
-     * @param property reactive property
-     * @param <T> type of value
-     * @param <U> type of collection
-     * @return binder
-     */
-    @Nonnull
-    static <T, U extends Collection<T>> ObservableItemsBinder<T, U> bindItems(final @Nonnull ReactiveProperty<U> property)
-    {
-        return new ObservableItemsBinder<>(property.asObservable());
-    }
-
-    /**
-     * Return command execution binder for given reactive command
-     *
-     * @param command reactive command
-     * @param <T> type of command input
-     * @param <R> type of command result
-     * @return binder
-     */
-    @Nonnull
-    static <T, R> CommandExecutionBinder<T, R> bindCommandExecution(final @Nonnull ReactiveCommand<T, R> command)
-    {
-        return new CommandExecutionBinder<>(command);
-    }
-
-    /**
-     * Return command result binder for given reactive command
-     *
-     * @param command reactive command
-     * @param <R> type of command result
-     * @return binder
-     */
-    @Nonnull
-    static <R> ObservableValueBinder<R> bindCommandResult(final @Nonnull ReactiveCommand<?, R> command)
-    {
-        return new ObservableValueBinder<>(command.getResult());
-    }
-
-    /**
-     * Return command success binder for given reactive command
-     *
-     * @param command reactive command
-     * @param <R> type of command result
-     * @return binder
-     */
-    @Nonnull
-    static <R> ObservableBinder<R> bindCommandSuccess(final @Nonnull ReactiveCommand<?, R> command)
-    {
-        return new ObservableBinder<>(command.getResult());
-    }
-
-    /**
-     * Return command error binder for given reactive command
-     *
-     * @param command reactive command
-     * @param <R> type of command result
-     * @return binder
-     */
-    @Nonnull
-    static <R> ObservableBinder<Throwable> bindCommandError(final @Nonnull ReactiveCommand<?, R> command)
-    {
-        return new ObservableBinder<>(command.getError());
-    }
-
-    /**
-     * Return command progress binder for given reactive command
-     *
-     * @param command reactive command
-     * @return binder
-     */
-    @Nonnull
-    static ObservableProgressBinder bindCommandProgress(final @Nonnull ReactiveCommand<?, ?> command)
-    {
-        return new ObservableProgressBinder(command.getProgress());
+        return new EventBinder<>(event);
     }
 }

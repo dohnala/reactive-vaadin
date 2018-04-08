@@ -4,7 +4,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.function.Function;
 
-import com.github.dohnal.vaadin.reactive.property.Property;
+import com.github.dohnal.vaadin.reactive.property.BehaviorSubjectProperty;
 import rx.Observable;
 
 /**
@@ -13,7 +13,7 @@ import rx.Observable;
  * @param <T> type of property
  * @author dohnal
  */
-public interface ReactiveProperty<T> extends Disposable<ReactiveProperty<T>>
+public interface ReactiveProperty<T> extends Property<T>, IsObservable<T>
 {
     /**
      * Creates new property with no value
@@ -24,7 +24,7 @@ public interface ReactiveProperty<T> extends Disposable<ReactiveProperty<T>>
     @Nonnull
     static <T> ReactiveProperty<T> empty()
     {
-        return new Property<>();
+        return new BehaviorSubjectProperty<>();
     }
 
     /**
@@ -37,7 +37,7 @@ public interface ReactiveProperty<T> extends Disposable<ReactiveProperty<T>>
     @Nonnull
     static <T> ReactiveProperty<T> withValue(final @Nullable T defaultValue)
     {
-        return new Property<>(defaultValue);
+        return new BehaviorSubjectProperty<>(defaultValue);
     }
 
     /**
@@ -50,7 +50,7 @@ public interface ReactiveProperty<T> extends Disposable<ReactiveProperty<T>>
     @Nonnull
     static <T> ReactiveProperty<T> fromObservable(final @Nonnull Observable<T> observable)
     {
-        return new Property<>(observable);
+        return new BehaviorSubjectProperty<>(observable);
     }
 
     /**
@@ -63,7 +63,7 @@ public interface ReactiveProperty<T> extends Disposable<ReactiveProperty<T>>
     @Nonnull
     static <T> ReactiveProperty<T> fromProperty(final @Nonnull Observable<T> property)
     {
-        return new Property<>(property);
+        return new BehaviorSubjectProperty<>(property);
     }
 
     /**
@@ -79,6 +79,7 @@ public interface ReactiveProperty<T> extends Disposable<ReactiveProperty<T>>
      *
      * @param value value
      */
+    @Override
     void setValue(final @Nullable T value);
 
     /**
@@ -94,6 +95,7 @@ public interface ReactiveProperty<T> extends Disposable<ReactiveProperty<T>>
      * @return observable for this property
      */
     @Nonnull
+    @Override
     Observable<T> asObservable();
 
     /**
