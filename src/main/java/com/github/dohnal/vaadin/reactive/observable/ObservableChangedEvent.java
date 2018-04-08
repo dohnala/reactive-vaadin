@@ -2,7 +2,7 @@ package com.github.dohnal.vaadin.reactive.observable;
 
 import javax.annotation.Nonnull;
 
-import com.github.dohnal.vaadin.reactive.Event;
+import com.github.dohnal.vaadin.mvvm.Event;
 import rx.Observable;
 
 /**

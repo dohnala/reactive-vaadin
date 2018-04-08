@@ -2,14 +2,13 @@ package com.github.dohnal.vaadin.reactive;
 
 import javax.annotation.Nonnull;
 
-import com.github.dohnal.vaadin.reactive.binder.EventBinder;
-import com.github.dohnal.vaadin.reactive.binder.ObservableBinder;
-import com.github.dohnal.vaadin.reactive.observable.ObservableChangedEvent;
+import com.github.dohnal.vaadin.reactive.binder.ObservableActionBinder;
+import com.github.dohnal.vaadin.reactive.binder.ObservablePropertyBinder;
 import rx.Observable;
 
 /**
  * Base interface for binders which can bind observables to properties or call actions as a reaction
- * to events that happened
+ * when any observable is changed
  *
  * @author dohnal
  */
@@ -23,9 +22,9 @@ public interface ReactiveBinder extends Disposable<ReactiveBinder>
      * @return binder
      */
     @Nonnull
-    default <T> ObservableBinder<T> bind(final @Nonnull Observable<T> observable)
+    default <T> ObservablePropertyBinder<T> bind(final @Nonnull Observable<T> observable)
     {
-        return new ObservableBinder<>(observable);
+        return new ObservablePropertyBinder<>(observable);
     }
 
     /**
@@ -36,22 +35,22 @@ public interface ReactiveBinder extends Disposable<ReactiveBinder>
      * @return binder
      */
     @Nonnull
-    default <T> ObservableBinder<T> bind(final @Nonnull IsObservable<T> isObservable)
+    default <T> ObservablePropertyBinder<T> bind(final @Nonnull IsObservable<T> isObservable)
     {
-        return new ObservableBinder<>(isObservable.asObservable());
+        return new ObservablePropertyBinder<>(isObservable.asObservable());
     }
 
     /**
-     * Creates binder which can call action as a reaction to change of given observable
+     * Creates binder which can call action as a reaction when given observable is changed
      *
      * @param observable observable
      * @param <T> type of values
      * @return binder
      */
     @Nonnull
-    default <T> EventBinder<T> whenChanged(final @Nonnull Observable<T> observable)
+    default <T> ObservableActionBinder<T> whenChanged(final @Nonnull Observable<T> observable)
     {
-        return when(new ObservableChangedEvent<>(observable));
+        return new ObservableActionBinder<>(observable);
     }
 
     /**
@@ -62,21 +61,8 @@ public interface ReactiveBinder extends Disposable<ReactiveBinder>
      * @return binder
      */
     @Nonnull
-    default <T> EventBinder<T> whenChanged(final @Nonnull IsObservable<T> isObservable)
+    default <T> ObservableActionBinder<T> whenChanged(final @Nonnull IsObservable<T> isObservable)
     {
         return whenChanged(isObservable.asObservable());
-    }
-
-    /**
-     * Creates binder which can call action as a reaction to some event
-     *
-     * @param event event
-     * @param <T> type of values
-     * @return binder
-     */
-    @Nonnull
-    default <T> EventBinder<T> when(final @Nonnull Event<T> event)
-    {
-        return new EventBinder<>(event);
     }
 }

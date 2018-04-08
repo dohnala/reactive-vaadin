@@ -2,9 +2,9 @@ package com.github.dohnal.vaadin.mvvm.component;
 
 import javax.annotation.Nonnull;
 
+import com.github.dohnal.vaadin.mvvm.Event;
 import com.github.dohnal.vaadin.mvvm.component.event.ButtonClickedEvent;
 import com.github.dohnal.vaadin.mvvm.component.event.FieldValueChangedEvent;
-import com.github.dohnal.vaadin.reactive.Event;
 import com.vaadin.data.HasValue;
 import com.vaadin.ui.Button;
 

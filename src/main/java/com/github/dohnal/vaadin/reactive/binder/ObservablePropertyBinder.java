@@ -15,13 +15,13 @@ import rx.Subscription;
  * @param <T> type of value in the observable
  * @author dohnal
  */
-public class ObservableBinder<T> implements ReactiveBinder
+public class ObservablePropertyBinder<T> implements ReactiveBinder
 {
     private final Observable<T> observable;
 
     private List<Subscription> subscriptions;
 
-    public ObservableBinder(final @Nonnull Observable<T> observable)
+    public ObservablePropertyBinder(final @Nonnull Observable<T> observable)
     {
         this.observable = observable;
         this.subscriptions = Lists.newArrayList();
@@ -35,7 +35,7 @@ public class ObservableBinder<T> implements ReactiveBinder
      * @return this binder
      */
     @Nonnull
-    public <P extends Property<? super T>> ObservableBinder<T> to(final @Nonnull P property)
+    public <P extends Property<? super T>> ObservablePropertyBinder<T> to(final @Nonnull P property)
     {
         subscriptions.add(observable.subscribe(property::setValue));
 
@@ -44,7 +44,7 @@ public class ObservableBinder<T> implements ReactiveBinder
 
     @Nonnull
     @Override
-    public ObservableBinder<T> unbind()
+    public ObservablePropertyBinder<T> unbind()
     {
         subscriptions.stream()
                 .filter(subscription -> !subscription.isUnsubscribed())

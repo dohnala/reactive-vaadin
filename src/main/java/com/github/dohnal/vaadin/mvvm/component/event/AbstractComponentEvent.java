@@ -4,7 +4,7 @@ import javax.annotation.Nonnull;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import com.github.dohnal.vaadin.reactive.Event;
+import com.github.dohnal.vaadin.mvvm.Event;
 import com.vaadin.shared.Registration;
 import rx.Emitter;
 import rx.Observable;
