@@ -61,7 +61,7 @@ public interface ReactiveProperty<T> extends Property<T>, IsObservable<T>
      * @return created property
      */
     @Nonnull
-    static <T> ReactiveProperty<T> fromProperty(final @Nonnull Observable<T> property)
+    static <T> ReactiveProperty<T> fromProperty(final @Nonnull ReactiveProperty<T> property)
     {
         return new BehaviorSubjectProperty<>(property);
     }
