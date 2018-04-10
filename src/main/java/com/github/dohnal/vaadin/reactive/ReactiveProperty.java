@@ -68,11 +68,20 @@ public interface ReactiveProperty<T> extends Property<T>, IsObservable<T>
 
     /**
      * Returns current value
+     * NOTE: if this property has not value, this method still return null
      *
      * @return current value
+     * @see #hasValue()
      */
     @Nullable
     T getValue();
+
+    /**
+     * Return if this property has any value
+     *
+     * @return if this property has any value
+     */
+    boolean hasValue();
 
     /**
      * Sets new value and notifies all subscribers

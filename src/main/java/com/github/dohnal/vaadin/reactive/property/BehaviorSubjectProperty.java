@@ -56,7 +56,14 @@ public final class BehaviorSubjectProperty<T> implements ReactiveProperty<T>
      */
     public BehaviorSubjectProperty(final @Nonnull ReactiveProperty<T> anotherProperty)
     {
-        this(anotherProperty.getValue());
+        if (anotherProperty.hasValue())
+        {
+            this.subject = BehaviorSubject.create(anotherProperty.getValue());
+        }
+        else
+        {
+            this.subject = BehaviorSubject.create();
+        }
 
         anotherProperty.asObservable().subscribe(this::setValue);
     }
@@ -66,6 +73,12 @@ public final class BehaviorSubjectProperty<T> implements ReactiveProperty<T>
     public final T getValue()
     {
         return subject.getValue();
+    }
+
+    @Override
+    public boolean hasValue()
+    {
+        return subject.hasValue();
     }
 
     @Override
