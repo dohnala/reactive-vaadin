@@ -1,7 +1,9 @@
 package com.github.dohnal.vaadin.reactive.property;
 
 import com.github.dohnal.vaadin.reactive.ReactiveProperty;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import rx.schedulers.Schedulers;
 import rx.schedulers.TestScheduler;
@@ -17,441 +19,546 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  *
  * @author dohnal
  */
+@DisplayName("Behavior subject property")
 public class BehaviorSubjectPropertyTest
 {
-    @Test
-    @DisplayName("Value should be null after empty property is created")
-    public void testValueAfterCreateEmpty()
-    {
-        final ReactiveProperty<Integer> property = ReactiveProperty.empty();
+    private ReactiveProperty<Integer> property;
 
-        assertNull(property.getValue());
+    @Nested
+    @DisplayName("After empty property is created")
+    class AfterCreateEmpty
+    {
+        @BeforeEach
+        void createEmptyProperty()
+        {
+            property = ReactiveProperty.empty();
+        }
+
+        @Test
+        @DisplayName("Value should be null")
+        public void testValue()
+        {
+            assertNull(property.getValue());
+        }
+
+        @Test
+        @DisplayName("Observable shouldn't emit any value")
+        public void testObservable()
+        {
+            property.asObservable().test()
+                    .assertNoValues();
+        }
+
+        @Test
+        @DisplayName("Property shouldn't have value")
+        public void testHasValue()
+        {
+            assertFalse(property.hasValue());
+        }
+
+        @Test
+        @DisplayName("Property shouldn't have observers")
+        public void testHasObservers()
+        {
+            assertFalse(property.hasObservers());
+        }
     }
 
-    @Test
-    @DisplayName("Observable shouldn't emit any value after empty property is created")
-    public void testObservableAfterCreateEmpty()
+    @Nested
+    @DisplayName("After property is created with value")
+    class AfterCreateWithValue
     {
-        final ReactiveProperty<Integer> property = ReactiveProperty.empty();
+        @BeforeEach
+        void createPropertyWithValue()
+        {
+            property = ReactiveProperty.withValue(5);
+        }
 
-        property.asObservable().test()
-                .assertNoValues();
+        @Test
+        @DisplayName("Value should be correct")
+        public void testValue()
+        {
+            assertEquals(new Integer(5), property.getValue());
+        }
+
+        @Test
+        @DisplayName("Observable should emit default value")
+        public void testObservable()
+        {
+            property.asObservable().test()
+                    .assertValue(5);
+        }
+
+        @Test
+        @DisplayName("Property should have value")
+        public void testHasValue()
+        {
+            assertTrue(property.hasValue());
+        }
+
+        @Test
+        @DisplayName("Property shouldn't have observers")
+        public void testHasObservers()
+        {
+            assertFalse(property.hasObservers());
+        }
     }
 
-    @Test
-    @DisplayName("Value should be correct after property is created with value")
-    public void testValueAfterCreateWithValue()
+    @Nested
+    @DisplayName("After property is created from observable")
+    class AfterCreateFromObservable
     {
-        final ReactiveProperty<Integer> property = ReactiveProperty.withValue(5);
+        private TestScheduler testScheduler;
+        private TestSubject<Integer> testSubject;
 
-        assertEquals(new Integer(5), property.getValue());
-    }
+        @BeforeEach
+        void createPropertyFromObservable()
+        {
+            testScheduler = Schedulers.test();
+            testSubject = TestSubject.create(testScheduler);
+            property = ReactiveProperty.fromObservable(testSubject);
+        }
 
-    @Test
-    @DisplayName("Observable should emit default value after property is created with default value")
-    public void testObservableAfterCreateWithValue()
-    {
-        final ReactiveProperty<Integer> property = ReactiveProperty.withValue(5);
+        @Test
+        @DisplayName("Value should be null")
+        public void testValue()
+        {
+            assertNull(property.getValue());
+        }
 
-        property.asObservable().test()
-                .assertValue(5);
-    }
+        @Test
+        @DisplayName("Observable shouldn't emit any value")
+        public void testObservable()
+        {
+            property.asObservable().test()
+                    .assertNoValues();
+        }
 
-    @Test
-    @DisplayName("Value should be null after property is created from empty observable")
-    public void testValueAfterCreateFromEmptyObservable()
-    {
-        final TestSubject<Integer> testSubject = TestSubject.create(Schedulers.test());
+        @Test
+        @DisplayName("Property shouldn't have value")
+        public void testHasValue()
+        {
+            assertFalse(property.hasValue());
+        }
 
-        final ReactiveProperty<Integer> property = ReactiveProperty.fromObservable(testSubject);
+        @Test
+        @DisplayName("Property shouldn't have observers")
+        public void testHasObservers()
+        {
+            assertFalse(property.hasObservers());
+        }
 
-        assertNull(property.getValue());
-    }
+        @Nested
+        @DisplayName("After source observable emits value")
+        class AfterSourceObservableEmitsValue
+        {
+            @BeforeEach
+            void sourceObservableEmitsValue()
+            {
+                testSubject.onNext(5);
+                testScheduler.triggerActions();
+            }
 
-    @Test
-    @DisplayName("Observable shouldn't emit any value after property is created from empty observable")
-    public void testObservableAfterCreateFromEmptyObservable()
-    {
-        final TestSubject<Integer> testSubject = TestSubject.create(Schedulers.test());
+            @Test
+            @DisplayName("Value should be correct")
+            public void testValue()
+            {
+                assertEquals(new Integer(5), property.getValue());
+            }
 
-        final ReactiveProperty<Integer> property = ReactiveProperty.fromObservable(testSubject);
+            @Test
+            @DisplayName("Observable should emit value")
+            public void testObservable()
+            {
+                property.asObservable().test()
+                        .assertValue(5);
+            }
 
-        property.asObservable().test()
-                .assertNoValues();
-    }
-
-    @Test
-    @DisplayName("Value should be correct after source observable emits value")
-    public void testValueAfterSourceObservableEmitsValue()
-    {
-        final TestScheduler testScheduler = Schedulers.test();
-        final TestSubject<Integer> testSubject = TestSubject.create(testScheduler);
-
-        final ReactiveProperty<Integer> property = ReactiveProperty.fromObservable(testSubject);
-
-        testSubject.onNext(5);
-        testScheduler.triggerActions();
-
-        assertEquals(new Integer(5), property.getValue());
-    }
-
-    @Test
-    @DisplayName("Observable should emit correct value after source observable emits value")
-    public void testObservableAfterSourceObservableEmitsValue()
-    {
-        final TestScheduler testScheduler = Schedulers.test();
-        final TestSubject<Integer> testSubject = TestSubject.create(testScheduler);
-
-        final ReactiveProperty<Integer> property = ReactiveProperty.fromObservable(testSubject);
-
-        testSubject.onNext(5);
-        testScheduler.triggerActions();
-
-        property.asObservable().test()
-                .assertValue(5);
-    }
-
-    @Test
-    @DisplayName("Value should be correct after source observable emits different value")
-    public void testValueAfterSourceObservableEmitsDifferentValue()
-    {
-        final TestScheduler testScheduler = Schedulers.test();
-        final TestSubject<Integer> testSubject = TestSubject.create(testScheduler);
-
-        final ReactiveProperty<Integer> property = ReactiveProperty.fromObservable(testSubject);
-
-        testSubject.onNext(5);
-        testSubject.onNext(7);
-        testScheduler.triggerActions();
-
-        assertEquals(new Integer(7), property.getValue());
-    }
-
-    @Test
-    @DisplayName("Observable should emit correct value after source observable emits different value")
-    public void testObservableAfterSourceObservableEmitsDifferentValue()
-    {
-        final TestScheduler testScheduler = Schedulers.test();
-        final TestSubject<Integer> testSubject = TestSubject.create(testScheduler);
-
-        final ReactiveProperty<Integer> property = ReactiveProperty.fromObservable(testSubject);
-
-        testSubject.onNext(5);
-        testScheduler.triggerActions();
-
-        property.asObservable().test()
-                .perform(() -> {
+            @Nested
+            @DisplayName("After source observable emits another different value")
+            class AfterSourceObservableEmitsAnotherDifferentValue
+            {
+                @Test
+                @DisplayName("Value should be correct")
+                public void testValue()
+                {
                     testSubject.onNext(7);
                     testScheduler.triggerActions();
-                })
-                .assertValues(5, 7);
+
+                    assertEquals(new Integer(7), property.getValue());
+                }
+
+                @Test
+                @DisplayName("Observable should emit value")
+                public void testObservable()
+                {
+                    property.asObservable().test()
+                            .perform(() -> {
+                                testSubject.onNext(7);
+                                testScheduler.triggerActions();
+                            })
+                            .assertValues(5, 7);
+                }
+            }
+
+            @Nested
+            @DisplayName("After source observable emits another same value")
+            class AfterSourceObservableEmitsAnotherSameValue
+            {
+                @Test
+                @DisplayName("Observable shouldn't emit any value")
+                public void testObservable()
+                {
+                    property.asObservable().test()
+                            .perform(() -> {
+                                testSubject.onNext(5);
+                                testScheduler.triggerActions();
+                            })
+                            .assertValues(5);
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("Observable shouldn't emit correct value after source observable emits same value")
-    public void testObservableAfterSourceObservableEmitsSameValue()
+    @Nested
+    @DisplayName("After property is created from empty property")
+    class AfterCreateFromEmptyProperty
     {
-        final TestScheduler testScheduler = Schedulers.test();
-        final TestSubject<Integer> testSubject = TestSubject.create(testScheduler);
+        private ReactiveProperty<Integer> sourceProperty;
 
-        final ReactiveProperty<Integer> property = ReactiveProperty.fromObservable(testSubject);
+        @BeforeEach
+        void createPropertyFromObservable()
+        {
+            sourceProperty = ReactiveProperty.empty();
+            property = ReactiveProperty.fromProperty(sourceProperty);
+        }
 
-        testSubject.onNext(5);
-        testScheduler.triggerActions();
+        @Test
+        @DisplayName("Value should be null")
+        public void testValue()
+        {
+            assertNull(property.getValue());
+        }
 
-        property.asObservable().test()
-                .perform(() -> {
-                    testSubject.onNext(5);
-                    testScheduler.triggerActions();
-                })
-                .assertValues(5);
+        @Test
+        @DisplayName("Observable shouldn't emit any value")
+        public void testObservable()
+        {
+            property.asObservable().test()
+                    .assertNoValues();
+        }
+
+        @Test
+        @DisplayName("Property shouldn't have value")
+        public void testHasValue()
+        {
+            assertFalse(property.hasValue());
+        }
+
+        @Test
+        @DisplayName("Property shouldn't have observers")
+        public void testHasObservers()
+        {
+            assertFalse(property.hasObservers());
+        }
+
+        @Nested
+        @DisplayName("After source property emits value")
+        class AfterSourcePropertyEmitsValue
+        {
+            @BeforeEach
+            void sourceObservableEmitsValue()
+            {
+                sourceProperty.setValue(5);
+            }
+
+            @Test
+            @DisplayName("Value should be correct")
+            public void testValue()
+            {
+                assertEquals(new Integer(5), property.getValue());
+            }
+
+            @Test
+            @DisplayName("Observable should emit value")
+            public void testObservable()
+            {
+                property.asObservable().test()
+                        .assertValue(5);
+            }
+
+            @Nested
+            @DisplayName("After source property emits another different value")
+            class AfterSourcePropertyEmitsAnotherDifferentValue
+            {
+                @Test
+                @DisplayName("Value should be correct")
+                public void testValue()
+                {
+                    property.setValue(7);
+
+                    assertEquals(new Integer(7), property.getValue());
+                }
+
+                @Test
+                @DisplayName("Observable should emit value")
+                public void testObservable()
+                {
+                    property.asObservable().test()
+                            .perform(() -> property.setValue(7))
+                            .assertValues(5, 7);
+                }
+            }
+
+            @Nested
+            @DisplayName("After source property emits another same value")
+            class AfterSourcePropertyEmitsAnotherSameValue
+            {
+                @Test
+                @DisplayName("Observable shouldn't emit any value")
+                public void testObservable()
+                {
+                    property.asObservable().test()
+                            .perform(() -> property.setValue(5))
+                            .assertValues(5);
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("Value should be null after property is created from empty property")
-    public void testValueAfterCreateFromEmptyProperty()
+    @Nested
+    @DisplayName("After property is created from property with value")
+    class AfterCreatePropertyWithValue
     {
-        final ReactiveProperty<Integer> sourceProperty = ReactiveProperty.empty();
+        private ReactiveProperty<Integer> sourceProperty;
 
-        final ReactiveProperty<Integer> property = ReactiveProperty.fromProperty(sourceProperty);
+        @BeforeEach
+        void createPropertyFromObservable()
+        {
+            sourceProperty = ReactiveProperty.withValue(5);
+            property = ReactiveProperty.fromProperty(sourceProperty);
+        }
 
-        assertNull(property.getValue());
+        @Test
+        @DisplayName("Value should be correct")
+        public void testValue()
+        {
+            assertEquals(new Integer(5), property.getValue());
+        }
+
+        @Test
+        @DisplayName("Observable should emit correct value")
+        public void testObservable()
+        {
+            property.asObservable().test()
+                    .assertValue(5);
+        }
+
+        @Test
+        @DisplayName("Property should have value")
+        public void testHasValue()
+        {
+            assertTrue(property.hasValue());
+        }
+
+        @Test
+        @DisplayName("Property shouldn't have observers")
+        public void testHasObservers()
+        {
+            assertFalse(property.hasObservers());
+        }
     }
 
-    @Test
-    @DisplayName("Observable should emit value after property is created from empty property")
-    public void testObservableAfterCreateFromEmptyProperty()
+    @Nested
+    @DisplayName("After value is set")
+    class AfterSetValue
     {
-        final ReactiveProperty<Integer> sourceProperty = ReactiveProperty.empty();
+        private ReactiveProperty<Integer> sourceProperty;
 
-        final ReactiveProperty<Integer> property = ReactiveProperty.fromProperty(sourceProperty);
+        @BeforeEach
+        void createPropertyFromObservable()
+        {
+            property = ReactiveProperty.empty();
+        }
 
-        property.asObservable().test()
-                .assertValue(null);
+        @Test
+        @DisplayName("Value should be updated")
+        public void testValue()
+        {
+            property.setValue(2);
+
+            assertEquals(new Integer(2), property.getValue());
+        }
+
+        @Test
+        @DisplayName("Observable should emit value")
+        public void testObservable()
+        {
+            property.asObservable().test()
+                    .perform(() -> property.setValue(2))
+                    .assertValue(2);
+        }
+
+        @Nested
+        @DisplayName("After another different value is set")
+        class AfterAnotherDifferentValueSet
+        {
+            @BeforeEach
+            void setValue()
+            {
+                property.setValue(2);
+            }
+
+            @Test
+            @DisplayName("Value should be updated")
+            public void testValue()
+            {
+                property.setValue(7);
+
+                assertEquals(new Integer(7), property.getValue());
+            }
+
+            @Test
+            @DisplayName("Observable should emit value")
+            public void testObservable()
+            {
+                property.asObservable().test()
+                        .perform(() -> property.setValue(7))
+                        .assertValues(2, 7);
+            }
+        }
+
+        @Nested
+        @DisplayName("After another same value is set")
+        class AfterAnotherSameValueSet
+        {
+            @BeforeEach
+            void setValue()
+            {
+                property.setValue(2);
+            }
+
+            @Test
+            @DisplayName("Observable shouldn't emit value")
+            public void testObservable()
+            {
+                property.asObservable().test()
+                        .perform(() -> property.setValue(2))
+                        .assertValue(2);
+            }
+        }
     }
 
-    @Test
-    @DisplayName("Value should be correct after property is created from property with value")
-    public void testValueAfterCreateFromPropertyWithValue()
+    @Nested
+    @DisplayName("After value is updated")
+    class AfterUpdate
     {
-        final ReactiveProperty<Integer> sourceProperty = ReactiveProperty.withValue(5);
+        private ReactiveProperty<Integer> sourceProperty;
 
-        final ReactiveProperty<Integer> property = ReactiveProperty.fromProperty(sourceProperty);
+        @BeforeEach
+        void create()
+        {
+            property = ReactiveProperty.empty();
+        }
 
-        assertEquals(new Integer(5), property.getValue());
+        @Test
+        @DisplayName("Value should be updated")
+        public void testValue()
+        {
+            property.updateValue(value -> 5);
+
+            assertEquals(new Integer(5), property.getValue());
+        }
+
+        @Test
+        @DisplayName("Observable should emit value")
+        public void testObservable()
+        {
+            property.asObservable().test()
+                    .perform(() -> property.updateValue(value -> 5))
+                    .assertValue(5);
+        }
+
+        @Nested
+        @DisplayName("After another different value is set")
+        class AfterAnotherDifferentUpdate
+        {
+            @BeforeEach
+            void setValue()
+            {
+                property.setValue(2);
+            }
+
+            @Test
+            @DisplayName("Value should be update")
+            public void testValue()
+            {
+                property.updateValue(value -> value + 5);
+
+                assertEquals(new Integer(7), property.getValue());
+            }
+
+            @Test
+            @DisplayName("Observable should emit value")
+            public void testObservable()
+            {
+                property.asObservable().test()
+                        .perform(() -> property.updateValue(value -> value + 5))
+                        .assertValues(2, 7);
+            }
+        }
+
+        @Nested
+        @DisplayName("After another same value is set")
+        class AfterAnotherSameValueSet
+        {
+            @BeforeEach
+            void setValue()
+            {
+                property.setValue(2);
+            }
+
+            @Test
+            @DisplayName("Observable shouldn't emit value")
+            public void testObservable()
+            {
+                property.asObservable().test()
+                        .perform(() -> property.updateValue(value -> 2))
+                        .assertValue(2);
+            }
+        }
     }
 
-    @Test
-    @DisplayName("Observable should emit value after property is created from property with value")
-    public void testObservableAfterCreateFromPropertyWithValue()
+    @Nested
+    @DisplayName("After property is subscribed")
+    class AfterSubscribed
     {
-        final ReactiveProperty<Integer> sourceProperty = ReactiveProperty.withValue(5);
+        private ReactiveProperty<Integer> sourceProperty;
 
-        final ReactiveProperty<Integer> property = ReactiveProperty.fromProperty(sourceProperty);
+        @BeforeEach
+        void create()
+        {
+            property = ReactiveProperty.empty();
+        }
 
-        property.asObservable().test()
-                .assertValue(5);
-    }
+        @Test
+        @DisplayName("Observable should have observers")
+        public void testHasObservers()
+        {
+            property.asObservable().test();
 
-    @Test
-    @DisplayName("Value should be correct after source property emits value")
-    public void testValueAfterSourcePropertyEmitsValue()
-    {
-        final ReactiveProperty<Integer> sourceProperty = ReactiveProperty.empty();
+            assertTrue(property.hasObservers());
+        }
 
-        final ReactiveProperty<Integer> property = ReactiveProperty.fromProperty(sourceProperty);
+        @Test
+        @DisplayName("Observable should emit only last value")
+        public void testObservable()
+        {
+            property.setValue(2);
+            property.updateValue(value -> value + 2);
 
-        sourceProperty.setValue(7);
-
-        assertEquals(new Integer(7), property.getValue());
-    }
-
-    @Test
-    @DisplayName("Observable should emit correct value after source property emits value")
-    public void testObservableAfterSourcePropertyEmitsValue()
-    {
-        final ReactiveProperty<Integer> sourceProperty = ReactiveProperty.empty();
-
-        final ReactiveProperty<Integer> property = ReactiveProperty.fromProperty(sourceProperty);
-
-        sourceProperty.setValue(7);
-
-        property.asObservable().test()
-                .assertValue(7);
-    }
-
-    @Test
-    @DisplayName("Value should be correct after source property emits different value")
-    public void testValueAfterSourcePropertyEmitsDifferentValue()
-    {
-        final ReactiveProperty<Integer> sourceProperty = ReactiveProperty.empty();
-
-        final ReactiveProperty<Integer> property = ReactiveProperty.fromProperty(sourceProperty);
-
-        property.setValue(5);
-        property.setValue(7);
-
-        assertEquals(new Integer(7), property.getValue());
-    }
-
-    @Test
-    @DisplayName("Observable should emit correct value after source property emits different value")
-    public void testObservableAfterSourcePropertyEmitsDifferentValue()
-    {
-        final ReactiveProperty<Integer> sourceProperty = ReactiveProperty.empty();
-
-        final ReactiveProperty<Integer> property = ReactiveProperty.fromProperty(sourceProperty);
-
-        property.setValue(5);
-
-        property.asObservable().test()
-                .perform(() -> property.setValue(7))
-                .assertValues(5, 7);
-    }
-
-    @Test
-    @DisplayName("Observable shouldn't emit any value after source property emits same value")
-    public void testObservableAfterSourcePropertyEmitsSameValue()
-    {
-        final ReactiveProperty<Integer> sourceProperty = ReactiveProperty.empty();
-
-        final ReactiveProperty<Integer> property = ReactiveProperty.fromProperty(sourceProperty);
-
-        property.setValue(5);
-
-        property.asObservable().test()
-                .perform(() -> property.setValue(5))
-                .assertValues(5);
-    }
-
-    @Test
-    @DisplayName("Value should be updated after value is set")
-    public void testValueAfterSetValue()
-    {
-        final ReactiveProperty<Integer> property = ReactiveProperty.empty();
-
-        property.setValue(2);
-
-        assertEquals(new Integer(2), property.getValue());
-    }
-
-    @Test
-    @DisplayName("Observable should emit value after value is set")
-    public void testObservableAfterSetValue()
-    {
-        final ReactiveProperty<Integer> property = ReactiveProperty.empty();
-
-        property.asObservable().test()
-                .perform(() -> property.setValue(2))
-                .assertValue(2);
-    }
-
-    @Test
-    @DisplayName("Value should be updated after different value is set")
-    public void testValueAfterSetDifferentValue()
-    {
-        final ReactiveProperty<Integer> property = ReactiveProperty.empty();
-
-        property.setValue(2);
-        property.setValue(7);
-
-        assertEquals(new Integer(7), property.getValue());
-    }
-
-    @Test
-    @DisplayName("Observable should emit value after different value is set")
-    public void testObservableAfterSetDifferentValue()
-    {
-        final ReactiveProperty<Integer> property = ReactiveProperty.empty();
-
-        property.setValue(2);
-
-        property.asObservable().test()
-                .perform(() -> property.setValue(7))
-                .assertValues(2, 7);
-    }
-
-    @Test
-    @DisplayName("Observable should not emit value after same value is set again")
-    public void testObservableAfterSetSameValueMultipleTimes()
-    {
-        final ReactiveProperty<Integer> property = ReactiveProperty.empty();
-
-        property.asObservable().test()
-                .perform(() -> {
-                    property.setValue(2);
-                    property.setValue(2);
-                })
-                .assertValue(2);
-    }
-
-    @Test
-    @DisplayName("Observable should emit only last value after subscribed")
-    public void testObservableAfterSetMultipleValues()
-    {
-        final ReactiveProperty<Integer> property = ReactiveProperty.empty();
-
-        property.setValue(2);
-        property.setValue(7);
-        property.setValue(5);
-
-        property.asObservable().test()
-                .assertValue(5);
-    }
-
-    @Test
-    @DisplayName("Value should be updated after update")
-    public void testValueAfterUpdateValue()
-    {
-        final ReactiveProperty<Integer> property = ReactiveProperty.empty();
-
-        property.updateValue(value -> 5);
-
-        assertEquals(new Integer(5), property.getValue());
-    }
-
-    @Test
-    @DisplayName("Observable should emit value after update")
-    public void testObservableAfterUpdateValue()
-    {
-        final ReactiveProperty<Integer> property = ReactiveProperty.empty();
-
-        property.asObservable().test()
-                .perform(() -> property.updateValue(value -> 5))
-                .assertValue(5);
-    }
-
-    @Test
-    @DisplayName("Value should be updated after different update")
-    public void testValueAfterDifferentUpdate()
-    {
-        final ReactiveProperty<Integer> property = ReactiveProperty.empty();
-
-        property.setValue(2);
-
-        property.updateValue(value -> value + 5);
-
-        assertEquals(new Integer(7), property.getValue());
-    }
-
-    @Test
-    @DisplayName("Observable should emit value after different update")
-    public void testObservableAfterDifferentUpdate()
-    {
-        final ReactiveProperty<Integer> property = ReactiveProperty.empty();
-
-        property.setValue(2);
-
-        property.asObservable().test()
-                .perform(() -> property.updateValue(value -> value + 5))
-                .assertValues(2, 7);
-    }
-
-    @Test
-    @DisplayName("Observable should not emit value after same update")
-    public void testObservableAfterSameUpdate()
-    {
-        final ReactiveProperty<Integer> property = ReactiveProperty.empty();
-
-        property.asObservable().test()
-                .perform(() -> {
-                    property.setValue(2);
-                    property.updateValue(value -> 2);
-                })
-                .assertValue(2);
-    }
-
-    @Test
-    @DisplayName("Observable should emit only last value after subscribed")
-    public void testObservableAfterMultipleUpdates()
-    {
-        final ReactiveProperty<Integer> property = ReactiveProperty.empty();
-
-        property.setValue(2);
-        property.updateValue(value -> value + 2);
-        property.updateValue(value -> value + 2);
-
-        property.asObservable().test()
-                .assertValue(6);
-    }
-
-    @Test
-    @DisplayName("Observable should not have observers after it is created")
-    public void testHasObserversAfterCreate()
-    {
-        final ReactiveProperty<Integer> property = ReactiveProperty.empty();
-
-        assertFalse(property.hasObservers());
-    }
-
-    @Test
-    @DisplayName("Observable should have observers after it is subscribed")
-    public void testHasObserversAfterSubscribe()
-    {
-        final ReactiveProperty<Integer> property = ReactiveProperty.empty();
-
-        property.asObservable().test();
-
-        assertTrue(property.hasObservers());
+            property.asObservable().test()
+                    .assertValue(4);
+        }
     }
 }
