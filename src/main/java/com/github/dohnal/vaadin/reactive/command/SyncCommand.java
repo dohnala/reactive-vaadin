@@ -50,6 +50,7 @@ public final class SyncCommand<T, R> extends AbstractCommand<T, R>
         {
             this.progress.setValue(1.0f);
             this.isExecuting.setValue(false);
+            this.progress.setValue(0.0f);
         }
     }
 }
