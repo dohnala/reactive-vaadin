@@ -2,7 +2,6 @@ package com.github.dohnal.vaadin.reactive.property;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Objects;
 import java.util.function.Function;
 
 import com.github.dohnal.vaadin.reactive.ReactiveProperty;
@@ -78,10 +77,7 @@ public final class BehaviorSubjectProperty<T> implements ReactiveProperty<T>
     @Override
     public final void setValue(final @Nullable T value)
     {
-        if (!Objects.equals(value, getValue()))
-        {
-            subject.onNext(value);
-        }
+        subject.onNext(value);
     }
 
     @Override

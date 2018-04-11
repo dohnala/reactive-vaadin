@@ -206,7 +206,7 @@ public class BehaviorSubjectPropertyTest
             class AfterSourceObservableEmitsAnotherSameValue
             {
                 @Test
-                @DisplayName("Observable shouldn't emit any value")
+                @DisplayName("Observable should emit value")
                 public void testObservable()
                 {
                     property.asObservable().test()
@@ -214,7 +214,7 @@ public class BehaviorSubjectPropertyTest
                                 testSubject.onNext(5);
                                 testScheduler.triggerActions();
                             })
-                            .assertValues(5);
+                            .assertValues(5, 5);
                 }
             }
         }
@@ -315,12 +315,12 @@ public class BehaviorSubjectPropertyTest
             class AfterSourcePropertyEmitsAnotherSameValue
             {
                 @Test
-                @DisplayName("Observable shouldn't emit any value")
+                @DisplayName("Observable should emit value")
                 public void testObservable()
                 {
                     property.asObservable().test()
                             .perform(() -> property.setValue(5))
-                            .assertValues(5);
+                            .assertValues(5, 5);
                 }
             }
         }
@@ -444,7 +444,7 @@ public class BehaviorSubjectPropertyTest
             {
                 property.asObservable().test()
                         .perform(() -> property.setValue(2))
-                        .assertValue(2);
+                        .assertValues(2, 2);
             }
         }
     }
@@ -524,7 +524,7 @@ public class BehaviorSubjectPropertyTest
             {
                 property.asObservable().test()
                         .perform(() -> property.updateValue(value -> 2))
-                        .assertValue(2);
+                        .assertValues(2, 2);
             }
         }
     }
