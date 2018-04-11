@@ -76,18 +76,18 @@ public final class BehaviorSubjectProperty<T> implements ReactiveProperty<T>
     }
 
     @Override
-    public boolean hasValue()
-    {
-        return subject.hasValue();
-    }
-
-    @Override
     public final void setValue(final @Nullable T value)
     {
         if (!Objects.equals(value, getValue()))
         {
             subject.onNext(value);
         }
+    }
+
+    @Override
+    public boolean hasValue()
+    {
+        return subject.hasValue();
     }
 
     @Override

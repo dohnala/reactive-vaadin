@@ -4,6 +4,7 @@ import javax.annotation.Nonnull;
 import java.util.List;
 
 import com.github.dohnal.vaadin.mvvm.ViewBinder;
+import com.github.dohnal.vaadin.reactive.Disposable;
 import com.github.dohnal.vaadin.reactive.IsObservable;
 import com.github.dohnal.vaadin.reactive.Property;
 import com.google.common.collect.Lists;
@@ -15,7 +16,8 @@ import rx.Subscription;
  * @param <T> type of value in the event
  * @author dohnal
  */
-public class ViewPropertyBinder<T, U extends Property<T> & IsObservable<T>> implements ViewBinder
+public class ViewPropertyBinder<T, U extends Property<T> & IsObservable<T>>
+        implements Disposable<ViewPropertyBinder<T, U>>
 {
     private final U property;
 

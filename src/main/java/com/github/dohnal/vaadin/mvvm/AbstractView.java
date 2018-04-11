@@ -28,11 +28,4 @@ public abstract class AbstractView<M extends AbstractViewModel>
     {
         this.viewModel = viewModel;
     }
-
-    @Nonnull
-    @Override
-    public AbstractView unbind()
-    {
-        return this;
-    }
 }

@@ -1,7 +1,5 @@
 package com.github.dohnal.vaadin.mvvm;
 
-import javax.annotation.Nonnull;
-
 import com.github.dohnal.vaadin.reactive.command.CommandActions;
 
 /**
@@ -11,10 +9,4 @@ import com.github.dohnal.vaadin.reactive.command.CommandActions;
  */
 public class AbstractViewModel implements ViewModelBinder, CommandActions
 {
-    @Nonnull
-    @Override
-    public AbstractViewModel unbind()
-    {
-        return this;
-    }
 }

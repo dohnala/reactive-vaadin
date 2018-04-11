@@ -12,7 +12,7 @@ import rx.Observable;
  *
  * @author dohnal
  */
-public interface ReactiveBinder extends Disposable<ReactiveBinder>
+public interface ReactiveBinder
 {
     /**
      * Creates binder for binding observable of values
