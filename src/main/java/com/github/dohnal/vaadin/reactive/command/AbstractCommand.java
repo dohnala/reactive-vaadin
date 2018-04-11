@@ -6,6 +6,7 @@ import javax.annotation.Nullable;
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
 import com.github.dohnal.vaadin.reactive.ReactiveProperty;
 import rx.Observable;
+import rx.subjects.PublishSubject;
 
 /**
  * Abstract implementation of {@link ReactiveCommand}
@@ -16,9 +17,9 @@ import rx.Observable;
  */
 public abstract class AbstractCommand<T, R> implements ReactiveCommand<T, R>
 {
-    protected final ReactiveProperty<R> result;
+    protected final PublishSubject<R> result;
 
-    protected final ReactiveProperty<Throwable> error;
+    protected final PublishSubject<Throwable> error;
 
     protected final ReactiveProperty<Boolean> isExecuting;
 
@@ -35,8 +36,8 @@ public abstract class AbstractCommand<T, R> implements ReactiveCommand<T, R>
      */
     public AbstractCommand(final @Nonnull Observable<Boolean> canExecute)
     {
-        this.result = ReactiveProperty.empty();
-        this.error = ReactiveProperty.empty();
+        this.result = PublishSubject.create();
+        this.error = PublishSubject.create();
         this.isExecuting = ReactiveProperty.withValue(false);
         this.executionCount = ReactiveProperty.withValue(0);
 
@@ -47,7 +48,7 @@ public abstract class AbstractCommand<T, R> implements ReactiveCommand<T, R>
         this.canExecute = ReactiveProperty.fromObservable(
                 Observable.combineLatest(
                         defaultCanExecute,
-                        canExecute,
+                        canExecute.startWith(true),
                         (x, y) -> x && y));
 
         this.progress = ReactiveProperty.withValue(0.0f);
@@ -126,13 +127,13 @@ public abstract class AbstractCommand<T, R> implements ReactiveCommand<T, R>
      */
     protected final void handleResult(final @Nullable R result, final @Nullable Throwable error)
     {
-        this.result.setValue(result);
+        this.result.onNext(result);
 
         if (error != null)
         {
             if (this.error.hasObservers())
             {
-                this.error.setValue(error);
+                this.error.onNext(error);
             }
             else
             {
