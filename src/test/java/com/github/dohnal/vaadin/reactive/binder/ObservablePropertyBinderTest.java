@@ -64,12 +64,6 @@ public class ObservablePropertyBinderTest implements ReactiveBinder
             assertFalse(property.hasValue());
         }
 
-        @Test
-        @DisplayName("Property shouldn't have observers")
-        public void testHasObservers()
-        {
-            assertFalse(property.hasObservers());
-        }
 
         @Nested
         @DisplayName("After source observable emits value")
@@ -116,13 +110,6 @@ public class ObservablePropertyBinderTest implements ReactiveBinder
             void unbindObservableFromProperty()
             {
                 binder.unbind();
-            }
-
-            @Test
-            @DisplayName("Property shouldn't have observers")
-            public void testHasObservers()
-            {
-                assertFalse(property.hasObservers());
             }
 
             @Nested
@@ -203,13 +190,6 @@ public class ObservablePropertyBinderTest implements ReactiveBinder
             assertFalse(property.hasValue());
         }
 
-        @Test
-        @DisplayName("Property shouldn't have observers")
-        public void testHasObservers()
-        {
-            assertFalse(property.hasObservers());
-        }
-
         @Nested
         @DisplayName("After source property emits value")
         class AfterSourceObservableEmitsValue
@@ -250,13 +230,6 @@ public class ObservablePropertyBinderTest implements ReactiveBinder
             void unbindPropertyFromProperty()
             {
                 binder.unbind();
-            }
-
-            @Test
-            @DisplayName("Property shouldn't have observers")
-            public void testHasObservers()
-            {
-                assertFalse(property.hasObservers());
             }
 
             @Nested

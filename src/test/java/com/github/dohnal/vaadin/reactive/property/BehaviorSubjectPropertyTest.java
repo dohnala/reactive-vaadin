@@ -55,13 +55,6 @@ public class BehaviorSubjectPropertyTest
         {
             assertFalse(property.hasValue());
         }
-
-        @Test
-        @DisplayName("Property shouldn't have observers")
-        public void testHasObservers()
-        {
-            assertFalse(property.hasObservers());
-        }
     }
 
     @Nested
@@ -94,13 +87,6 @@ public class BehaviorSubjectPropertyTest
         public void testHasValue()
         {
             assertTrue(property.hasValue());
-        }
-
-        @Test
-        @DisplayName("Property shouldn't have observers")
-        public void testHasObservers()
-        {
-            assertFalse(property.hasObservers());
         }
     }
 
@@ -139,13 +125,6 @@ public class BehaviorSubjectPropertyTest
         public void testHasValue()
         {
             assertFalse(property.hasValue());
-        }
-
-        @Test
-        @DisplayName("Property shouldn't have observers")
-        public void testHasObservers()
-        {
-            assertFalse(property.hasObservers());
         }
 
         @Nested
@@ -255,13 +234,6 @@ public class BehaviorSubjectPropertyTest
             assertFalse(property.hasValue());
         }
 
-        @Test
-        @DisplayName("Property shouldn't have observers")
-        public void testHasObservers()
-        {
-            assertFalse(property.hasObservers());
-        }
-
         @Nested
         @DisplayName("After source property emits value")
         class AfterSourcePropertyEmitsValue
@@ -359,13 +331,6 @@ public class BehaviorSubjectPropertyTest
         public void testHasValue()
         {
             assertTrue(property.hasValue());
-        }
-
-        @Test
-        @DisplayName("Property shouldn't have observers")
-        public void testHasObservers()
-        {
-            assertFalse(property.hasObservers());
         }
     }
 
@@ -539,15 +504,6 @@ public class BehaviorSubjectPropertyTest
         void create()
         {
             property = ReactiveProperty.empty();
-        }
-
-        @Test
-        @DisplayName("Observable should have observers")
-        public void testHasObservers()
-        {
-            property.asObservable().test();
-
-            assertTrue(property.hasObservers());
         }
 
         @Test

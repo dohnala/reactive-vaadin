@@ -106,11 +106,4 @@ public interface ReactiveProperty<T> extends Property<T>, IsObservable<T>
     @Nonnull
     @Override
     Observable<T> asObservable();
-
-    /**
-     * Return whether this property has observers
-     *
-     * @return whether this property has observers
-     */
-    boolean hasObservers();
 }

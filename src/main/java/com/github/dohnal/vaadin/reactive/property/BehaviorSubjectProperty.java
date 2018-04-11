@@ -98,10 +98,4 @@ public final class BehaviorSubjectProperty<T> implements ReactiveProperty<T>
     {
         return subject;
     }
-
-    @Override
-    public final boolean hasObservers()
-    {
-        return subject.hasObservers();
-    }
 }
