@@ -64,7 +64,6 @@ public class ObservablePropertyBinderTest implements ReactiveBinder
             assertFalse(property.hasValue());
         }
 
-
         @Nested
         @DisplayName("After source observable emits value")
         class AfterSourceObservableEmitsValue
