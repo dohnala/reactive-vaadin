@@ -64,6 +64,7 @@ public final class AsyncCommand<T, R> extends AbstractCommand<T, R>
                 this.progress.setValue(1.0f);
                 this.isExecuting.setValue(false);
                 this.progress.setValue(0.0f);
+                this.executionCount.updateValue(count -> count + 1);
             }, executor);
         }
         else
@@ -74,6 +75,7 @@ public final class AsyncCommand<T, R> extends AbstractCommand<T, R>
                 this.progress.setValue(1.0f);
                 this.isExecuting.setValue(false);
                 this.progress.setValue(0.0f);
+                this.executionCount.updateValue(count -> count + 1);
             });
         }
     }

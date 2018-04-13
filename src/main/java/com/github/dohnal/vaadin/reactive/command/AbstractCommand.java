@@ -127,9 +127,11 @@ public abstract class AbstractCommand<T, R> implements ReactiveCommand<T, R>
      */
     protected final void handleResult(final @Nullable R result, final @Nullable Throwable error)
     {
-        this.result.onNext(result);
-
-        if (error != null)
+        if (error == null)
+        {
+            this.result.onNext(result);
+        }
+        else
         {
             if (this.error.hasObservers())
             {
@@ -140,7 +142,5 @@ public abstract class AbstractCommand<T, R> implements ReactiveCommand<T, R>
                 throw new RuntimeException("Unexpected error during command execution", error);
             }
         }
-
-        this.executionCount.updateValue(count -> count + 1);
     }
 }
