@@ -16,6 +16,7 @@ dependencies {
     compile "com.vaadin:vaadin-server:8.3.2"
 
     testCompile "org.junit.jupiter:junit-jupiter-engine:5.1.1"
+    testCompile "org.mockito:mockito-core:2.18.0"
 }
 
 task wrapper(type: Wrapper) {
