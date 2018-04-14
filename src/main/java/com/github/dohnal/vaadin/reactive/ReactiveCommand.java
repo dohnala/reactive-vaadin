@@ -193,6 +193,32 @@ public interface ReactiveCommand<T, R>
     }
 
     /**
+     * Creates a new asynchronous reactive command with no execution
+     *
+     * @param executor executor where the execution will be executed
+     * @return created reactive command
+     */
+    @Nonnull
+    static ReactiveCommand<Void, Void> createAsync(final @Nonnull Executor executor)
+    {
+        return createAsync(Observable.just(true), executor);
+    }
+
+    /**
+     * Creates a new asynchronous reactive command with no execution
+     *
+     * @param canExecute observable which controls command executability
+     * @param executor executor where the execution will be executed
+     * @return created reactive command
+     */
+    @Nonnull
+    static ReactiveCommand<Void, Void> createAsync(final @Nonnull Observable<Boolean> canExecute,
+                                                   final @Nonnull Executor executor)
+    {
+        return createFromAsyncSupplier(canExecute, AsyncSupplier.create(executor), executor);
+    }
+
+    /**
      * Creates a new asynchronous reactive command from given runnable
      *
      * @param execution execution which will be executed

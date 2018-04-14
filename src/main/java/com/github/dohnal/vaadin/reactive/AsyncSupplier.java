@@ -26,6 +26,18 @@ public interface AsyncSupplier<T> extends Supplier<CompletableFuture<T>>
     }
 
     /**
+     * Creates asynchronous supplier
+     *
+     * @return asynchronous supplier
+     */
+    @Nonnull
+    static AsyncSupplier<Void> create(final @Nonnull Executor executor)
+    {
+        return create(() -> {
+        }, executor);
+    }
+
+    /**
      * Creates asynchronous supplier from runnable
      *
      * @param runnable runnable
