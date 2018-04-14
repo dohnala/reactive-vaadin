@@ -20,7 +20,7 @@ import rx.subjects.TestSubject;
  * @author dohnal
  */
 @DisplayName("Synchronous empty command")
-public class SyncEmptyCommandTest extends AbstractCommandTest
+public class SyncEmptyCommandTest extends AbstractSyncCommandTest
 {
     @Nested
     @DisplayName("After create empty command")
@@ -43,7 +43,7 @@ public class SyncEmptyCommandTest extends AbstractCommandTest
 
         @Nested
         @DisplayName("During execute")
-        class DuringExecute extends DuringCommandExecute<Void, Void>
+        class DuringExecute extends DuringExecuteCommand<Void, Void>
         {
             @Nonnull
             @Override
@@ -65,24 +65,24 @@ public class SyncEmptyCommandTest extends AbstractCommandTest
             {
                 return null;
             }
+        }
 
-            @Nested
-            @DisplayName("After execute")
-            class AfterExecute extends AfterExecuteCommand<Void, Void>
+        @Nested
+        @DisplayName("After execute")
+        class AfterExecute extends AfterExecuteCommand<Void, Void>
+        {
+            @Nonnull
+            @Override
+            public ReactiveCommand<Void, Void> getCommand()
             {
-                @Nonnull
-                @Override
-                public ReactiveCommand<Void, Void> getCommand()
-                {
-                    return command;
-                }
+                return command;
+            }
 
-                @Nullable
-                @Override
-                protected Void getInput()
-                {
-                    return null;
-                }
+            @Nullable
+            @Override
+            protected Void getInput()
+            {
+                return null;
             }
         }
     }
@@ -148,29 +148,30 @@ public class SyncEmptyCommandTest extends AbstractCommandTest
                 testSubject.onNext(false);
                 testScheduler.triggerActions();
             }
+        }
 
-            @Nested
-            @DisplayName("After execute disabled command")
-            class AfterExecute extends AfterExecuteDisabledCommand<Void, Void>
+        @Nested
+        @DisplayName("After execute disabled command")
+        class AfterExecuteDisabled extends AfterExecuteDisabledCommand<Void, Void>
+        {
+            @BeforeEach
+            public void disableCommand()
             {
-                @BeforeEach
-                public void disableCommand()
-                {
-                    emitsFalse();
-                }
+                testSubject.onNext(false);
+                testScheduler.triggerActions();
+            }
 
-                @Nonnull
-                @Override
-                public ReactiveCommand<Void, Void> getCommand()
-                {
-                    return command;
-                }
+            @Nonnull
+            @Override
+            public ReactiveCommand<Void, Void> getCommand()
+            {
+                return command;
+            }
 
-                @Override
-                protected Void getInput()
-                {
-                    return null;
-                }
+            @Override
+            protected Void getInput()
+            {
+                return null;
             }
         }
     }

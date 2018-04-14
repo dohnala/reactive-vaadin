@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  * @author dohnal
  */
 @DisplayName("Synchronous command from consumer")
-public class SyncCommandFromConsumerTest extends AbstractCommandTest
+public class SyncCommandFromConsumerTest extends AbstractSyncCommandTest
 {
     @Nested
     @DisplayName("After create command from consumer")
@@ -58,7 +58,7 @@ public class SyncCommandFromConsumerTest extends AbstractCommandTest
 
         @Nested
         @DisplayName("During execute")
-        class DuringExecute extends DuringCommandExecute<Integer, Void>
+        class DuringExecute extends DuringExecuteCommand<Integer, Void>
         {
             protected final Integer INPUT = 5;
 
@@ -97,30 +97,32 @@ public class SyncCommandFromConsumerTest extends AbstractCommandTest
 
                 Mockito.verify(execution).accept(INPUT);
             }
+        }
 
-            @Nested
-            @DisplayName("After execute")
-            class AfterExecute extends AfterExecuteCommand<Integer, Void>
+        @Nested
+        @DisplayName("After execute")
+        class AfterExecute extends AfterExecuteCommand<Integer, Void>
+        {
+            protected final Integer INPUT = 5;
+
+            @Nonnull
+            @Override
+            public ReactiveCommand<Integer, Void> getCommand()
             {
-                @Nonnull
-                @Override
-                public ReactiveCommand<Integer, Void> getCommand()
-                {
-                    return command;
-                }
+                return command;
+            }
 
-                @Nullable
-                @Override
-                protected Integer getInput()
-                {
-                    return INPUT;
-                }
+            @Nullable
+            @Override
+            protected Integer getInput()
+            {
+                return INPUT;
             }
         }
 
         @Nested
         @DisplayName("After execute with error")
-        class DuringExecuteWithError extends DuringCommandExecuteWithError<Integer, Void>
+        class DuringExecuteWithError extends DuringExecuteCommandWithError<Integer, Void>
         {
             protected final Integer INPUT = 5;
             protected final Throwable ERROR = new RuntimeException("Error");
@@ -160,24 +162,26 @@ public class SyncCommandFromConsumerTest extends AbstractCommandTest
 
                 Mockito.verify(execution).accept(INPUT);
             }
+        }
 
-            @Nested
-            @DisplayName("After execute with error")
-            class AfterExecuteWithError extends AfterExecuteCommandWithError<Integer, Void>
+        @Nested
+        @DisplayName("After execute with error")
+        class AfterExecuteWithError extends AfterExecuteCommandWithError<Integer, Void>
+        {
+            protected final Integer INPUT = 5;
+
+            @Nonnull
+            @Override
+            public ReactiveCommand<Integer, Void> getCommand()
             {
-                @Nonnull
-                @Override
-                public ReactiveCommand<Integer, Void> getCommand()
-                {
-                    return command;
-                }
+                return command;
+            }
 
-                @Nullable
-                @Override
-                protected Integer getInput()
-                {
-                    return INPUT;
-                }
+            @Nullable
+            @Override
+            protected Integer getInput()
+            {
+                return INPUT;
             }
         }
     }
@@ -245,40 +249,41 @@ public class SyncCommandFromConsumerTest extends AbstractCommandTest
                 testSubject.onNext(false);
                 testScheduler.triggerActions();
             }
+        }
 
-            @Nested
-            @DisplayName("After execute disabled command")
-            class AfterExecute extends AfterExecuteDisabledCommand<Integer, Void>
+        @Nested
+        @DisplayName("After execute disabled command")
+        class AfterExecuteDisabled extends AfterExecuteDisabledCommand<Integer, Void>
+        {
+            protected final Integer INPUT = 5;
+
+            @BeforeEach
+            public void disableCommand()
             {
-                protected final Integer INPUT = 5;
+                testSubject.onNext(false);
+                testScheduler.triggerActions();
+            }
 
-                @BeforeEach
-                public void disableCommand()
-                {
-                    emitsFalse();
-                }
+            @Nonnull
+            @Override
+            public ReactiveCommand<Integer, Void> getCommand()
+            {
+                return command;
+            }
 
-                @Nonnull
-                @Override
-                public ReactiveCommand<Integer, Void> getCommand()
-                {
-                    return command;
-                }
+            @Override
+            protected Integer getInput()
+            {
+                return INPUT;
+            }
 
-                @Override
-                protected Integer getInput()
-                {
-                    return INPUT;
-                }
+            @Test
+            @DisplayName("Consumer should not be run")
+            public void testConsumer()
+            {
+                command.execute(getInput());
 
-                @Test
-                @DisplayName("Consumer should not be run")
-                public void testConsumer()
-                {
-                    command.execute(getInput());
-
-                    Mockito.verify(execution, Mockito.never()).accept(Mockito.any());
-                }
+                Mockito.verify(execution, Mockito.never()).accept(Mockito.any());
             }
         }
     }

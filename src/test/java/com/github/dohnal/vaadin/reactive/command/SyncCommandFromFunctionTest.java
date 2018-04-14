@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  * @author dohnal
  */
 @DisplayName("Synchronous command from function")
-public class SyncCommandFromFunctionTest extends AbstractCommandTest
+public class SyncCommandFromFunctionTest extends AbstractSyncCommandTest
 {
     @Nested
     @DisplayName("After create command from function")
@@ -58,7 +58,7 @@ public class SyncCommandFromFunctionTest extends AbstractCommandTest
 
         @Nested
         @DisplayName("During execute")
-        class DuringExecute extends DuringCommandExecute<Integer, Integer>
+        class DuringExecute extends DuringExecuteCommand<Integer, Integer>
         {
             protected final Integer INPUT = 5;
             protected final Integer RESULT = 7;
@@ -98,30 +98,32 @@ public class SyncCommandFromFunctionTest extends AbstractCommandTest
 
                 Mockito.verify(execution).apply(INPUT);
             }
+        }
 
-            @Nested
-            @DisplayName("After execute")
-            class AfterExecute extends AfterExecuteCommand<Integer, Integer>
+        @Nested
+        @DisplayName("After execute")
+        class AfterExecute extends AfterExecuteCommand<Integer, Integer>
+        {
+            protected final Integer INPUT = 5;
+
+            @Nonnull
+            @Override
+            public ReactiveCommand<Integer, Integer> getCommand()
             {
-                @Nonnull
-                @Override
-                public ReactiveCommand<Integer, Integer> getCommand()
-                {
-                    return command;
-                }
+                return command;
+            }
 
-                @Nullable
-                @Override
-                protected Integer getInput()
-                {
-                    return INPUT;
-                }
+            @Nullable
+            @Override
+            protected Integer getInput()
+            {
+                return INPUT;
             }
         }
 
         @Nested
         @DisplayName("After execute with error")
-        class DuringExecuteWithError extends DuringCommandExecuteWithError<Integer, Integer>
+        class DuringExecuteWithError extends DuringExecuteCommandWithError<Integer, Integer>
         {
             protected final Integer INPUT = 5;
             protected final Throwable ERROR = new RuntimeException("Error");
@@ -161,24 +163,26 @@ public class SyncCommandFromFunctionTest extends AbstractCommandTest
 
                 Mockito.verify(execution).apply(INPUT);
             }
+        }
 
-            @Nested
-            @DisplayName("After execute with error")
-            class AfterExecuteWithError extends AfterExecuteCommandWithError<Integer, Integer>
+        @Nested
+        @DisplayName("After execute with error")
+        class AfterExecuteWithError extends AfterExecuteCommandWithError<Integer, Integer>
+        {
+            protected final Integer INPUT = 5;
+
+            @Nonnull
+            @Override
+            public ReactiveCommand<Integer, Integer> getCommand()
             {
-                @Nonnull
-                @Override
-                public ReactiveCommand<Integer, Integer> getCommand()
-                {
-                    return command;
-                }
+                return command;
+            }
 
-                @Nullable
-                @Override
-                protected Integer getInput()
-                {
-                    return INPUT;
-                }
+            @Nullable
+            @Override
+            protected Integer getInput()
+            {
+                return INPUT;
             }
         }
     }
@@ -246,40 +250,41 @@ public class SyncCommandFromFunctionTest extends AbstractCommandTest
                 testSubject.onNext(false);
                 testScheduler.triggerActions();
             }
+        }
 
-            @Nested
-            @DisplayName("After execute disabled command")
-            class AfterExecute extends AfterExecuteDisabledCommand<Integer, Integer>
+        @Nested
+        @DisplayName("After execute disabled command")
+        class AfterExecuteDisabled extends AfterExecuteDisabledCommand<Integer, Integer>
+        {
+            protected final Integer INPUT = 5;
+
+            @BeforeEach
+            public void disableCommand()
             {
-                protected final Integer INPUT = 5;
+                testSubject.onNext(false);
+                testScheduler.triggerActions();
+            }
 
-                @BeforeEach
-                public void disableCommand()
-                {
-                    emitsFalse();
-                }
+            @Nonnull
+            @Override
+            public ReactiveCommand<Integer, Integer> getCommand()
+            {
+                return command;
+            }
 
-                @Nonnull
-                @Override
-                public ReactiveCommand<Integer, Integer> getCommand()
-                {
-                    return command;
-                }
+            @Override
+            protected Integer getInput()
+            {
+                return INPUT;
+            }
 
-                @Override
-                protected Integer getInput()
-                {
-                    return INPUT;
-                }
+            @Test
+            @DisplayName("Function should not be run")
+            public void testFunction()
+            {
+                command.execute(getInput());
 
-                @Test
-                @DisplayName("Function should not be run")
-                public void testFunction()
-                {
-                    command.execute(getInput());
-
-                    Mockito.verify(execution, Mockito.never()).apply(Mockito.any());
-                }
+                Mockito.verify(execution, Mockito.never()).apply(Mockito.any());
             }
         }
     }

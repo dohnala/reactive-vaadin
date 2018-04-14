@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  *
  * @author dohnal
  */
-public class AbstractCommandTest
+public abstract class AbstractCommandTest
 {
     /**
      * Base interface for tests which needs command
@@ -161,7 +161,7 @@ public class AbstractCommandTest
      * @param <T> type of command input
      * @param <R> type of command result
      */
-    protected abstract class DuringCommandExecute<T, R> implements RequireCommand<T, R>
+    protected abstract class DuringExecuteCommand<T, R> implements RequireCommand<T, R>
     {
         @Nullable
         protected abstract T getInput();
@@ -170,7 +170,7 @@ public class AbstractCommandTest
         protected abstract R getCorrectResult();
 
         @Test
-        @DisplayName("Result observable should emit null")
+        @DisplayName("Result observable should emit result")
         public void testResult()
         {
             getCommand().getResult().test()
@@ -244,7 +244,7 @@ public class AbstractCommandTest
      * @param <T> type of command input
      * @param <R> type of command result
      */
-    protected abstract class DuringCommandExecuteWithError<T, R> implements RequireCommand<T, R>
+    protected abstract class DuringExecuteCommandWithError<T, R> implements RequireCommand<T, R>
     {
         @Nullable
         protected abstract T getInput();
