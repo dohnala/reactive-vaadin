@@ -273,4 +273,58 @@ public abstract class AbstractAsyncCommandTest extends AbstractCommandTest
                     .assertValues(1.0f, 0.0f);
         }
     }
+
+    /**
+     * Tests which verify behavior of command after observable which controls command executability
+     * emits true during command execution
+     *
+     * @param <T> type of command input
+     * @param <R> type of command result
+     */
+    protected abstract class AfterObservableEmitsTrueDuringExecution<T, R> implements RequireCommand<T, R>
+    {
+        @Nullable
+        protected abstract T getInput();
+
+        protected abstract void emitsTrue();
+
+        @Test
+        @DisplayName("Can be executed observable should emit false")
+        public void testCanExecute()
+        {
+            getCommand().canExecute().test()
+                    .assertValuesAndClear(true)
+                    .perform(() -> getCommand().execute(getInput()))
+                    .assertValuesAndClear(false)
+                    .perform(this::emitsTrue)
+                    .assertValue(false);
+        }
+    }
+
+    /**
+     * Tests which verify behavior of command after observable which controls command executability
+     * emits false during command execution
+     *
+     * @param <T> type of command input
+     * @param <R> type of command result
+     */
+    protected abstract class AfterObservableEmitsFalseDuringExecution<T, R> implements RequireCommand<T, R>
+    {
+        @Nullable
+        protected abstract T getInput();
+
+        protected abstract void emitsFalse();
+
+        @Test
+        @DisplayName("Can be executed observable should emit false")
+        public void testCanExecute()
+        {
+            getCommand().canExecute().test()
+                    .assertValuesAndClear(true)
+                    .perform(() -> getCommand().execute(getInput()))
+                    .assertValuesAndClear(false)
+                    .perform(this::emitsFalse)
+                    .assertValue(false);
+        }
+    }
 }
