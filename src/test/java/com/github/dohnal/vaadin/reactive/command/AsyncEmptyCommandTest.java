@@ -2,16 +2,22 @@ package com.github.dohnal.vaadin.reactive.command;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.concurrent.Executor;
 
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
+import rx.Observable;
 import rx.schedulers.Schedulers;
 import rx.schedulers.TestScheduler;
 import rx.subjects.TestSubject;
 
 /**
+ * Tests for {@link AsyncCommand} created by
+ * {@link ReactiveCommand#createAsync(Executor)}
+ * {@link ReactiveCommand#createAsync(Observable, Executor)}
+ *
  * @author dohnal
  */
 @DisplayName("Asynchronous empty command")
