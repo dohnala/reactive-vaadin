@@ -215,7 +215,7 @@ public interface ReactiveCommand<T, R>
     static ReactiveCommand<Void, Void> createAsync(final @Nonnull Observable<Boolean> canExecute,
                                                    final @Nonnull Executor executor)
     {
-        return createFromAsyncSupplier(canExecute, AsyncSupplier.create(executor), executor);
+        return createFromAsyncSupplier(canExecute, AsyncSupplier.create(executor));
     }
 
     /**
@@ -271,7 +271,7 @@ public interface ReactiveCommand<T, R>
                                                    final @Nonnull Runnable execution,
                                                    final @Nonnull Executor executor)
     {
-        return createFromAsyncSupplier(canExecute, AsyncSupplier.create(execution, executor), executor);
+        return createFromAsyncSupplier(canExecute, AsyncSupplier.create(execution, executor));
     }
 
     /**
@@ -331,7 +331,7 @@ public interface ReactiveCommand<T, R>
                                                     final @Nonnull Supplier<R> execution,
                                                     final @Nonnull Executor executor)
     {
-        return createFromAsyncSupplier(canExecute, AsyncSupplier.create(execution, executor), executor);
+        return createFromAsyncSupplier(canExecute, AsyncSupplier.create(execution, executor));
     }
 
     /**
@@ -391,7 +391,7 @@ public interface ReactiveCommand<T, R>
                                                     final @Nonnull Consumer<T> execution,
                                                     final @Nonnull Executor executor)
     {
-        return createFromAsyncFunction(canExecute, AsyncFunction.create(execution, executor), executor);
+        return createFromAsyncFunction(canExecute, AsyncFunction.create(execution, executor));
     }
 
     /**
@@ -455,7 +455,7 @@ public interface ReactiveCommand<T, R>
                                                     final @Nonnull Function<T, R> execution,
                                                     final @Nonnull Executor executor)
     {
-        return createFromAsyncFunction(canExecute, AsyncFunction.create(execution, executor), executor);
+        return createFromAsyncFunction(canExecute, AsyncFunction.create(execution, executor));
     }
 
     /**
@@ -511,7 +511,7 @@ public interface ReactiveCommand<T, R>
                                                       final @Nonnull Consumer<Progress> execution,
                                                       final @Nonnull Executor executor)
     {
-        return createFromAsyncProgressSupplier(canExecute, AsyncProgressSupplier.create(execution, executor), executor);
+        return createFromAsyncProgressSupplier(canExecute, AsyncProgressSupplier.create(execution, executor));
     }
 
     /**
@@ -571,7 +571,7 @@ public interface ReactiveCommand<T, R>
                                                        final @Nonnull Function<Progress, R> execution,
                                                        final @Nonnull Executor executor)
     {
-        return createFromAsyncProgressSupplier(canExecute, AsyncProgressSupplier.create(execution, executor), executor);
+        return createFromAsyncProgressSupplier(canExecute, AsyncProgressSupplier.create(execution, executor));
     }
 
     /**
@@ -631,7 +631,7 @@ public interface ReactiveCommand<T, R>
                                                        final @Nonnull BiConsumer<Progress, T> execution,
                                                        final @Nonnull Executor executor)
     {
-        return createFromAsyncProgressFunction(canExecute, AsyncProgressFunction.create(execution, executor), executor);
+        return createFromAsyncProgressFunction(canExecute, AsyncProgressFunction.create(execution, executor));
     }
 
     /**
@@ -695,7 +695,7 @@ public interface ReactiveCommand<T, R>
                                                        final @Nonnull BiFunction<Progress, T, R> execution,
                                                        final @Nonnull Executor executor)
     {
-        return createFromAsyncProgressFunction(canExecute, AsyncProgressFunction.create(execution, executor), executor);
+        return createFromAsyncProgressFunction(canExecute, AsyncProgressFunction.create(execution, executor));
     }
 
     /**
@@ -724,38 +724,6 @@ public interface ReactiveCommand<T, R>
                                                                 final @Nonnull AsyncSupplier<R> execution)
     {
         return createFromAsyncFunction(canExecute, AsyncFunction.create(execution));
-    }
-
-    /**
-     * Creates a new asynchronous reactive command from given asynchronous supplier
-     *
-     * @param execution execution which will be executed
-     * @param executor executor where the execution will be executed
-     * @param <R> type of command result
-     * @return created reactive command
-     */
-    @Nonnull
-    static <R> ReactiveCommand<Void, R> createFromAsyncSupplier(final @Nonnull AsyncSupplier<R> execution,
-                                                                final @Nonnull Executor executor)
-    {
-        return createFromAsyncSupplier(Observable.just(true), execution, executor);
-    }
-
-    /**
-     * Creates a new asynchronous reactive command from given asynchronous supplier
-     *
-     * @param canExecute observable which controls command executability
-     * @param execution execution which will be executed
-     * @param executor executor where the execution will be executed
-     * @param <R> type of command result
-     * @return created reactive command
-     */
-    @Nonnull
-    static <R> ReactiveCommand<Void, R> createFromAsyncSupplier(final @Nonnull Observable<Boolean> canExecute,
-                                                                final @Nonnull AsyncSupplier<R> execution,
-                                                                final @Nonnull Executor executor)
-    {
-        return createFromAsyncFunction(canExecute, AsyncFunction.create(execution), executor);
     }
 
     /**
@@ -789,40 +757,6 @@ public interface ReactiveCommand<T, R>
     }
 
     /**
-     * Creates a new asynchronous reactive command from given asynchronous function
-     *
-     * @param execution execution which will be executed
-     * @param executor executor where the execution will be executed
-     * @param <T> type of command input
-     * @param <R> type of command result
-     * @return created reactive command
-     */
-    @Nonnull
-    static <T, R> ReactiveCommand<T, R> createFromAsyncFunction(final @Nonnull AsyncFunction<T, R> execution,
-                                                                final @Nonnull Executor executor)
-    {
-        return createFromAsyncFunction(Observable.just(true), execution, executor);
-    }
-
-    /**
-     * Creates a new asynchronous reactive command from given asynchronous function
-     *
-     * @param canExecute observable which controls command executability
-     * @param execution execution which will be executed
-     * @param executor executor where the execution will be executed
-     * @param <T> type of command input
-     * @param <R> type of command result
-     * @return created reactive command
-     */
-    @Nonnull
-    static <T, R> ReactiveCommand<T, R> createFromAsyncFunction(final @Nonnull Observable<Boolean> canExecute,
-                                                                final @Nonnull AsyncFunction<T, R> execution,
-                                                                final @Nonnull Executor executor)
-    {
-        return new AsyncCommand<>(canExecute, execution, executor);
-    }
-
-    /**
      * Creates a new asynchronous progress reactive command from given asynchronous progress supplier
      *
      * @param execution execution which will be executed
@@ -848,38 +782,6 @@ public interface ReactiveCommand<T, R>
                                                                         final @Nonnull AsyncProgressSupplier<R> execution)
     {
         return createFromAsyncProgressFunction(canExecute, AsyncProgressFunction.create(execution));
-    }
-
-    /**
-     * Creates a new asynchronous progress reactive command from given asynchronous progress supplier
-     *
-     * @param execution execution which will be executed
-     * @param executor executor where the execution will be executed
-     * @param <R> type of command result
-     * @return created reactive command
-     */
-    @Nonnull
-    static <R> ReactiveCommand<Void, R> createFromAsyncProgressSupplier(final @Nonnull AsyncProgressSupplier<R> execution,
-                                                                        final @Nonnull Executor executor)
-    {
-        return createFromAsyncProgressSupplier(Observable.just(true), execution, executor);
-    }
-
-    /**
-     * Creates a new asynchronous progress reactive command from given asynchronous progress supplier
-     *
-     * @param canExecute observable which controls command executability
-     * @param execution execution which will be executed
-     * @param executor executor where the execution will be executed
-     * @param <R> type of command result
-     * @return created reactive command
-     */
-    @Nonnull
-    static <R> ReactiveCommand<Void, R> createFromAsyncProgressSupplier(final @Nonnull Observable<Boolean> canExecute,
-                                                                        final @Nonnull AsyncProgressSupplier<R> execution,
-                                                                        final @Nonnull Executor executor)
-    {
-        return createFromAsyncProgressFunction(canExecute, AsyncProgressFunction.create(execution), executor);
     }
 
     /**
@@ -910,40 +812,6 @@ public interface ReactiveCommand<T, R>
                                                                         final @Nonnull AsyncProgressFunction<T, R> execution)
     {
         return new ProgressCommand<>(canExecute, execution);
-    }
-
-    /**
-     * Creates a new asynchronous progress reactive command from given asynchronous progress function
-     *
-     * @param execution execution which will be executed
-     * @param executor executor where the execution will be executed
-     * @param <T> type of command input
-     * @param <R> type of command result
-     * @return created reactive command
-     */
-    @Nonnull
-    static <T, R> ReactiveCommand<T, R> createFromAsyncProgressFunction(final @Nonnull AsyncProgressFunction<T, R> execution,
-                                                                        final @Nonnull Executor executor)
-    {
-        return createFromAsyncProgressFunction(Observable.just(true), execution, executor);
-    }
-
-    /**
-     * Creates a new asynchronous progress reactive command from given asynchronous progress function
-     *
-     * @param canExecute observable which controls command executability
-     * @param execution execution which will be executed
-     * @param executor executor where the execution will be executed
-     * @param <T> type of command input
-     * @param <R> type of command result
-     * @return created reactive command
-     */
-    @Nonnull
-    static <T, R> ReactiveCommand<T, R> createFromAsyncProgressFunction(final @Nonnull Observable<Boolean> canExecute,
-                                                                        final @Nonnull AsyncProgressFunction<T, R> execution,
-                                                                        final @Nonnull Executor executor)
-    {
-        return new ProgressCommand<>(canExecute, execution, executor);
     }
 
     /**
