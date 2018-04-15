@@ -185,7 +185,7 @@ public class AsyncCommandFromConsumerTest extends AbstractAsyncCommandTest
 
     @Nested
     @DisplayName("After create command from consumer with observable")
-    class AfterCreateCommandFromRunnableWithCanExecute extends AfterCreateCommandWithObservable<Integer, Void>
+    class AfterCreateCommandFromRunnableWithObservable extends AfterCreateCommandWithObservable<Integer, Void>
     {
         private TestExecutor testExecutor;
         private Consumer<Integer> execution;

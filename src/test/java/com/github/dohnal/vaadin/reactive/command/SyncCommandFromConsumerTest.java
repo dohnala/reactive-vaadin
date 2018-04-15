@@ -188,7 +188,7 @@ public class SyncCommandFromConsumerTest extends AbstractSyncCommandTest
 
     @Nested
     @DisplayName("After create command from consumer with observable")
-    class AfterCreateCommandFromRunnableWithCanExecute extends AfterCreateCommandWithObservable<Integer, Void>
+    class AfterCreateCommandFromRunnableWithObservable extends AfterCreateCommandWithObservable<Integer, Void>
     {
         private Consumer<Integer> execution;
         private TestScheduler testScheduler;

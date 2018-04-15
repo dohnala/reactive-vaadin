@@ -189,7 +189,7 @@ public class SyncCommandFromFunctionTest extends AbstractSyncCommandTest
 
     @Nested
     @DisplayName("After create command from function with observable")
-    class AfterCreateCommandFromRunnableWithCanExecute extends AfterCreateCommandWithObservable<Integer, Integer>
+    class AfterCreateCommandFromRunnableWithObservable extends AfterCreateCommandWithObservable<Integer, Integer>
     {
         private Function<Integer, Integer> execution;
         private TestScheduler testScheduler;

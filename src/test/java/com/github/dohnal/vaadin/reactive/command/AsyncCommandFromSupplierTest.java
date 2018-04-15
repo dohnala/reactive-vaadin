@@ -180,7 +180,7 @@ public class AsyncCommandFromSupplierTest extends AbstractAsyncCommandTest
 
     @Nested
     @DisplayName("After create command from supplier with observable")
-    class AfterCreateCommandFromSupplierWithCanExecute extends AfterCreateCommandWithObservable<Void, Integer>
+    class AfterCreateCommandFromSupplierWithObservable extends AfterCreateCommandWithObservable<Void, Integer>
     {
         private TestExecutor testExecutor;
         private Supplier<Integer> execution;

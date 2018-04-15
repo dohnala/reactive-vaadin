@@ -183,7 +183,7 @@ public class SyncCommandFromSupplierTest extends AbstractSyncCommandTest
 
     @Nested
     @DisplayName("After create command from supplier with observable")
-    class AfterCreateCommandFromSupplierWithCanExecute extends AfterCreateCommandWithObservable<Void, Integer>
+    class AfterCreateCommandFromSupplierWithObservable extends AfterCreateCommandWithObservable<Void, Integer>
     {
         private Supplier<Integer> execution;
         private TestScheduler testScheduler;

@@ -186,7 +186,7 @@ public class AsyncCommandFromFunctionTest extends AbstractAsyncCommandTest
 
     @Nested
     @DisplayName("After create command from function with observable")
-    class AfterCreateCommandFromRunnableWithCanExecute extends AfterCreateCommandWithObservable<Integer, Integer>
+    class AfterCreateCommandFromRunnableWithObservable extends AfterCreateCommandWithObservable<Integer, Integer>
     {
         private TestExecutor testExecutor;
         private Function<Integer, Integer> execution;
