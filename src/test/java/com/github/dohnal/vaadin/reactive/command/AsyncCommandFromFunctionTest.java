@@ -16,8 +16,6 @@ import rx.schedulers.Schedulers;
 import rx.schedulers.TestScheduler;
 import rx.subjects.TestSubject;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
 /**
  * Tests for {@link AsyncCommand} created by
  * {@link ReactiveCommand#createAsync(Function, Executor)}
@@ -125,7 +123,7 @@ public class AsyncCommandFromFunctionTest extends AbstractAsyncCommandTest
         }
 
         @Nested
-        @DisplayName("After execute with error")
+        @DisplayName("During execute with error")
         class DuringExecuteWithError extends DuringExecuteCommandWithError<Integer, Integer>
         {
             protected final Integer INPUT = 5;
@@ -162,7 +160,7 @@ public class AsyncCommandFromFunctionTest extends AbstractAsyncCommandTest
             @DisplayName("Function should be run")
             public void testFunction()
             {
-                assertThrows(getError().getClass(), () -> command.execute(getInput()));
+                command.execute(getInput());
 
                 Mockito.verify(execution).apply(INPUT);
             }

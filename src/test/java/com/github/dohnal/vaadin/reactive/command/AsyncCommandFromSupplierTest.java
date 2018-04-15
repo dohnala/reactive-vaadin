@@ -16,8 +16,6 @@ import rx.schedulers.Schedulers;
 import rx.schedulers.TestScheduler;
 import rx.subjects.TestSubject;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
 /**
  * Tests for {@link AsyncCommand} created by
  * {@link ReactiveCommand#createAsync(Supplier, Executor)}
@@ -122,7 +120,7 @@ public class AsyncCommandFromSupplierTest extends AbstractAsyncCommandTest
         }
 
         @Nested
-        @DisplayName("After execute with error")
+        @DisplayName("During execute with error")
         class DuringExecuteWithError extends DuringExecuteCommandWithError<Void, Integer>
         {
             private final Throwable ERROR = new RuntimeException("Error");
@@ -158,7 +156,7 @@ public class AsyncCommandFromSupplierTest extends AbstractAsyncCommandTest
             @DisplayName("Supplier should be run")
             public void testSupplier()
             {
-                assertThrows(getError().getClass(), () -> command.execute(getInput()));
+                command.execute(getInput());
 
                 Mockito.verify(execution).get();
             }

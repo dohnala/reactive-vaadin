@@ -7,8 +7,6 @@ import com.github.dohnal.vaadin.reactive.ReactiveCommand;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
 /**
  * Base tests for {@link ReactiveCommand}
  *
@@ -259,13 +257,6 @@ public abstract class AbstractCommandTest
             getCommand().getError().test()
                     .perform(() -> getCommand().execute(getInput()))
                     .assertValue(getError());
-        }
-
-        @Test
-        @DisplayName("Error should be thrown if no one is subscribed")
-        public void testUnhandledError()
-        {
-            assertThrows(getError().getClass(), () -> getCommand().execute(getInput()));
         }
 
         @Test

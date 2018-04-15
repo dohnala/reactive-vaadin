@@ -119,7 +119,7 @@ public class SyncCommandFromSupplierTest extends AbstractSyncCommandTest
         }
 
         @Nested
-        @DisplayName("After execute with error")
+        @DisplayName("During execute with error")
         class DuringExecuteWithError extends DuringExecuteCommandWithError<Void, Integer>
         {
             private final Throwable ERROR = new RuntimeException("Error");
@@ -149,6 +149,13 @@ public class SyncCommandFromSupplierTest extends AbstractSyncCommandTest
             protected Throwable getError()
             {
                 return ERROR;
+            }
+
+            @Test
+            @DisplayName("Error should be thrown if no one is subscribed")
+            public void testUnhandledError()
+            {
+                assertThrows(getError().getClass(), () -> getCommand().execute(getInput()));
             }
 
             @Test
