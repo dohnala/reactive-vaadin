@@ -2,6 +2,7 @@ package com.github.dohnal.vaadin.reactive.command;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.concurrent.CompletionException;
 
 import com.github.dohnal.vaadin.reactive.AsyncFunction;
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
@@ -35,16 +36,21 @@ public final class AsyncCommand<T, R> extends AbstractCommand<T, R>
     @Override
     public final void executeInternal(final @Nullable T input)
     {
-        this.progress.setValue(0.0f);
-        this.isExecuting.setValue(true);
+        handleStart();
 
-        execution.apply(input).whenComplete((result, error) -> {
-            handleResult(result, error != null ? error.getCause() : null);
+        execution.apply(input)
+                .handle((result, error) -> {
+                    if (error instanceof CompletionException)
+                    {
+                        handleResult(result, error.getCause());
+                    }
+                    else
+                    {
+                        handleResult(result, error);
+                    }
 
-            this.progress.setValue(1.0f);
-            this.isExecuting.setValue(false);
-            this.progress.setValue(0.0f);
-            this.executionCount.updateValue(count -> count + 1);
-        });
+                    return result;
+                })
+                .whenComplete((result, error) -> handleComplete());
     }
 }

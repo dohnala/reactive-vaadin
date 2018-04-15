@@ -120,6 +120,15 @@ public abstract class AbstractCommand<T, R> implements ReactiveCommand<T, R>
     }
 
     /**
+     * Handles start of command execution
+     */
+    protected final void handleStart()
+    {
+        this.progress.setValue(0.0f);
+        this.isExecuting.setValue(true);
+    }
+
+    /**
      * Handles result of command execution
      *
      * @param result result
@@ -142,5 +151,16 @@ public abstract class AbstractCommand<T, R> implements ReactiveCommand<T, R>
                 throw new RuntimeException("Unexpected error during command execution", error);
             }
         }
+    }
+
+    /**
+     * Handles completion of command execution
+     */
+    protected final void handleComplete()
+    {
+        this.progress.setValue(1.0f);
+        this.isExecuting.setValue(false);
+        this.progress.setValue(0.0f);
+        this.executionCount.updateValue(count -> count + 1);
     }
 }
