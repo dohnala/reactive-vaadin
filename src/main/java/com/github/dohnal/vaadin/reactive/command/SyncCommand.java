@@ -50,4 +50,10 @@ public final class SyncCommand<T, R> extends AbstractCommand<T, R>
             handleComplete();
         }
     }
+
+    @Override
+    protected void handleError(final @Nonnull Throwable throwable)
+    {
+        throw new RuntimeException("Unexpected error during command execution", throwable);
+    }
 }

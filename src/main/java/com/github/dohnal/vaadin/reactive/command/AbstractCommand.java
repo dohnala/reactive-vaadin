@@ -148,9 +148,19 @@ public abstract class AbstractCommand<T, R> implements ReactiveCommand<T, R>
             }
             else
             {
-                throw new RuntimeException("Unexpected error during command execution", error);
+                handleError(error);
             }
         }
+    }
+
+    /**
+     * Handle unhandled error produced during command execution
+     *
+     * @param throwable error
+     */
+    protected void handleError(final @Nonnull Throwable throwable)
+    {
+        // TODO: log
     }
 
     /**
