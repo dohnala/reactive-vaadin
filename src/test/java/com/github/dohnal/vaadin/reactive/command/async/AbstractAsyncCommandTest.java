@@ -1,9 +1,10 @@
-package com.github.dohnal.vaadin.reactive.command;
+package com.github.dohnal.vaadin.reactive.command.async;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.concurrent.Executor;
 
+import com.github.dohnal.vaadin.reactive.command.AbstractCommandTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -15,7 +16,7 @@ public abstract class AbstractAsyncCommandTest extends AbstractCommandTest
     /**
      * Synchronized implementation of {@link Executor} for test purposes
      */
-    protected class TestExecutor implements Executor
+    public class TestExecutor implements Executor
     {
         @Override
         public void execute(final @Nonnull Runnable runnable)
@@ -98,7 +99,6 @@ public abstract class AbstractAsyncCommandTest extends AbstractCommandTest
         public void testProgress()
         {
             getCommand().getProgress().test()
-                    .assertValuesAndClear(0.0f)
                     .perform(() -> getCommand().execute(getInput()))
                     .assertValues(0.0f);
         }

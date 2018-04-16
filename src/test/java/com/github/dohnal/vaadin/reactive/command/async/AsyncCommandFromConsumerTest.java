@@ -1,4 +1,4 @@
-package com.github.dohnal.vaadin.reactive.command;
+package com.github.dohnal.vaadin.reactive.command.async;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -6,6 +6,7 @@ import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
+import com.github.dohnal.vaadin.reactive.command.AsyncCommand;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

@@ -1,10 +1,11 @@
-package com.github.dohnal.vaadin.reactive.command;
+package com.github.dohnal.vaadin.reactive.command.sync;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.function.Function;
 
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
+import com.github.dohnal.vaadin.reactive.command.SyncCommand;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

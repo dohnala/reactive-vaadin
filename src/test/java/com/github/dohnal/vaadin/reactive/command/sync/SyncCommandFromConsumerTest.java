@@ -1,10 +1,11 @@
-package com.github.dohnal.vaadin.reactive.command;
+package com.github.dohnal.vaadin.reactive.command.sync;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.function.Supplier;
+import java.util.function.Consumer;
 
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
+import com.github.dohnal.vaadin.reactive.command.SyncCommand;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -19,129 +20,132 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Tests for {@link SyncCommand} created by
- * {@link ReactiveCommand#create(Supplier)}
- * {@link ReactiveCommand#create(Observable, Supplier)}
+ * {@link ReactiveCommand#create(Consumer)}
+ * {@link ReactiveCommand#create(Observable, Consumer)}
  *
  * @author dohnal
  */
-@DisplayName("Synchronous command from supplier")
-public class SyncCommandFromSupplierTest extends AbstractSyncCommandTest
+@DisplayName("Synchronous command from consumer")
+public class SyncCommandFromConsumerTest extends AbstractSyncCommandTest
 {
     @Nested
-    @DisplayName("After create command from supplier")
-    class AfterCreateCommandFromSupplier extends AfterCreateCommand<Void, Integer>
+    @DisplayName("After create command from consumer")
+    class AfterCreateCommandFromConsumer extends AfterCreateCommand<Integer, Void>
     {
-        private Supplier<Integer> execution;
-        private ReactiveCommand<Void, Integer> command;
+        private Consumer<Integer> execution;
+        private ReactiveCommand<Integer, Void> command;
 
         @BeforeEach
         @SuppressWarnings("unchecked")
         protected void create()
         {
-            execution = Mockito.mock(Supplier.class);
+            execution = Mockito.mock(Consumer.class);
             command = ReactiveCommand.create(execution);
         }
 
         @Nonnull
         @Override
-        public ReactiveCommand<Void, Integer> getCommand()
+        public ReactiveCommand<Integer, Void> getCommand()
         {
             return command;
         }
 
         @Test
-        @DisplayName("Supplier should not be run")
-        public void testSupplier()
+        @DisplayName("Consumer should not be run")
+        public void testConsumer()
         {
-            Mockito.verify(execution, Mockito.never()).get();
+            Mockito.verify(execution, Mockito.never()).accept(Mockito.anyInt());
         }
 
         @Nested
         @DisplayName("During execute")
-        class DuringExecute extends DuringExecuteCommand<Void, Integer>
+        class DuringExecute extends DuringExecuteCommand<Integer, Void>
         {
-            protected final Integer RESULT = 5;
+            protected final Integer INPUT = 5;
 
             @BeforeEach
             protected void mockExecution()
             {
-                Mockito.when(execution.get()).thenReturn(RESULT);
+                Mockito.doNothing().when(execution).accept(INPUT);
             }
 
             @Nonnull
             @Override
-            public ReactiveCommand<Void, Integer> getCommand()
+            public ReactiveCommand<Integer, Void> getCommand()
             {
                 return command;
             }
 
             @Nullable
             @Override
-            protected Void getInput()
+            protected Integer getInput()
             {
-                return null;
+                return INPUT;
             }
 
             @Nullable
             @Override
-            protected Integer getCorrectResult()
+            protected Void getCorrectResult()
             {
-                return RESULT;
+                return null;
             }
 
             @Test
-            @DisplayName("Supplier should be run")
-            public void testSupplier()
+            @DisplayName("Consumer should be run")
+            public void testConsumer()
             {
                 command.execute(getInput());
 
-                Mockito.verify(execution).get();
+                Mockito.verify(execution).accept(INPUT);
             }
         }
 
         @Nested
         @DisplayName("After execute")
-        class AfterExecute extends AfterExecuteCommand<Void, Integer>
+        class AfterExecute extends AfterExecuteCommand<Integer, Void>
         {
+            protected final Integer INPUT = 5;
+
             @Nonnull
             @Override
-            public ReactiveCommand<Void, Integer> getCommand()
+            public ReactiveCommand<Integer, Void> getCommand()
             {
                 return command;
             }
 
             @Nullable
             @Override
-            protected Void getInput()
+            protected Integer getInput()
             {
-                return null;
+                return INPUT;
             }
         }
 
         @Nested
         @DisplayName("During execute with error")
-        class DuringExecuteWithError extends DuringExecuteCommandWithError<Void, Integer>
+        class DuringExecuteWithError extends DuringExecuteCommandWithError<Integer, Void>
         {
-            private final Throwable ERROR = new RuntimeException("Error");
+            protected final Integer INPUT = 5;
+            protected final Throwable ERROR = new RuntimeException("Error");
 
             @BeforeEach
             protected void mockExecution()
             {
-                Mockito.when(execution.get()).thenThrow(ERROR);
+                Mockito.doThrow(ERROR).when(execution).accept(INPUT);
             }
 
             @Nonnull
             @Override
-            public ReactiveCommand<Void, Integer> getCommand()
+            public ReactiveCommand<Integer, Void> getCommand()
             {
                 return command;
             }
 
             @Nullable
             @Override
-            protected Void getInput()
+            protected Integer getInput()
             {
-                return null;
+                return INPUT;
             }
 
             @Nonnull
@@ -159,49 +163,51 @@ public class SyncCommandFromSupplierTest extends AbstractSyncCommandTest
             }
 
             @Test
-            @DisplayName("Supplier should be run")
-            public void testSupplier()
+            @DisplayName("Consumer should be run")
+            public void testConsumer()
             {
                 assertThrows(getError().getClass(), () -> command.execute(getInput()));
 
-                Mockito.verify(execution).get();
+                Mockito.verify(execution).accept(INPUT);
             }
         }
 
         @Nested
         @DisplayName("After execute with error")
-        class AfterExecuteWithError extends AfterExecuteCommandWithError<Void, Integer>
+        class AfterExecuteWithError extends AfterExecuteCommandWithError<Integer, Void>
         {
+            protected final Integer INPUT = 5;
+
             @Nonnull
             @Override
-            public ReactiveCommand<Void, Integer> getCommand()
+            public ReactiveCommand<Integer, Void> getCommand()
             {
                 return command;
             }
 
             @Nullable
             @Override
-            protected Void getInput()
+            protected Integer getInput()
             {
-                return null;
+                return INPUT;
             }
         }
     }
 
     @Nested
-    @DisplayName("After create command from supplier with observable")
-    class AfterCreateCommandFromSupplierWithObservable extends AfterCreateCommandWithObservable<Void, Integer>
+    @DisplayName("After create command from consumer with observable")
+    class AfterCreateCommandFromRunnableWithObservable extends AfterCreateCommandWithObservable<Integer, Void>
     {
-        private Supplier<Integer> execution;
+        private Consumer<Integer> execution;
         private TestScheduler testScheduler;
         private TestSubject<Boolean> testSubject;
-        private ReactiveCommand<Void, Integer> command;
+        private ReactiveCommand<Integer, Void> command;
 
         @BeforeEach
         @SuppressWarnings("unchecked")
         protected void create()
         {
-            execution = Mockito.mock(Supplier.class);
+            execution = Mockito.mock(Consumer.class);
             testScheduler = Schedulers.test();
             testSubject = TestSubject.create(testScheduler);
             command = ReactiveCommand.create(testSubject, execution);
@@ -209,19 +215,18 @@ public class SyncCommandFromSupplierTest extends AbstractSyncCommandTest
 
         @Nonnull
         @Override
-        public ReactiveCommand<Void, Integer> getCommand()
+        public ReactiveCommand<Integer, Void> getCommand()
         {
             return command;
         }
 
         @Nested
         @DisplayName("After observable emits true")
-        class AfterEmitsTrue extends AfterObservableEmitsTrue<Void, Integer>
+        class AfterEmitsTrue extends AfterObservableEmitsTrue<Integer, Void>
         {
-
             @Nonnull
             @Override
-            public ReactiveCommand<Void, Integer> getCommand()
+            public ReactiveCommand<Integer, Void> getCommand()
             {
                 return command;
             }
@@ -236,12 +241,12 @@ public class SyncCommandFromSupplierTest extends AbstractSyncCommandTest
 
         @Nested
         @DisplayName("After observable emits false")
-        class AfterEmitsFalse extends AfterObservableEmitsFalse<Void, Integer>
+        class AfterEmitsFalse extends AfterObservableEmitsFalse<Integer, Void>
         {
 
             @Nonnull
             @Override
-            public ReactiveCommand<Void, Integer> getCommand()
+            public ReactiveCommand<Integer, Void> getCommand()
             {
                 return command;
             }
@@ -256,8 +261,10 @@ public class SyncCommandFromSupplierTest extends AbstractSyncCommandTest
 
         @Nested
         @DisplayName("After execute disabled command")
-        class AfterExecuteDisabled extends AfterExecuteDisabledCommand<Void, Integer>
+        class AfterExecuteDisabled extends AfterExecuteDisabledCommand<Integer, Void>
         {
+            protected final Integer INPUT = 5;
+
             @BeforeEach
             public void disableCommand()
             {
@@ -267,24 +274,24 @@ public class SyncCommandFromSupplierTest extends AbstractSyncCommandTest
 
             @Nonnull
             @Override
-            public ReactiveCommand<Void, Integer> getCommand()
+            public ReactiveCommand<Integer, Void> getCommand()
             {
                 return command;
             }
 
             @Override
-            protected Void getInput()
+            protected Integer getInput()
             {
-                return null;
+                return INPUT;
             }
 
             @Test
-            @DisplayName("Supplier should not be run")
-            public void testSupplier()
+            @DisplayName("Consumer should not be run")
+            public void testConsumer()
             {
                 command.execute(getInput());
 
-                Mockito.verify(execution, Mockito.never()).get();
+                Mockito.verify(execution, Mockito.never()).accept(Mockito.any());
             }
         }
     }

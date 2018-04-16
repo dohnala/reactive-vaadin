@@ -230,7 +230,6 @@ public abstract class AbstractCommandTest
         public void testProgress()
         {
             getCommand().getProgress().test()
-                    .assertValuesAndClear(0.0f)
                     .perform(() -> getCommand().execute(getInput()))
                     .assertValues(0.0f, 1.0f, 0.0f);
         }
@@ -325,7 +324,6 @@ public abstract class AbstractCommandTest
             getCommand().getError().test();
 
             getCommand().getProgress().test()
-                    .assertValuesAndClear(0.0f)
                     .perform(() -> getCommand().execute(getInput()))
                     .assertValues(0.0f, 1.0f, 0.0f);
         }

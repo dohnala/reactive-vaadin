@@ -1,10 +1,10 @@
-package com.github.dohnal.vaadin.reactive.command;
+package com.github.dohnal.vaadin.reactive.command.sync;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.concurrent.Executor;
 
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
+import com.github.dohnal.vaadin.reactive.command.SyncCommand;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -14,27 +14,25 @@ import rx.schedulers.TestScheduler;
 import rx.subjects.TestSubject;
 
 /**
- * Tests for {@link AsyncCommand} created by
- * {@link ReactiveCommand#createAsync(Executor)}
- * {@link ReactiveCommand#createAsync(Observable, Executor)}
+ * Tests for {@link SyncCommand} created by
+ * {@link ReactiveCommand#create()}
+ * {@link ReactiveCommand#create(Observable)}
  *
  * @author dohnal
  */
-@DisplayName("Asynchronous empty command")
-public class AsyncEmptyCommandTest extends AbstractAsyncCommandTest
+@DisplayName("Synchronous empty command")
+public class SyncEmptyCommandTest extends AbstractSyncCommandTest
 {
     @Nested
     @DisplayName("After create empty command")
     class AfterCreateEmptyCommand extends AfterCreateCommand<Void, Void>
     {
-        private TestExecutor executor;
         private ReactiveCommand<Void, Void> command;
 
         @BeforeEach
         protected void create()
         {
-            executor = new TestExecutor();
-            command = ReactiveCommand.createAsync(executor);
+            command = ReactiveCommand.create();
         }
 
         @Nonnull
@@ -94,7 +92,6 @@ public class AsyncEmptyCommandTest extends AbstractAsyncCommandTest
     @DisplayName("After create empty command with observable")
     class AfterCreateEmptyCommandWithObservable extends AfterCreateCommandWithObservable<Void, Void>
     {
-        private TestExecutor testExecutor;
         private TestScheduler testScheduler;
         private TestSubject<Boolean> testSubject;
         private ReactiveCommand<Void, Void> command;
@@ -102,10 +99,9 @@ public class AsyncEmptyCommandTest extends AbstractAsyncCommandTest
         @BeforeEach
         protected void create()
         {
-            testExecutor = new TestExecutor();
             testScheduler = Schedulers.test();
             testSubject = TestSubject.create(testScheduler);
-            command = ReactiveCommand.createAsync(testSubject, testExecutor);
+            command = ReactiveCommand.create(testSubject);
         }
 
         @Nonnull

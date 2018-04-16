@@ -1,11 +1,12 @@
-package com.github.dohnal.vaadin.reactive.command;
+package com.github.dohnal.vaadin.reactive.command.async;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.concurrent.CompletableFuture;
 
-import com.github.dohnal.vaadin.reactive.AsyncFunction;
+import com.github.dohnal.vaadin.reactive.AsyncSupplier;
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
+import com.github.dohnal.vaadin.reactive.command.AsyncCommand;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -18,85 +19,82 @@ import rx.subjects.TestSubject;
 
 /**
  * Tests for {@link AsyncCommand} created by
- * {@link ReactiveCommand#createFromAsyncFunction(AsyncFunction)}
- * {@link ReactiveCommand#createFromAsyncFunction(Observable, AsyncFunction)}
+ * {@link ReactiveCommand#createFromAsyncSupplier(AsyncSupplier)}
+ * {@link ReactiveCommand#createFromAsyncSupplier(Observable, AsyncSupplier)}
  *
  * @author dohnal
  */
-@DisplayName("Asynchronous command from asynchronous function")
-public class AsyncCommandFromAsyncFunctionTest extends AbstractAsyncCommandTest
+@DisplayName("Asynchronous command from asynchronous supplier")
+public class AsyncCommandFromAsyncSupplierTest extends AbstractAsyncCommandTest
 {
     @Nested
-    @DisplayName("After create command from function")
-    class AfterCreateCommandFromFunction extends AfterCreateCommand<Integer, Integer>
+    @DisplayName("After create command from supplier")
+    class AfterCreateCommandFromSupplier extends AfterCreateCommand<Void, Integer>
     {
-        private AsyncFunction<Integer, Integer> execution;
+        private AsyncSupplier<Integer> execution;
         private CompletableFuture<Integer> executionResult;
-        private ReactiveCommand<Integer, Integer> command;
+        private ReactiveCommand<Void, Integer> command;
 
         @BeforeEach
         @SuppressWarnings("unchecked")
         protected void create()
         {
             executionResult = new CompletableFuture<>();
-            execution = Mockito.mock(AsyncFunction.class);
-            command = ReactiveCommand.createFromAsyncFunction(execution);
+            execution = Mockito.mock(AsyncSupplier.class);
+            command = ReactiveCommand.createFromAsyncSupplier(execution);
         }
 
         @Nonnull
         @Override
-        public ReactiveCommand<Integer, Integer> getCommand()
+        public ReactiveCommand<Void, Integer> getCommand()
         {
             return command;
         }
 
         @Test
-        @DisplayName("Function should not be run")
-        public void testFunction()
+        @DisplayName("Supplier should not be run")
+        public void testSupplier()
         {
-            Mockito.verify(execution, Mockito.never()).apply(Mockito.any());
+            Mockito.verify(execution, Mockito.never()).get();
         }
 
         @Nested
         @DisplayName("After command execution started")
-        class AfterExecuteStarted extends AfterExecuteCommandStarted<Integer, Integer>
+        class AfterExecuteStarted extends AfterExecuteCommandStarted<Void, Integer>
         {
-            protected final Integer INPUT = 5;
-
             @BeforeEach
             protected void mockExecution()
             {
-                Mockito.when(execution.apply(INPUT)).thenReturn(executionResult);
+                Mockito.when(execution.get()).thenReturn(executionResult);
             }
 
             @Nonnull
             @Override
-            public ReactiveCommand<Integer, Integer> getCommand()
+            public ReactiveCommand<Void, Integer> getCommand()
             {
                 return command;
             }
 
             @Nullable
-            protected Integer getInput()
+            protected Void getInput()
             {
-                return INPUT;
+                return null;
             }
 
             @Test
-            @DisplayName("Function should be run")
-            public void testFunction()
+            @DisplayName("Supplier should be run")
+            public void testSupplier()
             {
                 command.execute(getInput());
 
-                Mockito.verify(execution).apply(INPUT);
+                Mockito.verify(execution).get();
             }
 
             @Nested
             @DisplayName("After command execution finished")
-            class AfterExecuteFinished extends AfterExecuteCommandFinished<Integer, Integer>
+            class AfterExecuteFinished extends AfterExecuteCommandFinished<Void, Integer>
             {
-                protected final Integer INPUT = 5;
-                protected final Integer RESULT = 7;
+                protected final Integer RESULT = 5;
 
                 @BeforeEach
                 protected void startExecution()
@@ -112,15 +110,15 @@ public class AsyncCommandFromAsyncFunctionTest extends AbstractAsyncCommandTest
 
                 @Nonnull
                 @Override
-                public ReactiveCommand<Integer, Integer> getCommand()
+                public ReactiveCommand<Void, Integer> getCommand()
                 {
                     return command;
                 }
 
                 @Nullable
-                protected Integer getInput()
+                protected Void getInput()
                 {
-                    return INPUT;
+                    return null;
                 }
 
                 @Nullable
@@ -132,9 +130,8 @@ public class AsyncCommandFromAsyncFunctionTest extends AbstractAsyncCommandTest
 
             @Nested
             @DisplayName("After command execution finished with error")
-            class AfterExecuteFinishedWithError extends AfterExecuteCommandFinishedWithError<Integer, Integer>
+            class AfterExecuteFinishedWithError extends AfterExecuteCommandFinishedWithError<Void, Integer>
             {
-                protected final Integer INPUT = 5;
                 protected final Throwable ERROR = new RuntimeException("Error");
 
                 @BeforeEach
@@ -151,15 +148,15 @@ public class AsyncCommandFromAsyncFunctionTest extends AbstractAsyncCommandTest
 
                 @Nonnull
                 @Override
-                public ReactiveCommand<Integer, Integer> getCommand()
+                public ReactiveCommand<Void, Integer> getCommand()
                 {
                     return command;
                 }
 
                 @Nullable
-                protected Integer getInput()
+                protected Void getInput()
                 {
-                    return INPUT;
+                    return null;
                 }
 
                 @Nonnull
@@ -173,99 +170,97 @@ public class AsyncCommandFromAsyncFunctionTest extends AbstractAsyncCommandTest
 
         @Nested
         @DisplayName("After execute")
-        class AfterExecute extends AfterExecuteCommand<Integer, Integer>
+        class AfterExecute extends AfterExecuteCommand<Void, Integer>
         {
-            protected final Integer INPUT = 5;
-            protected final Integer RESULT = 7;
+            protected final Integer RESULT = 5;
 
             @BeforeEach
             protected void mockExecution()
             {
-                Mockito.when(execution.apply(INPUT)).thenReturn(executionResult);
+                Mockito.when(execution.get()).thenReturn(executionResult);
                 executionResult.complete(RESULT);
             }
 
             @Nonnull
             @Override
-            public ReactiveCommand<Integer, Integer> getCommand()
+            public ReactiveCommand<Void, Integer> getCommand()
             {
                 return command;
             }
 
             @Nullable
             @Override
-            protected Integer getInput()
+            protected Void getInput()
             {
-                return INPUT;
+                return null;
             }
         }
 
         @Nested
         @DisplayName("After execute with error")
-        class AfterExecuteWithError extends AfterExecuteCommandWithError<Integer, Integer>
+        class AfterExecuteWithError extends AfterExecuteCommandWithError<Void, Integer>
         {
-            protected final Integer INPUT = 5;
             protected final Throwable ERROR = new RuntimeException("Error");
 
             @BeforeEach
             protected void mockExecution()
             {
-                Mockito.when(execution.apply(INPUT)).thenReturn(executionResult);
+                Mockito.when(execution.get()).thenReturn(executionResult);
                 executionResult.completeExceptionally(ERROR);
             }
 
             @Nonnull
             @Override
-            public ReactiveCommand<Integer, Integer> getCommand()
+            public ReactiveCommand<Void, Integer> getCommand()
             {
                 return command;
             }
 
             @Nullable
             @Override
-            protected Integer getInput()
+            protected Void getInput()
             {
-                return INPUT;
+                return null;
             }
         }
     }
 
     @Nested
-    @DisplayName("After create command from asynchronous function with observable")
-    class AfterCreateCommandFromAsyncFunctionWitObservable extends AfterCreateCommandWithObservable<Integer, Integer>
+    @DisplayName("After create command from asynchronous supplier with observable")
+    class AfterCreateCommandFromAsyncSupplierWitObservable extends AfterCreateCommandWithObservable<Void, Integer>
     {
-        private AsyncFunction<Integer, Integer> execution;
+        private AsyncSupplier<Integer> execution;
         private CompletableFuture<Integer> executionResult;
         private TestScheduler testScheduler;
         private TestSubject<Boolean> testSubject;
-        private ReactiveCommand<Integer, Integer> command;
+        private ReactiveCommand<Void, Integer> command;
 
         @BeforeEach
         @SuppressWarnings("unchecked")
         protected void create()
         {
-            execution = Mockito.mock(AsyncFunction.class);
+            execution = Mockito.mock(AsyncSupplier.class);
             executionResult = new CompletableFuture<>();
             testScheduler = Schedulers.test();
             testSubject = TestSubject.create(testScheduler);
-            command = ReactiveCommand.createFromAsyncFunction(testSubject, execution);
+            command = ReactiveCommand.createFromAsyncSupplier(testSubject, execution);
         }
 
         @Nonnull
         @Override
-        public ReactiveCommand<Integer, Integer> getCommand()
+        public ReactiveCommand<Void, Integer> getCommand()
         {
             return command;
         }
 
         @Nested
         @DisplayName("After observable emits true")
-        class AfterEmitsTrue extends AfterObservableEmitsTrue<Integer, Integer>
+        class AfterEmitsTrue extends AfterObservableEmitsTrue<Void, Integer>
         {
 
             @Nonnull
             @Override
-            public ReactiveCommand<Integer, Integer> getCommand()
+            public ReactiveCommand<Void, Integer> getCommand()
             {
                 return command;
             }
@@ -280,12 +275,12 @@ public class AsyncCommandFromAsyncFunctionTest extends AbstractAsyncCommandTest
 
         @Nested
         @DisplayName("After observable emits false")
-        class AfterEmitsFalse extends AfterObservableEmitsFalse<Integer, Integer>
+        class AfterEmitsFalse extends AfterObservableEmitsFalse<Void, Integer>
         {
 
             @Nonnull
             @Override
-            public ReactiveCommand<Integer, Integer> getCommand()
+            public ReactiveCommand<Void, Integer> getCommand()
             {
                 return command;
             }
@@ -300,27 +295,26 @@ public class AsyncCommandFromAsyncFunctionTest extends AbstractAsyncCommandTest
 
         @Nested
         @DisplayName("After observable emits true during execution")
-        class AfterEmitsTrueDuringExecution extends AfterObservableEmitsTrueDuringExecution<Integer, Integer>
+        class AfterEmitsTrueDuringExecution extends AfterObservableEmitsTrueDuringExecution<Void, Integer>
         {
-            protected final Integer INPUT = 5;
 
             @BeforeEach
             protected void mockExecution()
             {
-                Mockito.when(execution.apply(INPUT)).thenReturn(executionResult);
+                Mockito.when(execution.get()).thenReturn(executionResult);
             }
 
             @Nonnull
             @Override
-            public ReactiveCommand<Integer, Integer> getCommand()
+            public ReactiveCommand<Void, Integer> getCommand()
             {
                 return command;
             }
 
             @Nullable
-            protected Integer getInput()
+            protected Void getInput()
             {
-                return INPUT;
+                return null;
             }
 
             @Override
@@ -333,27 +327,26 @@ public class AsyncCommandFromAsyncFunctionTest extends AbstractAsyncCommandTest
 
         @Nested
         @DisplayName("After observable emits false during execution")
-        class AfterEmitsFalseDuringExecution extends AfterObservableEmitsFalseDuringExecution<Integer, Integer>
+        class AfterEmitsFalseDuringExecution extends AfterObservableEmitsFalseDuringExecution<Void, Integer>
         {
-            protected final Integer INPUT = 5;
 
             @BeforeEach
             protected void mockExecution()
             {
-                Mockito.when(execution.apply(INPUT)).thenReturn(executionResult);
+                Mockito.when(execution.get()).thenReturn(executionResult);
             }
 
             @Nonnull
             @Override
-            public ReactiveCommand<Integer, Integer> getCommand()
+            public ReactiveCommand<Void, Integer> getCommand()
             {
                 return command;
             }
 
             @Nullable
-            protected Integer getInput()
+            protected Void getInput()
             {
-                return INPUT;
+                return null;
             }
 
             @Override
@@ -366,10 +359,8 @@ public class AsyncCommandFromAsyncFunctionTest extends AbstractAsyncCommandTest
 
         @Nested
         @DisplayName("After execute disabled command")
-        class AfterExecuteDisabled extends AfterExecuteDisabledCommand<Integer, Integer>
+        class AfterExecuteDisabled extends AfterExecuteDisabledCommand<Void, Integer>
         {
-            protected final Integer INPUT = 5;
-
             @BeforeEach
             public void disableCommand()
             {
@@ -379,24 +370,24 @@ public class AsyncCommandFromAsyncFunctionTest extends AbstractAsyncCommandTest
 
             @Nonnull
             @Override
-            public ReactiveCommand<Integer, Integer> getCommand()
+            public ReactiveCommand<Void, Integer> getCommand()
             {
                 return command;
             }
 
             @Override
-            protected Integer getInput()
+            protected Void getInput()
             {
                 return null;
             }
 
             @Test
-            @DisplayName("Function should not be run")
-            public void testFunction()
+            @DisplayName("Supplier should not be run")
+            public void testSupplier()
             {
                 command.execute(getInput());
 
-                Mockito.verify(execution, Mockito.never()).apply(Mockito.any());
+                Mockito.verify(execution, Mockito.never()).get();
             }
         }
     }

@@ -1,11 +1,11 @@
-package com.github.dohnal.vaadin.reactive.command;
+package com.github.dohnal.vaadin.reactive.command.sync;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.concurrent.Executor;
 import java.util.function.Supplier;
 
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
+import com.github.dohnal.vaadin.reactive.command.SyncCommand;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -16,21 +16,22 @@ import rx.schedulers.Schedulers;
 import rx.schedulers.TestScheduler;
 import rx.subjects.TestSubject;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 /**
- * Tests for {@link AsyncCommand} created by
- * {@link ReactiveCommand#createAsync(Supplier, Executor)}
- * {@link ReactiveCommand#createAsync(Observable, Supplier, Executor)}
+ * Tests for {@link SyncCommand} created by
+ * {@link ReactiveCommand#create(Supplier)}
+ * {@link ReactiveCommand#create(Observable, Supplier)}
  *
  * @author dohnal
  */
-@DisplayName("Asynchronous command from supplier")
-public class AsyncCommandFromSupplierTest extends AbstractAsyncCommandTest
+@DisplayName("Synchronous command from supplier")
+public class SyncCommandFromSupplierTest extends AbstractSyncCommandTest
 {
     @Nested
     @DisplayName("After create command from supplier")
     class AfterCreateCommandFromSupplier extends AfterCreateCommand<Void, Integer>
     {
-        private TestExecutor testExecutor;
         private Supplier<Integer> execution;
         private ReactiveCommand<Void, Integer> command;
 
@@ -38,9 +39,8 @@ public class AsyncCommandFromSupplierTest extends AbstractAsyncCommandTest
         @SuppressWarnings("unchecked")
         protected void create()
         {
-            testExecutor = new TestExecutor();
             execution = Mockito.mock(Supplier.class);
-            command = ReactiveCommand.createAsync(execution, testExecutor);
+            command = ReactiveCommand.create(execution);
         }
 
         @Nonnull
@@ -153,10 +153,17 @@ public class AsyncCommandFromSupplierTest extends AbstractAsyncCommandTest
             }
 
             @Test
+            @DisplayName("Error should be thrown if no one is subscribed")
+            public void testUnhandledError()
+            {
+                assertThrows(getError().getClass(), () -> getCommand().execute(getInput()));
+            }
+
+            @Test
             @DisplayName("Supplier should be run")
             public void testSupplier()
             {
-                command.execute(getInput());
+                assertThrows(getError().getClass(), () -> command.execute(getInput()));
 
                 Mockito.verify(execution).get();
             }
@@ -186,7 +193,6 @@ public class AsyncCommandFromSupplierTest extends AbstractAsyncCommandTest
     @DisplayName("After create command from supplier with observable")
     class AfterCreateCommandFromSupplierWithObservable extends AfterCreateCommandWithObservable<Void, Integer>
     {
-        private TestExecutor testExecutor;
         private Supplier<Integer> execution;
         private TestScheduler testScheduler;
         private TestSubject<Boolean> testSubject;
@@ -196,11 +202,10 @@ public class AsyncCommandFromSupplierTest extends AbstractAsyncCommandTest
         @SuppressWarnings("unchecked")
         protected void create()
         {
-            testExecutor = new TestExecutor();
             execution = Mockito.mock(Supplier.class);
             testScheduler = Schedulers.test();
             testSubject = TestSubject.create(testScheduler);
-            command = ReactiveCommand.createAsync(testSubject, execution, testExecutor);
+            command = ReactiveCommand.create(testSubject, execution);
         }
 
         @Nonnull
