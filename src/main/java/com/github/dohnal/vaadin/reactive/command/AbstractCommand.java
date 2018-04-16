@@ -107,7 +107,7 @@ public abstract class AbstractCommand<T, R> implements ReactiveCommand<T, R>
     @Override
     public final Observable<Float> getProgress()
     {
-        return progress.asObservable();
+        return progress.asObservable().distinctUntilChanged();
     }
 
     @Override
