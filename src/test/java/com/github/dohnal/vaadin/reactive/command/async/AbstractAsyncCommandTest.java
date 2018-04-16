@@ -5,10 +5,13 @@ import javax.annotation.Nullable;
 import java.util.concurrent.Executor;
 
 import com.github.dohnal.vaadin.reactive.command.AbstractCommandTest;
+import com.github.dohnal.vaadin.reactive.command.AsyncCommand;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 /**
+ * Base tests for {@link AsyncCommand}
+ *
  * @author dohnal
  */
 public abstract class AbstractAsyncCommandTest extends AbstractCommandTest
