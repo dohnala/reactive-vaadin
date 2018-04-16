@@ -2,7 +2,7 @@ package com.github.dohnal.vaadin.reactive.command;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.concurrent.Executor;
+import java.util.concurrent.CompletionException;
 
 import com.github.dohnal.vaadin.reactive.AsyncProgressFunction;
 import com.github.dohnal.vaadin.reactive.Progress;
@@ -20,8 +20,6 @@ public final class ProgressCommand<T, R> extends AbstractCommand<T, R>
 {
     protected final AsyncProgressFunction<T, R> execution;
 
-    protected final Executor executor;
-
     /**
      * Creates new asynchronous reactive command with given execution
      *
@@ -31,53 +29,30 @@ public final class ProgressCommand<T, R> extends AbstractCommand<T, R>
     public ProgressCommand(final @Nonnull Observable<Boolean> canExecute,
                            final @Nonnull AsyncProgressFunction<T, R> execution)
     {
-        this(canExecute, execution, null);
-    }
-
-    /**
-     * Creates new asynchronous reactive command with given execution and executor
-     *
-     * @param canExecute observable which controls command executability
-     * @param execution execution
-     * @param executor executor
-     */
-    public ProgressCommand(final @Nonnull Observable<Boolean> canExecute,
-                           final @Nonnull AsyncProgressFunction<T, R> execution,
-                           final @Nullable Executor executor)
-    {
         super(canExecute);
 
         this.execution = execution;
-        this.executor = executor;
     }
 
     @Override
     public final void executeInternal(final @Nullable T input)
     {
-        this.progress.setValue(0.0f);
-        this.isExecuting.setValue(true);
+        handleStart();
 
-        if (executor != null)
-        {
-            execution.apply(createProgress(), input).whenCompleteAsync((result, error) -> {
-                handleResult(result, error);
+        execution.apply(createProgress(), input)
+                .handle((result, error) -> {
+                    if (error instanceof CompletionException)
+                    {
+                        handleResult(result, error.getCause());
+                    }
+                    else
+                    {
+                        handleResult(result, error);
+                    }
 
-                this.progress.setValue(1.0f);
-                this.isExecuting.setValue(false);
-                this.progress.setValue(0.0f);
-                this.executionCount.updateValue(count -> count + 1);
-            }, executor);
-        }
-        else
-        {
-            execution.apply(createProgress(), input).whenCompleteAsync((result, error) -> {
-                handleResult(result, error);
-
-                this.progress.setValue(1.0f);
-                this.isExecuting.setValue(false);
-                this.executionCount.updateValue(count -> count + 1);
-            });
-        }
+                    return result;
+                })
+                .whenComplete((result, error) -> handleComplete());
     }
 
     @Nonnull
