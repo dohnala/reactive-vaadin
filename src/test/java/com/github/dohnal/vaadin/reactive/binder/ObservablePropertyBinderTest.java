@@ -6,14 +6,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import rx.schedulers.Schedulers;
 import rx.schedulers.TestScheduler;
 import rx.subjects.TestSubject;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Tests for {@link ObservablePropertyBinder}
@@ -24,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class ObservablePropertyBinderTest implements ReactiveBinder
 {
     @Nested
-    @DisplayName("After bind observable to empty property")
+    @DisplayName("After bind observable to property")
     class AfterBindObservableToProperty
     {
         private TestScheduler testScheduler;
@@ -33,35 +29,21 @@ public class ObservablePropertyBinderTest implements ReactiveBinder
         private ObservablePropertyBinder<Integer> binder;
 
         @BeforeEach
+        @SuppressWarnings("unchecked")
         void bindObservableToProperty()
         {
             testScheduler = Schedulers.test();
             testSubject = TestSubject.create(testScheduler);
-            property = ReactiveProperty.empty();
+            property = Mockito.mock(ReactiveProperty.class);
 
             binder = bind(testSubject).to(property);
         }
 
         @Test
-        @DisplayName("Property value should be null")
-        public void testValue()
+        @DisplayName("Property value should not be set")
+        public void testPropertyValue()
         {
-            assertNull(property.getValue());
-        }
-
-        @Test
-        @DisplayName("Property observable shouldn't emit any value")
-        public void testObservable()
-        {
-            property.asObservable().test()
-                    .assertNoValues();
-        }
-
-        @Test
-        @DisplayName("Property shouldn't have value")
-        public void testHasValue()
-        {
-            assertFalse(property.hasValue());
+            Mockito.verify(property, Mockito.never()).setValue(Mockito.any());
         }
 
         @Nested
@@ -69,35 +51,13 @@ public class ObservablePropertyBinderTest implements ReactiveBinder
         class AfterSourceObservableEmitsValue
         {
             @Test
-            @DisplayName("Property value should be correct")
-            public void testValue()
+            @DisplayName("Property value should be set with correct value")
+            public void testPropertyValue()
             {
                 testSubject.onNext(5);
                 testScheduler.triggerActions();
 
-                assertEquals(new Integer(5), property.getValue());
-            }
-
-            @Test
-            @DisplayName("Property observable should emit correct value")
-            public void testObservable()
-            {
-                property.asObservable().test()
-                        .perform(() -> {
-                            testSubject.onNext(5);
-                            testScheduler.triggerActions();
-                        })
-                        .assertValue(5);
-            }
-
-            @Test
-            @DisplayName("Property should have value")
-            public void testHasValue()
-            {
-                testSubject.onNext(5);
-                testScheduler.triggerActions();
-
-                assertTrue(property.hasValue());
+                Mockito.verify(property).setValue(5);
             }
         }
 
@@ -116,42 +76,20 @@ public class ObservablePropertyBinderTest implements ReactiveBinder
             class AfterSourceObservableEmitsValue
             {
                 @Test
-                @DisplayName("Property value should be null")
-                public void testValue()
+                @DisplayName("Property value should not be set")
+                public void testPropertyValue()
                 {
                     testSubject.onNext(5);
                     testScheduler.triggerActions();
 
-                    assertNull(property.getValue());
-                }
-
-                @Test
-                @DisplayName("Property observable shouldn't emit any value")
-                public void testObservable()
-                {
-                    property.asObservable().test()
-                            .perform(() -> {
-                                testSubject.onNext(5);
-                                testScheduler.triggerActions();
-                            })
-                            .assertNoValues();
-                }
-
-                @Test
-                @DisplayName("Property shouldn't have value")
-                public void testHasValue()
-                {
-                    testSubject.onNext(5);
-                    testScheduler.triggerActions();
-
-                    assertFalse(property.hasValue());
+                    Mockito.verify(property, Mockito.never()).setValue(Mockito.any());
                 }
             }
         }
     }
 
     @Nested
-    @DisplayName("After bind property to empty property")
+    @DisplayName("After bind property to property")
     class AfterBindPropertyToProperty
     {
         private ReactiveProperty<Integer> sourceProperty;
@@ -159,34 +97,20 @@ public class ObservablePropertyBinderTest implements ReactiveBinder
         private ObservablePropertyBinder<Integer> binder;
 
         @BeforeEach
+        @SuppressWarnings("unchecked")
         void bindPropertyToProperty()
         {
             sourceProperty = ReactiveProperty.empty();
-            property = ReactiveProperty.empty();
+            property = Mockito.mock(ReactiveProperty.class);
 
             binder = bind(sourceProperty).to(property);
         }
 
         @Test
-        @DisplayName("Property value should be null")
-        public void testValue()
+        @DisplayName("Property value should not be set")
+        public void testPropertyValue()
         {
-            assertNull(property.getValue());
-        }
-
-        @Test
-        @DisplayName("Property observable shouldn't emit any value")
-        public void testObservable()
-        {
-            property.asObservable().test()
-                    .assertNoValues();
-        }
-
-        @Test
-        @DisplayName("Property shouldn't have value")
-        public void testHasValue()
-        {
-            assertFalse(property.hasValue());
+            Mockito.verify(property, Mockito.never()).setValue(Mockito.any());
         }
 
         @Nested
@@ -194,30 +118,12 @@ public class ObservablePropertyBinderTest implements ReactiveBinder
         class AfterSourceObservableEmitsValue
         {
             @Test
-            @DisplayName("Property value should be correct")
-            public void testValue()
+            @DisplayName("Property value should be set with correct value")
+            public void testPropertyValue()
             {
                 sourceProperty.setValue(5);
 
-                assertEquals(new Integer(5), property.getValue());
-            }
-
-            @Test
-            @DisplayName("Property observable should emit correct value")
-            public void testObservable()
-            {
-                property.asObservable().test()
-                        .perform(() -> sourceProperty.setValue(5))
-                        .assertValue(5);
-            }
-
-            @Test
-            @DisplayName("Property should have value")
-            public void testHasValue()
-            {
-                sourceProperty.setValue(5);
-
-                assertTrue(property.hasValue());
+                Mockito.verify(property).setValue(5);
             }
         }
 
@@ -236,30 +142,12 @@ public class ObservablePropertyBinderTest implements ReactiveBinder
             class AfterSourceObservableEmitsValue
             {
                 @Test
-                @DisplayName("Property value should be null")
-                public void testValue()
+                @DisplayName("Property value should be set with correct value")
+                public void testPropertyValue()
                 {
                     sourceProperty.setValue(5);
 
-                    assertNull(property.getValue());
-                }
-
-                @Test
-                @DisplayName("Property observable shouldn't emit any value")
-                public void testObservable()
-                {
-                    property.asObservable().test()
-                            .perform(() -> sourceProperty.setValue(5))
-                            .assertNoValues();
-                }
-
-                @Test
-                @DisplayName("Property shouldn't have value")
-                public void testHasValue()
-                {
-                    sourceProperty.setValue(5);
-
-                    assertFalse(property.hasValue());
+                    Mockito.verify(property, Mockito.never()).setValue(Mockito.any());
                 }
             }
         }
