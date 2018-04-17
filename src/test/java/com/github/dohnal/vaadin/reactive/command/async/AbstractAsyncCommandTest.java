@@ -292,7 +292,7 @@ public abstract class AbstractAsyncCommandTest extends AbstractCommandTest
         protected abstract void emitsTrue();
 
         @Test
-        @DisplayName("Can be executed observable should emit false")
+        @DisplayName("Can be executed observable should not emit any value")
         public void testCanExecute()
         {
             getCommand().canExecute().test()
@@ -300,7 +300,7 @@ public abstract class AbstractAsyncCommandTest extends AbstractCommandTest
                     .perform(() -> getCommand().execute(getInput()))
                     .assertValuesAndClear(false)
                     .perform(this::emitsTrue)
-                    .assertValue(false);
+                    .assertNoValues();
         }
     }
 
@@ -319,7 +319,7 @@ public abstract class AbstractAsyncCommandTest extends AbstractCommandTest
         protected abstract void emitsFalse();
 
         @Test
-        @DisplayName("Can be executed observable should emit false")
+        @DisplayName("Can be executed observable should not emit any value")
         public void testCanExecute()
         {
             getCommand().canExecute().test()
@@ -327,7 +327,7 @@ public abstract class AbstractAsyncCommandTest extends AbstractCommandTest
                     .perform(() -> getCommand().execute(getInput()))
                     .assertValuesAndClear(false)
                     .perform(this::emitsFalse)
-                    .assertValue(false);
+                    .assertNoValues();
         }
     }
 }

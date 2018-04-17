@@ -100,7 +100,7 @@ public abstract class AbstractCommand<T, R> implements ReactiveCommand<T, R>
     @Override
     public final Observable<Boolean> canExecute()
     {
-        return canExecute.asObservable();
+        return canExecute.asObservable().distinctUntilChanged();
     }
 
     @Nonnull

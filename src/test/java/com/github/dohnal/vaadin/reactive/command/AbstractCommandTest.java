@@ -121,13 +121,13 @@ public abstract class AbstractCommandTest
         protected abstract void emitsTrue();
 
         @Test
-        @DisplayName("Can be executed observable should emit true")
+        @DisplayName("Can be executed observable should not emit any value")
         public void testCanExecute()
         {
             getCommand().canExecute().test()
                     .assertValuesAndClear(true)
                     .perform(this::emitsTrue)
-                    .assertValue(true);
+                    .assertNoValues();
         }
     }
 
