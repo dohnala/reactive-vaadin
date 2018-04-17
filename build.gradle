@@ -1,7 +1,11 @@
+plugins {
+    id 'java'
+    id 'jacoco'
+    id 'com.github.kt3k.coveralls' version '2.8.2'
+}
+
 group 'com.github.dohnal.vaadin'
 version '1.0-SNAPSHOT'
-
-apply plugin: 'java'
 
 sourceCompatibility = 1.8
 
@@ -21,6 +25,21 @@ dependencies {
     testCompile "org.mockito:mockito-core:2.18.0"
 }
 
+test {
+    useJUnitPlatform()
+}
+
+jacoco {
+    toolVersion = "0.8.0"
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled = true
+        html.enabled = true
+    }
+}
+
 task wrapper(type: Wrapper) {
-    gradleVersion = '4.5.1'
+    gradleVersion = '4.6'
 }
