@@ -7,16 +7,22 @@ import java.util.concurrent.CompletableFuture;
 import com.github.dohnal.vaadin.reactive.AsyncProgressFunction;
 import com.github.dohnal.vaadin.reactive.Progress;
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
+import com.github.dohnal.vaadin.reactive.command.ProgressCommand;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import rx.Observable;
 import rx.schedulers.Schedulers;
 import rx.schedulers.TestScheduler;
 import rx.subjects.TestSubject;
 
 /**
+ * Tests for {@link ProgressCommand} created by
+ * {@link ReactiveCommand#createFromAsyncProgressFunction(AsyncProgressFunction)}
+ * {@link ReactiveCommand#createFromAsyncProgressFunction(Observable, AsyncProgressFunction)}
+ *
  * @author dohnal
  */
 @DisplayName("Progress command from asynchronous progress function")

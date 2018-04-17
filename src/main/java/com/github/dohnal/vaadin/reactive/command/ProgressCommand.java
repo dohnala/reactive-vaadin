@@ -5,7 +5,6 @@ import javax.annotation.Nullable;
 import java.util.concurrent.CompletionException;
 
 import com.github.dohnal.vaadin.reactive.AsyncProgressFunction;
-import com.github.dohnal.vaadin.reactive.Progress;
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
 import rx.Observable;
 
@@ -39,7 +38,7 @@ public final class ProgressCommand<T, R> extends AbstractCommand<T, R>
     {
         handleStart();
 
-        execution.apply(createProgress(), input)
+        execution.apply(new ReactiveProgress(progress), input)
                 .handle((result, error) -> {
                     if (error instanceof CompletionException)
                     {
@@ -53,24 +52,5 @@ public final class ProgressCommand<T, R> extends AbstractCommand<T, R>
                     return result;
                 })
                 .whenComplete((result, error) -> handleComplete());
-    }
-
-    @Nonnull
-    private Progress createProgress()
-    {
-        return new Progress()
-        {
-            @Override
-            public void set(float value)
-            {
-                progress.setValue(value);
-            }
-
-            @Override
-            public void add(float value)
-            {
-                progress.updateValue(current -> current + value);
-            }
-        };
     }
 }
