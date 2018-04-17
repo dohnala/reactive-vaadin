@@ -77,14 +77,14 @@ public abstract class AbstractCommand<T, R> implements ReactiveCommand<T, R>
     @Override
     public final Observable<Boolean> isExecuting()
     {
-        return isExecuting.asObservable();
+        return isExecuting.asObservable().distinctUntilChanged();
     }
 
     @Nonnull
     @Override
     public final Observable<Integer> getExecutionCount()
     {
-        return executionCount.asObservable();
+        return executionCount.asObservable().distinctUntilChanged();
     }
 
     @Nonnull
