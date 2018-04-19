@@ -20,7 +20,7 @@ public interface BasePropertySpecification
     /**
      * Base interface for tests which needs property
      *
-     * @param <T> type of command input
+     * @param <T> type of property
      */
     interface RequireProperty<T>
     {
