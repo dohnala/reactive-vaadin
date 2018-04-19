@@ -5,7 +5,7 @@ import javax.annotation.Nullable;
 import java.util.function.Supplier;
 
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
-import com.github.dohnal.vaadin.reactive.command.SyncCommand;
+import com.github.dohnal.vaadin.reactive.command.BaseCommandSpecification;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -19,18 +19,15 @@ import rx.subjects.TestSubject;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
- * Tests for {@link SyncCommand} created by
+ * Specification for {@link ReactiveCommand} created by
  * {@link ReactiveCommand#create(Supplier)}
  * {@link ReactiveCommand#create(Observable, Supplier)}
  *
  * @author dohnal
  */
-@DisplayName("Synchronous command from supplier")
-public class SyncCommandFromSupplierTest extends AbstractSyncCommandTest
+public interface SyncCommandFromSupplierSpecification extends BaseCommandSpecification
 {
-    @Nested
-    @DisplayName("After create command from supplier")
-    class AfterCreateCommandFromSupplier extends AfterCreateCommand<Void, Integer>
+    abstract class WhenCreateFromSupplierSpecification extends WhenCreateSpecification<Void, Integer>
     {
         private Supplier<Integer> execution;
         private ReactiveCommand<Void, Integer> command;
@@ -58,8 +55,8 @@ public class SyncCommandFromSupplierTest extends AbstractSyncCommandTest
         }
 
         @Nested
-        @DisplayName("During execute")
-        class DuringExecute extends DuringExecuteCommand<Void, Integer>
+        @DisplayName("When command is executed")
+        class WhenExecute extends WhenExecuteSpecification<Void, Integer>
         {
             protected final Integer RESULT = 5;
 
@@ -85,7 +82,7 @@ public class SyncCommandFromSupplierTest extends AbstractSyncCommandTest
 
             @Nullable
             @Override
-            protected Integer getCorrectResult()
+            protected Integer getResult()
             {
                 return RESULT;
             }
@@ -101,27 +98,8 @@ public class SyncCommandFromSupplierTest extends AbstractSyncCommandTest
         }
 
         @Nested
-        @DisplayName("After execute")
-        class AfterExecute extends AfterExecuteCommand<Void, Integer>
-        {
-            @Nonnull
-            @Override
-            public ReactiveCommand<Void, Integer> getCommand()
-            {
-                return command;
-            }
-
-            @Nullable
-            @Override
-            protected Void getInput()
-            {
-                return null;
-            }
-        }
-
-        @Nested
-        @DisplayName("During execute with error")
-        class DuringExecuteWithError extends DuringExecuteCommandWithError<Void, Integer>
+        @DisplayName("When command is executed with error")
+        class WhenExecuteWithError extends WhenExecuteWithErrorSpecification<Void, Integer>
         {
             private final Throwable ERROR = new RuntimeException("Error");
 
@@ -153,7 +131,7 @@ public class SyncCommandFromSupplierTest extends AbstractSyncCommandTest
             }
 
             @Test
-            @DisplayName("Error should be thrown if no one is subscribed")
+            @DisplayName("Exception should be thrown if no one is subscribed to Error observable")
             public void testUnhandledError()
             {
                 assertThrows(getError().getClass(), () -> getCommand().execute(getInput()));
@@ -170,8 +148,27 @@ public class SyncCommandFromSupplierTest extends AbstractSyncCommandTest
         }
 
         @Nested
-        @DisplayName("After execute with error")
-        class AfterExecuteWithError extends AfterExecuteCommandWithError<Void, Integer>
+        @DisplayName("When command is subscribed after execution")
+        class WhenSubscribeAfterExecute extends WhenSubscribeAfterExecuteSpecification<Void, Integer>
+        {
+            @Nonnull
+            @Override
+            public ReactiveCommand<Void, Integer> getCommand()
+            {
+                return command;
+            }
+
+            @Nullable
+            @Override
+            protected Void getInput()
+            {
+                return null;
+            }
+        }
+
+        @Nested
+        @DisplayName("When command is subscribed after execution with error")
+        class WhenSubscribeAfterExecuteWithError extends WhenSubscribeAfterExecuteWithErrorSpecification<Void, Integer>
         {
             @Nonnull
             @Override
@@ -189,9 +186,8 @@ public class SyncCommandFromSupplierTest extends AbstractSyncCommandTest
         }
     }
 
-    @Nested
-    @DisplayName("After create command from supplier with observable")
-    class AfterCreateCommandFromSupplierWithObservable extends AfterCreateCommandWithObservable<Void, Integer>
+    abstract class WhenCreateFromSupplierWithCanExecuteSpecification extends
+            WhenCreateWithCanExecuteSpecification<Void, Integer>
     {
         private Supplier<Integer> execution;
         private TestScheduler testScheduler;
@@ -216,10 +212,9 @@ public class SyncCommandFromSupplierTest extends AbstractSyncCommandTest
         }
 
         @Nested
-        @DisplayName("After observable emits true")
-        class AfterEmitsTrue extends AfterObservableEmitsTrue<Void, Integer>
+        @DisplayName("When CanExecute observable emits true")
+        class WhenCanExecuteEmitsTrue extends WhenCanExecuteEmitsTrueSpecification<Void, Integer>
         {
-
             @Nonnull
             @Override
             public ReactiveCommand<Void, Integer> getCommand()
@@ -236,10 +231,9 @@ public class SyncCommandFromSupplierTest extends AbstractSyncCommandTest
         }
 
         @Nested
-        @DisplayName("After observable emits false")
-        class AfterEmitsFalse extends AfterObservableEmitsFalse<Void, Integer>
+        @DisplayName("When CanExecute observable emits false")
+        class WhenCanExecuteEmitsFalse extends WhenCanExecuteEmitsFalseSpecification<Void, Integer>
         {
-
             @Nonnull
             @Override
             public ReactiveCommand<Void, Integer> getCommand()
@@ -256,8 +250,8 @@ public class SyncCommandFromSupplierTest extends AbstractSyncCommandTest
         }
 
         @Nested
-        @DisplayName("After execute disabled command")
-        class AfterExecuteDisabled extends AfterExecuteDisabledCommand<Void, Integer>
+        @DisplayName("When command is executed while disabled")
+        class WhenExecuteWhileDisabled extends WhenExecuteWhileDisabledSpecification<Void, Integer>
         {
             @BeforeEach
             public void disableCommand()
@@ -277,15 +271,6 @@ public class SyncCommandFromSupplierTest extends AbstractSyncCommandTest
             protected Void getInput()
             {
                 return null;
-            }
-
-            @Test
-            @DisplayName("Supplier should not be run")
-            public void testSupplier()
-            {
-                command.execute(getInput());
-
-                Mockito.verify(execution, Mockito.never()).get();
             }
         }
     }

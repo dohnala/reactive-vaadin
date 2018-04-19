@@ -2,10 +2,10 @@ package com.github.dohnal.vaadin.reactive.command.sync;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.function.Function;
+import java.util.function.Consumer;
 
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
-import com.github.dohnal.vaadin.reactive.command.SyncCommand;
+import com.github.dohnal.vaadin.reactive.command.BaseCommandSpecification;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -19,60 +19,56 @@ import rx.subjects.TestSubject;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
- * Tests for {@link SyncCommand} created by
- * {@link ReactiveCommand#create(Function)}
- * {@link ReactiveCommand#create(Observable, Function)}
+ * Specification for {@link ReactiveCommand} created by
+ * {@link ReactiveCommand#create(Consumer)}
+ * {@link ReactiveCommand#create(Observable, Consumer)}
  *
  * @author dohnal
  */
-@DisplayName("Synchronous command from function")
-public class SyncCommandFromFunctionTest extends AbstractSyncCommandTest
+public interface SyncCommandFromConsumerSpecification extends BaseCommandSpecification
 {
-    @Nested
-    @DisplayName("After create command from function")
-    class AfterCreateCommandFromFunction extends AfterCreateCommand<Integer, Integer>
+    abstract class WhenCreateFromConsumerSpecification extends WhenCreateSpecification<Integer, Void>
     {
-        private Function<Integer, Integer> execution;
-        private ReactiveCommand<Integer, Integer> command;
+        private Consumer<Integer> execution;
+        private ReactiveCommand<Integer, Void> command;
 
         @BeforeEach
         @SuppressWarnings("unchecked")
         protected void create()
         {
-            execution = Mockito.mock(Function.class);
+            execution = Mockito.mock(Consumer.class);
             command = ReactiveCommand.create(execution);
         }
 
         @Nonnull
         @Override
-        public ReactiveCommand<Integer, Integer> getCommand()
+        public ReactiveCommand<Integer, Void> getCommand()
         {
             return command;
         }
 
         @Test
-        @DisplayName("Function should not be run")
-        public void testFunction()
+        @DisplayName("Consumer should not be run")
+        public void testConsumer()
         {
-            Mockito.verify(execution, Mockito.never()).apply(Mockito.anyInt());
+            Mockito.verify(execution, Mockito.never()).accept(Mockito.anyInt());
         }
 
         @Nested
-        @DisplayName("During execute")
-        class DuringExecute extends DuringExecuteCommand<Integer, Integer>
+        @DisplayName("When command is executed")
+        class WhenExecute extends WhenExecuteSpecification<Integer, Void>
         {
             protected final Integer INPUT = 5;
-            protected final Integer RESULT = 7;
 
             @BeforeEach
             protected void mockExecution()
             {
-                Mockito.when(execution.apply(INPUT)).thenReturn(RESULT);
+                Mockito.doNothing().when(execution).accept(INPUT);
             }
 
             @Nonnull
             @Override
-            public ReactiveCommand<Integer, Integer> getCommand()
+            public ReactiveCommand<Integer, Void> getCommand()
             {
                 return command;
             }
@@ -86,45 +82,24 @@ public class SyncCommandFromFunctionTest extends AbstractSyncCommandTest
 
             @Nullable
             @Override
-            protected Integer getCorrectResult()
+            protected Void getResult()
             {
-                return RESULT;
+                return null;
             }
 
             @Test
-            @DisplayName("Function should be run")
-            public void testFunction()
+            @DisplayName("Consumer should be run")
+            public void testConsumer()
             {
                 command.execute(getInput());
 
-                Mockito.verify(execution).apply(INPUT);
+                Mockito.verify(execution).accept(INPUT);
             }
         }
 
         @Nested
-        @DisplayName("After execute")
-        class AfterExecute extends AfterExecuteCommand<Integer, Integer>
-        {
-            protected final Integer INPUT = 5;
-
-            @Nonnull
-            @Override
-            public ReactiveCommand<Integer, Integer> getCommand()
-            {
-                return command;
-            }
-
-            @Nullable
-            @Override
-            protected Integer getInput()
-            {
-                return INPUT;
-            }
-        }
-
-        @Nested
-        @DisplayName("During execute with error")
-        class DuringExecuteWithError extends DuringExecuteCommandWithError<Integer, Integer>
+        @DisplayName("When command is executed with error")
+        class WhenExecuteWithError extends WhenExecuteWithErrorSpecification<Integer, Void>
         {
             protected final Integer INPUT = 5;
             protected final Throwable ERROR = new RuntimeException("Error");
@@ -132,12 +107,12 @@ public class SyncCommandFromFunctionTest extends AbstractSyncCommandTest
             @BeforeEach
             protected void mockExecution()
             {
-                Mockito.when(execution.apply(INPUT)).thenThrow(ERROR);
+                Mockito.doThrow(ERROR).when(execution).accept(INPUT);
             }
 
             @Nonnull
             @Override
-            public ReactiveCommand<Integer, Integer> getCommand()
+            public ReactiveCommand<Integer, Void> getCommand()
             {
                 return command;
             }
@@ -157,31 +132,52 @@ public class SyncCommandFromFunctionTest extends AbstractSyncCommandTest
             }
 
             @Test
-            @DisplayName("Error should be thrown if no one is subscribed")
+            @DisplayName("Error should be thrown if no one is subscribed to Error observable")
             public void testUnhandledError()
             {
                 assertThrows(getError().getClass(), () -> getCommand().execute(getInput()));
             }
 
             @Test
-            @DisplayName("Function should be run")
-            public void testFunction()
+            @DisplayName("Consumer should be run")
+            public void testConsumer()
             {
                 assertThrows(getError().getClass(), () -> command.execute(getInput()));
 
-                Mockito.verify(execution).apply(INPUT);
+                Mockito.verify(execution).accept(INPUT);
             }
         }
 
         @Nested
-        @DisplayName("After execute with error")
-        class AfterExecuteWithError extends AfterExecuteCommandWithError<Integer, Integer>
+        @DisplayName("When command is subscribed after execution")
+        class WhenSubscribeAfterExecute extends WhenSubscribeAfterExecuteSpecification<Integer, Void>
         {
             protected final Integer INPUT = 5;
 
             @Nonnull
             @Override
-            public ReactiveCommand<Integer, Integer> getCommand()
+            public ReactiveCommand<Integer, Void> getCommand()
+            {
+                return command;
+            }
+
+            @Nullable
+            @Override
+            protected Integer getInput()
+            {
+                return INPUT;
+            }
+        }
+
+        @Nested
+        @DisplayName("When command is subscribed after execution with error")
+        class WhenSubscribeAfterExecuteWithError extends WhenSubscribeAfterExecuteWithErrorSpecification<Integer, Void>
+        {
+            protected final Integer INPUT = 5;
+
+            @Nonnull
+            @Override
+            public ReactiveCommand<Integer, Void> getCommand()
             {
                 return command;
             }
@@ -195,20 +191,19 @@ public class SyncCommandFromFunctionTest extends AbstractSyncCommandTest
         }
     }
 
-    @Nested
-    @DisplayName("After create command from function with observable")
-    class AfterCreateCommandFromRunnableWithObservable extends AfterCreateCommandWithObservable<Integer, Integer>
+    abstract class WhenCreateFromConsumerWithCanExecuteSpecification extends
+            WhenCreateWithCanExecuteSpecification<Integer, Void>
     {
-        private Function<Integer, Integer> execution;
+        private Consumer<Integer> execution;
         private TestScheduler testScheduler;
         private TestSubject<Boolean> testSubject;
-        private ReactiveCommand<Integer, Integer> command;
+        private ReactiveCommand<Integer, Void> command;
 
         @BeforeEach
         @SuppressWarnings("unchecked")
         protected void create()
         {
-            execution = Mockito.mock(Function.class);
+            execution = Mockito.mock(Consumer.class);
             testScheduler = Schedulers.test();
             testSubject = TestSubject.create(testScheduler);
             command = ReactiveCommand.create(testSubject, execution);
@@ -216,18 +211,18 @@ public class SyncCommandFromFunctionTest extends AbstractSyncCommandTest
 
         @Nonnull
         @Override
-        public ReactiveCommand<Integer, Integer> getCommand()
+        public ReactiveCommand<Integer, Void> getCommand()
         {
             return command;
         }
 
         @Nested
-        @DisplayName("After observable emits true")
-        class AfterEmitsTrue extends AfterObservableEmitsTrue<Integer, Integer>
+        @DisplayName("When CanExecute observable emits true")
+        class WhenCanExecuteEmitsTrue extends WhenCanExecuteEmitsTrueSpecification<Integer, Void>
         {
             @Nonnull
             @Override
-            public ReactiveCommand<Integer, Integer> getCommand()
+            public ReactiveCommand<Integer, Void> getCommand()
             {
                 return command;
             }
@@ -241,13 +236,12 @@ public class SyncCommandFromFunctionTest extends AbstractSyncCommandTest
         }
 
         @Nested
-        @DisplayName("After observable emits false")
-        class AfterEmitsFalse extends AfterObservableEmitsFalse<Integer, Integer>
+        @DisplayName("When CanExecute observable emits false")
+        class WhenCanExecuteEmitsFalse extends WhenCanExecuteEmitsFalseSpecification<Integer, Void>
         {
-
             @Nonnull
             @Override
-            public ReactiveCommand<Integer, Integer> getCommand()
+            public ReactiveCommand<Integer, Void> getCommand()
             {
                 return command;
             }
@@ -261,8 +255,8 @@ public class SyncCommandFromFunctionTest extends AbstractSyncCommandTest
         }
 
         @Nested
-        @DisplayName("After execute disabled command")
-        class AfterExecuteDisabled extends AfterExecuteDisabledCommand<Integer, Integer>
+        @DisplayName("When command is executed while disabled")
+        class WhenExecuteWhileDisabled extends WhenExecuteWhileDisabledSpecification<Integer, Void>
         {
             protected final Integer INPUT = 5;
 
@@ -275,7 +269,7 @@ public class SyncCommandFromFunctionTest extends AbstractSyncCommandTest
 
             @Nonnull
             @Override
-            public ReactiveCommand<Integer, Integer> getCommand()
+            public ReactiveCommand<Integer, Void> getCommand()
             {
                 return command;
             }
@@ -284,15 +278,6 @@ public class SyncCommandFromFunctionTest extends AbstractSyncCommandTest
             protected Integer getInput()
             {
                 return INPUT;
-            }
-
-            @Test
-            @DisplayName("Function should not be run")
-            public void testFunction()
-            {
-                command.execute(getInput());
-
-                Mockito.verify(execution, Mockito.never()).apply(Mockito.any());
             }
         }
     }

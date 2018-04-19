@@ -4,7 +4,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
-import com.github.dohnal.vaadin.reactive.command.SyncCommand;
+import com.github.dohnal.vaadin.reactive.command.BaseCommandSpecification;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -14,18 +14,15 @@ import rx.schedulers.TestScheduler;
 import rx.subjects.TestSubject;
 
 /**
- * Tests for {@link SyncCommand} created by
+ * Specification for {@link ReactiveCommand} created by
  * {@link ReactiveCommand#create()}
  * {@link ReactiveCommand#create(Observable)}
  *
  * @author dohnal
  */
-@DisplayName("Synchronous empty command")
-public class SyncEmptyCommandTest extends AbstractSyncCommandTest
+public interface SyncEmptyCommandSpecification extends BaseCommandSpecification
 {
-    @Nested
-    @DisplayName("After create empty command")
-    class AfterCreateEmptyCommand extends AfterCreateCommand<Void, Void>
+    abstract class WhenCreateEmptySpecification extends WhenCreateSpecification<Void, Void>
     {
         private ReactiveCommand<Void, Void> command;
 
@@ -43,8 +40,8 @@ public class SyncEmptyCommandTest extends AbstractSyncCommandTest
         }
 
         @Nested
-        @DisplayName("During execute")
-        class DuringExecute extends DuringExecuteCommand<Void, Void>
+        @DisplayName("When command is executed")
+        class WhenExecute extends WhenExecuteSpecification<Void, Void>
         {
             @Nonnull
             @Override
@@ -62,15 +59,15 @@ public class SyncEmptyCommandTest extends AbstractSyncCommandTest
 
             @Nullable
             @Override
-            protected Void getCorrectResult()
+            protected Void getResult()
             {
                 return null;
             }
         }
 
         @Nested
-        @DisplayName("After execute")
-        class AfterExecute extends AfterExecuteCommand<Void, Void>
+        @DisplayName("When command is subscribed after execution")
+        class WhenSubscribeAfterExecute extends WhenSubscribeAfterExecuteSpecification<Void, Void>
         {
             @Nonnull
             @Override
@@ -88,9 +85,7 @@ public class SyncEmptyCommandTest extends AbstractSyncCommandTest
         }
     }
 
-    @Nested
-    @DisplayName("After create empty command with observable")
-    class AfterCreateEmptyCommandWithObservable extends AfterCreateCommandWithObservable<Void, Void>
+    abstract class WhenCreateEmptyWithCanExecuteSpecification extends WhenCreateWithCanExecuteSpecification<Void, Void>
     {
         private TestScheduler testScheduler;
         private TestSubject<Boolean> testSubject;
@@ -112,10 +107,9 @@ public class SyncEmptyCommandTest extends AbstractSyncCommandTest
         }
 
         @Nested
-        @DisplayName("After observable emits true")
-        class AfterEmitsTrue extends AfterObservableEmitsTrue<Void, Void>
+        @DisplayName("When CanExecute observable emits true")
+        class WhenCanExecuteEmitsTrue extends WhenCanExecuteEmitsTrueSpecification<Void, Void>
         {
-
             @Nonnull
             @Override
             public ReactiveCommand<Void, Void> getCommand()
@@ -132,10 +126,9 @@ public class SyncEmptyCommandTest extends AbstractSyncCommandTest
         }
 
         @Nested
-        @DisplayName("After observable emits false")
-        class AfterEmitsFalse extends AfterObservableEmitsFalse<Void, Void>
+        @DisplayName("When CanExecute observable emits false")
+        class WhenCanExecuteEmitsFalse extends WhenCanExecuteEmitsFalseSpecification<Void, Void>
         {
-
             @Nonnull
             @Override
             public ReactiveCommand<Void, Void> getCommand()
@@ -152,8 +145,8 @@ public class SyncEmptyCommandTest extends AbstractSyncCommandTest
         }
 
         @Nested
-        @DisplayName("After execute disabled command")
-        class AfterExecuteDisabled extends AfterExecuteDisabledCommand<Void, Void>
+        @DisplayName("When command is executed while disabled")
+        class WhenExecuteWhileDisabled extends WhenExecuteWhileDisabledSpecification<Void, Void>
         {
             @BeforeEach
             public void disableCommand()
