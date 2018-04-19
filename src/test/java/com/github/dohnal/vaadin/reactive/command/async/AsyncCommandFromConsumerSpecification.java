@@ -6,7 +6,6 @@ import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
-import com.github.dohnal.vaadin.reactive.command.AsyncCommand;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -18,18 +17,15 @@ import rx.schedulers.TestScheduler;
 import rx.subjects.TestSubject;
 
 /**
- * Tests for {@link AsyncCommand} created by
+ * Tests for {@link ReactiveCommand} created by
  * {@link ReactiveCommand#createAsync(Consumer, Executor)}
  * {@link ReactiveCommand#createAsync(Observable, Consumer, Executor)}
  *
  * @author dohnal
  */
-@DisplayName("Asynchronous command from consumer")
-public class AsyncCommandFromConsumerTest extends AbstractAsyncCommandTest
+public interface AsyncCommandFromConsumerSpecification extends BaseAsyncCommandSpecification
 {
-    @Nested
-    @DisplayName("After create command from consumer")
-    class AfterCreateCommandFromConsumer extends AfterCreateCommand<Integer, Void>
+    abstract class WhenCreateFromConsumerSpecification extends WhenCreateSpecification<Integer, Void>
     {
         private TestExecutor testExecutor;
         private Consumer<Integer> execution;
@@ -59,8 +55,8 @@ public class AsyncCommandFromConsumerTest extends AbstractAsyncCommandTest
         }
 
         @Nested
-        @DisplayName("During execute")
-        class DuringExecute extends DuringExecuteCommand<Integer, Void>
+        @DisplayName("When command is executed")
+        class WhenExecute extends WhenExecuteSpecification<Integer, Void>
         {
             protected final Integer INPUT = 5;
 
@@ -86,7 +82,7 @@ public class AsyncCommandFromConsumerTest extends AbstractAsyncCommandTest
 
             @Nullable
             @Override
-            protected Void getCorrectResult()
+            protected Void getResult()
             {
                 return null;
             }
@@ -102,29 +98,8 @@ public class AsyncCommandFromConsumerTest extends AbstractAsyncCommandTest
         }
 
         @Nested
-        @DisplayName("After execute")
-        class AfterExecute extends AfterExecuteCommand<Integer, Void>
-        {
-            protected final Integer INPUT = 5;
-
-            @Nonnull
-            @Override
-            public ReactiveCommand<Integer, Void> getCommand()
-            {
-                return command;
-            }
-
-            @Nullable
-            @Override
-            protected Integer getInput()
-            {
-                return INPUT;
-            }
-        }
-
-        @Nested
-        @DisplayName("During execute with error")
-        class DuringExecuteWithError extends DuringExecuteCommandWithError<Integer, Void>
+        @DisplayName("When command is executed with error")
+        class WhenExecuteWithError extends WhenExecuteWithErrorSpecification<Integer, Void>
         {
             protected final Integer INPUT = 5;
             protected final Throwable ERROR = new RuntimeException("Error");
@@ -167,8 +142,29 @@ public class AsyncCommandFromConsumerTest extends AbstractAsyncCommandTest
         }
 
         @Nested
-        @DisplayName("After execute with error")
-        class AfterExecuteWithError extends AfterExecuteCommandWithError<Integer, Void>
+        @DisplayName("When subscribed after execution")
+        class WhenSubscribeAfterExecute extends WhenSubscribeAfterExecuteSpecification<Integer, Void>
+        {
+            protected final Integer INPUT = 5;
+
+            @Nonnull
+            @Override
+            public ReactiveCommand<Integer, Void> getCommand()
+            {
+                return command;
+            }
+
+            @Nullable
+            @Override
+            protected Integer getInput()
+            {
+                return INPUT;
+            }
+        }
+
+        @Nested
+        @DisplayName("When subscribed after execution with error")
+        class WhenSubscribeAfterExecuteWithError extends WhenSubscribeAfterExecuteWithErrorSpecification<Integer, Void>
         {
             protected final Integer INPUT = 5;
 
@@ -188,9 +184,8 @@ public class AsyncCommandFromConsumerTest extends AbstractAsyncCommandTest
         }
     }
 
-    @Nested
-    @DisplayName("After create command from consumer with observable")
-    class AfterCreateCommandFromRunnableWithObservable extends AfterCreateCommandWithObservable<Integer, Void>
+    abstract class WhenCreateFromConsumerWithCanExecuteSpecification extends
+            WhenCreateWithCanExecuteSpecification<Integer, Void>
     {
         private TestExecutor testExecutor;
         private Consumer<Integer> execution;
@@ -217,8 +212,8 @@ public class AsyncCommandFromConsumerTest extends AbstractAsyncCommandTest
         }
 
         @Nested
-        @DisplayName("After observable emits true")
-        class AfterEmitsTrue extends AfterObservableEmitsTrue<Integer, Void>
+        @DisplayName("When CanExecute observable emits true")
+        class WhenCanExecuteEmitsTrue extends WhenCanExecuteEmitsTrueSpecification<Integer, Void>
         {
             @Nonnull
             @Override
@@ -236,10 +231,9 @@ public class AsyncCommandFromConsumerTest extends AbstractAsyncCommandTest
         }
 
         @Nested
-        @DisplayName("After observable emits false")
-        class AfterEmitsFalse extends AfterObservableEmitsFalse<Integer, Void>
+        @DisplayName("When CanExecute observable emits false")
+        class WhenCanExecuteEmitsFalse extends WhenCanExecuteEmitsFalseSpecification<Integer, Void>
         {
-
             @Nonnull
             @Override
             public ReactiveCommand<Integer, Void> getCommand()
@@ -256,8 +250,8 @@ public class AsyncCommandFromConsumerTest extends AbstractAsyncCommandTest
         }
 
         @Nested
-        @DisplayName("After execute disabled command")
-        class AfterExecuteDisabled extends AfterExecuteDisabledCommand<Integer, Void>
+        @DisplayName("When command is executed while disabled")
+        class WhenExecuteWhileDisabled extends WhenExecuteWhileDisabledSpecification<Integer, Void>
         {
             protected final Integer INPUT = 5;
 

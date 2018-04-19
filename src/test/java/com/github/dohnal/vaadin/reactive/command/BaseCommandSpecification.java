@@ -425,7 +425,7 @@ public interface BaseCommandSpecification
         protected abstract T getInput();
 
         @BeforeEach
-        void execute()
+        protected void execute()
         {
             getCommand().execute(getInput());
         }
@@ -499,7 +499,7 @@ public interface BaseCommandSpecification
         protected abstract T getInput();
 
         @BeforeEach
-        void execute()
+        protected void execute()
         {
             getCommand().getError().test();
 

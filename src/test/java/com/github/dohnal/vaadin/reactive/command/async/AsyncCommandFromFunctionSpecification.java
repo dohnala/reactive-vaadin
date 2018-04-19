@@ -6,7 +6,6 @@ import java.util.concurrent.Executor;
 import java.util.function.Function;
 
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
-import com.github.dohnal.vaadin.reactive.command.AsyncCommand;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -18,18 +17,15 @@ import rx.schedulers.TestScheduler;
 import rx.subjects.TestSubject;
 
 /**
- * Tests for {@link AsyncCommand} created by
+ * Tests for {@link ReactiveCommand} created by
  * {@link ReactiveCommand#createAsync(Function, Executor)}
  * {@link ReactiveCommand#createAsync(Observable, Function, Executor)}
  *
  * @author dohnal
  */
-@DisplayName("Asynchronous command from function")
-public class AsyncCommandFromFunctionTest extends AbstractAsyncCommandTest
+public interface AsyncCommandFromFunctionSpecification extends BaseAsyncCommandSpecification
 {
-    @Nested
-    @DisplayName("After create command from function")
-    class AfterCreateCommandFromFunction extends AfterCreateCommand<Integer, Integer>
+    abstract class WhenCreateFromFunctionSpecification extends WhenCreateSpecification<Integer, Integer>
     {
         private TestExecutor testExecutor;
         private Function<Integer, Integer> execution;
@@ -59,8 +55,8 @@ public class AsyncCommandFromFunctionTest extends AbstractAsyncCommandTest
         }
 
         @Nested
-        @DisplayName("During execute")
-        class DuringExecute extends DuringExecuteCommand<Integer, Integer>
+        @DisplayName("When command is executed")
+        class WhenExecute extends WhenExecuteSpecification<Integer, Integer>
         {
             protected final Integer INPUT = 5;
             protected final Integer RESULT = 7;
@@ -87,7 +83,7 @@ public class AsyncCommandFromFunctionTest extends AbstractAsyncCommandTest
 
             @Nullable
             @Override
-            protected Integer getCorrectResult()
+            protected Integer getResult()
             {
                 return RESULT;
             }
@@ -103,29 +99,8 @@ public class AsyncCommandFromFunctionTest extends AbstractAsyncCommandTest
         }
 
         @Nested
-        @DisplayName("After execute")
-        class AfterExecute extends AfterExecuteCommand<Integer, Integer>
-        {
-            protected final Integer INPUT = 5;
-
-            @Nonnull
-            @Override
-            public ReactiveCommand<Integer, Integer> getCommand()
-            {
-                return command;
-            }
-
-            @Nullable
-            @Override
-            protected Integer getInput()
-            {
-                return INPUT;
-            }
-        }
-
-        @Nested
-        @DisplayName("During execute with error")
-        class DuringExecuteWithError extends DuringExecuteCommandWithError<Integer, Integer>
+        @DisplayName("When command is executed with error")
+        class WhenExecuteWithError extends WhenExecuteWithErrorSpecification<Integer, Integer>
         {
             protected final Integer INPUT = 5;
             protected final Throwable ERROR = new RuntimeException("Error");
@@ -168,8 +143,30 @@ public class AsyncCommandFromFunctionTest extends AbstractAsyncCommandTest
         }
 
         @Nested
-        @DisplayName("After execute with error")
-        class AfterExecuteWithError extends AfterExecuteCommandWithError<Integer, Integer>
+        @DisplayName("When subscribed after execution")
+        class WhenSubscribeAfterExecute extends WhenSubscribeAfterExecuteSpecification<Integer, Integer>
+        {
+            protected final Integer INPUT = 5;
+
+            @Nonnull
+            @Override
+            public ReactiveCommand<Integer, Integer> getCommand()
+            {
+                return command;
+            }
+
+            @Nullable
+            @Override
+            protected Integer getInput()
+            {
+                return INPUT;
+            }
+        }
+
+        @Nested
+        @DisplayName("When subscribed after execution with error")
+        class WhenSubscribeAfterExecuteWithError extends WhenSubscribeAfterExecuteWithErrorSpecification<Integer,
+                Integer>
         {
             protected final Integer INPUT = 5;
 
@@ -189,9 +186,8 @@ public class AsyncCommandFromFunctionTest extends AbstractAsyncCommandTest
         }
     }
 
-    @Nested
-    @DisplayName("After create command from function with observable")
-    class AfterCreateCommandFromRunnableWithObservable extends AfterCreateCommandWithObservable<Integer, Integer>
+    abstract class WhenCreateFromFunctionWithCanExecuteSpecification extends
+            WhenCreateWithCanExecuteSpecification<Integer, Integer>
     {
         private TestExecutor testExecutor;
         private Function<Integer, Integer> execution;
@@ -218,8 +214,8 @@ public class AsyncCommandFromFunctionTest extends AbstractAsyncCommandTest
         }
 
         @Nested
-        @DisplayName("After observable emits true")
-        class AfterEmitsTrue extends AfterObservableEmitsTrue<Integer, Integer>
+        @DisplayName("When CanExecute observable emits true")
+        class WhenCanExecuteEmitsTrue extends WhenCanExecuteEmitsTrueSpecification<Integer, Integer>
         {
             @Nonnull
             @Override
@@ -237,10 +233,9 @@ public class AsyncCommandFromFunctionTest extends AbstractAsyncCommandTest
         }
 
         @Nested
-        @DisplayName("After observable emits false")
-        class AfterEmitsFalse extends AfterObservableEmitsFalse<Integer, Integer>
+        @DisplayName("When CanExecute observable emits false")
+        class WhenCanExecuteEmitsFalse extends WhenCanExecuteEmitsFalseSpecification<Integer, Integer>
         {
-
             @Nonnull
             @Override
             public ReactiveCommand<Integer, Integer> getCommand()
@@ -257,8 +252,8 @@ public class AsyncCommandFromFunctionTest extends AbstractAsyncCommandTest
         }
 
         @Nested
-        @DisplayName("After execute disabled command")
-        class AfterExecuteDisabled extends AfterExecuteDisabledCommand<Integer, Integer>
+        @DisplayName("When command is executed while disabled")
+        class WhenExecuteWhileDisabled extends WhenExecuteWhileDisabledSpecification<Integer, Integer>
         {
             protected final Integer INPUT = 5;
 

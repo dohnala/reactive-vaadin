@@ -5,7 +5,6 @@ import javax.annotation.Nullable;
 import java.util.concurrent.Executor;
 
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
-import com.github.dohnal.vaadin.reactive.command.AsyncCommand;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -17,19 +16,15 @@ import rx.schedulers.TestScheduler;
 import rx.subjects.TestSubject;
 
 /**
- * Tests for {@link AsyncCommand} created by
+ * Tests for {@link ReactiveCommand} created by
  * {@link ReactiveCommand#createAsync(Runnable, Executor)}
  * {@link ReactiveCommand#createAsync(Observable, Runnable, Executor)}
  *
  * @author dohnal
  */
-@DisplayName("Asynchronous command from runnable")
-public class AsyncCommandFromRunnableTest extends AbstractAsyncCommandTest
+public interface AsyncCommandFromRunnableSpecification extends BaseAsyncCommandSpecification
 {
-
-    @Nested
-    @DisplayName("After create command from runnable")
-    class AfterCreateCommandFromRunnable extends AfterCreateCommand<Void, Void>
+    abstract class WhenCreateFromRunnableSpecification extends WhenCreateSpecification<Void, Void>
     {
         private TestExecutor testExecutor;
         private Runnable execution;
@@ -58,8 +53,8 @@ public class AsyncCommandFromRunnableTest extends AbstractAsyncCommandTest
         }
 
         @Nested
-        @DisplayName("During execute")
-        class DuringExecute extends DuringExecuteCommand<Void, Void>
+        @DisplayName("When command is executed")
+        class WhenExecute extends WhenExecuteSpecification<Void, Void>
         {
             @BeforeEach
             protected void mockExecution()
@@ -83,7 +78,7 @@ public class AsyncCommandFromRunnableTest extends AbstractAsyncCommandTest
 
             @Nullable
             @Override
-            protected Void getCorrectResult()
+            protected Void getResult()
             {
                 return null;
             }
@@ -99,27 +94,8 @@ public class AsyncCommandFromRunnableTest extends AbstractAsyncCommandTest
         }
 
         @Nested
-        @DisplayName("After execute")
-        class AfterExecute extends AfterExecuteCommand<Void, Void>
-        {
-            @Nonnull
-            @Override
-            public ReactiveCommand<Void, Void> getCommand()
-            {
-                return command;
-            }
-
-            @Nullable
-            @Override
-            protected Void getInput()
-            {
-                return null;
-            }
-        }
-
-        @Nested
-        @DisplayName("During execute with error")
-        class DuringExecuteWithError extends DuringExecuteCommandWithError<Void, Void>
+        @DisplayName("When command is executed with error")
+        class WhenExecuteWithError extends WhenExecuteWithErrorSpecification<Void, Void>
         {
             private Throwable ERROR = new RuntimeException("Error");
 
@@ -161,8 +137,27 @@ public class AsyncCommandFromRunnableTest extends AbstractAsyncCommandTest
         }
 
         @Nested
-        @DisplayName("After execute with error")
-        class AfterExecuteWithError extends AfterExecuteCommandWithError<Void, Void>
+        @DisplayName("When command is subscribed after execution")
+        class WhenSubscribeAfterExecute extends WhenSubscribeAfterExecuteSpecification<Void, Void>
+        {
+            @Nonnull
+            @Override
+            public ReactiveCommand<Void, Void> getCommand()
+            {
+                return command;
+            }
+
+            @Nullable
+            @Override
+            protected Void getInput()
+            {
+                return null;
+            }
+        }
+
+        @Nested
+        @DisplayName("When command is subscribed after execution")
+        class WhenSubscribeAfterExecuteWithError extends WhenSubscribeAfterExecuteWithErrorSpecification<Void, Void>
         {
             @Nonnull
             @Override
@@ -180,9 +175,8 @@ public class AsyncCommandFromRunnableTest extends AbstractAsyncCommandTest
         }
     }
 
-    @Nested
-    @DisplayName("After create command from runnable with observable")
-    class AfterCreateCommandFromRunnableWithObservable extends AfterCreateCommandWithObservable<Void, Void>
+    abstract class WhenCreateFromRunnableWithCanExecuteSpecification extends
+            WhenCreateWithCanExecuteSpecification<Void, Void>
     {
         private TestExecutor testExecutor = new TestExecutor();
         private Runnable execution;
@@ -207,10 +201,9 @@ public class AsyncCommandFromRunnableTest extends AbstractAsyncCommandTest
         }
 
         @Nested
-        @DisplayName("After observable emits true")
-        class AfterEmitsTrue extends AfterObservableEmitsTrue<Void, Void>
+        @DisplayName("When CanExecute observable emits true")
+        class WhenCanExecuteEmitsTrue extends WhenCanExecuteEmitsTrueSpecification<Void, Void>
         {
-
             @Nonnull
             @Override
             public ReactiveCommand<Void, Void> getCommand()
@@ -227,10 +220,9 @@ public class AsyncCommandFromRunnableTest extends AbstractAsyncCommandTest
         }
 
         @Nested
-        @DisplayName("After observable emits false")
-        class AfterEmitsFalse extends AfterObservableEmitsFalse<Void, Void>
+        @DisplayName("When CanExecute observable emits false")
+        class WhenCanExecuteEmitsFalse extends WhenCanExecuteEmitsFalseSpecification<Void, Void>
         {
-
             @Nonnull
             @Override
             public ReactiveCommand<Void, Void> getCommand()
@@ -247,8 +239,8 @@ public class AsyncCommandFromRunnableTest extends AbstractAsyncCommandTest
         }
 
         @Nested
-        @DisplayName("After execute disabled command")
-        class AfterExecuteDisabled extends AfterExecuteDisabledCommand<Void, Void>
+        @DisplayName("When command is executed while disabled")
+        class WhenExecuteWhileDisabled extends WhenExecuteWhileDisabledSpecification<Void, Void>
         {
             @BeforeEach
             public void disableCommand()

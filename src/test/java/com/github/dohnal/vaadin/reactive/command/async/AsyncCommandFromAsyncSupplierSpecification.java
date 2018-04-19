@@ -6,7 +6,6 @@ import java.util.concurrent.CompletableFuture;
 
 import com.github.dohnal.vaadin.reactive.AsyncSupplier;
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
-import com.github.dohnal.vaadin.reactive.command.AsyncCommand;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -18,18 +17,15 @@ import rx.schedulers.TestScheduler;
 import rx.subjects.TestSubject;
 
 /**
- * Tests for {@link AsyncCommand} created by
+ * Tests for {@link ReactiveCommand} created by
  * {@link ReactiveCommand#createFromAsyncSupplier(AsyncSupplier)}
  * {@link ReactiveCommand#createFromAsyncSupplier(Observable, AsyncSupplier)}
  *
  * @author dohnal
  */
-@DisplayName("Asynchronous command from asynchronous supplier")
-public class AsyncCommandFromAsyncSupplierTest extends AbstractAsyncCommandTest
+public interface AsyncCommandFromAsyncSupplierSpecification extends BaseAsyncCommandSpecification
 {
-    @Nested
-    @DisplayName("After create command from supplier")
-    class AfterCreateCommandFromSupplier extends AfterCreateCommand<Void, Integer>
+    abstract class WhenCreateFromAsyncSupplierSpecification extends WhenCreateSpecification<Void, Integer>
     {
         private AsyncSupplier<Integer> execution;
         private CompletableFuture<Integer> executionResult;
@@ -59,8 +55,8 @@ public class AsyncCommandFromAsyncSupplierTest extends AbstractAsyncCommandTest
         }
 
         @Nested
-        @DisplayName("After command execution started")
-        class AfterExecuteStarted extends AfterExecuteCommandStarted<Void, Integer>
+        @DisplayName("When command execution started")
+        class WhenExecutionStarted extends WhenExecutionStartedSpecification<Void, Integer>
         {
             @BeforeEach
             protected void mockExecution()
@@ -91,16 +87,10 @@ public class AsyncCommandFromAsyncSupplierTest extends AbstractAsyncCommandTest
             }
 
             @Nested
-            @DisplayName("After command execution finished")
-            class AfterExecuteFinished extends AfterExecuteCommandFinished<Void, Integer>
+            @DisplayName("When command execution finished")
+            class WhenExecutionFinished extends WhenExecutionFinishedSpecification<Void, Integer>
             {
                 protected final Integer RESULT = 5;
-
-                @BeforeEach
-                protected void startExecution()
-                {
-                    getCommand().execute(getInput());
-                }
 
                 @Override
                 protected void finishExecution()
@@ -122,23 +112,17 @@ public class AsyncCommandFromAsyncSupplierTest extends AbstractAsyncCommandTest
                 }
 
                 @Nullable
-                protected Integer getCorrectResult()
+                protected Integer getResult()
                 {
                     return RESULT;
                 }
             }
 
             @Nested
-            @DisplayName("After command execution finished with error")
-            class AfterExecuteFinishedWithError extends AfterExecuteCommandFinishedWithError<Void, Integer>
+            @DisplayName("When command execution finished with error")
+            class WhenExecutionFinishedWithError extends WhenExecutionFinishedWithErrorSpecification<Void, Integer>
             {
                 protected final Throwable ERROR = new RuntimeException("Error");
-
-                @BeforeEach
-                protected void startExecution()
-                {
-                    getCommand().execute(getInput());
-                }
 
                 @Override
                 protected void finishExecution()
@@ -169,16 +153,19 @@ public class AsyncCommandFromAsyncSupplierTest extends AbstractAsyncCommandTest
         }
 
         @Nested
-        @DisplayName("After execute")
-        class AfterExecute extends AfterExecuteCommand<Void, Integer>
+        @DisplayName("When command is subscribed after execution")
+        class WhenSubscribeAfterExecute extends WhenSubscribeAfterExecuteSpecification<Void, Integer>
         {
             protected final Integer RESULT = 5;
 
+            @Override
             @BeforeEach
-            protected void mockExecution()
+            protected void execute()
             {
                 Mockito.when(execution.get()).thenReturn(executionResult);
                 executionResult.complete(RESULT);
+
+                super.execute();
             }
 
             @Nonnull
@@ -197,16 +184,19 @@ public class AsyncCommandFromAsyncSupplierTest extends AbstractAsyncCommandTest
         }
 
         @Nested
-        @DisplayName("After execute with error")
-        class AfterExecuteWithError extends AfterExecuteCommandWithError<Void, Integer>
+        @DisplayName("When command is subscribed after execution with error")
+        class WhenSubscribeAfterExecuteWithError extends WhenSubscribeAfterExecuteWithErrorSpecification<Void, Integer>
         {
             protected final Throwable ERROR = new RuntimeException("Error");
 
+            @Override
             @BeforeEach
-            protected void mockExecution()
+            protected void execute()
             {
                 Mockito.when(execution.get()).thenReturn(executionResult);
                 executionResult.completeExceptionally(ERROR);
+
+                super.execute();
             }
 
             @Nonnull
@@ -225,9 +215,8 @@ public class AsyncCommandFromAsyncSupplierTest extends AbstractAsyncCommandTest
         }
     }
 
-    @Nested
-    @DisplayName("After create command from asynchronous supplier with observable")
-    class AfterCreateCommandFromAsyncSupplierWitObservable extends AfterCreateCommandWithObservable<Void, Integer>
+    abstract class WhenCreateFromAsyncSupplierWithCanExecuteSpecification extends
+            WhenCreateWithCanExecuteSpecification<Void, Integer>
     {
         private AsyncSupplier<Integer> execution;
         private CompletableFuture<Integer> executionResult;
@@ -254,10 +243,9 @@ public class AsyncCommandFromAsyncSupplierTest extends AbstractAsyncCommandTest
         }
 
         @Nested
-        @DisplayName("After observable emits true")
-        class AfterEmitsTrue extends AfterObservableEmitsTrue<Void, Integer>
+        @DisplayName("When CanExecute observable emits true")
+        class WhenCanExecuteEmitsTrue extends WhenCanExecuteEmitsTrueSpecification<Void, Integer>
         {
-
             @Nonnull
             @Override
             public ReactiveCommand<Void, Integer> getCommand()
@@ -274,10 +262,9 @@ public class AsyncCommandFromAsyncSupplierTest extends AbstractAsyncCommandTest
         }
 
         @Nested
-        @DisplayName("After observable emits false")
-        class AfterEmitsFalse extends AfterObservableEmitsFalse<Void, Integer>
+        @DisplayName("When CanExecute observable emits false")
+        class WhenCanExecuteEmitsFalse extends WhenCanExecuteEmitsFalseSpecification<Void, Integer>
         {
-
             @Nonnull
             @Override
             public ReactiveCommand<Void, Integer> getCommand()
@@ -294,14 +281,16 @@ public class AsyncCommandFromAsyncSupplierTest extends AbstractAsyncCommandTest
         }
 
         @Nested
-        @DisplayName("After observable emits true during execution")
-        class AfterEmitsTrueDuringExecution extends AfterObservableEmitsTrueDuringExecution<Void, Integer>
+        @DisplayName("When CanExecute observable emits true during execution")
+        class WhenCanExecuteEmitsTrueDuringExecution extends WhenCanExecuteEmitsTrueDuringExecutionSpecification<Void, Integer>
         {
-
+            @Override
             @BeforeEach
-            protected void mockExecution()
+            protected void startExecution()
             {
                 Mockito.when(execution.get()).thenReturn(executionResult);
+
+                super.startExecution();
             }
 
             @Nonnull
@@ -326,14 +315,16 @@ public class AsyncCommandFromAsyncSupplierTest extends AbstractAsyncCommandTest
         }
 
         @Nested
-        @DisplayName("After observable emits false during execution")
-        class AfterEmitsFalseDuringExecution extends AfterObservableEmitsFalseDuringExecution<Void, Integer>
+        @DisplayName("When CanExecute observable emits false during execution")
+        class WhenCanExecuteEmitsFalseDuringExecution extends WhenCanExecuteEmitsFalseDuringExecutionSpecification<Void, Integer>
         {
-
+            @Override
             @BeforeEach
-            protected void mockExecution()
+            protected void startExecution()
             {
                 Mockito.when(execution.get()).thenReturn(executionResult);
+
+                super.startExecution();
             }
 
             @Nonnull
@@ -358,8 +349,8 @@ public class AsyncCommandFromAsyncSupplierTest extends AbstractAsyncCommandTest
         }
 
         @Nested
-        @DisplayName("After execute disabled command")
-        class AfterExecuteDisabled extends AfterExecuteDisabledCommand<Void, Integer>
+        @DisplayName("When command is executed while disabled")
+        class WhenExecuteWhileDisabled extends WhenExecuteWhileDisabledSpecification<Void, Integer>
         {
             @BeforeEach
             public void disableCommand()

@@ -6,7 +6,6 @@ import java.util.concurrent.Executor;
 import java.util.function.Supplier;
 
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
-import com.github.dohnal.vaadin.reactive.command.AsyncCommand;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -18,18 +17,15 @@ import rx.schedulers.TestScheduler;
 import rx.subjects.TestSubject;
 
 /**
- * Tests for {@link AsyncCommand} created by
+ * Tests for {@link ReactiveCommand} created by
  * {@link ReactiveCommand#createAsync(Supplier, Executor)}
  * {@link ReactiveCommand#createAsync(Observable, Supplier, Executor)}
  *
  * @author dohnal
  */
-@DisplayName("Asynchronous command from supplier")
-public class AsyncCommandFromSupplierTest extends AbstractAsyncCommandTest
+public interface AsyncCommandFromSupplierSpecification extends BaseAsyncCommandSpecification
 {
-    @Nested
-    @DisplayName("After create command from supplier")
-    class AfterCreateCommandFromSupplier extends AfterCreateCommand<Void, Integer>
+    abstract class WhenCreateFromSupplierSpecification extends WhenCreateSpecification<Void, Integer>
     {
         private TestExecutor testExecutor;
         private Supplier<Integer> execution;
@@ -59,8 +55,8 @@ public class AsyncCommandFromSupplierTest extends AbstractAsyncCommandTest
         }
 
         @Nested
-        @DisplayName("During execute")
-        class DuringExecute extends DuringExecuteCommand<Void, Integer>
+        @DisplayName("When command is executed")
+        class WhenExecute extends WhenExecuteSpecification<Void, Integer>
         {
             protected final Integer RESULT = 5;
 
@@ -86,7 +82,7 @@ public class AsyncCommandFromSupplierTest extends AbstractAsyncCommandTest
 
             @Nullable
             @Override
-            protected Integer getCorrectResult()
+            protected Integer getResult()
             {
                 return RESULT;
             }
@@ -102,27 +98,8 @@ public class AsyncCommandFromSupplierTest extends AbstractAsyncCommandTest
         }
 
         @Nested
-        @DisplayName("After execute")
-        class AfterExecute extends AfterExecuteCommand<Void, Integer>
-        {
-            @Nonnull
-            @Override
-            public ReactiveCommand<Void, Integer> getCommand()
-            {
-                return command;
-            }
-
-            @Nullable
-            @Override
-            protected Void getInput()
-            {
-                return null;
-            }
-        }
-
-        @Nested
-        @DisplayName("During execute with error")
-        class DuringExecuteWithError extends DuringExecuteCommandWithError<Void, Integer>
+        @DisplayName("When command is executed with error")
+        class WhenExecuteWithError extends WhenExecuteWithErrorSpecification<Void, Integer>
         {
             private final Throwable ERROR = new RuntimeException("Error");
 
@@ -164,8 +141,27 @@ public class AsyncCommandFromSupplierTest extends AbstractAsyncCommandTest
         }
 
         @Nested
-        @DisplayName("After execute with error")
-        class AfterExecuteWithError extends AfterExecuteCommandWithError<Void, Integer>
+        @DisplayName("When command is subscribed after execution")
+        class WhenSubscribeAfterExecute extends WhenSubscribeAfterExecuteSpecification<Void, Integer>
+        {
+            @Nonnull
+            @Override
+            public ReactiveCommand<Void, Integer> getCommand()
+            {
+                return command;
+            }
+
+            @Nullable
+            @Override
+            protected Void getInput()
+            {
+                return null;
+            }
+        }
+
+        @Nested
+        @DisplayName("When command is subscribed after execution with error")
+        class WhenSubscribeAfterExecuteWithError extends WhenSubscribeAfterExecuteWithErrorSpecification<Void, Integer>
         {
             @Nonnull
             @Override
@@ -183,9 +179,8 @@ public class AsyncCommandFromSupplierTest extends AbstractAsyncCommandTest
         }
     }
 
-    @Nested
-    @DisplayName("After create command from supplier with observable")
-    class AfterCreateCommandFromSupplierWithObservable extends AfterCreateCommandWithObservable<Void, Integer>
+    abstract class WhenCreateFromSupplierWithCanExecuteSpecification extends
+            WhenCreateWithCanExecuteSpecification<Void, Integer>
     {
         private TestExecutor testExecutor;
         private Supplier<Integer> execution;
@@ -212,10 +207,9 @@ public class AsyncCommandFromSupplierTest extends AbstractAsyncCommandTest
         }
 
         @Nested
-        @DisplayName("After observable emits true")
-        class AfterEmitsTrue extends AfterObservableEmitsTrue<Void, Integer>
+        @DisplayName("When CanExecute observable emits true")
+        class WhenCanExecuteEmitsTrue extends WhenCanExecuteEmitsTrueSpecification<Void, Integer>
         {
-
             @Nonnull
             @Override
             public ReactiveCommand<Void, Integer> getCommand()
@@ -232,10 +226,9 @@ public class AsyncCommandFromSupplierTest extends AbstractAsyncCommandTest
         }
 
         @Nested
-        @DisplayName("After observable emits false")
-        class AfterEmitsFalse extends AfterObservableEmitsFalse<Void, Integer>
+        @DisplayName("When CanExecute observable emits true")
+        class WhenCanExecuteEmitsFalse extends WhenCanExecuteEmitsFalseSpecification<Void, Integer>
         {
-
             @Nonnull
             @Override
             public ReactiveCommand<Void, Integer> getCommand()
@@ -252,8 +245,8 @@ public class AsyncCommandFromSupplierTest extends AbstractAsyncCommandTest
         }
 
         @Nested
-        @DisplayName("After execute disabled command")
-        class AfterExecuteDisabled extends AfterExecuteDisabledCommand<Void, Integer>
+        @DisplayName("When command is executed while disabled")
+        class WhenExecuteWhileDisabled extends WhenExecuteWhileDisabledSpecification<Void, Integer>
         {
             @BeforeEach
             public void disableCommand()
