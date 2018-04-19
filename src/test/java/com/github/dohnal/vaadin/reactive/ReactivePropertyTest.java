@@ -1,9 +1,8 @@
 package com.github.dohnal.vaadin.reactive;
 
 import com.github.dohnal.vaadin.reactive.property.EmptyPropertySpecification;
-import com.github.dohnal.vaadin.reactive.property.PropertyFromEmptyPropertySpecification;
 import com.github.dohnal.vaadin.reactive.property.PropertyFromObservableSpecification;
-import com.github.dohnal.vaadin.reactive.property.PropertyFromPropertyWithValueSpecification;
+import com.github.dohnal.vaadin.reactive.property.PropertyFromPropertySpecification;
 import com.github.dohnal.vaadin.reactive.property.PropertyWithValueSpecification;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -18,8 +17,7 @@ public class ReactivePropertyTest implements
         EmptyPropertySpecification,
         PropertyWithValueSpecification,
         PropertyFromObservableSpecification,
-        PropertyFromEmptyPropertySpecification,
-        PropertyFromPropertyWithValueSpecification
+        PropertyFromPropertySpecification
 {
     @Nested
     @DisplayName("When new reactive property is created")
