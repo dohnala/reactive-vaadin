@@ -7,6 +7,7 @@ import com.github.dohnal.vaadin.reactive.command.async.AsyncCommandFromFunctionS
 import com.github.dohnal.vaadin.reactive.command.async.AsyncCommandFromRunnableSpecification;
 import com.github.dohnal.vaadin.reactive.command.async.AsyncCommandFromSupplierSpecification;
 import com.github.dohnal.vaadin.reactive.command.async.AsyncEmptyCommandSpecification;
+import com.github.dohnal.vaadin.reactive.command.composite.CompositeCommandSpecification;
 import com.github.dohnal.vaadin.reactive.command.progress.ProgressCommandFromAsyncProgressFunctionSpecification;
 import com.github.dohnal.vaadin.reactive.command.progress.ProgressCommandFromAsyncProgressSupplierSpecification;
 import com.github.dohnal.vaadin.reactive.command.progress.ProgressCommandFromBiConsumerSpecification;
@@ -204,5 +205,22 @@ public class ReactiveCommandTest
         @Nested
         @DisplayName("From asynchronous progress function with CanExecute")
         class FromAsyncProgressFunctionWithCanExecute extends WhenCreateFromAsyncProgressFunctionWithCanExecuteSpecification {}
+    }
+
+    @Nested
+    @DisplayName("When new composite command is created")
+    class WhenCreateComposite implements CompositeCommandSpecification
+    {
+        @Nested
+        @DisplayName("From no child commands")
+        class FromNoChildCommands extends WhenCreateFromNoCommandsSpecification {}
+
+        @Nested
+        @DisplayName("From child commands")
+        class FromChildCommands extends WhenCreateFromCommandsSpecification {}
+
+        @Nested
+        @DisplayName("From child commands with CanExecute")
+        class FromChildCommandsWithCanExecute extends WhenCreateFromCommandsWithCanExecuteSpecification {}
     }
 }

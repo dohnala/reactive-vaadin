@@ -2,6 +2,7 @@ package com.github.dohnal.vaadin.reactive;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
@@ -10,6 +11,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.github.dohnal.vaadin.reactive.command.AsyncCommand;
+import com.github.dohnal.vaadin.reactive.command.CompositeCommand;
 import com.github.dohnal.vaadin.reactive.command.ProgressCommand;
 import com.github.dohnal.vaadin.reactive.command.SyncCommand;
 import rx.Observable;
@@ -696,6 +698,36 @@ public interface ReactiveCommand<T, R>
                                                        final @Nonnull Executor executor)
     {
         return createFromAsyncProgressFunction(canExecute, AsyncProgressFunction.create(execution, executor));
+    }
+
+    /**
+     * Creates a new composite command composed of given commands
+     *
+     * @param commands commands to compose
+     * @param <T> type of commands input
+     * @param <R> type of commands result
+     * @return created composite reactive commands
+     */
+    @Nonnull
+    static <T, R> ReactiveCommand<T, List<R>> createComposite(final @Nonnull List<ReactiveCommand<T, R>> commands)
+    {
+        return createComposite(Observable.just(true), commands);
+    }
+
+    /**
+     * Creates a new composite command composed of given commands
+     *
+     * @param canExecute observable which controls command executability
+     * @param commands commands to compose
+     * @param <T> type of commands input
+     * @param <R> type of commands result
+     * @return created composite reactive commands
+     */
+    @Nonnull
+    static <T, R> ReactiveCommand<T, List<R>> createComposite(final @Nonnull Observable<Boolean> canExecute,
+                                                              final @Nonnull List<ReactiveCommand<T, R>> commands)
+    {
+        return new CompositeCommand<>(canExecute, commands);
     }
 
     /**

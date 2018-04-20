@@ -144,13 +144,13 @@ public interface ProgressCommandFromAsyncProgressFunctionSpecification extends B
 
                 @Test
                 @Override
-                @DisplayName("Progress observable should reset back to 0")
+                @DisplayName("Progress observable should not emit any values")
                 public void testProgress()
                 {
                     getCommand().getProgress().test()
                             .assertValuesAndClear(1.0f)
                             .perform(this::finishExecution)
-                            .assertValues(0.0f);
+                            .assertNoValues();
                 }
             }
 
@@ -187,13 +187,13 @@ public interface ProgressCommandFromAsyncProgressFunctionSpecification extends B
                 }
 
                 @Test
-                @DisplayName("Progress observable should reset back to 0")
+                @DisplayName("Progress observable should not emit any value")
                 public void testProgress()
                 {
                     getCommand().getProgress().test()
                             .assertValuesAndClear(1.0f)
                             .perform(this::finishExecution)
-                            .assertValues(0.0f);
+                            .assertNoValues();
                 }
             }
         }

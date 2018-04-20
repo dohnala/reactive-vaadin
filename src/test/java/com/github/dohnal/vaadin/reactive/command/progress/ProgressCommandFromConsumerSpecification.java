@@ -98,13 +98,13 @@ public interface ProgressCommandFromConsumerSpecification extends BaseCommandSpe
 
             @Test
             @Override
-            @DisplayName("Progress observable should emit correct values and then reset back to 0")
+            @DisplayName("Progress observable should emit correct values")
             public void testProgress()
             {
                 getCommand().getProgress().test()
                         .assertValuesAndClear(0.0f)
                         .perform(() -> getCommand().execute(getInput()))
-                        .assertValues(0.25f, 0.5f, 0.75f, 1.0f, 0.0f);
+                        .assertValues(0.25f, 0.5f, 0.75f, 1.0f);
             }
 
             @Test
@@ -161,13 +161,13 @@ public interface ProgressCommandFromConsumerSpecification extends BaseCommandSpe
 
             @Test
             @Override
-            @DisplayName("Progress observable should emit correct values and then reset back to 0")
+            @DisplayName("Progress observable should emit correct values")
             public void testProgress()
             {
                 getCommand().getProgress().test()
                         .assertValuesAndClear(0.0f)
                         .perform(() -> getCommand().execute(getInput()))
-                        .assertValues(0.25f, 0.5f, 1.0f, 0.0f);
+                        .assertValues(0.25f, 0.5f, 1.0f);
             }
 
             @Test

@@ -383,13 +383,13 @@ public interface BaseCommandSpecification
         }
 
         @Test
-        @DisplayName("Progress observable should emit 1 and then reset back to 0")
+        @DisplayName("Progress observable should emit 1")
         public void testProgress()
         {
             getCommand().getProgress().test()
                     .assertValuesAndClear(0.0f)
                     .perform(() -> getCommand().execute(getInput()))
-                    .assertValues(1.0f, 0.0f);
+                    .assertValues(1.0f);
         }
     }
 
@@ -408,17 +408,6 @@ public interface BaseCommandSpecification
         protected abstract Throwable getError();
 
         @Test
-        @DisplayName("Error observable should emit correct error")
-        public void testError()
-        {
-            getCommand().getError().test();
-
-            getCommand().getError().test()
-                    .perform(() -> getCommand().execute(getInput()))
-                    .assertValue(getError());
-        }
-
-        @Test
         @DisplayName("Result observable should not emit any value")
         public void testResult()
         {
@@ -427,6 +416,17 @@ public interface BaseCommandSpecification
             getCommand().getResult().test()
                     .perform(() -> getCommand().execute(getInput()))
                     .assertNoValues();
+        }
+
+        @Test
+        @DisplayName("Error observable should emit correct error")
+        public void testError()
+        {
+            getCommand().getError().test();
+
+            getCommand().getError().test()
+                    .perform(() -> getCommand().execute(getInput()))
+                    .assertValue(getError());
         }
 
         @Test
@@ -478,7 +478,7 @@ public interface BaseCommandSpecification
         }
 
         @Test
-        @DisplayName("Progress observable should emit 1 and then reset back to 0")
+        @DisplayName("Progress observable should emit 1")
         public void testProgress()
         {
             getCommand().getError().test();
@@ -486,7 +486,7 @@ public interface BaseCommandSpecification
             getCommand().getProgress().test()
                     .assertValuesAndClear(0.0f)
                     .perform(() -> getCommand().execute(getInput()))
-                    .assertValues(1.0f, 0.0f);
+                    .assertValues(1.0f);
         }
     }
 
@@ -571,13 +571,13 @@ public interface BaseCommandSpecification
         }
 
         @Test
-        @DisplayName("Progress observable should emit 1 and then reset back to 0")
+        @DisplayName("Progress observable should emit 1")
         public void testProgress()
         {
             getCommand().getProgress().test()
                     .assertValuesAndClear(0.0f)
                     .perform(this::finishExecution)
-                    .assertValues(1.0f, 0.0f);
+                    .assertValues(1.0f);
         }
     }
 
@@ -662,13 +662,13 @@ public interface BaseCommandSpecification
         }
 
         @Test
-        @DisplayName("Progress observable should emit 1 and then reset back to 0")
+        @DisplayName("Progress observable should emit 1")
         public void testProgress()
         {
             getCommand().getProgress().test()
                     .assertValuesAndClear(0.0f)
                     .perform(this::finishExecution)
-                    .assertValues(1.0f, 0.0f);
+                    .assertValues(1.0f);
         }
     }
 
@@ -817,11 +817,11 @@ public interface BaseCommandSpecification
         }
 
         @Test
-        @DisplayName("Progress observable should emit 0")
+        @DisplayName("Progress observable should emit 1.0")
         public void testProgress()
         {
             getCommand().getProgress().test()
-                    .assertValue(0.0f);
+                    .assertValue(1.0f);
         }
     }
 
@@ -893,11 +893,11 @@ public interface BaseCommandSpecification
         }
 
         @Test
-        @DisplayName("Progress observable should emit 0")
+        @DisplayName("Progress observable should emit 1.0")
         public void testProgress()
         {
             getCommand().getProgress().test()
-                    .assertValue(0.0f);
+                    .assertValue(1.0f);
         }
     }
 }
