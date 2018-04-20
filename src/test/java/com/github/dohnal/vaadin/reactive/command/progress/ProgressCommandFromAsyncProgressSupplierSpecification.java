@@ -7,7 +7,7 @@ import java.util.concurrent.CompletableFuture;
 import com.github.dohnal.vaadin.reactive.AsyncProgressSupplier;
 import com.github.dohnal.vaadin.reactive.Progress;
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
-import com.github.dohnal.vaadin.reactive.command.ProgressCommand;
+import com.github.dohnal.vaadin.reactive.command.BaseCommandSpecification;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -19,18 +19,15 @@ import rx.schedulers.TestScheduler;
 import rx.subjects.TestSubject;
 
 /**
- * Tests for {@link ProgressCommand} created by
+ * Tests for {@link ReactiveCommand} created by
  * {@link ReactiveCommand#createFromAsyncProgressSupplier(AsyncProgressSupplier)}
  * {@link ReactiveCommand#createFromAsyncProgressSupplier(Observable, AsyncProgressSupplier)}
  *
  * @author dohnal
  */
-@DisplayName("Progress command from asynchronous progress supplier")
-public class ProgressCommandFromAsyncProgressSupplierTest extends AbstractProgressCommandTest
+public interface ProgressCommandFromAsyncProgressSupplierSpecification extends BaseCommandSpecification
 {
-    @Nested
-    @DisplayName("After create command from supplier")
-    class AfterCreateCommandFromSupplier extends AfterCreateCommand<Void, Integer>
+    class WhenCreateFromAsyncProgressSupplierSpecification extends WhenCreateSpecification<Void, Integer>
     {
         private AsyncProgressSupplier<Integer> execution;
         private CompletableFuture<Integer> executionResult;
@@ -60,8 +57,8 @@ public class ProgressCommandFromAsyncProgressSupplierTest extends AbstractProgre
         }
 
         @Nested
-        @DisplayName("After command execution started")
-        class AfterExecuteStarted extends AfterExecuteProgressCommandStarted<Void, Integer>
+        @DisplayName("When command execution started")
+        class WhenExecutionStarted extends WhenExecutionStartedSpecification<Void, Integer>
         {
             @BeforeEach
             protected void mockExecution()
@@ -92,11 +89,15 @@ public class ProgressCommandFromAsyncProgressSupplierTest extends AbstractProgre
                 return null;
             }
 
-            @Nonnull
+            @Test
             @Override
-            protected Float[] getProgress()
+            @DisplayName("Progress observable should emit correct values")
+            public void testProgress()
             {
-                return new Float[]{0.0f, 0.25f, 0.5f, 0.75f, 1.0f};
+                getCommand().getProgress().test()
+                        .assertValuesAndClear(0.0f)
+                        .perform(() -> getCommand().execute(getInput()))
+                        .assertValues(0.25f, 0.5f, 0.75f, 1.0f);
             }
 
             @Test
@@ -109,16 +110,10 @@ public class ProgressCommandFromAsyncProgressSupplierTest extends AbstractProgre
             }
 
             @Nested
-            @DisplayName("After command execution finished")
-            class AfterExecuteFinished extends AfterExecuteProgressCommandFinished<Void, Integer>
+            @DisplayName("When command execution finished")
+            class WhenExecutionFinished extends WhenExecutionFinishedSpecification<Void, Integer>
             {
                 protected final Integer RESULT = 5;
-
-                @BeforeEach
-                protected void startExecution()
-                {
-                    getCommand().execute(getInput());
-                }
 
                 @Override
                 protected void finishExecution()
@@ -140,23 +135,28 @@ public class ProgressCommandFromAsyncProgressSupplierTest extends AbstractProgre
                 }
 
                 @Nullable
-                protected Integer getCorrectResult()
+                protected Integer getResult()
                 {
                     return RESULT;
+                }
+
+                @Test
+                @Override
+                @DisplayName("Progress observable should reset back to 0")
+                public void testProgress()
+                {
+                    getCommand().getProgress().test()
+                            .assertValuesAndClear(1.0f)
+                            .perform(this::finishExecution)
+                            .assertValues(0.0f);
                 }
             }
 
             @Nested
-            @DisplayName("After command execution finished with error")
-            class AfterExecuteFinishedWithError extends AfterExecuteProgressCommandFinishedWithError<Void, Integer>
+            @DisplayName("When command execution finished with error")
+            class WhenExecutionFinishedWithError extends WhenExecutionFinishedWithErrorSpecification<Void, Integer>
             {
                 protected final Throwable ERROR = new RuntimeException("Error");
-
-                @BeforeEach
-                protected void startExecution()
-                {
-                    getCommand().execute(getInput());
-                }
 
                 @Override
                 protected void finishExecution()
@@ -183,17 +183,28 @@ public class ProgressCommandFromAsyncProgressSupplierTest extends AbstractProgre
                 {
                     return ERROR;
                 }
+
+                @Test
+                @DisplayName("Progress observable should reset back to 0")
+                public void testProgress()
+                {
+                    getCommand().getProgress().test()
+                            .assertValuesAndClear(1.0f)
+                            .perform(this::finishExecution)
+                            .assertValues(0.0f);
+                }
             }
         }
 
         @Nested
-        @DisplayName("After execute")
-        class AfterExecute extends AfterExecuteCommand<Void, Integer>
+        @DisplayName("When command is subscribed after execution")
+        class WhenSubscribeAfterExecute extends WhenSubscribeAfterExecuteSpecification<Void, Integer>
         {
             protected final Integer RESULT = 5;
 
+            @Override
             @BeforeEach
-            protected void mockExecution()
+            protected void execute()
             {
                 Mockito.doAnswer(invocation -> {
                     final Progress progress = invocation.getArgument(0);
@@ -208,6 +219,8 @@ public class ProgressCommandFromAsyncProgressSupplierTest extends AbstractProgre
                 }).when(execution).apply(Mockito.any(Progress.class));
 
                 executionResult.complete(RESULT);
+
+                super.execute();
             }
 
             @Nonnull
@@ -226,13 +239,14 @@ public class ProgressCommandFromAsyncProgressSupplierTest extends AbstractProgre
         }
 
         @Nested
-        @DisplayName("After execute with error")
-        class AfterExecuteWithError extends AfterExecuteCommandWithError<Void, Integer>
+        @DisplayName("When command is subscribed after execution with error")
+        class WhenSubscribeAfterExecuteWithError extends WhenSubscribeAfterExecuteWithErrorSpecification<Void, Integer>
         {
             protected final Throwable ERROR = new RuntimeException("Error");
 
+            @Override
             @BeforeEach
-            protected void mockExecution()
+            protected void execute()
             {
                 Mockito.doAnswer(invocation -> {
                     final Progress progress = invocation.getArgument(0);
@@ -245,6 +259,8 @@ public class ProgressCommandFromAsyncProgressSupplierTest extends AbstractProgre
                 }).when(execution).apply(Mockito.any(Progress.class));
 
                 executionResult.completeExceptionally(ERROR);
+
+                super.execute();
             }
 
             @Nonnull
@@ -263,9 +279,8 @@ public class ProgressCommandFromAsyncProgressSupplierTest extends AbstractProgre
         }
     }
 
-    @Nested
-    @DisplayName("After create command from asynchronous supplier with observable")
-    class AfterCreateCommandFromAsyncProgressSupplierWitObservable extends AfterCreateCommandWithObservable<Void, Integer>
+    abstract class WhenCreateFromAsyncProgressSupplierWithCanExecuteSpecification extends
+            WhenCreateWithCanExecuteSpecification<Void, Integer>
     {
         private AsyncProgressSupplier<Integer> execution;
         private CompletableFuture<Integer> executionResult;
@@ -292,10 +307,9 @@ public class ProgressCommandFromAsyncProgressSupplierTest extends AbstractProgre
         }
 
         @Nested
-        @DisplayName("After observable emits true")
-        class AfterEmitsTrue extends AfterObservableEmitsTrue<Void, Integer>
+        @DisplayName("When CanExecute observable emits true")
+        class WhenCanExecuteEmitsTrue extends WhenCanExecuteEmitsTrueSpecification<Void, Integer>
         {
-
             @Nonnull
             @Override
             public ReactiveCommand<Void, Integer> getCommand()
@@ -312,10 +326,9 @@ public class ProgressCommandFromAsyncProgressSupplierTest extends AbstractProgre
         }
 
         @Nested
-        @DisplayName("After observable emits false")
-        class AfterEmitsFalse extends AfterObservableEmitsFalse<Void, Integer>
+        @DisplayName("When CanExecute observable emits false")
+        class WhenCanExecuteEmitsFalse extends WhenCanExecuteEmitsFalseSpecification<Void, Integer>
         {
-
             @Nonnull
             @Override
             public ReactiveCommand<Void, Integer> getCommand()
@@ -332,12 +345,12 @@ public class ProgressCommandFromAsyncProgressSupplierTest extends AbstractProgre
         }
 
         @Nested
-        @DisplayName("After observable emits true during execution")
-        class AfterEmitsTrueDuringExecution extends AfterObservableEmitsTrueDuringExecution<Void, Integer>
+        @DisplayName("When CanExecute observable emits true during execution")
+        class WhenCanExecuteEmitsTrueDuringExecution extends WhenCanExecuteEmitsTrueDuringExecutionSpecification<Void, Integer>
         {
-
+            @Override
             @BeforeEach
-            protected void mockExecution()
+            protected void startExecution()
             {
                 Mockito.doAnswer(invocation -> {
                     final Progress progress = invocation.getArgument(0);
@@ -350,6 +363,8 @@ public class ProgressCommandFromAsyncProgressSupplierTest extends AbstractProgre
 
                     return executionResult;
                 }).when(execution).apply(Mockito.any(Progress.class));
+
+                super.startExecution();
             }
 
             @Nonnull
@@ -374,12 +389,12 @@ public class ProgressCommandFromAsyncProgressSupplierTest extends AbstractProgre
         }
 
         @Nested
-        @DisplayName("After observable emits false during execution")
-        class AfterEmitsFalseDuringExecution extends AfterObservableEmitsFalseDuringExecution<Void, Integer>
+        @DisplayName("When CanExecute observable emits false during execution")
+        class WhenCanExecuteEmitsFalseDuringExecution extends WhenCanExecuteEmitsFalseDuringExecutionSpecification<Void, Integer>
         {
-
+            @Override
             @BeforeEach
-            protected void mockExecution()
+            protected void startExecution()
             {
                 Mockito.doAnswer(invocation -> {
                     final Progress progress = invocation.getArgument(0);
@@ -392,6 +407,8 @@ public class ProgressCommandFromAsyncProgressSupplierTest extends AbstractProgre
 
                     return executionResult;
                 }).when(execution).apply(Mockito.any(Progress.class));
+
+                super.startExecution();
             }
 
             @Nonnull
@@ -416,8 +433,8 @@ public class ProgressCommandFromAsyncProgressSupplierTest extends AbstractProgre
         }
 
         @Nested
-        @DisplayName("After execute disabled command")
-        class AfterExecuteDisabled extends AfterExecuteDisabledCommand<Void, Integer>
+        @DisplayName("When command is executed while disabled")
+        class WhenExecuteWhileDisabled extends WhenExecuteWhileDisabledSpecification<Void, Integer>
         {
             @BeforeEach
             public void disableCommand()

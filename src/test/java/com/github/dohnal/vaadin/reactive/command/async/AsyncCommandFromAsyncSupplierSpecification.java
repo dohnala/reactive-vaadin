@@ -6,6 +6,7 @@ import java.util.concurrent.CompletableFuture;
 
 import com.github.dohnal.vaadin.reactive.AsyncSupplier;
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
+import com.github.dohnal.vaadin.reactive.command.BaseCommandSpecification;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -23,7 +24,7 @@ import rx.subjects.TestSubject;
  *
  * @author dohnal
  */
-public interface AsyncCommandFromAsyncSupplierSpecification extends BaseAsyncCommandSpecification
+public interface AsyncCommandFromAsyncSupplierSpecification extends BaseCommandSpecification
 {
     abstract class WhenCreateFromAsyncSupplierSpecification extends WhenCreateSpecification<Void, Integer>
     {

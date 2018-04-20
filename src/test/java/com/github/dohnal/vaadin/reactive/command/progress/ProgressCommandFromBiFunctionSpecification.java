@@ -3,12 +3,11 @@ package com.github.dohnal.vaadin.reactive.command.progress;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.concurrent.Executor;
-import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 
 import com.github.dohnal.vaadin.reactive.Progress;
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
-import com.github.dohnal.vaadin.reactive.command.ProgressCommand;
+import com.github.dohnal.vaadin.reactive.command.BaseCommandSpecification;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -19,51 +18,49 @@ import rx.schedulers.TestScheduler;
 import rx.subjects.TestSubject;
 
 /**
- * Tests for {@link ProgressCommand} created by
- * {@link ReactiveCommand#createProgress(BiConsumer)}
+ * Tests for {@link ReactiveCommand} created by
+ * {@link ReactiveCommand#createProgress(BiFunction)}
  * {@link ReactiveCommand#createProgress(BiFunction, Executor)}
  *
  * @author dohnal
  */
-@DisplayName("Progress command from bi-consumer")
-public class ProgressCommandFromBiConsumerTest extends AbstractProgressCommandTest
+public interface ProgressCommandFromBiFunctionSpecification extends BaseCommandSpecification
 {
-    @Nested
-    @DisplayName("After create command from bi-consumer")
-    class AfterCreateCommandFromBiConsumer extends AfterCreateCommand<Integer, Void>
+    abstract class WhenCreateFromBiFunctionSpecification extends WhenCreateSpecification<Integer, Integer>
     {
         private TestExecutor testExecutor;
-        private BiConsumer<Progress, Integer> execution;
-        private ReactiveCommand<Integer, Void> command;
+        private BiFunction<Progress, Integer, Integer> execution;
+        private ReactiveCommand<Integer, Integer> command;
 
         @BeforeEach
         @SuppressWarnings("unchecked")
         protected void create()
         {
             testExecutor = new TestExecutor();
-            execution = Mockito.mock(BiConsumer.class);
+            execution = Mockito.mock(BiFunction.class);
             command = ReactiveCommand.createProgress(execution, testExecutor);
         }
 
         @Nonnull
         @Override
-        public ReactiveCommand<Integer, Void> getCommand()
+        public ReactiveCommand<Integer, Integer> getCommand()
         {
             return command;
         }
 
         @Test
-        @DisplayName("BiConsumer should not be run")
-        public void testBiConsumer()
+        @DisplayName("BiFunction should not be run")
+        public void testBiFunction()
         {
-            Mockito.verify(execution, Mockito.never()).accept(Mockito.any(), Mockito.any());
+            Mockito.verify(execution, Mockito.never()).apply(Mockito.any(), Mockito.any());
         }
 
         @Nested
-        @DisplayName("During execute")
-        class DuringExecute extends DuringExecuteProgressCommand<Integer, Void>
+        @DisplayName("When command is executed")
+        class WhenExecute extends WhenExecuteSpecification<Integer, Integer>
         {
             protected final Integer INPUT = 5;
+            protected final Integer RESULT = 7;
 
             @BeforeEach
             protected void mockExecution()
@@ -77,13 +74,13 @@ public class ProgressCommandFromBiConsumerTest extends AbstractProgressCommandTe
                     progress.set(0.75f);
                     progress.set(1.0f);
 
-                    return null;
-                }).when(execution).accept(Mockito.any(Progress.class), Mockito.anyInt());
+                    return RESULT;
+                }).when(execution).apply(Mockito.any(Progress.class), Mockito.anyInt());
             }
 
             @Nonnull
             @Override
-            public ReactiveCommand<Integer, Void> getCommand()
+            public ReactiveCommand<Integer, Integer> getCommand()
             {
                 return command;
             }
@@ -97,52 +94,35 @@ public class ProgressCommandFromBiConsumerTest extends AbstractProgressCommandTe
 
             @Nullable
             @Override
-            protected Void getCorrectResult()
+            protected Integer getResult()
             {
-                return null;
-            }
-
-            @Nonnull
-            @Override
-            protected Float[] getProgress()
-            {
-                return new Float[]{0.0f, 0.25f, 0.5f, 0.75f, 1.0f};
+                return RESULT;
             }
 
             @Test
-            @DisplayName("BiConsumer should be run")
-            public void testBiConsumer()
+            @Override
+            @DisplayName("Progress observable should emit correct values and then reset back to 0")
+            public void testProgress()
+            {
+                getCommand().getProgress().test()
+                        .assertValuesAndClear(0.0f)
+                        .perform(() -> getCommand().execute(getInput()))
+                        .assertValues(0.25f, 0.5f, 0.75f, 1.0f, 0.0f);
+            }
+
+            @Test
+            @DisplayName("BiFunction should be run")
+            public void testBiFunction()
             {
                 command.execute(getInput());
 
-                Mockito.verify(execution).accept(Mockito.any(Progress.class), Mockito.anyInt());
+                Mockito.verify(execution).apply(Mockito.any(Progress.class), Mockito.anyInt());
             }
         }
 
         @Nested
-        @DisplayName("After execute")
-        class AfterExecute extends AfterExecuteCommand<Integer, Void>
-        {
-            protected final Integer INPUT = 5;
-
-            @Nonnull
-            @Override
-            public ReactiveCommand<Integer, Void> getCommand()
-            {
-                return command;
-            }
-
-            @Nullable
-            @Override
-            protected Integer getInput()
-            {
-                return INPUT;
-            }
-        }
-
-        @Nested
-        @DisplayName("During execute with error")
-        class DuringExecuteWithError extends DuringExecuteProgressCommandWithError<Integer, Void>
+        @DisplayName("When command is executed with error")
+        class WhenExecuteWithError extends WhenExecuteWithErrorSpecification<Integer, Integer>
         {
             protected final Integer INPUT = 5;
             protected final Throwable ERROR = new RuntimeException("Error");
@@ -159,12 +139,12 @@ public class ProgressCommandFromBiConsumerTest extends AbstractProgressCommandTe
 
                     throw ERROR;
 
-                }).when(execution).accept(Mockito.any(Progress.class), Mockito.anyInt());
+                }).when(execution).apply(Mockito.any(Progress.class), Mockito.anyInt());
             }
 
             @Nonnull
             @Override
-            public ReactiveCommand<Integer, Void> getCommand()
+            public ReactiveCommand<Integer, Integer> getCommand()
             {
                 return command;
             }
@@ -183,32 +163,57 @@ public class ProgressCommandFromBiConsumerTest extends AbstractProgressCommandTe
                 return ERROR;
             }
 
-            @Nonnull
+            @Test
             @Override
-            protected Float[] getProgress()
+            @DisplayName("Progress observable should emit correct values and then reset back to 0")
+            public void testProgress()
             {
-                return new Float[]{0.0f, 0.25f, 0.5f};
+                getCommand().getProgress().test()
+                        .assertValuesAndClear(0.0f)
+                        .perform(() -> getCommand().execute(getInput()))
+                        .assertValues(0.25f, 0.5f, 1.0f, 0.0f);
             }
 
             @Test
-            @DisplayName("BiConsumer should be run")
-            public void testBiConsumer()
+            @DisplayName("BiFunction should be run")
+            public void testBiFunction()
             {
                 command.execute(getInput());
 
-                Mockito.verify(execution).accept(Mockito.any(Progress.class), Mockito.anyInt());
+                Mockito.verify(execution).apply(Mockito.any(Progress.class), Mockito.anyInt());
             }
         }
 
         @Nested
-        @DisplayName("After execute with error")
-        class AfterExecuteWithError extends AfterExecuteCommandWithError<Integer, Void>
+        @DisplayName("When command is subscribed after execution")
+        class WhenSubscribeAfterExecute extends WhenSubscribeAfterExecuteSpecification<Integer, Integer>
         {
             protected final Integer INPUT = 5;
 
             @Nonnull
             @Override
-            public ReactiveCommand<Integer, Void> getCommand()
+            public ReactiveCommand<Integer, Integer> getCommand()
+            {
+                return command;
+            }
+
+            @Nullable
+            @Override
+            protected Integer getInput()
+            {
+                return INPUT;
+            }
+        }
+
+        @Nested
+        @DisplayName("When command is subscribed after execution with error")
+        class WhenSubscribeAfterExecuteWithError extends WhenSubscribeAfterExecuteWithErrorSpecification<Integer, Integer>
+        {
+            protected final Integer INPUT = 5;
+
+            @Nonnull
+            @Override
+            public ReactiveCommand<Integer, Integer> getCommand()
             {
                 return command;
             }
@@ -222,22 +227,21 @@ public class ProgressCommandFromBiConsumerTest extends AbstractProgressCommandTe
         }
     }
 
-    @Nested
-    @DisplayName("After create command from bi-consumer with observable")
-    class AfterCreateCommandFromBiConsumerWithObservable extends AfterCreateCommandWithObservable<Integer, Void>
+    abstract class WhenCreateFromBiFunctionWithCanExecuteSpecification extends
+            WhenCreateWithCanExecuteSpecification<Integer, Integer>
     {
         private TestExecutor testExecutor;
-        private BiConsumer<Progress, Integer> execution;
+        private BiFunction<Progress, Integer, Integer> execution;
         private TestScheduler testScheduler;
         private TestSubject<Boolean> testSubject;
-        private ReactiveCommand<Integer, Void> command;
+        private ReactiveCommand<Integer, Integer> command;
 
         @BeforeEach
         @SuppressWarnings("unchecked")
         protected void create()
         {
             testExecutor = new TestExecutor();
-            execution = Mockito.mock(BiConsumer.class);
+            execution = Mockito.mock(BiFunction.class);
             testScheduler = Schedulers.test();
             testSubject = TestSubject.create(testScheduler);
             command = ReactiveCommand.createProgress(testSubject, execution, testExecutor);
@@ -245,18 +249,18 @@ public class ProgressCommandFromBiConsumerTest extends AbstractProgressCommandTe
 
         @Nonnull
         @Override
-        public ReactiveCommand<Integer, Void> getCommand()
+        public ReactiveCommand<Integer, Integer> getCommand()
         {
             return command;
         }
 
         @Nested
-        @DisplayName("After observable emits true")
-        class AfterEmitsTrue extends AfterObservableEmitsTrue<Integer, Void>
+        @DisplayName("When CanExecute observable emits true")
+        class WhenCanExecuteEmitsTrue extends WhenCanExecuteEmitsTrueSpecification<Integer, Integer>
         {
             @Nonnull
             @Override
-            public ReactiveCommand<Integer, Void> getCommand()
+            public ReactiveCommand<Integer, Integer> getCommand()
             {
                 return command;
             }
@@ -270,13 +274,12 @@ public class ProgressCommandFromBiConsumerTest extends AbstractProgressCommandTe
         }
 
         @Nested
-        @DisplayName("After observable emits false")
-        class AfterEmitsFalse extends AfterObservableEmitsFalse<Integer, Void>
+        @DisplayName("When CanExecute observable emits false")
+        class WhenCanExecuteEmitsFalse extends WhenCanExecuteEmitsFalseSpecification<Integer, Integer>
         {
-
             @Nonnull
             @Override
-            public ReactiveCommand<Integer, Void> getCommand()
+            public ReactiveCommand<Integer, Integer> getCommand()
             {
                 return command;
             }
@@ -290,8 +293,8 @@ public class ProgressCommandFromBiConsumerTest extends AbstractProgressCommandTe
         }
 
         @Nested
-        @DisplayName("After execute disabled command")
-        class AfterExecuteDisabled extends AfterExecuteDisabledCommand<Integer, Void>
+        @DisplayName("When command is executed while disabled")
+        class WhenExecuteWhileDisabled extends WhenExecuteWhileDisabledSpecification<Integer, Integer>
         {
             protected final Integer INPUT = 5;
 
@@ -304,7 +307,7 @@ public class ProgressCommandFromBiConsumerTest extends AbstractProgressCommandTe
 
             @Nonnull
             @Override
-            public ReactiveCommand<Integer, Void> getCommand()
+            public ReactiveCommand<Integer, Integer> getCommand()
             {
                 return command;
             }
@@ -316,12 +319,12 @@ public class ProgressCommandFromBiConsumerTest extends AbstractProgressCommandTe
             }
 
             @Test
-            @DisplayName("BiConsumer should not be run")
-            public void testBiConsumer()
+            @DisplayName("BiFunction should not be run")
+            public void testBiFunction()
             {
                 command.execute(getInput());
 
-                Mockito.verify(execution, Mockito.never()).accept(Mockito.any(), Mockito.anyInt());
+                Mockito.verify(execution, Mockito.never()).apply(Mockito.any(), Mockito.anyInt());
             }
         }
     }

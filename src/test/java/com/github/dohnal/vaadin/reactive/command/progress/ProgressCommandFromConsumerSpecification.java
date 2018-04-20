@@ -7,7 +7,7 @@ import java.util.function.Consumer;
 
 import com.github.dohnal.vaadin.reactive.Progress;
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
-import com.github.dohnal.vaadin.reactive.command.ProgressCommand;
+import com.github.dohnal.vaadin.reactive.command.BaseCommandSpecification;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -18,18 +18,15 @@ import rx.schedulers.TestScheduler;
 import rx.subjects.TestSubject;
 
 /**
- * Tests for {@link ProgressCommand} created by
+ * Tests for {@link ReactiveCommand} created by
  * {@link ReactiveCommand#createProgress(Consumer)}
  * {@link ReactiveCommand#createProgress(Consumer, Executor)}
  *
  * @author dohnal
  */
-@DisplayName("Progress command from consumer")
-public class ProgressCommandFromConsumerTest extends AbstractProgressCommandTest
+public interface ProgressCommandFromConsumerSpecification extends BaseCommandSpecification
 {
-    @Nested
-    @DisplayName("After create command from consumer")
-    class AfterCreateCommandFromConsumer extends AfterCreateCommand<Void, Void>
+    abstract class WhenCreateFromConsumerSpecification extends WhenCreateSpecification<Void, Void>
     {
         private TestExecutor testExecutor;
         private Consumer<Progress> execution;
@@ -59,8 +56,8 @@ public class ProgressCommandFromConsumerTest extends AbstractProgressCommandTest
         }
 
         @Nested
-        @DisplayName("During execute")
-        class DuringExecute extends DuringExecuteProgressCommand<Void, Void>
+        @DisplayName("When command is executed")
+        class WhenExecute extends WhenExecuteSpecification<Void, Void>
         {
             @BeforeEach
             protected void mockExecution()
@@ -94,16 +91,20 @@ public class ProgressCommandFromConsumerTest extends AbstractProgressCommandTest
 
             @Nullable
             @Override
-            protected Void getCorrectResult()
+            protected Void getResult()
             {
                 return null;
             }
 
-            @Nonnull
+            @Test
             @Override
-            protected Float[] getProgress()
+            @DisplayName("Progress observable should emit correct values and then reset back to 0")
+            public void testProgress()
             {
-                return new Float[]{0.0f, 0.25f, 0.5f, 0.75f, 1.0f};
+                getCommand().getProgress().test()
+                        .assertValuesAndClear(0.0f)
+                        .perform(() -> getCommand().execute(getInput()))
+                        .assertValues(0.25f, 0.5f, 0.75f, 1.0f, 0.0f);
             }
 
             @Test
@@ -117,27 +118,8 @@ public class ProgressCommandFromConsumerTest extends AbstractProgressCommandTest
         }
 
         @Nested
-        @DisplayName("After execute")
-        class AfterExecute extends AfterExecuteCommand<Void, Void>
-        {
-            @Nonnull
-            @Override
-            public ReactiveCommand<Void, Void> getCommand()
-            {
-                return command;
-            }
-
-            @Nullable
-            @Override
-            protected Void getInput()
-            {
-                return null;
-            }
-        }
-
-        @Nested
-        @DisplayName("During execute with error")
-        class DuringExecuteWithError extends DuringExecuteProgressCommandWithError<Void, Void>
+        @DisplayName("When command is executed with error")
+        class WhenExecuteWithError extends WhenExecuteWithErrorSpecification<Void, Void>
         {
             protected final Throwable ERROR = new RuntimeException("Error");
 
@@ -177,11 +159,15 @@ public class ProgressCommandFromConsumerTest extends AbstractProgressCommandTest
                 return ERROR;
             }
 
-            @Nonnull
+            @Test
             @Override
-            protected Float[] getProgress()
+            @DisplayName("Progress observable should emit correct values and then reset back to 0")
+            public void testProgress()
             {
-                return new Float[]{0.0f, 0.25f, 0.5f};
+                getCommand().getProgress().test()
+                        .assertValuesAndClear(0.0f)
+                        .perform(() -> getCommand().execute(getInput()))
+                        .assertValues(0.25f, 0.5f, 1.0f, 0.0f);
             }
 
             @Test
@@ -195,8 +181,27 @@ public class ProgressCommandFromConsumerTest extends AbstractProgressCommandTest
         }
 
         @Nested
-        @DisplayName("After execute with error")
-        class AfterExecuteWithError extends AfterExecuteCommandWithError<Void, Void>
+        @DisplayName("When command is subscribed after execution")
+        class WhenSubscribeAfterExecute extends WhenSubscribeAfterExecuteSpecification<Void, Void>
+        {
+            @Nonnull
+            @Override
+            public ReactiveCommand<Void, Void> getCommand()
+            {
+                return command;
+            }
+
+            @Nullable
+            @Override
+            protected Void getInput()
+            {
+                return null;
+            }
+        }
+
+        @Nested
+        @DisplayName("When command is subscribed after execution with error")
+        class WhenSubscribeAfterExecuteWithError extends WhenSubscribeAfterExecuteWithErrorSpecification<Void, Void>
         {
             @Nonnull
             @Override
@@ -214,9 +219,8 @@ public class ProgressCommandFromConsumerTest extends AbstractProgressCommandTest
         }
     }
 
-    @Nested
-    @DisplayName("After create command from consumer with observable")
-    class AfterCreateCommandFromConsumerWithObservable extends AfterCreateCommandWithObservable<Void, Void>
+    abstract class WhenCreateFromConsumerWithCanExecuteSpecification extends
+            WhenCreateWithCanExecuteSpecification<Void, Void>
     {
         private TestExecutor testExecutor;
         private Consumer<Progress> execution;
@@ -243,8 +247,8 @@ public class ProgressCommandFromConsumerTest extends AbstractProgressCommandTest
         }
 
         @Nested
-        @DisplayName("After observable emits true")
-        class AfterEmitsTrue extends AfterObservableEmitsTrue<Void, Void>
+        @DisplayName("When CanExecute observable emits true")
+        class WhenCanExecuteEmitsTrue extends WhenCanExecuteEmitsTrueSpecification<Void, Void>
         {
             @Nonnull
             @Override
@@ -262,10 +266,9 @@ public class ProgressCommandFromConsumerTest extends AbstractProgressCommandTest
         }
 
         @Nested
-        @DisplayName("After observable emits false")
-        class AfterEmitsFalse extends AfterObservableEmitsFalse<Void, Void>
+        @DisplayName("When CanExecute observable emits false")
+        class WhenCanExecuteEmitsFalse extends WhenCanExecuteEmitsFalseSpecification<Void, Void>
         {
-
             @Nonnull
             @Override
             public ReactiveCommand<Void, Void> getCommand()
@@ -282,8 +285,8 @@ public class ProgressCommandFromConsumerTest extends AbstractProgressCommandTest
         }
 
         @Nested
-        @DisplayName("After execute disabled command")
-        class AfterExecuteDisabled extends AfterExecuteDisabledCommand<Void, Void>
+        @DisplayName("When command is executed while disabled")
+        class WhenExecuteWhileDisabled extends WhenExecuteWhileDisabledSpecification<Void, Void>
         {
             @BeforeEach
             public void disableCommand()

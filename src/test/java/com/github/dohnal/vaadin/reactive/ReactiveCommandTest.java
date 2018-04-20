@@ -7,6 +7,12 @@ import com.github.dohnal.vaadin.reactive.command.async.AsyncCommandFromFunctionS
 import com.github.dohnal.vaadin.reactive.command.async.AsyncCommandFromRunnableSpecification;
 import com.github.dohnal.vaadin.reactive.command.async.AsyncCommandFromSupplierSpecification;
 import com.github.dohnal.vaadin.reactive.command.async.AsyncEmptyCommandSpecification;
+import com.github.dohnal.vaadin.reactive.command.progress.ProgressCommandFromAsyncProgressFunctionSpecification;
+import com.github.dohnal.vaadin.reactive.command.progress.ProgressCommandFromAsyncProgressSupplierSpecification;
+import com.github.dohnal.vaadin.reactive.command.progress.ProgressCommandFromBiConsumerSpecification;
+import com.github.dohnal.vaadin.reactive.command.progress.ProgressCommandFromBiFunctionSpecification;
+import com.github.dohnal.vaadin.reactive.command.progress.ProgressCommandFromConsumerSpecification;
+import com.github.dohnal.vaadin.reactive.command.progress.ProgressCommandFromFunctionSpecification;
 import com.github.dohnal.vaadin.reactive.command.sync.SyncCommandFromConsumerSpecification;
 import com.github.dohnal.vaadin.reactive.command.sync.SyncCommandFromFunctionSpecification;
 import com.github.dohnal.vaadin.reactive.command.sync.SyncCommandFromRunnableSpecification;
@@ -139,5 +145,64 @@ public class ReactiveCommandTest
         @Nested
         @DisplayName("From asynchronous function with CanExecute")
         class FromAsyncFunctionWithCanExecute extends WhenCreateFromAsyncFunctionWithCanExecuteSpecification {}
+    }
+
+    @Nested
+    @DisplayName("When new progress command is created")
+    class WhenCreateProgress implements
+            ProgressCommandFromConsumerSpecification,
+            ProgressCommandFromFunctionSpecification,
+            ProgressCommandFromBiFunctionSpecification,
+            ProgressCommandFromBiConsumerSpecification,
+            ProgressCommandFromAsyncProgressSupplierSpecification,
+            ProgressCommandFromAsyncProgressFunctionSpecification
+    {
+        @Nested
+        @DisplayName("From consumer")
+        class FromConsumer extends WhenCreateFromConsumerSpecification {}
+
+        @Nested
+        @DisplayName("From consumer with CanExecute")
+        class FromConsumerWithCanExecute extends WhenCreateFromConsumerWithCanExecuteSpecification {}
+
+        @Nested
+        @DisplayName("From function")
+        class FromFunction extends WhenCreateFromFunctionSpecification {}
+
+        @Nested
+        @DisplayName("From function with CanExecute")
+        class FromFunctionWithCanExecute extends WhenCreateFromFunctionWithCanExecuteSpecification {}
+
+        @Nested
+        @DisplayName("From bi-consumer")
+        class FromBiConsumer extends WhenCreateFromBiConsumerSpecification {}
+
+        @Nested
+        @DisplayName("From bi-consumer supplier with CanExecute")
+        class FromBiConsumerWithCanExecute extends WhenCreateFromBiConsumerWithCanExecuteSpecification {}
+
+        @Nested
+        @DisplayName("From bi-function")
+        class FromBiFunction extends WhenCreateFromBiFunctionSpecification {}
+
+        @Nested
+        @DisplayName("From bi-function with CanExecute")
+        class FromBiFunctionWithCanExecute extends WhenCreateFromBiFunctionWithCanExecuteSpecification {}
+
+        @Nested
+        @DisplayName("From asynchronous progress supplier")
+        class FromAsyncProgressSupplier extends WhenCreateFromAsyncProgressSupplierSpecification {}
+
+        @Nested
+        @DisplayName("From asynchronous progress supplier with CanExecute")
+        class FromAsyncProgressSupplierWithCanExecute extends WhenCreateFromAsyncProgressSupplierWithCanExecuteSpecification {}
+
+        @Nested
+        @DisplayName("From asynchronous progress function")
+        class FromAsyncProgressFunction extends WhenCreateFromAsyncProgressFunctionSpecification {}
+
+        @Nested
+        @DisplayName("From asynchronous progress function with CanExecute")
+        class FromAsyncProgressFunctionWithCanExecute extends WhenCreateFromAsyncProgressFunctionWithCanExecuteSpecification {}
     }
 }

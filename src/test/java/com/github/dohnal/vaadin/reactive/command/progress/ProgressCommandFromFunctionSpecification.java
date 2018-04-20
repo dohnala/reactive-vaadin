@@ -7,7 +7,7 @@ import java.util.function.Function;
 
 import com.github.dohnal.vaadin.reactive.Progress;
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
-import com.github.dohnal.vaadin.reactive.command.ProgressCommand;
+import com.github.dohnal.vaadin.reactive.command.BaseCommandSpecification;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -18,18 +18,15 @@ import rx.schedulers.TestScheduler;
 import rx.subjects.TestSubject;
 
 /**
- * Tests for {@link ProgressCommand} created by
+ * Tests for {@link ReactiveCommand} created by
  * {@link ReactiveCommand#createProgress(Function)}
  * {@link ReactiveCommand#createProgress(Function, Executor)}
  *
  * @author dohnal
  */
-@DisplayName("Progress command from function")
-public class ProgressCommandFromFunctionTest extends AbstractProgressCommandTest
+public interface ProgressCommandFromFunctionSpecification extends BaseCommandSpecification
 {
-    @Nested
-    @DisplayName("After create command from function")
-    class AfterCreateCommandFromFunction extends AfterCreateCommand<Void, Integer>
+    abstract class WhenCreateFromFunctionSpecification extends WhenCreateSpecification<Void, Integer>
     {
         private TestExecutor testExecutor;
         private Function<Progress, Integer> execution;
@@ -59,8 +56,8 @@ public class ProgressCommandFromFunctionTest extends AbstractProgressCommandTest
         }
 
         @Nested
-        @DisplayName("During execute")
-        class DuringExecute extends DuringExecuteProgressCommand<Void, Integer>
+        @DisplayName("When command is executed")
+        class WhenExecute extends WhenExecuteSpecification<Void, Integer>
         {
             protected final Integer RESULT = 5;
 
@@ -96,16 +93,20 @@ public class ProgressCommandFromFunctionTest extends AbstractProgressCommandTest
 
             @Nullable
             @Override
-            protected Integer getCorrectResult()
+            protected Integer getResult()
             {
                 return RESULT;
             }
 
-            @Nonnull
+            @Test
             @Override
-            protected Float[] getProgress()
+            @DisplayName("Progress observable should emit correct values and then reset back to 0")
+            public void testProgress()
             {
-                return new Float[]{0.0f, 0.25f, 0.5f, 0.75f, 1.0f};
+                getCommand().getProgress().test()
+                        .assertValuesAndClear(0.0f)
+                        .perform(() -> getCommand().execute(getInput()))
+                        .assertValues(0.25f, 0.5f, 0.75f, 1.0f, 0.0f);
             }
 
             @Test
@@ -119,27 +120,8 @@ public class ProgressCommandFromFunctionTest extends AbstractProgressCommandTest
         }
 
         @Nested
-        @DisplayName("After execute")
-        class AfterExecute extends AfterExecuteCommand<Void, Integer>
-        {
-            @Nonnull
-            @Override
-            public ReactiveCommand<Void, Integer> getCommand()
-            {
-                return command;
-            }
-
-            @Nullable
-            @Override
-            protected Void getInput()
-            {
-                return null;
-            }
-        }
-
-        @Nested
-        @DisplayName("During execute with error")
-        class DuringExecuteWithError extends DuringExecuteProgressCommandWithError<Void, Integer>
+        @DisplayName("When command is executed with error")
+        class WhenExecuteWithError extends WhenExecuteWithErrorSpecification<Void, Integer>
         {
             protected final Throwable ERROR = new RuntimeException("Error");
 
@@ -179,11 +161,15 @@ public class ProgressCommandFromFunctionTest extends AbstractProgressCommandTest
                 return ERROR;
             }
 
-            @Nonnull
+            @Test
             @Override
-            protected Float[] getProgress()
+            @DisplayName("Progress observable should emit correct values and then reset back to 0")
+            public void testProgress()
             {
-                return new Float[]{0.0f, 0.25f, 0.5f};
+                getCommand().getProgress().test()
+                        .assertValuesAndClear(0.0f)
+                        .perform(() -> getCommand().execute(getInput()))
+                        .assertValues(0.25f, 0.5f, 1.0f, 0.0f);
             }
 
             @Test
@@ -197,8 +183,27 @@ public class ProgressCommandFromFunctionTest extends AbstractProgressCommandTest
         }
 
         @Nested
-        @DisplayName("After execute with error")
-        class AfterExecuteWithError extends AfterExecuteCommandWithError<Void, Integer>
+        @DisplayName("When command is subscribed after execution")
+        class WhenSubscribeAfterExecute extends WhenSubscribeAfterExecuteSpecification<Void, Integer>
+        {
+            @Nonnull
+            @Override
+            public ReactiveCommand<Void, Integer> getCommand()
+            {
+                return command;
+            }
+
+            @Nullable
+            @Override
+            protected Void getInput()
+            {
+                return null;
+            }
+        }
+
+        @Nested
+        @DisplayName("When command is subscribed after execution with error")
+        class WhenSubscribeAfterExecuteWithError extends WhenSubscribeAfterExecuteWithErrorSpecification<Void, Integer>
         {
             @Nonnull
             @Override
@@ -216,9 +221,8 @@ public class ProgressCommandFromFunctionTest extends AbstractProgressCommandTest
         }
     }
 
-    @Nested
-    @DisplayName("After create command from function with observable")
-    class AfterCreateCommandFromFunctionWithObservable extends AfterCreateCommandWithObservable<Void, Integer>
+    abstract class WhenCreateFromFunctionWithCanExecuteSpecification extends
+            WhenCreateWithCanExecuteSpecification<Void, Integer>
     {
         private TestExecutor testExecutor;
         private Function<Progress, Integer> execution;
@@ -245,8 +249,8 @@ public class ProgressCommandFromFunctionTest extends AbstractProgressCommandTest
         }
 
         @Nested
-        @DisplayName("After observable emits true")
-        class AfterEmitsTrue extends AfterObservableEmitsTrue<Void, Integer>
+        @DisplayName("When CanExecute observable emits true")
+        class WhenCanExecuteEmitsTrue extends WhenCanExecuteEmitsTrueSpecification<Void, Integer>
         {
             @Nonnull
             @Override
@@ -264,10 +268,9 @@ public class ProgressCommandFromFunctionTest extends AbstractProgressCommandTest
         }
 
         @Nested
-        @DisplayName("After observable emits false")
-        class AfterEmitsFalse extends AfterObservableEmitsFalse<Void, Integer>
+        @DisplayName("When CanExecute observable emits false")
+        class WhenCanExecuteEmitsFalse extends WhenCanExecuteEmitsFalseSpecification<Void, Integer>
         {
-
             @Nonnull
             @Override
             public ReactiveCommand<Void, Integer> getCommand()
@@ -284,8 +287,8 @@ public class ProgressCommandFromFunctionTest extends AbstractProgressCommandTest
         }
 
         @Nested
-        @DisplayName("After execute disabled command")
-        class AfterExecuteDisabled extends AfterExecuteDisabledCommand<Void, Integer>
+        @DisplayName("When command is executed while disabled")
+        class WhenExecuteWhileDisabled extends WhenExecuteWhileDisabledSpecification<Void, Integer>
         {
             @BeforeEach
             public void disableCommand()
