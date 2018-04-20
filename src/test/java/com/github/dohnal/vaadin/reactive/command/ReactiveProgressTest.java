@@ -1,7 +1,6 @@
-package com.github.dohnal.vaadin.reactive.command.progress;
+package com.github.dohnal.vaadin.reactive.command;
 
 import com.github.dohnal.vaadin.reactive.ReactiveProperty;
-import com.github.dohnal.vaadin.reactive.command.ReactiveProgress;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -12,15 +11,15 @@ import org.junit.jupiter.api.Test;
  *
  * @author dohnal
  */
-@DisplayName("Reactive progress")
+@DisplayName("Reactive progress specification")
 public class ReactiveProgressTest
 {
     private ReactiveProperty<Float> progressProperty;
     private ReactiveProgress progress;
 
     @Nested
-    @DisplayName("After create from property")
-    class AfterCreate
+    @DisplayName("When progress is created")
+    class WhenCreate
     {
         @BeforeEach
         public void create()
@@ -38,8 +37,8 @@ public class ReactiveProgressTest
         }
 
         @Nested
-        @DisplayName("After set negative value")
-        class AfterSetNegativeValue
+        @DisplayName("When negative value is set")
+        class WhenSetNegativeValue
         {
             @Test
             @DisplayName("Value should not change")
@@ -53,8 +52,8 @@ public class ReactiveProgressTest
         }
 
         @Nested
-        @DisplayName("After set zero")
-        class AfterSetZero
+        @DisplayName("When zero is set")
+        class WhenSetZero
         {
             @Test
             @DisplayName("Value should not change")
@@ -68,8 +67,8 @@ public class ReactiveProgressTest
         }
 
         @Nested
-        @DisplayName("After set one")
-        class AfterSetOne
+        @DisplayName("When one is set")
+        class WhenSetOne
         {
             @Test
             @DisplayName("Value should be one")
@@ -83,8 +82,8 @@ public class ReactiveProgressTest
         }
 
         @Nested
-        @DisplayName("After set value bigger than one")
-        class AfterSetMoreThanOne
+        @DisplayName("when value bigger than one is set")
+        class WhenSetMoreThanOne
         {
             @Test
             @DisplayName("Value should be one")
@@ -98,8 +97,8 @@ public class ReactiveProgressTest
         }
 
         @Nested
-        @DisplayName("After set value between zero and one")
-        class AfterSetValue
+        @DisplayName("When value between zero and one is set")
+        class WhenSetValue
         {
             @Test
             @DisplayName("Value should be correct")
@@ -112,8 +111,8 @@ public class ReactiveProgressTest
             }
 
             @Nested
-            @DisplayName("After set lesser value")
-            class AfterSetLesserValue
+            @DisplayName("When lesser value is set")
+            class WhenSetLesserValue
             {
                 @Test
                 @DisplayName("Value should not change")
@@ -130,8 +129,8 @@ public class ReactiveProgressTest
         }
 
         @Nested
-        @DisplayName("After add negative value")
-        class AfterAddNegativeValue
+        @DisplayName("When negative value is added")
+        class WhenAddNegativeValue
         {
             @Test
             @DisplayName("Value should not change")
@@ -145,8 +144,8 @@ public class ReactiveProgressTest
         }
 
         @Nested
-        @DisplayName("After add zero")
-        class AfterAddZero
+        @DisplayName("When zero is added")
+        class WhenAddZero
         {
             @Test
             @DisplayName("Value should not change")
@@ -160,8 +159,8 @@ public class ReactiveProgressTest
         }
 
         @Nested
-        @DisplayName("After add one")
-        class AfterAddOne
+        @DisplayName("When one is added")
+        class WhenAddOne
         {
             @Test
             @DisplayName("Value should be one")
@@ -175,8 +174,8 @@ public class ReactiveProgressTest
         }
 
         @Nested
-        @DisplayName("After add value bigger than one")
-        class AfterAddMoreThanOne
+        @DisplayName("When value bigger than one is added")
+        class WhenAddMoreThanOne
         {
             @Test
             @DisplayName("Value should be one")
@@ -190,8 +189,8 @@ public class ReactiveProgressTest
         }
 
         @Nested
-        @DisplayName("After add value between zero and one")
-        class AfterAddValue
+        @DisplayName("When value between zero and one is added")
+        class WhenAddValue
         {
             @Test
             @DisplayName("Value should be correct")
@@ -204,8 +203,8 @@ public class ReactiveProgressTest
             }
 
             @Nested
-            @DisplayName("After add negative value")
-            class AfterSetLesserValue
+            @DisplayName("When negative value is added")
+            class WhenSetLesserValue
             {
                 @Test
                 @DisplayName("Value should not change")

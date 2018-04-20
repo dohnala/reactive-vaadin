@@ -27,7 +27,7 @@ import rx.subjects.TestSubject;
  */
 public interface ProgressCommandFromAsyncProgressSupplierSpecification extends BaseCommandSpecification
 {
-    class WhenCreateFromAsyncProgressSupplierSpecification extends WhenCreateSpecification<Void, Integer>
+    abstract class WhenCreateFromAsyncProgressSupplierSpecification extends WhenCreateSpecification<Void, Integer>
     {
         private AsyncProgressSupplier<Integer> execution;
         private CompletableFuture<Integer> executionResult;
