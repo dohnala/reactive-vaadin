@@ -61,7 +61,7 @@ public interface ReactiveProperty<T> extends Property<T>, IsObservable<T>
      * @return created property
      */
     @Nonnull
-    static <T> ReactiveProperty<T> fromObservable(final @Nonnull Observable<T> observable)
+    static <T> ReactiveProperty<T> fromObservable(final @Nonnull Observable<? extends T> observable)
     {
         return new BehaviorSubjectProperty<>(observable);
     }
@@ -74,7 +74,7 @@ public interface ReactiveProperty<T> extends Property<T>, IsObservable<T>
      * @return created property
      */
     @Nonnull
-    static <T> ReactiveProperty<T> fromProperty(final @Nonnull ReactiveProperty<T> property)
+    static <T> ReactiveProperty<T> fromProperty(final @Nonnull ReactiveProperty<? extends T> property)
     {
         return new BehaviorSubjectProperty<>(property);
     }
@@ -109,7 +109,7 @@ public interface ReactiveProperty<T> extends Property<T>, IsObservable<T>
      *
      * @param update update function
      */
-    void updateValue(final @Nonnull Function<T, T> update);
+    void updateValue(final @Nonnull Function<? super T, ? extends T> update);
 
     /**
      * Return observable for this property which can be subscribed to

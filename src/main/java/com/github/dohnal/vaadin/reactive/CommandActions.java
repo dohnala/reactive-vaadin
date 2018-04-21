@@ -44,7 +44,7 @@ public interface CommandActions
      * @return action
      */
     @Nonnull
-    default <T> Action<Object> executeWithInput(final @Nonnull ReactiveCommand<T, ?> command,
+    default <T> Action<Object> executeWithInput(final @Nonnull ReactiveCommand<? super T, ?> command,
                                                 final @Nullable T input)
     {
         return value -> command.execute(input);
@@ -59,7 +59,7 @@ public interface CommandActions
      * @return action
      */
     @Nonnull
-    default <T> Action<T> executeWithInput(final @Nonnull ReactiveCommand<T, ?> command)
+    default <T> Action<T> executeWithInput(final @Nonnull ReactiveCommand<? super T, ?> command)
     {
         return command::execute;
     }

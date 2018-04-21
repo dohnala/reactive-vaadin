@@ -26,7 +26,7 @@ import rx.Subscription;
 /**
  * Implementation of {@link ReactiveBinder} for binding actions as a reaction to observable changes
  *
- * @param <T> type of value in the observabley
+ * @param <T> type of value in the observable
  * @author dohnal
  */
 public class ObservableActionBinder<T> implements Disposable<ObservableActionBinder<T>>

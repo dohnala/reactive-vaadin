@@ -55,7 +55,7 @@ public final class BehaviorSubjectProperty<T> implements ReactiveProperty<T>
      *
      * @param observable observable
      */
-    public BehaviorSubjectProperty(final @Nonnull Observable<T> observable)
+    public BehaviorSubjectProperty(final @Nonnull Observable<? extends T> observable)
     {
         this();
 
@@ -67,7 +67,7 @@ public final class BehaviorSubjectProperty<T> implements ReactiveProperty<T>
      *
      * @param anotherProperty another property
      */
-    public BehaviorSubjectProperty(final @Nonnull ReactiveProperty<T> anotherProperty)
+    public BehaviorSubjectProperty(final @Nonnull ReactiveProperty<? extends T> anotherProperty)
     {
         if (anotherProperty.hasValue())
         {
@@ -104,7 +104,7 @@ public final class BehaviorSubjectProperty<T> implements ReactiveProperty<T>
     }
 
     @Override
-    public final void updateValue(final @Nonnull Function<T, T> update)
+    public final void updateValue(final @Nonnull Function<? super T, ? extends T> update)
     {
         setValue(update.apply(getValue()));
     }
