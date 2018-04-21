@@ -21,8 +21,7 @@ public interface AsyncSupplier<T> extends Supplier<CompletableFuture<T>>
     @Nonnull
     static AsyncSupplier<Void> create()
     {
-        return create(() -> {
-        });
+        return create(() -> {});
     }
 
     /**
@@ -33,8 +32,7 @@ public interface AsyncSupplier<T> extends Supplier<CompletableFuture<T>>
     @Nonnull
     static AsyncSupplier<Void> create(final @Nonnull Executor executor)
     {
-        return create(() -> {
-        }, executor);
+        return create(() -> {}, executor);
     }
 
     /**
