@@ -24,8 +24,6 @@ import com.github.dohnal.vaadin.reactive.ReactiveCommand;
 import rx.Observable;
 import rx.Subscription;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
 /**
  * Composite implementation of {@link ReactiveCommand}
  *
@@ -56,7 +54,10 @@ public final class CompositeCommand<T, R> extends AbstractCommand<T, List<R>>
                                 .allMatch(Boolean.TRUE::equals)),
                 (x, y) -> x && y));
 
-        checkArgument(commands.size() > 0, "At least one command is required");
+        if (commands.size() == 0)
+        {
+            throw new IllegalArgumentException("At least one command is required");
+        }
 
         this.commands = commands;
     }

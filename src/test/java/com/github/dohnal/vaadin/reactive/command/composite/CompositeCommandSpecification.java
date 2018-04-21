@@ -15,13 +15,14 @@ package com.github.dohnal.vaadin.reactive.command.composite;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import com.github.dohnal.vaadin.reactive.AsyncFunction;
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
 import com.github.dohnal.vaadin.reactive.command.BaseCommandSpecification;
-import com.google.common.collect.Lists;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -45,7 +46,7 @@ public interface CompositeCommandSpecification extends BaseCommandSpecification
         @DisplayName("Exception should be thrown")
         public void testCreate()
         {
-            assertThrows(IllegalArgumentException.class, () -> ReactiveCommand.createComposite(Lists.newArrayList()));
+            assertThrows(IllegalArgumentException.class, () -> ReactiveCommand.createComposite(new ArrayList<>()));
         }
     }
 
@@ -73,7 +74,7 @@ public interface CompositeCommandSpecification extends BaseCommandSpecification
             executionResultB = new CompletableFuture<>();
             commandB = ReactiveCommand.createFromAsyncFunction(executionB);
 
-            command = ReactiveCommand.createComposite(Lists.newArrayList(commandA, commandB));
+            command = ReactiveCommand.createComposite(Arrays.asList(commandA, commandB));
         }
 
         @Nonnull
@@ -461,7 +462,7 @@ public interface CompositeCommandSpecification extends BaseCommandSpecification
             {
                 protected final Integer RESULT_A = 7;
                 protected final Integer RESULT_B = 9;
-                protected final List<Integer> RESULT = Lists.newArrayList(RESULT_A, RESULT_B);
+                protected final List<Integer> RESULT = Arrays.asList(RESULT_A, RESULT_B);
 
                 @Override
                 protected void finishExecution()
@@ -895,7 +896,7 @@ public interface CompositeCommandSpecification extends BaseCommandSpecification
 
             testScheduler = Schedulers.test();
             testSubject = TestSubject.create(testScheduler);
-            command = ReactiveCommand.createComposite(testSubject, Lists.newArrayList(commandA, commandB));
+            command = ReactiveCommand.createComposite(testSubject, Arrays.asList(commandA, commandB));
         }
 
         @Nonnull

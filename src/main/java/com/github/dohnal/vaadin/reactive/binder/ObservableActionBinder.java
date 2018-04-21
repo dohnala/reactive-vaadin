@@ -14,12 +14,12 @@
 package com.github.dohnal.vaadin.reactive.binder;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.github.dohnal.vaadin.reactive.Action;
 import com.github.dohnal.vaadin.reactive.Disposable;
 import com.github.dohnal.vaadin.reactive.ReactiveBinder;
-import com.google.common.collect.Lists;
 import rx.Observable;
 import rx.Subscription;
 
@@ -38,7 +38,7 @@ public class ObservableActionBinder<T> implements Disposable<ObservableActionBin
     public ObservableActionBinder(final @Nonnull Observable<T> observable)
     {
         this.observable = observable;
-        this.subscriptions = Lists.newArrayList();
+        this.subscriptions = new ArrayList<>();
     }
 
     /**
