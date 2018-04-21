@@ -4,7 +4,7 @@ import javax.annotation.Nonnull;
 
 import com.github.dohnal.vaadin.mvvm.component.ComponentEvents;
 import com.github.dohnal.vaadin.mvvm.component.ComponentProperties;
-import com.github.dohnal.vaadin.reactive.command.CommandActions;
+import com.github.dohnal.vaadin.reactive.CommandActions;
 import com.vaadin.ui.CustomComponent;
 
 /**

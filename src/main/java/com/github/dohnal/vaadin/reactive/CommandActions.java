@@ -1,10 +1,7 @@
-package com.github.dohnal.vaadin.reactive.command;
+package com.github.dohnal.vaadin.reactive;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-
-import com.github.dohnal.vaadin.reactive.Action;
-import com.github.dohnal.vaadin.reactive.ReactiveCommand;
 
 /**
  * List of all command actions

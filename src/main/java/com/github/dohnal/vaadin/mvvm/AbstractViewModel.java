@@ -1,6 +1,6 @@
 package com.github.dohnal.vaadin.mvvm;
 
-import com.github.dohnal.vaadin.reactive.command.CommandActions;
+import com.github.dohnal.vaadin.reactive.CommandActions;
 
 /**
  * Base class for all view models in MVVM pattern
