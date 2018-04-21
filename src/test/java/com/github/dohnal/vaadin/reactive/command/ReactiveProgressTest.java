@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 /**
- * Tests for {@link ReactiveProgress}
+ * Tests for {@link ReactiveProgressContext}
  *
  * @author dohnal
  */
@@ -28,7 +28,7 @@ import org.junit.jupiter.api.Test;
 public class ReactiveProgressTest
 {
     private ReactiveProperty<Float> progressProperty;
-    private ReactiveProgress progress;
+    private ReactiveProgressContext progress;
 
     @Nested
     @DisplayName("When progress is created")
@@ -38,7 +38,7 @@ public class ReactiveProgressTest
         public void create()
         {
             progressProperty = ReactiveProperty.withValue(0.0f);
-            progress = new ReactiveProgress(progressProperty);
+            progress = new ReactiveProgressContext(progressProperty);
         }
 
         @Test

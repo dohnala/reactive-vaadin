@@ -18,7 +18,7 @@ import javax.annotation.Nullable;
 import java.util.concurrent.Executor;
 import java.util.function.BiFunction;
 
-import com.github.dohnal.vaadin.reactive.Progress;
+import com.github.dohnal.vaadin.reactive.ProgressContext;
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
 import com.github.dohnal.vaadin.reactive.command.BaseCommandSpecification;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,7 +42,7 @@ public interface ProgressCommandFromBiFunctionSpecification extends BaseCommandS
     abstract class WhenCreateFromBiFunctionSpecification extends WhenCreateSpecification<Integer, Integer>
     {
         private TestExecutor testExecutor;
-        private BiFunction<Progress, Integer, Integer> execution;
+        private BiFunction<ProgressContext, Integer, Integer> execution;
         private ReactiveCommand<Integer, Integer> command;
 
         @BeforeEach
@@ -79,16 +79,16 @@ public interface ProgressCommandFromBiFunctionSpecification extends BaseCommandS
             protected void mockExecution()
             {
                 Mockito.doAnswer(invocation -> {
-                    final Progress progress = invocation.getArgument(0);
+                    final ProgressContext progressContext = invocation.getArgument(0);
 
-                    progress.set(0.0f);
-                    progress.set(0.25f);
-                    progress.set(0.5f);
-                    progress.set(0.75f);
-                    progress.set(1.0f);
+                    progressContext.set(0.0f);
+                    progressContext.set(0.25f);
+                    progressContext.set(0.5f);
+                    progressContext.set(0.75f);
+                    progressContext.set(1.0f);
 
                     return RESULT;
-                }).when(execution).apply(Mockito.any(Progress.class), Mockito.anyInt());
+                }).when(execution).apply(Mockito.any(ProgressContext.class), Mockito.anyInt());
             }
 
             @Nonnull
@@ -129,7 +129,7 @@ public interface ProgressCommandFromBiFunctionSpecification extends BaseCommandS
             {
                 command.execute(getInput());
 
-                Mockito.verify(execution).apply(Mockito.any(Progress.class), Mockito.anyInt());
+                Mockito.verify(execution).apply(Mockito.any(ProgressContext.class), Mockito.anyInt());
             }
         }
 
@@ -144,15 +144,15 @@ public interface ProgressCommandFromBiFunctionSpecification extends BaseCommandS
             protected void mockExecution()
             {
                 Mockito.doAnswer(invocation -> {
-                    final Progress progress = invocation.getArgument(0);
+                    final ProgressContext progressContext = invocation.getArgument(0);
 
-                    progress.set(0.0f);
-                    progress.set(0.25f);
-                    progress.set(0.5f);
+                    progressContext.set(0.0f);
+                    progressContext.set(0.25f);
+                    progressContext.set(0.5f);
 
                     throw ERROR;
 
-                }).when(execution).apply(Mockito.any(Progress.class), Mockito.anyInt());
+                }).when(execution).apply(Mockito.any(ProgressContext.class), Mockito.anyInt());
             }
 
             @Nonnull
@@ -193,7 +193,7 @@ public interface ProgressCommandFromBiFunctionSpecification extends BaseCommandS
             {
                 command.execute(getInput());
 
-                Mockito.verify(execution).apply(Mockito.any(Progress.class), Mockito.anyInt());
+                Mockito.verify(execution).apply(Mockito.any(ProgressContext.class), Mockito.anyInt());
             }
         }
 
@@ -244,7 +244,7 @@ public interface ProgressCommandFromBiFunctionSpecification extends BaseCommandS
             WhenCreateWithCanExecuteSpecification<Integer, Integer>
     {
         private TestExecutor testExecutor;
-        private BiFunction<Progress, Integer, Integer> execution;
+        private BiFunction<ProgressContext, Integer, Integer> execution;
         private TestScheduler testScheduler;
         private TestSubject<Boolean> testSubject;
         private ReactiveCommand<Integer, Integer> command;

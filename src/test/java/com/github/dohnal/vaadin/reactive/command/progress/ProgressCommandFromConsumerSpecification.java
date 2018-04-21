@@ -18,7 +18,7 @@ import javax.annotation.Nullable;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
-import com.github.dohnal.vaadin.reactive.Progress;
+import com.github.dohnal.vaadin.reactive.ProgressContext;
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
 import com.github.dohnal.vaadin.reactive.command.BaseCommandSpecification;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,7 +42,7 @@ public interface ProgressCommandFromConsumerSpecification extends BaseCommandSpe
     abstract class WhenCreateFromConsumerSpecification extends WhenCreateSpecification<Void, Void>
     {
         private TestExecutor testExecutor;
-        private Consumer<Progress> execution;
+        private Consumer<ProgressContext> execution;
         private ReactiveCommand<Void, Void> command;
 
         @BeforeEach
@@ -76,16 +76,16 @@ public interface ProgressCommandFromConsumerSpecification extends BaseCommandSpe
             protected void mockExecution()
             {
                 Mockito.doAnswer(invocation -> {
-                    final Progress progress = invocation.getArgument(0);
+                    final ProgressContext progressContext = invocation.getArgument(0);
 
-                    progress.set(0.0f);
-                    progress.set(0.25f);
-                    progress.set(0.5f);
-                    progress.set(0.75f);
-                    progress.set(1.0f);
+                    progressContext.set(0.0f);
+                    progressContext.set(0.25f);
+                    progressContext.set(0.5f);
+                    progressContext.set(0.75f);
+                    progressContext.set(1.0f);
 
                     return null;
-                }).when(execution).accept(Mockito.any(Progress.class));
+                }).when(execution).accept(Mockito.any(ProgressContext.class));
             }
 
             @Nonnull
@@ -126,7 +126,7 @@ public interface ProgressCommandFromConsumerSpecification extends BaseCommandSpe
             {
                 command.execute(getInput());
 
-                Mockito.verify(execution).accept(Mockito.any(Progress.class));
+                Mockito.verify(execution).accept(Mockito.any(ProgressContext.class));
             }
         }
 
@@ -140,15 +140,15 @@ public interface ProgressCommandFromConsumerSpecification extends BaseCommandSpe
             protected void mockExecution()
             {
                 Mockito.doAnswer(invocation -> {
-                    final Progress progress = invocation.getArgument(0);
+                    final ProgressContext progressContext = invocation.getArgument(0);
 
-                    progress.set(0.0f);
-                    progress.set(0.25f);
-                    progress.set(0.5f);
+                    progressContext.set(0.0f);
+                    progressContext.set(0.25f);
+                    progressContext.set(0.5f);
 
                     throw ERROR;
 
-                }).when(execution).accept(Mockito.any(Progress.class));
+                }).when(execution).accept(Mockito.any(ProgressContext.class));
             }
 
             @Nonnull
@@ -189,7 +189,7 @@ public interface ProgressCommandFromConsumerSpecification extends BaseCommandSpe
             {
                 command.execute(getInput());
 
-                Mockito.verify(execution).accept(Mockito.any(Progress.class));
+                Mockito.verify(execution).accept(Mockito.any(ProgressContext.class));
             }
         }
 
@@ -236,7 +236,7 @@ public interface ProgressCommandFromConsumerSpecification extends BaseCommandSpe
             WhenCreateWithCanExecuteSpecification<Void, Void>
     {
         private TestExecutor testExecutor;
-        private Consumer<Progress> execution;
+        private Consumer<ProgressContext> execution;
         private TestScheduler testScheduler;
         private TestSubject<Boolean> testSubject;
         private ReactiveCommand<Void, Void> command;

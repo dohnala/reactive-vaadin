@@ -25,7 +25,7 @@ import java.util.function.Function;
  * @param <T> type of result
  * @author dohnal
  */
-public interface AsyncProgressSupplier<T> extends Function<Progress, CompletableFuture<T>>
+public interface AsyncProgressSupplier<T> extends Function<ProgressContext, CompletableFuture<T>>
 {
     /**
      * Creates asynchronous progress supplier from consumer
@@ -34,7 +34,7 @@ public interface AsyncProgressSupplier<T> extends Function<Progress, Completable
      * @return asynchronous progress supplier
      */
     @Nonnull
-    static AsyncProgressSupplier<Void> create(final @Nonnull Consumer<Progress> consumer)
+    static AsyncProgressSupplier<Void> create(final @Nonnull Consumer<ProgressContext> consumer)
     {
         return progress -> CompletableFuture.runAsync(() -> consumer.accept(progress));
     }
@@ -47,7 +47,7 @@ public interface AsyncProgressSupplier<T> extends Function<Progress, Completable
      * @return asynchronous progress supplier
      */
     @Nonnull
-    static AsyncProgressSupplier<Void> create(final @Nonnull Consumer<Progress> consumer,
+    static AsyncProgressSupplier<Void> create(final @Nonnull Consumer<ProgressContext> consumer,
                                               final @Nonnull Executor executor)
     {
         return progress -> CompletableFuture.runAsync(() -> consumer.accept(progress), executor);
@@ -61,7 +61,7 @@ public interface AsyncProgressSupplier<T> extends Function<Progress, Completable
      * @return asynchronous progress supplier
      */
     @Nonnull
-    static <T> AsyncProgressSupplier<T> create(final @Nonnull Function<Progress, T> function)
+    static <T> AsyncProgressSupplier<T> create(final @Nonnull Function<ProgressContext, T> function)
     {
         return progress -> CompletableFuture.supplyAsync(() -> function.apply(progress));
     }
@@ -75,7 +75,7 @@ public interface AsyncProgressSupplier<T> extends Function<Progress, Completable
      * @return asynchronous progress supplier
      */
     @Nonnull
-    static <T> AsyncProgressSupplier<T> create(final @Nonnull Function<Progress, T> function,
+    static <T> AsyncProgressSupplier<T> create(final @Nonnull Function<ProgressContext, T> function,
                                                final @Nonnull Executor executor)
     {
         return progress -> CompletableFuture.supplyAsync(() -> function.apply(progress), executor);

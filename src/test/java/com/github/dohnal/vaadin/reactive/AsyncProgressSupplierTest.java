@@ -56,28 +56,28 @@ public class AsyncProgressSupplierTest
         @DisplayName("From consumer")
         class FromConsumer
         {
-            private Progress progress;
-            private Consumer<Progress> consumer;
+            private ProgressContext progressContext;
+            private Consumer<ProgressContext> consumer;
             private AsyncProgressSupplier<Void> asyncProgressSupplier;
 
             @BeforeEach
             @SuppressWarnings("unchecked")
             protected void create()
             {
-                progress = Mockito.mock(Progress.class);
+                progressContext = Mockito.mock(ProgressContext.class);
                 consumer = Mockito.mock(Consumer.class);
                 asyncProgressSupplier = AsyncProgressSupplier.create(consumer);
 
-                Mockito.doNothing().when(consumer).accept(progress);
+                Mockito.doNothing().when(consumer).accept(progressContext);
             }
 
             @Test
             @DisplayName("When run, consumer should be run and null should be returned")
             public void testResult() throws ExecutionException, InterruptedException
             {
-                assertNull(asyncProgressSupplier.apply(progress).get());
+                assertNull(asyncProgressSupplier.apply(progressContext).get());
 
-                Mockito.verify(consumer).accept(progress);
+                Mockito.verify(consumer).accept(progressContext);
             }
         }
 
@@ -85,28 +85,28 @@ public class AsyncProgressSupplierTest
         @DisplayName("From consumer with executor")
         class FromConsumerWithExecutor
         {
-            private Progress progress;
-            private Consumer<Progress> consumer;
+            private ProgressContext progressContext;
+            private Consumer<ProgressContext> consumer;
             private AsyncProgressSupplier<Void> asyncProgressSupplier;
 
             @BeforeEach
             @SuppressWarnings("unchecked")
             protected void create()
             {
-                progress = Mockito.mock(Progress.class);
+                progressContext = Mockito.mock(ProgressContext.class);
                 consumer = Mockito.mock(Consumer.class);
                 asyncProgressSupplier = AsyncProgressSupplier.create(consumer, new TestExecutor());
 
-                Mockito.doNothing().when(consumer).accept(progress);
+                Mockito.doNothing().when(consumer).accept(progressContext);
             }
 
             @Test
             @DisplayName("When run, consumer should be run and null should be returned")
             public void testResult() throws ExecutionException, InterruptedException
             {
-                assertNull(asyncProgressSupplier.apply(progress).get());
+                assertNull(asyncProgressSupplier.apply(progressContext).get());
 
-                Mockito.verify(consumer).accept(progress);
+                Mockito.verify(consumer).accept(progressContext);
             }
         }
 
@@ -116,28 +116,28 @@ public class AsyncProgressSupplierTest
         {
             protected final Integer RESULT = 7;
 
-            private Progress progress;
-            private Function<Progress, Integer> function;
+            private ProgressContext progressContext;
+            private Function<ProgressContext, Integer> function;
             private AsyncProgressSupplier<Integer> asyncProgressSupplier;
 
             @BeforeEach
             @SuppressWarnings("unchecked")
             protected void create()
             {
-                progress = Mockito.mock(Progress.class);
+                progressContext = Mockito.mock(ProgressContext.class);
                 function = Mockito.mock(Function.class);
                 asyncProgressSupplier = AsyncProgressSupplier.create(function);
 
-                Mockito.when(function.apply(progress)).thenReturn(RESULT);
+                Mockito.when(function.apply(progressContext)).thenReturn(RESULT);
             }
 
             @Test
             @DisplayName("When run, function should be run and correct result should be returned")
             public void testResult() throws ExecutionException, InterruptedException
             {
-                assertEquals(RESULT, asyncProgressSupplier.apply(progress).get());
+                assertEquals(RESULT, asyncProgressSupplier.apply(progressContext).get());
 
-                Mockito.verify(function).apply(progress);
+                Mockito.verify(function).apply(progressContext);
             }
         }
 
@@ -147,28 +147,28 @@ public class AsyncProgressSupplierTest
         {
             protected final Integer RESULT = 7;
 
-            private Progress progress;
-            private Function<Progress, Integer> function;
+            private ProgressContext progressContext;
+            private Function<ProgressContext, Integer> function;
             private AsyncProgressSupplier<Integer> asyncProgressSupplier;
 
             @BeforeEach
             @SuppressWarnings("unchecked")
             protected void create()
             {
-                progress = Mockito.mock(Progress.class);
+                progressContext = Mockito.mock(ProgressContext.class);
                 function = Mockito.mock(Function.class);
                 asyncProgressSupplier = AsyncProgressSupplier.create(function, new TestExecutor());
 
-                Mockito.when(function.apply(progress)).thenReturn(RESULT);
+                Mockito.when(function.apply(progressContext)).thenReturn(RESULT);
             }
 
             @Test
             @DisplayName("When run, function should be run and correct result should be returned")
             public void testResult() throws ExecutionException, InterruptedException
             {
-                assertEquals(RESULT, asyncProgressSupplier.apply(progress).get());
+                assertEquals(RESULT, asyncProgressSupplier.apply(progressContext).get());
 
-                Mockito.verify(function).apply(progress);
+                Mockito.verify(function).apply(progressContext);
             }
         }
     }

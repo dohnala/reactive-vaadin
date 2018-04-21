@@ -480,7 +480,7 @@ public interface ReactiveCommand<T, R>
      * @return created reactive command
      */
     @Nonnull
-    static ReactiveCommand<Void, Void> createProgress(final @Nonnull Consumer<Progress> execution)
+    static ReactiveCommand<Void, Void> createProgress(final @Nonnull Consumer<ProgressContext> execution)
     {
         return createProgress(Observable.just(true), execution);
     }
@@ -494,7 +494,7 @@ public interface ReactiveCommand<T, R>
      */
     @Nonnull
     static ReactiveCommand<Void, Void> createProgress(final @Nonnull Observable<Boolean> canExecute,
-                                                      final @Nonnull Consumer<Progress> execution)
+                                                      final @Nonnull Consumer<ProgressContext> execution)
     {
         return createFromAsyncProgressSupplier(canExecute, AsyncProgressSupplier.create(execution));
     }
@@ -507,7 +507,7 @@ public interface ReactiveCommand<T, R>
      * @return created reactive command
      */
     @Nonnull
-    static ReactiveCommand<Void, Void> createProgress(final @Nonnull Consumer<Progress> execution,
+    static ReactiveCommand<Void, Void> createProgress(final @Nonnull Consumer<ProgressContext> execution,
                                                       final @Nonnull Executor executor)
     {
         return createProgress(Observable.just(true), execution, executor);
@@ -523,7 +523,7 @@ public interface ReactiveCommand<T, R>
      */
     @Nonnull
     static ReactiveCommand<Void, Void> createProgress(final @Nonnull Observable<Boolean> canExecute,
-                                                      final @Nonnull Consumer<Progress> execution,
+                                                      final @Nonnull Consumer<ProgressContext> execution,
                                                       final @Nonnull Executor executor)
     {
         return createFromAsyncProgressSupplier(canExecute, AsyncProgressSupplier.create(execution, executor));
@@ -537,7 +537,7 @@ public interface ReactiveCommand<T, R>
      * @return created reactive command
      */
     @Nonnull
-    static <R> ReactiveCommand<Void, R> createProgress(final @Nonnull Function<Progress, R> execution)
+    static <R> ReactiveCommand<Void, R> createProgress(final @Nonnull Function<ProgressContext, R> execution)
     {
         return createProgress(Observable.just(true), execution);
     }
@@ -552,7 +552,7 @@ public interface ReactiveCommand<T, R>
      */
     @Nonnull
     static <R> ReactiveCommand<Void, R> createProgress(final @Nonnull Observable<Boolean> canExecute,
-                                                       final @Nonnull Function<Progress, R> execution)
+                                                       final @Nonnull Function<ProgressContext, R> execution)
     {
         return createFromAsyncProgressSupplier(canExecute, AsyncProgressSupplier.create(execution));
     }
@@ -566,7 +566,7 @@ public interface ReactiveCommand<T, R>
      * @return created reactive command
      */
     @Nonnull
-    static <R> ReactiveCommand<Void, R> createProgress(final @Nonnull Function<Progress, R> execution,
+    static <R> ReactiveCommand<Void, R> createProgress(final @Nonnull Function<ProgressContext, R> execution,
                                                        final @Nonnull Executor executor)
     {
         return createProgress(Observable.just(true), execution, executor);
@@ -583,7 +583,7 @@ public interface ReactiveCommand<T, R>
      */
     @Nonnull
     static <R> ReactiveCommand<Void, R> createProgress(final @Nonnull Observable<Boolean> canExecute,
-                                                       final @Nonnull Function<Progress, R> execution,
+                                                       final @Nonnull Function<ProgressContext, R> execution,
                                                        final @Nonnull Executor executor)
     {
         return createFromAsyncProgressSupplier(canExecute, AsyncProgressSupplier.create(execution, executor));
@@ -597,7 +597,7 @@ public interface ReactiveCommand<T, R>
      * @return created reactive command
      */
     @Nonnull
-    static <T> ReactiveCommand<T, Void> createProgress(final @Nonnull BiConsumer<Progress, T> execution)
+    static <T> ReactiveCommand<T, Void> createProgress(final @Nonnull BiConsumer<ProgressContext, T> execution)
     {
         return createProgress(Observable.just(true), execution);
     }
@@ -612,7 +612,7 @@ public interface ReactiveCommand<T, R>
      */
     @Nonnull
     static <T> ReactiveCommand<T, Void> createProgress(final @Nonnull Observable<Boolean> canExecute,
-                                                       final @Nonnull BiConsumer<Progress, T> execution)
+                                                       final @Nonnull BiConsumer<ProgressContext, T> execution)
     {
         return createFromAsyncProgressFunction(canExecute, AsyncProgressFunction.create(execution));
     }
@@ -626,7 +626,7 @@ public interface ReactiveCommand<T, R>
      * @return created reactive command
      */
     @Nonnull
-    static <T> ReactiveCommand<T, Void> createProgress(final @Nonnull BiConsumer<Progress, T> execution,
+    static <T> ReactiveCommand<T, Void> createProgress(final @Nonnull BiConsumer<ProgressContext, T> execution,
                                                        final @Nonnull Executor executor)
     {
         return createProgress(Observable.just(true), execution, executor);
@@ -643,7 +643,7 @@ public interface ReactiveCommand<T, R>
      */
     @Nonnull
     static <T> ReactiveCommand<T, Void> createProgress(final @Nonnull Observable<Boolean> canExecute,
-                                                       final @Nonnull BiConsumer<Progress, T> execution,
+                                                       final @Nonnull BiConsumer<ProgressContext, T> execution,
                                                        final @Nonnull Executor executor)
     {
         return createFromAsyncProgressFunction(canExecute, AsyncProgressFunction.create(execution, executor));
@@ -658,7 +658,7 @@ public interface ReactiveCommand<T, R>
      * @return created reactive command
      */
     @Nonnull
-    static <T, R> ReactiveCommand<T, R> createProgress(final @Nonnull BiFunction<Progress, T, R> execution)
+    static <T, R> ReactiveCommand<T, R> createProgress(final @Nonnull BiFunction<ProgressContext, T, R> execution)
     {
         return createProgress(Observable.just(true), execution);
     }
@@ -674,7 +674,7 @@ public interface ReactiveCommand<T, R>
      */
     @Nonnull
     static <T, R> ReactiveCommand<T, R> createProgress(final @Nonnull Observable<Boolean> canExecute,
-                                                       final @Nonnull BiFunction<Progress, T, R> execution)
+                                                       final @Nonnull BiFunction<ProgressContext, T, R> execution)
     {
         return createFromAsyncProgressFunction(canExecute, AsyncProgressFunction.create(execution));
     }
@@ -689,7 +689,7 @@ public interface ReactiveCommand<T, R>
      * @return created reactive command
      */
     @Nonnull
-    static <T, R> ReactiveCommand<T, R> createProgress(final @Nonnull BiFunction<Progress, T, R> execution,
+    static <T, R> ReactiveCommand<T, R> createProgress(final @Nonnull BiFunction<ProgressContext, T, R> execution,
                                                        final @Nonnull Executor executor)
     {
         return createProgress(Observable.just(true), execution, executor);
@@ -707,7 +707,7 @@ public interface ReactiveCommand<T, R>
      */
     @Nonnull
     static <T, R> ReactiveCommand<T, R> createProgress(final @Nonnull Observable<Boolean> canExecute,
-                                                       final @Nonnull BiFunction<Progress, T, R> execution,
+                                                       final @Nonnull BiFunction<ProgressContext, T, R> execution,
                                                        final @Nonnull Executor executor)
     {
         return createFromAsyncProgressFunction(canExecute, AsyncProgressFunction.create(execution, executor));

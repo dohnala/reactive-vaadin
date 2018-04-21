@@ -14,11 +14,11 @@
 package com.github.dohnal.vaadin.reactive;
 
 /**
- * Used to control progress on some computation by given float value from 0.0f to 1.0f inclusive
+ * Context used to control progress of some computation by float value from 0.0f (0%) to 1.0f (100%) inclusive
  *
  * @author dohnal
  */
-public interface Progress
+public interface ProgressContext
 {
     /**
      * Sets progress by given value

@@ -19,7 +19,7 @@ import java.util.concurrent.Executor;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 
-import com.github.dohnal.vaadin.reactive.Progress;
+import com.github.dohnal.vaadin.reactive.ProgressContext;
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
 import com.github.dohnal.vaadin.reactive.command.BaseCommandSpecification;
 import org.junit.jupiter.api.BeforeEach;
@@ -43,7 +43,7 @@ public interface ProgressCommandFromBiConsumerSpecification extends BaseCommandS
     abstract class WhenCreateFromBiConsumerSpecification extends WhenCreateSpecification<Integer, Void>
     {
         private TestExecutor testExecutor;
-        private BiConsumer<Progress, Integer> execution;
+        private BiConsumer<ProgressContext, Integer> execution;
         private ReactiveCommand<Integer, Void> command;
 
         @BeforeEach
@@ -79,16 +79,16 @@ public interface ProgressCommandFromBiConsumerSpecification extends BaseCommandS
             protected void mockExecution()
             {
                 Mockito.doAnswer(invocation -> {
-                    final Progress progress = invocation.getArgument(0);
+                    final ProgressContext progressContext = invocation.getArgument(0);
 
-                    progress.set(0.0f);
-                    progress.set(0.25f);
-                    progress.set(0.5f);
-                    progress.set(0.75f);
-                    progress.set(1.0f);
+                    progressContext.set(0.0f);
+                    progressContext.set(0.25f);
+                    progressContext.set(0.5f);
+                    progressContext.set(0.75f);
+                    progressContext.set(1.0f);
 
                     return null;
-                }).when(execution).accept(Mockito.any(Progress.class), Mockito.anyInt());
+                }).when(execution).accept(Mockito.any(ProgressContext.class), Mockito.anyInt());
             }
 
             @Nonnull
@@ -129,7 +129,7 @@ public interface ProgressCommandFromBiConsumerSpecification extends BaseCommandS
             {
                 command.execute(getInput());
 
-                Mockito.verify(execution).accept(Mockito.any(Progress.class), Mockito.anyInt());
+                Mockito.verify(execution).accept(Mockito.any(ProgressContext.class), Mockito.anyInt());
             }
         }
 
@@ -144,15 +144,15 @@ public interface ProgressCommandFromBiConsumerSpecification extends BaseCommandS
             protected void mockExecution()
             {
                 Mockito.doAnswer(invocation -> {
-                    final Progress progress = invocation.getArgument(0);
+                    final ProgressContext progressContext = invocation.getArgument(0);
 
-                    progress.set(0.0f);
-                    progress.set(0.25f);
-                    progress.set(0.5f);
+                    progressContext.set(0.0f);
+                    progressContext.set(0.25f);
+                    progressContext.set(0.5f);
 
                     throw ERROR;
 
-                }).when(execution).accept(Mockito.any(Progress.class), Mockito.anyInt());
+                }).when(execution).accept(Mockito.any(ProgressContext.class), Mockito.anyInt());
             }
 
             @Nonnull
@@ -193,7 +193,7 @@ public interface ProgressCommandFromBiConsumerSpecification extends BaseCommandS
             {
                 command.execute(getInput());
 
-                Mockito.verify(execution).accept(Mockito.any(Progress.class), Mockito.anyInt());
+                Mockito.verify(execution).accept(Mockito.any(ProgressContext.class), Mockito.anyInt());
             }
         }
 
@@ -244,7 +244,7 @@ public interface ProgressCommandFromBiConsumerSpecification extends BaseCommandS
             WhenCreateWithCanExecuteSpecification<Integer, Void>
     {
         private TestExecutor testExecutor;
-        private BiConsumer<Progress, Integer> execution;
+        private BiConsumer<ProgressContext, Integer> execution;
         private TestScheduler testScheduler;
         private TestSubject<Boolean> testSubject;
         private ReactiveCommand<Integer, Void> command;

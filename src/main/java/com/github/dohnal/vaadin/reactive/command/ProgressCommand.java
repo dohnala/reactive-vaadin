@@ -51,7 +51,7 @@ public final class ProgressCommand<T, R> extends AbstractCommand<T, R>
     {
         handleStart();
 
-        execution.apply(new ReactiveProgress(progress), input)
+        execution.apply(new ReactiveProgressContext(progress), input)
                 .handle((result, error) -> {
                     if (error instanceof CompletionException)
                     {

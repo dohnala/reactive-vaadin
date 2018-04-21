@@ -16,19 +16,19 @@ package com.github.dohnal.vaadin.reactive.command;
 import javax.annotation.Nonnull;
 import java.util.Objects;
 
-import com.github.dohnal.vaadin.reactive.Progress;
+import com.github.dohnal.vaadin.reactive.ProgressContext;
 import com.github.dohnal.vaadin.reactive.ReactiveProperty;
 
 /**
- * Implementation of {@link Progress} which sets values to {@link ReactiveProperty}
+ * Implementation of {@link ProgressContext} which sets values to {@link ReactiveProperty}
  *
  * @author dohnal
  */
-public final class ReactiveProgress implements Progress
+public final class ReactiveProgressContext implements ProgressContext
 {
     private final ReactiveProperty<Float> property;
 
-    public ReactiveProgress(final @Nonnull ReactiveProperty<Float> property)
+    public ReactiveProgressContext(final @Nonnull ReactiveProperty<Float> property)
     {
         this.property = property;
     }

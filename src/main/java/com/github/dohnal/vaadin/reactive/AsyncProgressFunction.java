@@ -26,7 +26,7 @@ import java.util.function.BiFunction;
  * @param <R> type of result
  * @author dohnal
  */
-public interface AsyncProgressFunction<T, R> extends BiFunction<Progress, T, CompletableFuture<R>>
+public interface AsyncProgressFunction<T, R> extends BiFunction<ProgressContext, T, CompletableFuture<R>>
 {
     /**
      * Creates asynchronous progress function from asynchronous progress supplier
@@ -49,7 +49,7 @@ public interface AsyncProgressFunction<T, R> extends BiFunction<Progress, T, Com
      * @return asynchronous progress function
      */
     @Nonnull
-    static <T> AsyncProgressFunction<T, Void> create(final @Nonnull BiConsumer<Progress, T> consumer)
+    static <T> AsyncProgressFunction<T, Void> create(final @Nonnull BiConsumer<ProgressContext, T> consumer)
     {
         return (progress, input) -> CompletableFuture.runAsync(() -> consumer.accept(progress, input));
     }
@@ -63,7 +63,7 @@ public interface AsyncProgressFunction<T, R> extends BiFunction<Progress, T, Com
      * @return asynchronous progress function
      */
     @Nonnull
-    static <T> AsyncProgressFunction<T, Void> create(final @Nonnull BiConsumer<Progress, T> consumer,
+    static <T> AsyncProgressFunction<T, Void> create(final @Nonnull BiConsumer<ProgressContext, T> consumer,
                                                      final @Nonnull Executor executor)
     {
         return (progress, input) -> CompletableFuture.runAsync(() -> consumer.accept(progress, input), executor);
@@ -78,7 +78,7 @@ public interface AsyncProgressFunction<T, R> extends BiFunction<Progress, T, Com
      * @return asynchronous progress function
      */
     @Nonnull
-    static <T, R> AsyncProgressFunction<T, R> create(final @Nonnull BiFunction<Progress, T, R> function)
+    static <T, R> AsyncProgressFunction<T, R> create(final @Nonnull BiFunction<ProgressContext, T, R> function)
     {
         return (progress, input) -> CompletableFuture.supplyAsync(() -> function.apply(progress, input));
     }
@@ -93,7 +93,7 @@ public interface AsyncProgressFunction<T, R> extends BiFunction<Progress, T, Com
      * @return asynchronous progress function
      */
     @Nonnull
-    static <T, R> AsyncProgressFunction<T, R> create(final @Nonnull BiFunction<Progress, T, R> function,
+    static <T, R> AsyncProgressFunction<T, R> create(final @Nonnull BiFunction<ProgressContext, T, R> function,
                                                      final @Nonnull Executor executor)
     {
         return (progress, input) -> CompletableFuture.supplyAsync(() -> function.apply(progress, input), executor);

@@ -18,7 +18,7 @@ import javax.annotation.Nullable;
 import java.util.concurrent.CompletableFuture;
 
 import com.github.dohnal.vaadin.reactive.AsyncProgressFunction;
-import com.github.dohnal.vaadin.reactive.Progress;
+import com.github.dohnal.vaadin.reactive.ProgressContext;
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
 import com.github.dohnal.vaadin.reactive.command.BaseCommandSpecification;
 import org.junit.jupiter.api.BeforeEach;
@@ -79,16 +79,16 @@ public interface ProgressCommandFromAsyncProgressFunctionSpecification extends B
             protected void mockExecution()
             {
                 Mockito.doAnswer(invocation -> {
-                    final Progress progress = invocation.getArgument(0);
+                    final ProgressContext progressContext = invocation.getArgument(0);
 
-                    progress.set(0.0f);
-                    progress.set(0.25f);
-                    progress.set(0.5f);
-                    progress.set(0.75f);
-                    progress.set(1.0f);
+                    progressContext.set(0.0f);
+                    progressContext.set(0.25f);
+                    progressContext.set(0.5f);
+                    progressContext.set(0.75f);
+                    progressContext.set(1.0f);
 
                     return executionResult;
-                }).when(execution).apply(Mockito.any(Progress.class), Mockito.eq(INPUT));
+                }).when(execution).apply(Mockito.any(ProgressContext.class), Mockito.eq(INPUT));
             }
 
             @Nonnull
@@ -121,7 +121,7 @@ public interface ProgressCommandFromAsyncProgressFunctionSpecification extends B
             {
                 command.execute(getInput());
 
-                Mockito.verify(execution).apply(Mockito.any(Progress.class), Mockito.eq(INPUT));
+                Mockito.verify(execution).apply(Mockito.any(ProgressContext.class), Mockito.eq(INPUT));
             }
 
             @Nested
@@ -223,16 +223,16 @@ public interface ProgressCommandFromAsyncProgressFunctionSpecification extends B
             protected void execute()
             {
                 Mockito.doAnswer(invocation -> {
-                    final Progress progress = invocation.getArgument(0);
+                    final ProgressContext progressContext = invocation.getArgument(0);
 
-                    progress.set(0.0f);
-                    progress.set(0.25f);
-                    progress.set(0.5f);
-                    progress.set(0.75f);
-                    progress.set(1.0f);
+                    progressContext.set(0.0f);
+                    progressContext.set(0.25f);
+                    progressContext.set(0.5f);
+                    progressContext.set(0.75f);
+                    progressContext.set(1.0f);
 
                     return executionResult;
-                }).when(execution).apply(Mockito.any(Progress.class), Mockito.eq(INPUT));
+                }).when(execution).apply(Mockito.any(ProgressContext.class), Mockito.eq(INPUT));
 
                 executionResult.complete(RESULT);
 
@@ -266,14 +266,14 @@ public interface ProgressCommandFromAsyncProgressFunctionSpecification extends B
             protected void execute()
             {
                 Mockito.doAnswer(invocation -> {
-                    final Progress progress = invocation.getArgument(0);
+                    final ProgressContext progressContext = invocation.getArgument(0);
 
-                    progress.set(0.0f);
-                    progress.set(0.25f);
-                    progress.set(0.5f);
+                    progressContext.set(0.0f);
+                    progressContext.set(0.25f);
+                    progressContext.set(0.5f);
 
                     return executionResult;
-                }).when(execution).apply(Mockito.any(Progress.class), Mockito.eq(INPUT));
+                }).when(execution).apply(Mockito.any(ProgressContext.class), Mockito.eq(INPUT));
 
                 executionResult.completeExceptionally(ERROR);
 
@@ -372,16 +372,16 @@ public interface ProgressCommandFromAsyncProgressFunctionSpecification extends B
             protected void startExecution()
             {
                 Mockito.doAnswer(invocation -> {
-                    final Progress progress = invocation.getArgument(0);
+                    final ProgressContext progressContext = invocation.getArgument(0);
 
-                    progress.set(0.0f);
-                    progress.set(0.25f);
-                    progress.set(0.5f);
-                    progress.set(0.75f);
-                    progress.set(1.0f);
+                    progressContext.set(0.0f);
+                    progressContext.set(0.25f);
+                    progressContext.set(0.5f);
+                    progressContext.set(0.75f);
+                    progressContext.set(1.0f);
 
                     return executionResult;
-                }).when(execution).apply(Mockito.any(Progress.class), Mockito.eq(INPUT));
+                }).when(execution).apply(Mockito.any(ProgressContext.class), Mockito.eq(INPUT));
 
                 super.startExecution();
             }
@@ -418,16 +418,16 @@ public interface ProgressCommandFromAsyncProgressFunctionSpecification extends B
             protected void startExecution()
             {
                 Mockito.doAnswer(invocation -> {
-                    final Progress progress = invocation.getArgument(0);
+                    final ProgressContext progressContext = invocation.getArgument(0);
 
-                    progress.set(0.0f);
-                    progress.set(0.25f);
-                    progress.set(0.5f);
-                    progress.set(0.75f);
-                    progress.set(1.0f);
+                    progressContext.set(0.0f);
+                    progressContext.set(0.25f);
+                    progressContext.set(0.5f);
+                    progressContext.set(0.75f);
+                    progressContext.set(1.0f);
 
                     return executionResult;
-                }).when(execution).apply(Mockito.any(Progress.class), Mockito.eq(INPUT));
+                }).when(execution).apply(Mockito.any(ProgressContext.class), Mockito.eq(INPUT));
 
                 super.startExecution();
             }

@@ -59,7 +59,7 @@ public class AsyncProgressFunctionTest
         {
             protected final Integer RESULT = 5;
 
-            private Progress progress;
+            private ProgressContext progressContext;
             private AsyncProgressSupplier<Integer> asyncProgressSupplier;
             private AsyncProgressFunction<Void, Integer> asyncProgressFunction;
 
@@ -67,11 +67,11 @@ public class AsyncProgressFunctionTest
             @SuppressWarnings("unchecked")
             protected void create()
             {
-                progress = Mockito.mock(Progress.class);
+                progressContext = Mockito.mock(ProgressContext.class);
                 asyncProgressSupplier = Mockito.mock(AsyncProgressSupplier.class);
                 asyncProgressFunction = AsyncProgressFunction.create(asyncProgressSupplier);
 
-                Mockito.when(asyncProgressSupplier.apply(progress))
+                Mockito.when(asyncProgressSupplier.apply(progressContext))
                         .thenReturn(CompletableFuture.completedFuture(RESULT));
             }
 
@@ -79,9 +79,9 @@ public class AsyncProgressFunctionTest
             @DisplayName("When run, asynchronous progress supplier should be run and correct result should be returned")
             public void testResult() throws ExecutionException, InterruptedException
             {
-                assertEquals(RESULT, asyncProgressFunction.apply(progress, null).get());
+                assertEquals(RESULT, asyncProgressFunction.apply(progressContext, null).get());
 
-                Mockito.verify(asyncProgressSupplier).apply(progress);
+                Mockito.verify(asyncProgressSupplier).apply(progressContext);
             }
         }
 
@@ -91,28 +91,28 @@ public class AsyncProgressFunctionTest
         {
             protected final Integer INPUT = 5;
 
-            private Progress progress;
-            private BiConsumer<Progress, Integer> consumer;
+            private ProgressContext progressContext;
+            private BiConsumer<ProgressContext, Integer> consumer;
             private AsyncProgressFunction<Integer, Void> asyncProgressFunction;
 
             @BeforeEach
             @SuppressWarnings("unchecked")
             protected void create()
             {
-                progress = Mockito.mock(Progress.class);
+                progressContext = Mockito.mock(ProgressContext.class);
                 consumer = Mockito.mock(BiConsumer.class);
                 asyncProgressFunction = AsyncProgressFunction.create(consumer);
 
-                Mockito.doNothing().when(consumer).accept(progress, INPUT);
+                Mockito.doNothing().when(consumer).accept(progressContext, INPUT);
             }
 
             @Test
             @DisplayName("When run, bi-consumer should be run and null should be returned")
             public void testResult() throws ExecutionException, InterruptedException
             {
-                assertNull(asyncProgressFunction.apply(progress, INPUT).get());
+                assertNull(asyncProgressFunction.apply(progressContext, INPUT).get());
 
-                Mockito.verify(consumer).accept(progress, INPUT);
+                Mockito.verify(consumer).accept(progressContext, INPUT);
             }
         }
 
@@ -122,28 +122,28 @@ public class AsyncProgressFunctionTest
         {
             protected final Integer INPUT = 5;
 
-            private Progress progress;
-            private BiConsumer<Progress, Integer> consumer;
+            private ProgressContext progressContext;
+            private BiConsumer<ProgressContext, Integer> consumer;
             private AsyncProgressFunction<Integer, Void> asyncProgressFunction;
 
             @BeforeEach
             @SuppressWarnings("unchecked")
             protected void create()
             {
-                progress = Mockito.mock(Progress.class);
+                progressContext = Mockito.mock(ProgressContext.class);
                 consumer = Mockito.mock(BiConsumer.class);
                 asyncProgressFunction = AsyncProgressFunction.create(consumer, new TestExecutor());
 
-                Mockito.doNothing().when(consumer).accept(progress, INPUT);
+                Mockito.doNothing().when(consumer).accept(progressContext, INPUT);
             }
 
             @Test
             @DisplayName("When run, bi-consumer should be run and null should be returned")
             public void testResult() throws ExecutionException, InterruptedException
             {
-                assertNull(asyncProgressFunction.apply(progress, INPUT).get());
+                assertNull(asyncProgressFunction.apply(progressContext, INPUT).get());
 
-                Mockito.verify(consumer).accept(progress, INPUT);
+                Mockito.verify(consumer).accept(progressContext, INPUT);
             }
         }
 
@@ -154,28 +154,28 @@ public class AsyncProgressFunctionTest
             protected final Integer INPUT = 5;
             protected final Integer RESULT = 7;
 
-            private Progress progress;
-            private BiFunction<Progress, Integer, Integer> function;
+            private ProgressContext progressContext;
+            private BiFunction<ProgressContext, Integer, Integer> function;
             private AsyncProgressFunction<Integer, Integer> asyncProgressFunction;
 
             @BeforeEach
             @SuppressWarnings("unchecked")
             protected void create()
             {
-                progress = Mockito.mock(Progress.class);
+                progressContext = Mockito.mock(ProgressContext.class);
                 function = Mockito.mock(BiFunction.class);
                 asyncProgressFunction = AsyncProgressFunction.create(function);
 
-                Mockito.when(function.apply(progress, INPUT)).thenReturn(RESULT);
+                Mockito.when(function.apply(progressContext, INPUT)).thenReturn(RESULT);
             }
 
             @Test
             @DisplayName("When run, bi-function should be run and correct result should be returned")
             public void testResult() throws ExecutionException, InterruptedException
             {
-                assertEquals(RESULT, asyncProgressFunction.apply(progress, INPUT).get());
+                assertEquals(RESULT, asyncProgressFunction.apply(progressContext, INPUT).get());
 
-                Mockito.verify(function).apply(progress, INPUT);
+                Mockito.verify(function).apply(progressContext, INPUT);
             }
         }
 
@@ -186,28 +186,28 @@ public class AsyncProgressFunctionTest
             protected final Integer INPUT = 5;
             protected final Integer RESULT = 7;
 
-            private Progress progress;
-            private BiFunction<Progress, Integer, Integer> function;
+            private ProgressContext progressContext;
+            private BiFunction<ProgressContext, Integer, Integer> function;
             private AsyncProgressFunction<Integer, Integer> asyncProgressFunction;
 
             @BeforeEach
             @SuppressWarnings("unchecked")
             protected void create()
             {
-                progress = Mockito.mock(Progress.class);
+                progressContext = Mockito.mock(ProgressContext.class);
                 function = Mockito.mock(BiFunction.class);
                 asyncProgressFunction = AsyncProgressFunction.create(function, new TestExecutor());
 
-                Mockito.when(function.apply(progress, INPUT)).thenReturn(RESULT);
+                Mockito.when(function.apply(progressContext, INPUT)).thenReturn(RESULT);
             }
 
             @Test
             @DisplayName("When run, bi-function should be run and correct result should be returned")
             public void testResult() throws ExecutionException, InterruptedException
             {
-                assertEquals(RESULT, asyncProgressFunction.apply(progress, INPUT).get());
+                assertEquals(RESULT, asyncProgressFunction.apply(progressContext, INPUT).get());
 
-                Mockito.verify(function).apply(progress, INPUT);
+                Mockito.verify(function).apply(progressContext, INPUT);
             }
         }
     }
