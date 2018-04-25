@@ -15,9 +15,10 @@ package com.github.dohnal.vaadin.mvvm;
 
 import javax.annotation.Nonnull;
 
+import com.github.dohnal.vaadin.mvvm.component.ComponentActions;
 import com.github.dohnal.vaadin.mvvm.component.ComponentEvents;
 import com.github.dohnal.vaadin.mvvm.component.ComponentProperties;
-import com.github.dohnal.vaadin.reactive.CommandActions;
+import com.github.dohnal.vaadin.reactive.ReactiveBinder;
 import com.vaadin.ui.CustomComponent;
 
 /**
@@ -28,7 +29,7 @@ import com.vaadin.ui.CustomComponent;
  */
 public abstract class AbstractView<M extends AbstractViewModel>
         extends CustomComponent
-        implements ViewBinder, ComponentEvents, ComponentProperties, CommandActions
+        implements ReactiveBinder, ComponentEvents, ComponentProperties, ComponentActions
 {
     private M viewModel;
 

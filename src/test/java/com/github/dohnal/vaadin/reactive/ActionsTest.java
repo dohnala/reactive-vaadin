@@ -13,6 +13,8 @@
 
 package com.github.dohnal.vaadin.reactive;
 
+import java.util.function.Consumer;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -20,19 +22,19 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 /**
- * Tests for {@link CommandActions}
+ * Tests for {@link Actions}
  *
  * @author dohnal
  */
-@DisplayName("Command actions specification")
-public class CommandActionsTest implements CommandActions
+@DisplayName("Actions specification")
+public class ActionsTest implements Actions
 {
     @Nested
     @DisplayName("When execute action is created")
     class WhenCreateExecute
     {
         private ReactiveCommand<Void, Void> command;
-        private Action<Object> action;
+        private Runnable action;
 
         @BeforeEach
         @SuppressWarnings("unchecked")
@@ -56,7 +58,7 @@ public class CommandActionsTest implements CommandActions
             @BeforeEach
             protected void call()
             {
-                action.call(5);
+                action.run();
             }
 
             @Test
@@ -75,7 +77,7 @@ public class CommandActionsTest implements CommandActions
         protected final Integer INPUT = 7;
 
         private ReactiveCommand<Integer, Void> command;
-        private Action<Object> action;
+        private Runnable action;
 
         @BeforeEach
         @SuppressWarnings("unchecked")
@@ -99,7 +101,7 @@ public class CommandActionsTest implements CommandActions
             @BeforeEach
             protected void call()
             {
-                action.call(5);
+                action.run();
             }
 
             @Test
@@ -116,7 +118,7 @@ public class CommandActionsTest implements CommandActions
     class WhenCreateExecuteWithInput
     {
         private ReactiveCommand<Integer, Void> command;
-        private Action<Integer> action;
+        private Consumer<Integer> action;
 
         @BeforeEach
         @SuppressWarnings("unchecked")
@@ -142,7 +144,7 @@ public class CommandActionsTest implements CommandActions
             @BeforeEach
             protected void call()
             {
-                action.call(INPUT);
+                action.accept(INPUT);
             }
 
             @Test

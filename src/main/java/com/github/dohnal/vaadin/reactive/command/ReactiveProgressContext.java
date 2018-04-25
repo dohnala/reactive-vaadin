@@ -38,7 +38,9 @@ public final class ReactiveProgressContext implements ProgressContext
     {
         final Float currentValue = property.getValue();
 
-        final Float valueToSet = Math.max(Math.min(value, 1.0f), currentValue != null ? currentValue : 0.0f);
+        Objects.requireNonNull(currentValue);
+
+        final Float valueToSet = Math.max(Math.min(value, 1.0f), currentValue);
 
         if (!Objects.equals(currentValue, valueToSet))
         {
@@ -51,6 +53,8 @@ public final class ReactiveProgressContext implements ProgressContext
     {
         final Float currentValue = property.getValue();
 
-        set((currentValue != null ? currentValue : 0.0f) + value);
+        Objects.requireNonNull(currentValue);
+
+        set(currentValue + value);
     }
 }

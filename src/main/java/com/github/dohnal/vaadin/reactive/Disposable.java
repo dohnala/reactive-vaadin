@@ -13,21 +13,15 @@
 
 package com.github.dohnal.vaadin.reactive;
 
-import javax.annotation.Nonnull;
-
 /**
- * Interface returned from {@link ReactiveBinder} bind methods after binding to support unbinding
+ * Represents something which can be disposed
  *
- * @param <T> type of bean which supports unbind
  * @author dohnal
  */
-public interface Disposable<T>
+public interface Disposable
 {
     /**
-     * Unbind all previously bound bindings
-     *
-     * @return this bean
+     * Dispose
      */
-    @Nonnull
-    T unbind();
+    void dispose();
 }

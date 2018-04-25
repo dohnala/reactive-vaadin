@@ -13,10 +13,9 @@
 
 package com.github.dohnal.vaadin.reactive;
 
-import com.github.dohnal.vaadin.reactive.binder.ObservableToActionSpecification;
-import com.github.dohnal.vaadin.reactive.binder.ObservableToPropertySpecification;
-import com.github.dohnal.vaadin.reactive.binder.PropertyToActionSpecification;
-import com.github.dohnal.vaadin.reactive.binder.PropertyToPropertySpecification;
+import com.github.dohnal.vaadin.reactive.binder.ObservableBinderSpecification;
+import com.github.dohnal.vaadin.reactive.binder.ObservablePropertyBinderSpecification;
+import com.github.dohnal.vaadin.reactive.binder.PropertyBinderSpecification;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 
@@ -27,33 +26,63 @@ import org.junit.jupiter.api.Nested;
  */
 @DisplayName("Reactive binder specification")
 public class ReactiveBinderTest implements
-        ObservableToPropertySpecification,
-        PropertyToPropertySpecification,
-        ObservableToActionSpecification,
-        PropertyToActionSpecification
-
+        PropertyBinderSpecification,
+        ObservablePropertyBinderSpecification,
+        ObservableBinderSpecification
 {
     @Nested
-    @DisplayName("When observable is bound to property")
-    class WhenBindObservableToProperty extends WhenBindObservableToPropertySpecification {}
+    @DisplayName("When property is bound")
+    class WhenBindProperty
+    {
+        @Nested
+        @DisplayName("to observable")
+        class ToObservable extends WhenBindPropertyToObservableSpecification {}
+
+        @Nested
+        @DisplayName("to isObservable")
+        class ToIsObservable extends WhenBindPropertyToIsObservableSpecification {}
+    }
 
     @Nested
-    @DisplayName("When empty property is bound to property")
-    class WhenBindEmptyPropertyToProperty extends WhenBindEmptyPropertyToPropertySpecification {}
+    @DisplayName("When observable property is bound")
+    class WhenBindObservableProperty
+    {
+        @Nested
+        @DisplayName("to observable")
+        class ToObservable extends WhenBindObservablePropertyToObservableSpecification {}
+
+        @Nested
+        @DisplayName("to isObservable")
+        class ToIsObservable extends WhenBindObservablePropertyToIsObservableSpecification {}
+
+        @Nested
+        @DisplayName("to observable property")
+        class ToObservableProperty extends WhenBindObservablePropertyToObservablePropertySpecification {}
+    }
 
     @Nested
-    @DisplayName("When property with value is bound to property")
-    class WhenBindPropertyWithValueToProperty extends WhenBindPropertyWithValueToPropertySpecification {}
+    @DisplayName("When observable is bound")
+    class WhenBindObservable
+    {
+        @Nested
+        @DisplayName("to consumer")
+        class ToObservable extends WhenBindObservableToConsumerSpecification {}
+
+        @Nested
+        @DisplayName("to runnable")
+        class ToIsObservable extends WhenBindObservableToRunnableSpecification {}
+    }
 
     @Nested
-    @DisplayName("When observable is bound to action")
-    class WhenBindObservableToAction extends WhenBindObservableToActionSpecification {}
+    @DisplayName("When isObservable is bound")
+    class WhenBindIsObservable
+    {
+        @Nested
+        @DisplayName("to consumer")
+        class ToObservable extends WhenBindIsObservableToConsumerSpecification {}
 
-    @Nested
-    @DisplayName("When empty property is bound to action")
-    class AfterBindEmptyPropertyToAction extends AfterBindEmptyPropertyToActionSpecification {}
-
-    @Nested
-    @DisplayName("When property with value is bound to action")
-    class AfterBindPropertyWithValueToAction extends AfterBindPropertyWithValueToActionSpecification {}
+        @Nested
+        @DisplayName("to runnable")
+        class ToIsObservable extends WhenBindIsObservableToRunnableSpecification {}
+    }
 }

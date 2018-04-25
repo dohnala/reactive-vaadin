@@ -18,9 +18,9 @@ import javax.annotation.Nonnull;
 import rx.Observable;
 
 /**
- * Base interface for something which can be observed
+ * Represents something which can be observed
  *
- * @param <T> type of values which can be observed
+ * @param <T> type of value
  * @author dohnal
  */
 public interface IsObservable<T>

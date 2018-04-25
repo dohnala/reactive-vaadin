@@ -11,19 +11,13 @@
  * the License for the specific language governing permissions and limitations under the License.
  */
 
-package com.github.dohnal.vaadin.mvvm;
-
-import com.github.dohnal.vaadin.reactive.Action;
-import com.github.dohnal.vaadin.reactive.IsObservable;
-import com.github.dohnal.vaadin.reactive.ReactiveBinder;
+package com.github.dohnal.vaadin.reactive;
 
 /**
- * Event represents something what happened or changed in the past and some {@link Action} can be called as
- * a reaction to event by {@link ReactiveBinder}
+ * Represents property which is also observable
  *
- * @param <T> value this event generates
+ * @param <T> type of value
  * @author dohnal
  */
-public interface Event<T> extends IsObservable<T>
-{
-}
+public interface ObservableProperty<T> extends Property<T>, IsObservable<T>
+{}

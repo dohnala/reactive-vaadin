@@ -26,7 +26,7 @@ import rx.Observable;
  * @param <T> type of property
  * @author dohnal
  */
-public interface ReactiveProperty<T> extends Property<T>, IsObservable<T>
+public interface ReactiveProperty<T> extends ObservableProperty<T>
 {
     /**
      * Creates new property with no value

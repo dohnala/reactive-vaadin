@@ -15,67 +15,67 @@ package com.github.dohnal.vaadin.reactive;
 
 import javax.annotation.Nonnull;
 
-import com.github.dohnal.vaadin.reactive.binder.ObservableActionBinder;
-import com.github.dohnal.vaadin.reactive.binder.ObservablePropertyBinder;
+import com.github.dohnal.vaadin.reactive.binder.DefaultObservableBinder;
+import com.github.dohnal.vaadin.reactive.binder.DefaultObservablePropertyBinder;
+import com.github.dohnal.vaadin.reactive.binder.DefaultPropertyBinder;
 import rx.Observable;
 
 /**
- * Base interface for binders which can bind observables to properties or call actions as a reaction
- * when any observable is changed
+ * Base interface for binders which can bind properties and observables
  *
  * @author dohnal
  */
-public interface ReactiveBinder
+public interface ReactiveBinder extends Events, Actions
 {
     /**
-     * Creates binder for binding observable of values
+     * Returns binder for given property
+     *
+     * @param property property
+     * @param <T> type of value
+     * @return binder
+     */
+    @Nonnull
+    default <T> PropertyBinder<T> bind(final @Nonnull Property<T> property)
+    {
+        return new DefaultPropertyBinder<>(property);
+    }
+
+    /**
+     * Returns binder for given property which is also observable
+     *
+     * @param property property
+     * @param <T> type of value
+     * @return binder
+     */
+    @Nonnull
+    default <T> ObservablePropertyBinder<T> bind(final @Nonnull ObservableProperty<T> property)
+    {
+        return new DefaultObservablePropertyBinder<>(property);
+    }
+
+    /**
+     * Returns binder for given observable
      *
      * @param observable observable
-     * @param <T> type of values
+     * @param <T> type of value
      * @return binder
      */
     @Nonnull
-    default <T> ObservablePropertyBinder<T> bind(final @Nonnull Observable<T> observable)
+    default <T> ObservableBinder<T> when(final @Nonnull Observable<T> observable)
     {
-        return new ObservablePropertyBinder<>(observable);
+        return new DefaultObservableBinder<>(observable);
     }
 
     /**
-     * Creates binder for binding something what can be observed
+     * Returns binder for given observable
      *
-     * @param isObservable something what can be observed
-     * @param <T> type of values
+     * @param isObservable observable
+     * @param <T> type of value
      * @return binder
      */
     @Nonnull
-    default <T> ObservablePropertyBinder<T> bind(final @Nonnull IsObservable<T> isObservable)
+    default <T> ObservableBinder<T> when(final @Nonnull IsObservable<T> isObservable)
     {
-        return new ObservablePropertyBinder<>(isObservable.asObservable());
-    }
-
-    /**
-     * Creates binder which can call action as a reaction when given observable is changed
-     *
-     * @param observable observable
-     * @param <T> type of values
-     * @return binder
-     */
-    @Nonnull
-    default <T> ObservableActionBinder<T> whenChanged(final @Nonnull Observable<T> observable)
-    {
-        return new ObservableActionBinder<>(observable);
-    }
-
-    /**
-     * Creates binder which can call action as a reaction to change of something what can be observed
-     *
-     * @param isObservable something what can be observed
-     * @param <T> type of values
-     * @return binder
-     */
-    @Nonnull
-    default <T> ObservableActionBinder<T> whenChanged(final @Nonnull IsObservable<T> isObservable)
-    {
-        return whenChanged(isObservable.asObservable());
+        return when(isObservable.asObservable());
     }
 }

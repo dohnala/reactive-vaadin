@@ -13,20 +13,33 @@
 
 package com.github.dohnal.vaadin.reactive;
 
-import javax.annotation.Nullable;
+import javax.annotation.Nonnull;
+
+import rx.Observable;
 
 /**
- * Represents property which can be set
+ * Binder used to bind property
  *
  * @param <T> type of value
  * @author dohnal
  */
-public interface Property<T>
+public interface PropertyBinder<T>
 {
     /**
-     * Sets given value to this property
+     * Binds property to given observable which updates property value whenever observable emits new value
      *
-     * @param value value
+     * @param observable observable
+     * @return disposable to unbind property from given observable
      */
-    void setValue(final @Nullable T value);
+    @Nonnull
+    Disposable to(final @Nonnull Observable<? extends T> observable);
+
+    /**
+     * Binds property to given observable which updates property value whenever observable emits new value
+     *
+     * @param observable observable
+     * @return disposable to unbind property from given observable
+     */
+    @Nonnull
+    Disposable to(final @Nonnull IsObservable<? extends T> observable);
 }
