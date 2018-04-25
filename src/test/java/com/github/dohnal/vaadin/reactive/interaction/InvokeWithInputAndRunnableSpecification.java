@@ -15,7 +15,6 @@ package com.github.dohnal.vaadin.reactive.interaction;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.function.Consumer;
 
 import com.github.dohnal.vaadin.reactive.ReactiveInteraction;
 import com.github.dohnal.vaadin.reactive.exceptions.UnhandledInteractionException;
@@ -26,25 +25,25 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 /**
- * Specification for {@link ReactiveInteraction} handled by {@link ReactiveInteraction#handle(Object, Consumer)}
+ * Specification for {@link ReactiveInteraction} invoked by {@link ReactiveInteraction#invoke(Object, Runnable)}
  *
  * @author dohnal
  */
-public interface HandleWithInputAndConsumerSpecification extends BaseInteractionSpecification
+public interface InvokeWithInputAndRunnableSpecification extends BaseInteractionSpecification
 {
-    abstract class HandleWithInputAndConsumerWhenSubscriberSpecification extends HandleWhenSubscriberSpecification
+    abstract class InvokeWithInputAndRunnableWhenSubscriberSpecification extends InvokeWhenSubscriberSpecification
     {
         protected final Integer INPUT = 5;
 
         private ReactiveInteraction<Integer, Boolean> interaction;
-        private Consumer<Boolean> consumer;
+        private Runnable runnable;
 
         @BeforeEach
         @SuppressWarnings("unchecked")
         protected void create()
         {
             interaction = ReactiveInteraction.create();
-            consumer = Mockito.mock(Consumer.class);
+            runnable = Mockito.mock(Runnable.class);
         }
 
         @Nonnull
@@ -61,25 +60,25 @@ public interface HandleWithInputAndConsumerSpecification extends BaseInteraction
             return INPUT;
         }
 
-        protected void handle()
+        protected void invoke()
         {
-            interaction.handle(INPUT, consumer);
+            interaction.invoke(INPUT, runnable);
         }
 
         @Test
-        @DisplayName("Consumer should not be called")
-        public void testConsumer()
+        @DisplayName("Runnable should not be called")
+        public void testRunnable()
         {
             interaction.asObservable().test();
 
-            handle();
+            invoke();
 
-            Mockito.verify(consumer, Mockito.never()).accept(Mockito.anyBoolean());
+            Mockito.verify(runnable, Mockito.never()).run();
         }
 
         @Nested
-        @DisplayName("When interaction result is set")
-        class WhenSetResult extends WhenSetResultSpecification
+        @DisplayName("When interaction is handled")
+        class WhenHandle extends WhenHandleSpecification
         {
             protected final Boolean RESULT = true;
 
@@ -91,9 +90,9 @@ public interface HandleWithInputAndConsumerSpecification extends BaseInteraction
             }
 
             @Override
-            protected void handle()
+            protected void invoke()
             {
-                interaction.handle(consumer);
+                interaction.invoke(runnable);
             }
 
             @Nullable
@@ -104,16 +103,16 @@ public interface HandleWithInputAndConsumerSpecification extends BaseInteraction
             }
 
             @Test
-            @DisplayName("Consumer should be called with correct result")
-            public void testConsumer()
+            @DisplayName("Runnable should be called")
+            public void testRunnable()
             {
-                Mockito.verify(consumer).accept(RESULT);
+                Mockito.verify(runnable).run();
             }
         }
 
         @Nested
-        @DisplayName("When interaction result is set multiple times")
-        class WhenSetResultMultipleTimes extends WhenSetResultMultipleTimesSpecification
+        @DisplayName("When interaction is handled multiple times")
+        class WhenHandleMultipleTimes extends WhenHandleMultipleTimesSpecification
         {
             protected final Boolean RESULT = true;
 
@@ -125,9 +124,9 @@ public interface HandleWithInputAndConsumerSpecification extends BaseInteraction
             }
 
             @Override
-            protected void handle()
+            protected void invoke()
             {
-                interaction.handle(consumer);
+                interaction.invoke(runnable);
             }
 
             @Nullable
@@ -138,27 +137,27 @@ public interface HandleWithInputAndConsumerSpecification extends BaseInteraction
             }
 
             @Test
-            @DisplayName("Consumer should be called once with correct result")
-            public void testConsumer()
+            @DisplayName("Runnable should be called once")
+            public void testRunnable()
             {
-                Mockito.verify(consumer).accept(RESULT);
+                Mockito.verify(runnable).run();
             }
         }
     }
 
-    abstract class HandleWithInputAndConsumerWhenNoSubscriberSpecification extends HandleWhenNoSubscriberSpecification
+    abstract class InvokeWithInputAndRunnableWhenNoSubscriberSpecification extends InvokeWhenNoSubscriberSpecification
     {
         protected final Integer INPUT = 5;
 
         private ReactiveInteraction<Integer, Boolean> interaction;
-        private Consumer<Boolean> consumer;
+        private Runnable runnable;
 
         @BeforeEach
         @SuppressWarnings("unchecked")
         protected void create()
         {
             interaction = ReactiveInteraction.create();
-            consumer = Mockito.mock(Consumer.class);
+            runnable = Mockito.mock(Runnable.class);
         }
 
         @Nonnull
@@ -168,22 +167,22 @@ public interface HandleWithInputAndConsumerSpecification extends BaseInteraction
             return interaction;
         }
 
-        protected void handle()
+        protected void invoke()
         {
-            interaction.handle(INPUT, consumer);
+            interaction.invoke(INPUT, runnable);
         }
 
         @Test
-        @DisplayName("Consumer should not be called")
-        public void testConsumer()
+        @DisplayName("Runnable should not be called")
+        public void testRunnable()
         {
             try
             {
-                handle();
+                invoke();
             }
             catch (UnhandledInteractionException e)
             {
-                Mockito.verify(consumer, Mockito.never()).accept(Mockito.anyBoolean());
+                Mockito.verify(runnable, Mockito.never()).run();
             }
         }
     }

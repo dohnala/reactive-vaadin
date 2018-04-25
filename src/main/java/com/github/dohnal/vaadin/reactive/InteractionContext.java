@@ -42,10 +42,10 @@ public interface InteractionContext<T, R>
     boolean isHandled();
 
     /**
-     * Sets the result of the interaction
+     * Handles interaction with given result
      *
      * @param result result
      * @throws AlreadyHandledInteractionException if the interaction is already handled
      */
-    void setResult(final @Nullable R result);
+    void handle(final @Nullable R result);
 }

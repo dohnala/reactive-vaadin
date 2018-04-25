@@ -50,11 +50,11 @@ public interface BaseInteractionSpecification
     }
 
     /**
-     * Specification that tests behavior of interaction after it is handled when handler is subscribed
+     * Specification that tests behavior of interaction after it is invoked when handler is subscribed
      */
-    abstract class HandleWhenSubscriberSpecification implements RequireInteraction<Integer, Boolean>
+    abstract class InvokeWhenSubscriberSpecification implements RequireInteraction<Integer, Boolean>
     {
-        protected abstract void handle();
+        protected abstract void invoke();
 
         @Nullable
         protected abstract Integer getInput();
@@ -65,7 +65,7 @@ public interface BaseInteractionSpecification
         {
             final List<InteractionContext<Integer, Boolean>> interactionContexts =
                     getInteraction().asObservable().test()
-                            .perform(this::handle)
+                            .perform(this::invoke)
                             .getOnNextEvents();
 
             assertEquals(1, interactionContexts.size());
@@ -75,28 +75,28 @@ public interface BaseInteractionSpecification
     }
 
     /**
-     * Specification that tests behavior of interaction after result is set
+     * Specification that tests behavior of interaction after it is handled
      */
-    abstract class WhenSetResultSpecification implements RequireInteraction<Integer, Boolean>
+    abstract class WhenHandleSpecification implements RequireInteraction<Integer, Boolean>
     {
         private InteractionContext<Integer, Boolean> interactionContext;
 
-        protected abstract void handle();
+        protected abstract void invoke();
 
         @Nullable
         protected abstract Boolean getResult();
 
         @BeforeEach
-        protected void setResult()
+        protected void handle()
         {
             final List<InteractionContext<Integer, Boolean>> interactionContexts =
                     getInteraction().asObservable().test()
-                            .perform(this::handle)
+                            .perform(this::invoke)
                             .getOnNextEvents();
 
             interactionContext = interactionContexts.get(0);
 
-            interactionContext.setResult(getResult());
+            interactionContext.handle(getResult());
         }
 
         @Test()
@@ -108,35 +108,35 @@ public interface BaseInteractionSpecification
     }
 
     /**
-     * Specification that tests behavior of interaction after result is set multiple times
+     * Specification that tests behavior of interaction after it is handled multiple times
      */
-    abstract class WhenSetResultMultipleTimesSpecification implements RequireInteraction<Integer, Boolean>
+    abstract class WhenHandleMultipleTimesSpecification implements RequireInteraction<Integer, Boolean>
     {
         private InteractionContext<Integer, Boolean> interactionContext;
 
-        protected abstract void handle();
+        protected abstract void invoke();
 
         @Nullable
         protected abstract Boolean getResult();
 
         @BeforeEach
-        protected void setResult()
+        protected void handle()
         {
             final List<InteractionContext<Integer, Boolean>> interactionContexts =
                     getInteraction().asObservable().test()
-                            .perform(this::handle)
+                            .perform(this::invoke)
                             .getOnNextEvents();
 
             interactionContext = interactionContexts.get(0);
 
-            interactionContext.setResult(getResult());
+            interactionContext.handle(getResult());
         }
 
         @Test
         @DisplayName("AlreadyHandledInteractionException should be thrown")
         public void testError()
         {
-            assertThrows(AlreadyHandledInteractionException.class, () -> interactionContext.setResult(getResult()));
+            assertThrows(AlreadyHandledInteractionException.class, () -> interactionContext.handle(getResult()));
         }
 
         @Test()
@@ -145,7 +145,7 @@ public interface BaseInteractionSpecification
         {
             try
             {
-                interactionContext.setResult(getResult());
+                interactionContext.handle(getResult());
             }
             catch (AlreadyHandledInteractionException e)
             {
@@ -155,17 +155,17 @@ public interface BaseInteractionSpecification
     }
 
     /**
-     * Specification that tests behavior of interaction after it is handled when no handler is subscribed
+     * Specification that tests behavior of interaction after it is invoked when no handler is subscribed
      */
-    abstract class HandleWhenNoSubscriberSpecification implements RequireInteraction<Integer, Boolean>
+    abstract class InvokeWhenNoSubscriberSpecification implements RequireInteraction<Integer, Boolean>
     {
-        protected abstract void handle();
+        protected abstract void invoke();
 
         @Test
         @DisplayName("UnhandledInteractionException should be thrown")
         public void testError()
         {
-            assertThrows(UnhandledInteractionException.class, this::handle);
+            assertThrows(UnhandledInteractionException.class, this::invoke);
         }
 
         @Test()
@@ -174,7 +174,7 @@ public interface BaseInteractionSpecification
         {
             try
             {
-                handle();
+                invoke();
             }
             catch (UnhandledInteractionException e)
             {

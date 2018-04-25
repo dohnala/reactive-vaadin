@@ -45,7 +45,7 @@ public final class PublishSubjectInteraction<T, R> implements ReactiveInteractio
     }
 
     @Override
-    public void handle(final @Nullable T input, final @Nonnull Consumer<? super R> action)
+    public void invoke(final @Nullable T input, final @Nonnull Consumer<? super R> action)
     {
         if (!subject.hasObservers())
         {
@@ -56,21 +56,21 @@ public final class PublishSubjectInteraction<T, R> implements ReactiveInteractio
     }
 
     @Override
-    public void handle(final @Nonnull Consumer<? super R> action)
+    public void invoke(final @Nonnull Consumer<? super R> action)
     {
-        handle(null, action);
+        invoke(null, action);
     }
 
     @Override
-    public void handle(final @Nullable T input, final @Nonnull Runnable action)
+    public void invoke(final @Nullable T input, final @Nonnull Runnable action)
     {
-        handle(input, result -> action.run());
+        invoke(input, result -> action.run());
     }
 
     @Override
-    public void handle(final @Nonnull Runnable action)
+    public void invoke(final @Nonnull Runnable action)
     {
-        handle(null, action);
+        invoke(null, action);
     }
 
     @Nonnull
@@ -110,7 +110,7 @@ public final class PublishSubjectInteraction<T, R> implements ReactiveInteractio
         }
 
         @Override
-        public void setResult(final @Nullable R result)
+        public void handle(final @Nullable R result)
         {
             if (isHandled.compareAndSet(false, true))
             {

@@ -25,13 +25,13 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 /**
- * Specification for {@link ReactiveInteraction} handled by {@link ReactiveInteraction#handle(Runnable)}
+ * Specification for {@link ReactiveInteraction} invoked by {@link ReactiveInteraction#invoke(Runnable)}
  *
  * @author dohnal
  */
-public interface HandleWithRunnableSpecification extends BaseInteractionSpecification
+public interface InvokeWithRunnableSpecification extends BaseInteractionSpecification
 {
-    abstract class HandleWithRunnableWhenSubscriberSpecification extends HandleWhenSubscriberSpecification
+    abstract class InvokeWithRunnableWhenSubscriberSpecification extends InvokeWhenSubscriberSpecification
     {
         private ReactiveInteraction<Integer, Boolean> interaction;
         private Runnable runnable;
@@ -58,9 +58,9 @@ public interface HandleWithRunnableSpecification extends BaseInteractionSpecific
             return null;
         }
 
-        protected void handle()
+        protected void invoke()
         {
-            interaction.handle(runnable);
+            interaction.invoke(runnable);
         }
 
         @Test
@@ -69,14 +69,14 @@ public interface HandleWithRunnableSpecification extends BaseInteractionSpecific
         {
             interaction.asObservable().test();
 
-            handle();
+            invoke();
 
             Mockito.verify(runnable, Mockito.never()).run();
         }
 
         @Nested
-        @DisplayName("When interaction result is set")
-        class WhenSetResult extends WhenSetResultSpecification
+        @DisplayName("When interaction is handled")
+        class WhenHandle extends WhenHandleSpecification
         {
             protected final Boolean RESULT = true;
 
@@ -88,9 +88,9 @@ public interface HandleWithRunnableSpecification extends BaseInteractionSpecific
             }
 
             @Override
-            protected void handle()
+            protected void invoke()
             {
-                interaction.handle(runnable);
+                interaction.invoke(runnable);
             }
 
             @Nullable
@@ -109,8 +109,8 @@ public interface HandleWithRunnableSpecification extends BaseInteractionSpecific
         }
 
         @Nested
-        @DisplayName("When interaction result is set multiple times")
-        class WhenSetResultMultipleTimes extends WhenSetResultMultipleTimesSpecification
+        @DisplayName("When interaction is handled multiple times")
+        class WhenHandleMultipleTimes extends WhenHandleMultipleTimesSpecification
         {
             protected final Boolean RESULT = true;
 
@@ -122,9 +122,9 @@ public interface HandleWithRunnableSpecification extends BaseInteractionSpecific
             }
 
             @Override
-            protected void handle()
+            protected void invoke()
             {
-                interaction.handle(runnable);
+                interaction.invoke(runnable);
             }
 
             @Nullable
@@ -143,7 +143,7 @@ public interface HandleWithRunnableSpecification extends BaseInteractionSpecific
         }
     }
 
-    abstract class HandleWithRunnableWhenNoSubscriberSpecification extends HandleWhenNoSubscriberSpecification
+    abstract class InvokeWithRunnableWhenNoSubscriberSpecification extends InvokeWhenNoSubscriberSpecification
     {
         private ReactiveInteraction<Integer, Boolean> interaction;
         private Runnable runnable;
@@ -163,9 +163,9 @@ public interface HandleWithRunnableSpecification extends BaseInteractionSpecific
             return interaction;
         }
 
-        protected void handle()
+        protected void invoke()
         {
-            interaction.handle(runnable);
+            interaction.invoke(runnable);
         }
 
         @Test
@@ -174,7 +174,7 @@ public interface HandleWithRunnableSpecification extends BaseInteractionSpecific
         {
             try
             {
-                handle();
+                invoke();
             }
             catch (UnhandledInteractionException e)
             {

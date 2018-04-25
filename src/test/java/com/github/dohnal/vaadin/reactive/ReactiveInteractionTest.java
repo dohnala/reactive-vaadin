@@ -13,10 +13,10 @@
 
 package com.github.dohnal.vaadin.reactive;
 
-import com.github.dohnal.vaadin.reactive.interaction.HandleWithConsumerSpecification;
-import com.github.dohnal.vaadin.reactive.interaction.HandleWithInputAndConsumerSpecification;
-import com.github.dohnal.vaadin.reactive.interaction.HandleWithInputAndRunnableSpecification;
-import com.github.dohnal.vaadin.reactive.interaction.HandleWithRunnableSpecification;
+import com.github.dohnal.vaadin.reactive.interaction.InvokeWithConsumerSpecification;
+import com.github.dohnal.vaadin.reactive.interaction.InvokeWithInputAndConsumerSpecification;
+import com.github.dohnal.vaadin.reactive.interaction.InvokeWithInputAndRunnableSpecification;
+import com.github.dohnal.vaadin.reactive.interaction.InvokeWithRunnableSpecification;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 
@@ -27,65 +27,65 @@ import org.junit.jupiter.api.Nested;
  */
 @DisplayName("Reactive interaction specification")
 public class ReactiveInteractionTest implements
-        HandleWithInputAndConsumerSpecification,
-        HandleWithConsumerSpecification,
-        HandleWithInputAndRunnableSpecification,
-        HandleWithRunnableSpecification
+        InvokeWithInputAndConsumerSpecification,
+        InvokeWithConsumerSpecification,
+        InvokeWithInputAndRunnableSpecification,
+        InvokeWithRunnableSpecification
 {
     @Nested
     @DisplayName("When new reactive interaction is created")
     class WhenCreate
     {
         @Nested
-        @DisplayName("When interaction is handled with input and consumer")
+        @DisplayName("When interaction is invoked with input and consumer")
         class WhenHandledWithInputAndConsumer
         {
             @Nested
             @DisplayName("When handler is subscribed")
-            class WhenSubscriber extends HandleWithInputAndConsumerWhenSubscriberSpecification {}
+            class WhenSubscriber extends InvokeWithInputAndConsumerWhenSubscriberSpecification {}
 
             @Nested
             @DisplayName("When no handler is subscribed")
-            class WhenNoSubscribed extends HandleWithInputAndConsumerWhenNoSubscriberSpecification {}
+            class WhenNoSubscribed extends InvokeWithInputAndConsumerWhenNoSubscriberSpecification {}
         }
 
         @Nested
-        @DisplayName("When interaction is handled with consumer")
+        @DisplayName("When interaction is invoked with consumer")
         class WhenHandledWithConsumer
         {
             @Nested
             @DisplayName("When handler is subscribed")
-            class WhenSubscriber extends HandleWithConsumerWhenSubscriberSpecification {}
+            class WhenSubscriber extends InvokeWithConsumerWhenSubscriberSpecification {}
 
             @Nested
             @DisplayName("When no handler is subscribed")
-            class WhenNoSubscribed extends HandleWithConsumerWhenNoSubscriberSpecification {}
+            class WhenNoSubscribed extends InvokeWithConsumerWhenNoSubscriberSpecification {}
         }
 
         @Nested
-        @DisplayName("When interaction is handled with input and runnable")
+        @DisplayName("When interaction is invoked with input and runnable")
         class WhenHandledWithInputAndRunnable
         {
             @Nested
             @DisplayName("When handler is subscribed")
-            class WhenSubscriber extends HandleWithInputAndRunnableWhenSubscriberSpecification {}
+            class WhenSubscriber extends InvokeWithInputAndRunnableWhenSubscriberSpecification {}
 
             @Nested
             @DisplayName("When no handler is subscribed")
-            class WhenNoSubscribed extends HandleWithInputAndRunnableWhenNoSubscriberSpecification {}
+            class WhenNoSubscribed extends InvokeWithInputAndRunnableWhenNoSubscriberSpecification {}
         }
 
         @Nested
-        @DisplayName("When interaction is handled with runnable")
+        @DisplayName("When interaction is invoked with runnable")
         class WhenHandledWithRunnable
         {
             @Nested
             @DisplayName("When handler is subscribed")
-            class WhenSubscriber extends HandleWithRunnableWhenSubscriberSpecification {}
+            class WhenSubscriber extends InvokeWithRunnableWhenSubscriberSpecification {}
 
             @Nested
             @DisplayName("When no handler is subscribed")
-            class WhenNoSubscribed extends HandleWithRunnableWhenNoSubscriberSpecification {}
+            class WhenNoSubscribed extends InvokeWithRunnableWhenNoSubscriberSpecification {}
         }
     }
 }

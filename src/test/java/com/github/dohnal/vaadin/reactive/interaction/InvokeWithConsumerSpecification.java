@@ -26,13 +26,13 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 /**
- * Specification for {@link ReactiveInteraction} handled by {@link ReactiveInteraction#handle(Consumer)}
+ * Specification for {@link ReactiveInteraction} invoked by {@link ReactiveInteraction#invoke(Consumer)}
  *
  * @author dohnal
  */
-public interface HandleWithConsumerSpecification extends BaseInteractionSpecification
+public interface InvokeWithConsumerSpecification extends BaseInteractionSpecification
 {
-    abstract class HandleWithConsumerWhenSubscriberSpecification extends HandleWhenSubscriberSpecification
+    abstract class InvokeWithConsumerWhenSubscriberSpecification extends InvokeWhenSubscriberSpecification
     {
         private ReactiveInteraction<Integer, Boolean> interaction;
         private Consumer<Boolean> consumer;
@@ -59,9 +59,9 @@ public interface HandleWithConsumerSpecification extends BaseInteractionSpecific
             return null;
         }
 
-        protected void handle()
+        protected void invoke()
         {
-            interaction.handle(consumer);
+            interaction.invoke(consumer);
         }
 
         @Test
@@ -70,14 +70,14 @@ public interface HandleWithConsumerSpecification extends BaseInteractionSpecific
         {
             interaction.asObservable().test();
 
-            handle();
+            invoke();
 
             Mockito.verify(consumer, Mockito.never()).accept(Mockito.anyBoolean());
         }
 
         @Nested
-        @DisplayName("When interaction result is set")
-        class WhenSetResult extends WhenSetResultSpecification
+        @DisplayName("When interaction is handled")
+        class WhenHandle extends WhenHandleSpecification
         {
             protected final Boolean RESULT = true;
 
@@ -89,9 +89,9 @@ public interface HandleWithConsumerSpecification extends BaseInteractionSpecific
             }
 
             @Override
-            protected void handle()
+            protected void invoke()
             {
-                interaction.handle(consumer);
+                interaction.invoke(consumer);
             }
 
             @Nullable
@@ -110,8 +110,8 @@ public interface HandleWithConsumerSpecification extends BaseInteractionSpecific
         }
 
         @Nested
-        @DisplayName("When interaction result is set multiple times")
-        class WhenSetResultMultipleTimes extends WhenSetResultMultipleTimesSpecification
+        @DisplayName("When interaction is handled multiple times")
+        class WhenHandleMultipleTimes extends WhenHandleMultipleTimesSpecification
         {
             protected final Boolean RESULT = true;
 
@@ -123,9 +123,9 @@ public interface HandleWithConsumerSpecification extends BaseInteractionSpecific
             }
 
             @Override
-            protected void handle()
+            protected void invoke()
             {
-                interaction.handle(consumer);
+                interaction.invoke(consumer);
             }
 
             @Nullable
@@ -144,7 +144,7 @@ public interface HandleWithConsumerSpecification extends BaseInteractionSpecific
         }
     }
 
-    abstract class HandleWithConsumerWhenNoSubscriberSpecification extends HandleWhenNoSubscriberSpecification
+    abstract class InvokeWithConsumerWhenNoSubscriberSpecification extends InvokeWhenNoSubscriberSpecification
     {
         private ReactiveInteraction<Integer, Boolean> interaction;
         private Consumer<Boolean> consumer;
@@ -164,9 +164,9 @@ public interface HandleWithConsumerSpecification extends BaseInteractionSpecific
             return interaction;
         }
 
-        protected void handle()
+        protected void invoke()
         {
-            interaction.handle(consumer);
+            interaction.invoke(consumer);
         }
 
         @Test
@@ -175,7 +175,7 @@ public interface HandleWithConsumerSpecification extends BaseInteractionSpecific
         {
             try
             {
-                handle();
+                invoke();
             }
             catch (UnhandledInteractionException e)
             {

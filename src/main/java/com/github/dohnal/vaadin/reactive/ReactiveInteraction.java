@@ -43,36 +43,36 @@ public interface ReactiveInteraction<T, R> extends IsObservable<InteractionConte
     }
 
     /**
-     * Handles interaction with given input by invoking an action when the interaction is handled
+     * Invokes interaction with given input and call an action when the interaction is handled
      *
      * @param input input
      * @param action action called when interaction is handled and result is available
      * @throws UnhandledInteractionException if no handler is subscribed
      */
-    void handle(final @Nullable T input, final @Nonnull Consumer<? super R> action);
+    void invoke(final @Nullable T input, final @Nonnull Consumer<? super R> action);
 
     /**
-     * Handles interaction with given input by invoking an action when the interaction is handled
+     * Invokes interaction with given input and call an action when the interaction is handled
      *
      * @param input input
      * @param action action called when interaction is handled
      * @throws UnhandledInteractionException if no handler is subscribed
      */
-    void handle(final @Nullable T input, final @Nonnull Runnable action);
+    void invoke(final @Nullable T input, final @Nonnull Runnable action);
 
     /**
-     * Handles interaction with no input by invoking an action when the interaction is handled
+     * Invokes interaction with no input and call an action when the interaction is handled
      *
      * @param action action called when interaction is handled and result is available
      * @throws UnhandledInteractionException if no handler is subscribed
      */
-    void handle(final @Nonnull Consumer<? super R> action);
+    void invoke(final @Nonnull Consumer<? super R> action);
 
     /**
-     * Handles interaction with no input by invoking an action when the interaction is handled
+     * Invokes interaction with no input and call an action when the interaction is handled
      *
      * @param action action called when interaction is handled and result is available
      * @throws UnhandledInteractionException if no handler is subscribed
      */
-    void handle(final @Nonnull Runnable action);
+    void invoke(final @Nonnull Runnable action);
 }
