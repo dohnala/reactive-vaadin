@@ -256,6 +256,20 @@ public class ComponentPropertiesTest implements ComponentProperties
                 Mockito.verify(progressBar).setValue(0.5f);
             }
         }
+
+        @Nested
+        @DisplayName("When property value is set to null")
+        class WhenSetNull
+        {
+            @Test
+            @DisplayName("Progress bar's setValue should be called with 0")
+            public void testProgressBar()
+            {
+                property.setValue(null);
+
+                Mockito.verify(progressBar).setValue(0.0f);
+            }
+        }
     }
 
     @Nested
