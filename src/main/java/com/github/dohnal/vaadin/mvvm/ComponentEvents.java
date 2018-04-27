@@ -11,25 +11,50 @@
  * the License for the specific language governing permissions and limitations under the License.
  */
 
-package com.github.dohnal.vaadin.mvvm.component.event;
+package com.github.dohnal.vaadin.mvvm;
 
 import javax.annotation.Nonnull;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import com.github.dohnal.vaadin.reactive.Event;
+import com.vaadin.data.HasValue;
 import com.vaadin.shared.Registration;
+import com.vaadin.ui.Button;
 import rx.Emitter;
 import rx.Observable;
 
 /**
- * Base class for component events
+ * List of all component events
  *
- * @param <T> type of value
  * @author dohnal
  */
-public abstract class AbstractComponentEvent<T> implements Event<T>
+public interface ComponentEvents
 {
+    /**
+     * Returns an event which will happen when user click on given button
+     *
+     * @param button button
+     * @return event
+     */
+    @Nonnull
+    default Observable<Button.ClickEvent> clickedOn(final @Nonnull Button button)
+    {
+        return toObservable(consumer -> consumer::accept, button::addClickListener);
+    }
+
+    /**
+     * Returns an event which will happen when user changes value of given field
+     *
+     * @param field field
+     * @param <T> type of value in field
+     * @return event
+     */
+    @Nonnull
+    default <T> Observable<T> valueChangedOf(final @Nonnull HasValue<T> field)
+    {
+        return toObservable(consumer -> event -> consumer.accept(event.getValue()), field::addValueChangeListener);
+    }
+
     /**
      * Converts given functions to create and register listener to observable of values given listener
      * produces
@@ -41,8 +66,8 @@ public abstract class AbstractComponentEvent<T> implements Event<T>
      * @return observable of values given listener produces
      */
     @Nonnull
-    static <T, L> Observable<T> toObservable(final @Nonnull Function<Consumer<T>, L> createListener,
-                                             final @Nonnull Function<L, Registration> registerListener)
+    default <T, L> Observable<T> toObservable(final @Nonnull Function<Consumer<T>, L> createListener,
+                                              final @Nonnull Function<L, Registration> registerListener)
     {
         return Observable.create(eventEmitter -> {
             final L listener = createListener.apply(eventEmitter::onNext);

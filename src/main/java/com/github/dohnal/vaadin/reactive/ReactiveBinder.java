@@ -41,7 +41,7 @@ public interface ReactiveBinder extends Events, Actions
     }
 
     /**
-     * Returns binder for given property which is also observable
+     * Returns binder for given observable property
      *
      * @param property property
      * @param <T> type of value

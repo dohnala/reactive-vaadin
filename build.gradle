@@ -23,6 +23,7 @@ ext {
     junitVersion = '5.1.1'
     mockitoVersion = '2.18.0'
     jacocoVersion = '0.8.0'
+    servletApiVersion = '3.1.0'
 }
 
 dependencyManagement {
@@ -39,6 +40,7 @@ dependencies {
 
     testImplementation "org.junit.jupiter:junit-jupiter-engine:${junitVersion}"
     testImplementation "org.mockito:mockito-core:${mockitoVersion}"
+    testImplementation "javax.servlet:javax.servlet-api:${servletApiVersion}"
 }
 
 test {

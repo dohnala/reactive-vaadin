@@ -11,28 +11,26 @@
  * the License for the specific language governing permissions and limitations under the License.
  */
 
-package com.github.dohnal.vaadin.mvvm.component;
+package com.github.dohnal.vaadin.mvvm;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Collection;
 
-import com.github.dohnal.vaadin.mvvm.component.property.ComponentEnabledProperty;
-import com.github.dohnal.vaadin.mvvm.component.property.ComponentItemsProperty;
-import com.github.dohnal.vaadin.mvvm.component.property.ComponentVisibleProperty;
-import com.github.dohnal.vaadin.mvvm.component.property.FieldReadOnlyProperty;
-import com.github.dohnal.vaadin.mvvm.component.property.FieldValueProperty;
-import com.github.dohnal.vaadin.mvvm.component.property.ProgressBarValueProperty;
+import com.github.dohnal.vaadin.reactive.ObservableProperty;
+import com.github.dohnal.vaadin.reactive.Property;
 import com.vaadin.data.HasItems;
-import com.vaadin.ui.AbstractField;
+import com.vaadin.data.HasValue;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.ProgressBar;
+import rx.Observable;
 
 /**
  * List of all component properties
  *
  * @author dohnal
  */
-public interface ComponentProperties
+public interface ComponentProperties extends ComponentEvents
 {
     /**
      * Returns visible property of given component
@@ -41,9 +39,9 @@ public interface ComponentProperties
      * @return visible property
      */
     @Nonnull
-    default ComponentVisibleProperty visibleOf(final @Nonnull Component component)
+    default Property<Boolean> visibleOf(final @Nonnull Component component)
     {
-        return new ComponentVisibleProperty(component);
+        return value -> component.setVisible(Boolean.TRUE.equals(value));
     }
 
     /**
@@ -53,9 +51,9 @@ public interface ComponentProperties
      * @return enabled property
      */
     @Nonnull
-    default ComponentEnabledProperty enabledOf(final @Nonnull Component component)
+    default Property<Boolean> enabledOf(final @Nonnull Component component)
     {
-        return new ComponentEnabledProperty(component);
+        return value -> component.setEnabled(Boolean.TRUE.equals(value));
     }
 
     /**
@@ -65,9 +63,9 @@ public interface ComponentProperties
      * @return read-only property
      */
     @Nonnull
-    default FieldReadOnlyProperty readOnlyOf(final @Nonnull AbstractField<?> field)
+    default Property<Boolean> readOnlyOf(final @Nonnull HasValue<?> field)
     {
-        return new FieldReadOnlyProperty(field);
+        return value -> field.setReadOnly(Boolean.TRUE.equals(value));
     }
 
     /**
@@ -78,9 +76,23 @@ public interface ComponentProperties
      * @return value property
      */
     @Nonnull
-    default <T> FieldValueProperty<T> valueOf(final @Nonnull AbstractField<T> field)
+    default <T> ObservableProperty<T> valueOf(final @Nonnull HasValue<T> field)
     {
-        return new FieldValueProperty<>(field);
+        return new ObservableProperty<T>()
+        {
+            @Nonnull
+            @Override
+            public Observable<T> asObservable()
+            {
+                return valueChangedOf(field);
+            }
+
+            @Override
+            public void setValue(final @Nullable T value)
+            {
+                field.setValue(value);
+            }
+        };
     }
 
     /**
@@ -90,9 +102,9 @@ public interface ComponentProperties
      * @return value property
      */
     @Nonnull
-    default ProgressBarValueProperty valueOf(final @Nonnull ProgressBar progressBar)
+    default Property<Float> valueOf(final @Nonnull ProgressBar progressBar)
     {
-        return new ProgressBarValueProperty(progressBar);
+        return value -> progressBar.setValue(value != null ? value : 0.0f);
     }
 
     /**
@@ -104,8 +116,8 @@ public interface ComponentProperties
      * @return items property
      */
     @Nonnull
-    default <T, C extends Collection<T>> ComponentItemsProperty<T, C> itemsOf(final @Nonnull HasItems<T> component)
+    default <T, C extends Collection<T>> Property<C> itemsOf(final @Nonnull HasItems<T> component)
     {
-        return new ComponentItemsProperty<>(component);
+        return component::setItems;
     }
 }
