@@ -51,22 +51,6 @@ public interface Events
     }
 
     /**
-     * Returns event that represents that given command has been executed
-     * Parameter is current execution count
-     *
-     * @param command command
-     * @return event
-     */
-    @Nonnull
-    default Observable<Integer> executed(final @Nonnull ReactiveCommand<?, ?> command)
-    {
-        return command.isExecuting()
-                .filter(Boolean.TRUE::equals)
-                .scan(0, (count, isExecuting) -> count + 1)
-                .filter(count -> count > 0);
-    }
-
-    /**
      * Returns event that represents that given command has succeed
      *
      * @param command command

@@ -132,44 +132,6 @@ public class EventsTest implements Events
     }
 
     @Nested
-    @DisplayName("When executed event is created with command")
-    class WhenCreateExecuted
-    {
-        private ReactiveCommand<Integer, Integer> command;
-        private Observable<Integer> event;
-
-        @BeforeEach
-        @SuppressWarnings("unchecked")
-        protected void create()
-        {
-            command = ReactiveCommand.create(input -> input + 1);
-            event = executed(command);
-        }
-
-        @Test
-        @DisplayName("Event should not emit any value")
-        public void testEvent()
-        {
-            event.test()
-                    .assertNoValues();
-        }
-
-        @Nested
-        @DisplayName("When command is executed")
-        class WhenExecuted
-        {
-            @Test
-            @DisplayName("Event should emit correct value")
-            public void testEvent()
-            {
-                event.test()
-                        .perform(() -> command.execute(5))
-                        .assertValue(1);
-            }
-        }
-    }
-
-    @Nested
     @DisplayName("When succeed event is created with command")
     class WhenCreateSucceed
     {
