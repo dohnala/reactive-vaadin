@@ -15,6 +15,7 @@ package com.github.dohnal.vaadin.mvvm;
 
 import java.util.List;
 
+import com.vaadin.data.HasValue;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.TextField;
 import org.junit.jupiter.api.BeforeEach;
@@ -79,7 +80,7 @@ public class ComponentEventsTest implements ComponentEvents
     class WhenCreateValueChangedOfField
     {
         private TextField field;
-        private Observable<String> event;
+        private Observable<HasValue.ValueChangeEvent<String>> event;
 
         @BeforeEach
         @SuppressWarnings("unchecked")
@@ -105,9 +106,14 @@ public class ComponentEventsTest implements ComponentEvents
             @DisplayName("Event should emit correct value")
             public void testEvent()
             {
-                event.test()
+                final List<HasValue.ValueChangeEvent<String>> events = event.test()
                         .perform(() -> field.setValue("value"))
-                        .assertValue("value");
+                        .getOnNextEvents();
+
+                assertEquals(events.size(), 1);
+                assertEquals(events.get(0).getSource(), field);
+                assertEquals(events.get(0).getOldValue(), "");
+                assertEquals(events.get(0).getValue(), "value");
             }
         }
     }

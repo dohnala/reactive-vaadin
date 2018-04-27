@@ -84,7 +84,7 @@ public interface ComponentProperties extends ComponentEvents
             @Override
             public Observable<T> asObservable()
             {
-                return valueChangedOf(field);
+                return valueChangedOf(field).map(HasValue.ValueChangeEvent::getValue);
             }
 
             @Override

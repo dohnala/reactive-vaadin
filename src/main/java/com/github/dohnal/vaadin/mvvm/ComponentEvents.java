@@ -50,9 +50,9 @@ public interface ComponentEvents
      * @return event
      */
     @Nonnull
-    default <T> Observable<T> valueChangedOf(final @Nonnull HasValue<T> field)
+    default <T> Observable<HasValue.ValueChangeEvent<T>> valueChangedOf(final @Nonnull HasValue<T> field)
     {
-        return toObservable(consumer -> event -> consumer.accept(event.getValue()), field::addValueChangeListener);
+        return toObservable(consumer -> consumer::accept, field::addValueChangeListener);
     }
 
     /**
