@@ -14,7 +14,6 @@
 package com.github.dohnal.vaadin.reactive.command.progress;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.concurrent.Executor;
 import java.util.function.BiFunction;
 
@@ -29,6 +28,8 @@ import org.mockito.Mockito;
 import rx.schedulers.Schedulers;
 import rx.schedulers.TestScheduler;
 import rx.subjects.TestSubject;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Tests for {@link ReactiveCommand} created by
@@ -69,6 +70,18 @@ public interface ProgressCommandFromBiFunctionSpecification extends BaseCommandS
         }
 
         @Nested
+        @DisplayName("When command is executed with no input")
+        class WhenExecuteWithInput
+        {
+            @Test
+            @DisplayName("IllegalArgumentException should be thrown")
+            public void testExecute()
+            {
+                assertThrows(IllegalArgumentException.class, () -> command.execute());
+            }
+        }
+
+        @Nested
         @DisplayName("When command is executed")
         class WhenExecute extends WhenExecuteSpecification<Integer, Integer>
         {
@@ -98,18 +111,19 @@ public interface ProgressCommandFromBiFunctionSpecification extends BaseCommandS
                 return command;
             }
 
-            @Nullable
             @Override
-            protected Integer getInput()
+            protected void execute()
             {
-                return INPUT;
+                command.execute(INPUT);
             }
 
-            @Nullable
-            @Override
-            protected Integer getResult()
+            @Test
+            @DisplayName("Result observable should emit correct result")
+            public void testResult()
             {
-                return RESULT;
+                getCommand().getResult().test()
+                        .perform(this::execute)
+                        .assertValue(RESULT);
             }
 
             @Test
@@ -119,7 +133,7 @@ public interface ProgressCommandFromBiFunctionSpecification extends BaseCommandS
             {
                 getCommand().getProgress().test()
                         .assertValuesAndClear(0.0f)
-                        .perform(() -> getCommand().execute(getInput()))
+                        .perform(this::execute)
                         .assertValues(0.25f, 0.5f, 0.75f, 1.0f);
             }
 
@@ -127,7 +141,7 @@ public interface ProgressCommandFromBiFunctionSpecification extends BaseCommandS
             @DisplayName("BiFunction should be run")
             public void testBiFunction()
             {
-                command.execute(getInput());
+                execute();
 
                 Mockito.verify(execution).apply(Mockito.any(ProgressContext.class), Mockito.anyInt());
             }
@@ -162,11 +176,10 @@ public interface ProgressCommandFromBiFunctionSpecification extends BaseCommandS
                 return command;
             }
 
-            @Nullable
             @Override
-            protected Integer getInput()
+            protected void execute()
             {
-                return INPUT;
+                command.execute(INPUT);
             }
 
             @Nonnull
@@ -183,7 +196,7 @@ public interface ProgressCommandFromBiFunctionSpecification extends BaseCommandS
             {
                 getCommand().getProgress().test()
                         .assertValuesAndClear(0.0f)
-                        .perform(() -> getCommand().execute(getInput()))
+                        .perform(this::execute)
                         .assertValues(0.25f, 0.5f, 1.0f);
             }
 
@@ -191,7 +204,7 @@ public interface ProgressCommandFromBiFunctionSpecification extends BaseCommandS
             @DisplayName("BiFunction should be run")
             public void testBiFunction()
             {
-                command.execute(getInput());
+                execute();
 
                 Mockito.verify(execution).apply(Mockito.any(ProgressContext.class), Mockito.anyInt());
             }
@@ -202,6 +215,15 @@ public interface ProgressCommandFromBiFunctionSpecification extends BaseCommandS
         class WhenSubscribeAfterExecute extends WhenSubscribeAfterExecuteSpecification<Integer, Integer>
         {
             protected final Integer INPUT = 5;
+            protected final Integer RESULT = 7;
+
+            @BeforeEach
+            protected void executeCommand()
+            {
+                Mockito.when(execution.apply(Mockito.any(ProgressContext.class), Mockito.anyInt())).thenReturn(RESULT);
+
+                super.executeCommand();
+            }
 
             @Nonnull
             @Override
@@ -210,11 +232,10 @@ public interface ProgressCommandFromBiFunctionSpecification extends BaseCommandS
                 return command;
             }
 
-            @Nullable
             @Override
-            protected Integer getInput()
+            protected void execute()
             {
-                return INPUT;
+                command.execute(INPUT);
             }
         }
 
@@ -223,6 +244,15 @@ public interface ProgressCommandFromBiFunctionSpecification extends BaseCommandS
         class WhenSubscribeAfterExecuteWithError extends WhenSubscribeAfterExecuteWithErrorSpecification<Integer, Integer>
         {
             protected final Integer INPUT = 5;
+            private final Throwable ERROR = new RuntimeException("Error");
+
+            @BeforeEach
+            protected void executeCommand()
+            {
+                Mockito.when(execution.apply(Mockito.any(ProgressContext.class), Mockito.anyInt())).thenThrow(ERROR);
+
+                super.executeCommand();
+            }
 
             @Nonnull
             @Override
@@ -231,11 +261,10 @@ public interface ProgressCommandFromBiFunctionSpecification extends BaseCommandS
                 return command;
             }
 
-            @Nullable
             @Override
-            protected Integer getInput()
+            protected void execute()
             {
-                return null;
+                command.execute(INPUT);
             }
         }
     }
@@ -326,16 +355,16 @@ public interface ProgressCommandFromBiFunctionSpecification extends BaseCommandS
             }
 
             @Override
-            protected Integer getInput()
+            protected void execute()
             {
-                return INPUT;
+                command.execute(INPUT);
             }
 
             @Test
             @DisplayName("BiFunction should not be run")
             public void testBiFunction()
             {
-                command.execute(getInput());
+                execute();
 
                 Mockito.verify(execution, Mockito.never()).apply(Mockito.any(), Mockito.anyInt());
             }

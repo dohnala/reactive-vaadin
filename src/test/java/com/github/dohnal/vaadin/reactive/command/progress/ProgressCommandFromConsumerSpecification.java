@@ -14,7 +14,6 @@
 package com.github.dohnal.vaadin.reactive.command.progress;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
@@ -95,18 +94,19 @@ public interface ProgressCommandFromConsumerSpecification extends BaseCommandSpe
                 return command;
             }
 
-            @Nullable
             @Override
-            protected Void getInput()
+            protected void execute()
             {
-                return null;
+                command.execute();
             }
 
-            @Nullable
-            @Override
-            protected Void getResult()
+            @Test
+            @DisplayName("Result observable should not emit any value")
+            public void testResult()
             {
-                return null;
+                getCommand().getResult().test()
+                        .perform(this::execute)
+                        .assertNoValues();
             }
 
             @Test
@@ -116,7 +116,7 @@ public interface ProgressCommandFromConsumerSpecification extends BaseCommandSpe
             {
                 getCommand().getProgress().test()
                         .assertValuesAndClear(0.0f)
-                        .perform(() -> getCommand().execute(getInput()))
+                        .perform(this::execute)
                         .assertValues(0.25f, 0.5f, 0.75f, 1.0f);
             }
 
@@ -124,7 +124,7 @@ public interface ProgressCommandFromConsumerSpecification extends BaseCommandSpe
             @DisplayName("Consumer should be run")
             public void testConsumer()
             {
-                command.execute(getInput());
+                execute();
 
                 Mockito.verify(execution).accept(Mockito.any(ProgressContext.class));
             }
@@ -158,11 +158,10 @@ public interface ProgressCommandFromConsumerSpecification extends BaseCommandSpe
                 return command;
             }
 
-            @Nullable
             @Override
-            protected Void getInput()
+            protected void execute()
             {
-                return null;
+                command.execute();
             }
 
             @Nonnull
@@ -179,7 +178,7 @@ public interface ProgressCommandFromConsumerSpecification extends BaseCommandSpe
             {
                 getCommand().getProgress().test()
                         .assertValuesAndClear(0.0f)
-                        .perform(() -> getCommand().execute(getInput()))
+                        .perform(this::execute)
                         .assertValues(0.25f, 0.5f, 1.0f);
             }
 
@@ -187,7 +186,7 @@ public interface ProgressCommandFromConsumerSpecification extends BaseCommandSpe
             @DisplayName("Consumer should be run")
             public void testConsumer()
             {
-                command.execute(getInput());
+                execute();
 
                 Mockito.verify(execution).accept(Mockito.any(ProgressContext.class));
             }
@@ -204,11 +203,10 @@ public interface ProgressCommandFromConsumerSpecification extends BaseCommandSpe
                 return command;
             }
 
-            @Nullable
             @Override
-            protected Void getInput()
+            protected void execute()
             {
-                return null;
+                command.execute();
             }
         }
 
@@ -223,11 +221,10 @@ public interface ProgressCommandFromConsumerSpecification extends BaseCommandSpe
                 return command;
             }
 
-            @Nullable
             @Override
-            protected Void getInput()
+            protected void execute()
             {
-                return null;
+                command.execute();
             }
         }
     }
@@ -316,16 +313,16 @@ public interface ProgressCommandFromConsumerSpecification extends BaseCommandSpe
             }
 
             @Override
-            protected Void getInput()
+            protected void execute()
             {
-                return null;
+                command.execute();
             }
 
             @Test
             @DisplayName("Consumer should not be run")
             public void testConsumer()
             {
-                command.execute(getInput());
+                execute();
 
                 Mockito.verify(execution, Mockito.never()).accept(Mockito.any());
             }

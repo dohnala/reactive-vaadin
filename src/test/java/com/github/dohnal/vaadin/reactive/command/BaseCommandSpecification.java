@@ -14,7 +14,6 @@
 package com.github.dohnal.vaadin.reactive.command;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.concurrent.Executor;
 
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
@@ -189,15 +188,14 @@ public interface BaseCommandSpecification
      */
     abstract class WhenCanExecuteEmitsTrueDuringExecutionSpecification<T, R> implements RequireCommand<T, R>
     {
-        @Nullable
-        protected abstract T getInput();
+        protected abstract void execute();
 
         protected abstract void emitsTrue();
 
         @BeforeEach
         protected void startExecution()
         {
-            getCommand().execute(getInput());
+            execute();
         }
 
         @Test
@@ -220,15 +218,14 @@ public interface BaseCommandSpecification
      */
     abstract class WhenCanExecuteEmitsFalseDuringExecutionSpecification<T, R> implements RequireCommand<T, R>
     {
-        @Nullable
-        protected abstract T getInput();
+        protected abstract void execute();
 
         protected abstract void emitsFalse();
 
         @BeforeEach
         protected void startExecution()
         {
-            getCommand().execute(getInput());
+            execute();
         }
 
         @Test
@@ -251,15 +248,14 @@ public interface BaseCommandSpecification
      */
     abstract class WhenExecutionStartedSpecification<T, R> implements RequireCommand<T, R>
     {
-        @Nullable
-        protected abstract T getInput();
+        protected abstract void execute();
 
         @Test
         @DisplayName("Result observable should not emit any value")
         public void testResult()
         {
             getCommand().getResult().test()
-                    .perform(() -> getCommand().execute(getInput()))
+                    .perform(this::execute)
                     .assertNoValues();
         }
 
@@ -268,7 +264,7 @@ public interface BaseCommandSpecification
         public void testError()
         {
             getCommand().getError().test()
-                    .perform(() -> getCommand().execute(getInput()))
+                    .perform(this::execute)
                     .assertNoValues();
         }
 
@@ -278,7 +274,7 @@ public interface BaseCommandSpecification
         {
             getCommand().canExecute().test()
                     .assertValuesAndClear(true)
-                    .perform(() -> getCommand().execute(getInput()))
+                    .perform(this::execute)
                     .assertValues(false);
         }
 
@@ -288,7 +284,7 @@ public interface BaseCommandSpecification
         {
             getCommand().isExecuting().test()
                     .assertValuesAndClear(false)
-                    .perform(() -> getCommand().execute(getInput()))
+                    .perform(this::execute)
                     .assertValues(true);
         }
 
@@ -298,7 +294,7 @@ public interface BaseCommandSpecification
         {
             getCommand().getExecutionCount().test()
                     .assertValuesAndClear(0)
-                    .perform(() -> getCommand().execute(getInput()))
+                    .perform(this::execute)
                     .assertNoValues();
         }
 
@@ -308,7 +304,7 @@ public interface BaseCommandSpecification
         {
             getCommand().hasBeenExecuted().test()
                     .assertValuesAndClear(false)
-                    .perform(() -> getCommand().execute(getInput()))
+                    .perform(this::execute)
                     .assertNoValues();
         }
 
@@ -318,7 +314,7 @@ public interface BaseCommandSpecification
         {
             getCommand().getProgress().test()
                     .assertValuesAndClear(0.0f)
-                    .perform(() -> getCommand().execute(getInput()))
+                    .perform(this::execute)
                     .assertNoValues();
         }
     }
@@ -331,27 +327,14 @@ public interface BaseCommandSpecification
      */
     abstract class WhenExecuteSpecification<T, R> implements RequireCommand<T, R>
     {
-        @Nullable
-        protected abstract T getInput();
-
-        @Nullable
-        protected abstract R getResult();
-
-        @Test
-        @DisplayName("Result observable should emit correct result")
-        public void testResult()
-        {
-            getCommand().getResult().test()
-                    .perform(() -> getCommand().execute(getInput()))
-                    .assertValue(getResult());
-        }
+        protected abstract void execute();
 
         @Test
         @DisplayName("Error observable should not emit any value")
         public void testError()
         {
             getCommand().getError().test()
-                    .perform(() -> getCommand().execute(getInput()))
+                    .perform(this::execute)
                     .assertNoValues();
         }
 
@@ -361,7 +344,7 @@ public interface BaseCommandSpecification
         {
             getCommand().canExecute().test()
                     .assertValuesAndClear(true)
-                    .perform(() -> getCommand().execute(getInput()))
+                    .perform(this::execute)
                     .assertValues(false, true);
         }
 
@@ -371,7 +354,7 @@ public interface BaseCommandSpecification
         {
             getCommand().isExecuting().test()
                     .assertValuesAndClear(false)
-                    .perform(() -> getCommand().execute(getInput()))
+                    .perform(this::execute)
                     .assertValues(true, false);
         }
 
@@ -381,7 +364,7 @@ public interface BaseCommandSpecification
         {
             getCommand().getExecutionCount().test()
                     .assertValuesAndClear(0)
-                    .perform(() -> getCommand().execute(getInput()))
+                    .perform(this::execute)
                     .assertValue(1);
         }
 
@@ -391,7 +374,7 @@ public interface BaseCommandSpecification
         {
             getCommand().hasBeenExecuted().test()
                     .assertValuesAndClear(false)
-                    .perform(() -> getCommand().execute(getInput()))
+                    .perform(this::execute)
                     .assertValue(true);
         }
 
@@ -401,7 +384,7 @@ public interface BaseCommandSpecification
         {
             getCommand().getProgress().test()
                     .assertValuesAndClear(0.0f)
-                    .perform(() -> getCommand().execute(getInput()))
+                    .perform(this::execute)
                     .assertValues(1.0f);
         }
     }
@@ -414,8 +397,7 @@ public interface BaseCommandSpecification
      */
     abstract class WhenExecuteWithErrorSpecification<T, R> implements RequireCommand<T, R>
     {
-        @Nullable
-        protected abstract T getInput();
+        protected abstract void execute();
 
         @Nonnull
         protected abstract Throwable getError();
@@ -427,7 +409,7 @@ public interface BaseCommandSpecification
             getCommand().getError().test();
 
             getCommand().getResult().test()
-                    .perform(() -> getCommand().execute(getInput()))
+                    .perform(this::execute)
                     .assertNoValues();
         }
 
@@ -438,7 +420,7 @@ public interface BaseCommandSpecification
             getCommand().getError().test();
 
             getCommand().getError().test()
-                    .perform(() -> getCommand().execute(getInput()))
+                    .perform(this::execute)
                     .assertValue(getError());
         }
 
@@ -450,7 +432,7 @@ public interface BaseCommandSpecification
 
             getCommand().canExecute().test()
                     .assertValuesAndClear(true)
-                    .perform(() -> getCommand().execute(getInput()))
+                    .perform(this::execute)
                     .assertValues(false, true);
         }
 
@@ -462,7 +444,7 @@ public interface BaseCommandSpecification
 
             getCommand().isExecuting().test()
                     .assertValuesAndClear(false)
-                    .perform(() -> getCommand().execute(getInput()))
+                    .perform(this::execute)
                     .assertValues(true, false);
         }
 
@@ -474,7 +456,7 @@ public interface BaseCommandSpecification
 
             getCommand().getExecutionCount().test()
                     .assertValuesAndClear(0)
-                    .perform(() -> getCommand().execute(getInput()))
+                    .perform(this::execute)
                     .assertValue(1);
         }
 
@@ -486,7 +468,7 @@ public interface BaseCommandSpecification
 
             getCommand().hasBeenExecuted().test()
                     .assertValuesAndClear(false)
-                    .perform(() -> getCommand().execute(getInput()))
+                    .perform(this::execute)
                     .assertValue(true);
         }
 
@@ -498,7 +480,7 @@ public interface BaseCommandSpecification
 
             getCommand().getProgress().test()
                     .assertValuesAndClear(0.0f)
-                    .perform(() -> getCommand().execute(getInput()))
+                    .perform(this::execute)
                     .assertValues(1.0f);
         }
     }
@@ -511,27 +493,14 @@ public interface BaseCommandSpecification
      */
     abstract class WhenExecutionFinishedSpecification<T, R> implements RequireCommand<T, R>
     {
-        @Nullable
-        protected abstract T getInput();
-
-        @Nullable
-        protected abstract R getResult();
+        protected abstract void execute();
 
         protected abstract void finishExecution();
 
         @BeforeEach
         protected void startExecution()
         {
-            getCommand().execute(getInput());
-        }
-
-        @Test
-        @DisplayName("Result observable should emit correct result")
-        public void testResult()
-        {
-            getCommand().getResult().test()
-                    .perform(this::finishExecution)
-                    .assertValue(getResult());
+            execute();
         }
 
         @Test
@@ -602,8 +571,7 @@ public interface BaseCommandSpecification
      */
     abstract class WhenExecutionFinishedWithErrorSpecification<T, R> implements RequireCommand<T, R>
     {
-        @Nullable
-        protected abstract T getInput();
+        protected abstract void execute();
 
         @Nonnull
         protected abstract Throwable getError();
@@ -613,7 +581,7 @@ public interface BaseCommandSpecification
         @BeforeEach
         protected void startExecution()
         {
-            getCommand().execute(getInput());
+            execute();
         }
 
         @Test
@@ -693,14 +661,14 @@ public interface BaseCommandSpecification
      */
     abstract class WhenExecuteWhileDisabledSpecification<T, R> implements RequireCommand<T, R>
     {
-        protected abstract T getInput();
+        protected abstract void execute();
 
         @Test
         @DisplayName("Result observable should not emit any value")
         public void testResult()
         {
             getCommand().getResult().test()
-                    .perform(() -> getCommand().execute(getInput()))
+                    .perform(this::execute)
                     .assertNoValues();
         }
 
@@ -709,7 +677,7 @@ public interface BaseCommandSpecification
         public void testError()
         {
             getCommand().getError().test()
-                    .perform(() -> getCommand().execute(getInput()))
+                    .perform(this::execute)
                     .assertNoValues();
         }
 
@@ -719,7 +687,7 @@ public interface BaseCommandSpecification
         {
             getCommand().canExecute().test()
                     .assertValuesAndClear(false)
-                    .perform(() -> getCommand().execute(getInput()))
+                    .perform(this::execute)
                     .assertNoValues();
         }
 
@@ -729,7 +697,7 @@ public interface BaseCommandSpecification
         {
             getCommand().isExecuting().test()
                     .assertValuesAndClear(false)
-                    .perform(() -> getCommand().execute(getInput()))
+                    .perform(this::execute)
                     .assertNoValues();
         }
 
@@ -739,7 +707,7 @@ public interface BaseCommandSpecification
         {
             getCommand().getExecutionCount().test()
                     .assertValuesAndClear(0)
-                    .perform(() -> getCommand().execute(getInput()))
+                    .perform(this::execute)
                     .assertNoValues();
         }
 
@@ -749,7 +717,7 @@ public interface BaseCommandSpecification
         {
             getCommand().hasBeenExecuted().test()
                     .assertValuesAndClear(false)
-                    .perform(() -> getCommand().execute(getInput()))
+                    .perform(this::execute)
                     .assertNoValues();
         }
 
@@ -759,7 +727,7 @@ public interface BaseCommandSpecification
         {
             getCommand().getProgress().test()
                     .assertValuesAndClear(0.0f)
-                    .perform(() -> getCommand().execute(getInput()))
+                    .perform(this::execute)
                     .assertNoValues();
         }
     }
@@ -772,13 +740,12 @@ public interface BaseCommandSpecification
      */
     abstract class WhenSubscribeAfterExecuteSpecification<T, R> implements RequireCommand<T, R>
     {
-        @Nullable
-        protected abstract T getInput();
+        protected abstract void execute();
 
         @BeforeEach
-        protected void execute()
+        protected void executeCommand()
         {
-            getCommand().execute(getInput());
+            execute();
         }
 
         @Test
@@ -846,15 +813,14 @@ public interface BaseCommandSpecification
      */
     abstract class WhenSubscribeAfterExecuteWithErrorSpecification<T, R> implements RequireCommand<T, R>
     {
-        @Nullable
-        protected abstract T getInput();
+        protected abstract void execute();
 
         @BeforeEach
-        protected void execute()
+        protected void executeCommand()
         {
             getCommand().getError().test();
 
-            getCommand().execute(getInput());
+            execute();
         }
 
         @Test

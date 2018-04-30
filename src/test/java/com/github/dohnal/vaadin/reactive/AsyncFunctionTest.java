@@ -14,7 +14,6 @@
 package com.github.dohnal.vaadin.reactive;
 
 import javax.annotation.Nonnull;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
@@ -53,35 +52,6 @@ public class AsyncFunctionTest
     @DisplayName("When new asynchronous function is created")
     class WhenCreate
     {
-        @Nested
-        @DisplayName("From asynchronous supplier")
-        class FromAsyncSupplier
-        {
-            protected final Integer RESULT = 5;
-
-            private AsyncSupplier<Integer> asyncSupplier;
-            private AsyncFunction<Void, Integer> asyncFunction;
-
-            @BeforeEach
-            @SuppressWarnings("unchecked")
-            protected void create()
-            {
-                asyncSupplier = Mockito.mock(AsyncSupplier.class);
-                asyncFunction = AsyncFunction.create(asyncSupplier);
-
-                Mockito.when(asyncSupplier.get()).thenReturn(CompletableFuture.completedFuture(RESULT));
-            }
-
-            @Test
-            @DisplayName("When run, asynchronous supplier should be run and correct result should be returned")
-            public void testResult() throws ExecutionException, InterruptedException
-            {
-                assertEquals(RESULT, asyncFunction.apply(null).get());
-
-                Mockito.verify(asyncSupplier).get();
-            }
-        }
-
         @Nested
         @DisplayName("From consumer")
         class FromConsumer

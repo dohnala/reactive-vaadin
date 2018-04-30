@@ -14,20 +14,22 @@
 package com.github.dohnal.vaadin.reactive.command.composite;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import com.github.dohnal.vaadin.reactive.AsyncFunction;
+import com.github.dohnal.vaadin.reactive.AsyncSupplier;
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
+import com.github.dohnal.vaadin.reactive.command.AsyncCommand;
 import com.github.dohnal.vaadin.reactive.command.BaseCommandSpecification;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import rx.Observable;
 import rx.schedulers.Schedulers;
 import rx.schedulers.TestScheduler;
 import rx.subjects.TestSubject;
@@ -50,7 +52,804 @@ public interface CompositeCommandSpecification extends BaseCommandSpecification
         }
     }
 
-    abstract class WhenCreateFromCommandsSpecification extends WhenCreateSpecification<Integer, List<Integer>>
+    abstract class WhenCreateFromCommandsWithNoInputSpecification extends WhenCreateSpecification<Void, List<Integer>>
+    {
+        private AsyncSupplier<Integer> executionA;
+        private CompletableFuture<Integer> executionResultA;
+        private ReactiveCommand<Void, Integer> commandA;
+
+        private AsyncSupplier<Integer> executionB;
+        private CompletableFuture<Integer> executionResultB;
+        private ReactiveCommand<Void, Integer> commandB;
+
+        private ReactiveCommand<Void, List<Integer>> command;
+
+        @BeforeEach
+        @SuppressWarnings("unchecked")
+        protected void create()
+        {
+            executionA = Mockito.mock(AsyncSupplier.class);
+            executionResultA = new CompletableFuture<>();
+            commandA = new AsyncCommand<>(Observable.just(true), executionA);
+
+            executionB = Mockito.mock(AsyncSupplier.class);
+            executionResultB = new CompletableFuture<>();
+            commandB = new AsyncCommand<>(Observable.just(true), executionB);
+
+            command = ReactiveCommand.createComposite(Arrays.asList(commandA, commandB));
+        }
+
+        @Nonnull
+        @Override
+        public ReactiveCommand<Void, List<Integer>> getCommand()
+        {
+            return command;
+        }
+
+        @Test
+        @DisplayName("Child commands should not be executed")
+        public void testChildCommands()
+        {
+            Mockito.verify(executionA, Mockito.never()).get();
+            Mockito.verify(executionB, Mockito.never()).get();
+        }
+
+        @Nested
+        @DisplayName("When child command is executed")
+        class WhenExecuteChild
+        {
+            protected final Integer RESULT_A = 7;
+
+            @BeforeEach
+            protected void mockExecution()
+            {
+                Mockito.when(executionA.get()).thenReturn(executionResultA);
+                executionResultA.complete(RESULT_A);
+            }
+
+            @Test
+            @DisplayName("Result observable should not emit any value")
+            public void testResult()
+            {
+                getCommand().getResult().test()
+                        .perform(() -> commandA.execute())
+                        .assertNoValues();
+            }
+
+            @Test
+            @DisplayName("Error observable should not emit any value")
+            public void testError()
+            {
+                getCommand().getError().test()
+                        .perform(() -> commandA.execute())
+                        .assertNoValues();
+            }
+
+            @Test
+            @DisplayName("CanExecute observable should emit false and true")
+            public void testCanExecute()
+            {
+                getCommand().canExecute().test()
+                        .assertValuesAndClear(true)
+                        .perform(() -> commandA.execute())
+                        .assertValues(false, true);
+            }
+
+            @Test
+            @DisplayName("IsExecuting observable should not emit any value")
+            public void testIsExecuting()
+            {
+                getCommand().isExecuting().test()
+                        .assertValuesAndClear(false)
+                        .perform(() -> commandA.execute())
+                        .assertNoValues();
+            }
+
+            @Test
+            @DisplayName("ExecutionCount observable should not emit any value")
+            public void testExecutionCount()
+            {
+                getCommand().getExecutionCount().test()
+                        .assertValuesAndClear(0)
+                        .perform(() -> commandA.execute())
+                        .assertNoValues();
+            }
+
+            @Test
+            @DisplayName("HasBeenExecuted observable should not emit any value")
+            public void testHasBeenExecuted()
+            {
+                getCommand().hasBeenExecuted().test()
+                        .assertValuesAndClear(false)
+                        .perform(() -> commandA.execute())
+                        .assertNoValues();
+            }
+
+            @Test
+            @DisplayName("Progress observable should not emit any value")
+            public void testProgress()
+            {
+                getCommand().getProgress().test()
+                        .assertValuesAndClear(0.0f)
+                        .perform(() -> commandA.execute())
+                        .assertNoValues();
+            }
+        }
+
+        @Nested
+        @DisplayName("When command execution started")
+        class WhenExecuteStarted extends WhenExecutionStartedSpecification<Void, List<Integer>>
+        {
+            @BeforeEach
+            protected void mockExecution()
+            {
+                Mockito.when(executionA.get()).thenReturn(executionResultA);
+                Mockito.when(executionB.get()).thenReturn(executionResultB);
+            }
+
+            @Nonnull
+            @Override
+            public ReactiveCommand<Void, List<Integer>> getCommand()
+            {
+                return command;
+            }
+
+            @Override
+            protected void execute()
+            {
+                command.execute();
+            }
+
+            @Test
+            @DisplayName("Child commands should be executed")
+            public void testChildCommands()
+            {
+                execute();
+
+                Mockito.verify(executionA).get();
+                Mockito.verify(executionB).get();
+            }
+
+            @Nested
+            @DisplayName("When child command execution is finished")
+            class WhenExecuteChildFinished
+            {
+                protected final Integer RESULT_A = 7;
+
+                @BeforeEach
+                protected void startExecution()
+                {
+                    execute();
+                }
+
+                @Test
+                @DisplayName("Result observable should not emit any value")
+                public void testResult()
+                {
+                    getCommand().getResult().test()
+                            .perform(() -> executionResultA.complete(RESULT_A))
+                            .assertNoValues();
+                }
+
+                @Test
+                @DisplayName("Error observable should not emit any value")
+                public void testError()
+                {
+                    getCommand().getError().test()
+                            .perform(() -> executionResultA.complete(RESULT_A))
+                            .assertNoValues();
+                }
+
+                @Test
+                @DisplayName("CanExecute observable should not emit any value")
+                public void testCanExecute()
+                {
+                    getCommand().canExecute().test()
+                            .assertValuesAndClear(false)
+                            .perform(() -> executionResultA.complete(RESULT_A))
+                            .assertNoValues();
+                }
+
+                @Test
+                @DisplayName("IsExecuting observable should not emit any value")
+                public void testIsExecuting()
+                {
+                    getCommand().isExecuting().test()
+                            .assertValuesAndClear(true)
+                            .perform(() -> executionResultA.complete(RESULT_A))
+                            .assertNoValues();
+                }
+
+                @Test
+                @DisplayName("ExecutionCount observable should not emit any value")
+                public void testExecutionCount()
+                {
+                    getCommand().getExecutionCount().test()
+                            .assertValuesAndClear(0)
+                            .perform(() -> executionResultA.complete(RESULT_A))
+                            .assertNoValues();
+                }
+
+                @Test
+                @DisplayName("HasBeenExecuted observable should not emit any value")
+                public void testHasBeenExecuted()
+                {
+                    getCommand().hasBeenExecuted().test()
+                            .assertValuesAndClear(false)
+                            .perform(() -> executionResultA.complete(RESULT_A))
+                            .assertNoValues();
+                }
+
+                @Test
+                @DisplayName("Progress observable should emit correct value")
+                public void testProgress()
+                {
+                    getCommand().getProgress().test()
+                            .assertValuesAndClear(0.0f)
+                            .perform(() -> executionResultA.complete(RESULT_A))
+                            .assertValue(0.5f);
+                }
+            }
+
+            @Nested
+            @DisplayName("When child command execution is finished with error")
+            class WhenExecuteChildFinishedWithError
+            {
+                protected final Throwable ERROR_A = new RuntimeException("Error A");
+
+                @BeforeEach
+                protected void startExecution()
+                {
+                    execute();
+                }
+
+                @Test
+                @DisplayName("Result observable should not emit any value")
+                public void testResult()
+                {
+                    getCommand().getResult().test()
+                            .perform(() -> executionResultA.completeExceptionally(ERROR_A))
+                            .assertNoValues();
+                }
+
+                @Test
+                @DisplayName("Error observable should emit correct error")
+                public void testError()
+                {
+                    getCommand().getError().test()
+                            .perform(() -> executionResultA.completeExceptionally(ERROR_A))
+                            .assertValue(ERROR_A);
+                }
+
+                @Test
+                @DisplayName("CanExecute observable should not emit any value")
+                public void testCanExecute()
+                {
+                    getCommand().canExecute().test()
+                            .assertValuesAndClear(false)
+                            .perform(() -> executionResultA.completeExceptionally(ERROR_A))
+                            .assertNoValues();
+                }
+
+                @Test
+                @DisplayName("IsExecuting observable should not emit any value")
+                public void testIsExecuting()
+                {
+                    getCommand().isExecuting().test()
+                            .assertValuesAndClear(true)
+                            .perform(() -> executionResultA.completeExceptionally(ERROR_A))
+                            .assertNoValues();
+                }
+
+                @Test
+                @DisplayName("ExecutionCount observable should not emit any value")
+                public void testExecutionCount()
+                {
+                    getCommand().getExecutionCount().test()
+                            .assertValuesAndClear(0)
+                            .perform(() -> executionResultA.completeExceptionally(ERROR_A))
+                            .assertNoValues();
+                }
+
+                @Test
+                @DisplayName("HasBeenExecuted observable should not emit any value")
+                public void testHasBeenExecuted()
+                {
+                    getCommand().hasBeenExecuted().test()
+                            .assertValuesAndClear(false)
+                            .perform(() -> executionResultA.completeExceptionally(ERROR_A))
+                            .assertNoValues();
+                }
+
+                @Test
+                @DisplayName("Progress observable should emit correct value")
+                public void testProgress()
+                {
+                    getCommand().getProgress().test()
+                            .assertValuesAndClear(0.0f)
+                            .perform(() -> executionResultA.completeExceptionally(ERROR_A))
+                            .assertValue(0.5f);
+                }
+            }
+
+            @Nested
+            @DisplayName("When child command is executed again after it finished")
+            class WhenExecuteChildAgain
+            {
+                protected final Integer RESULT_A = 7;
+
+                @BeforeEach
+                protected void startExecution()
+                {
+                    execute();
+                    executionResultA.complete(RESULT_A);
+                }
+
+                @Test
+                @DisplayName("Result observable should not emit any value")
+                public void testResult()
+                {
+                    getCommand().getResult().test()
+                            .perform(() -> commandA.execute())
+                            .assertNoValues();
+                }
+
+                @Test
+                @DisplayName("Error observable should not emit any value")
+                public void testError()
+                {
+                    getCommand().getError().test()
+                            .perform(() -> commandA.execute())
+                            .assertNoValues();
+                }
+
+                @Test
+                @DisplayName("CanExecute observable should not emit any value")
+                public void testCanExecute()
+                {
+                    getCommand().canExecute().test()
+                            .assertValuesAndClear(false)
+                            .perform(() -> commandA.execute())
+                            .assertNoValues();
+                }
+
+                @Test
+                @DisplayName("IsExecuting observable should not emit any value")
+                public void testIsExecuting()
+                {
+                    getCommand().isExecuting().test()
+                            .assertValuesAndClear(true)
+                            .perform(() -> commandA.execute())
+                            .assertNoValues();
+                }
+
+                @Test
+                @DisplayName("ExecutionCount observable should not emit any value")
+                public void testExecutionCount()
+                {
+                    getCommand().getExecutionCount().test()
+                            .assertValuesAndClear(0)
+                            .perform(() -> commandA.execute())
+                            .assertNoValues();
+                }
+
+                @Test
+                @DisplayName("HasBeenExecuted observable should not emit any value")
+                public void testHasBeenExecuted()
+                {
+                    getCommand().hasBeenExecuted().test()
+                            .assertValuesAndClear(false)
+                            .perform(() -> commandA.execute())
+                            .assertNoValues();
+                }
+
+                @Test
+                @DisplayName("Progress observable should not emit any value")
+                public void testProgress()
+                {
+                    getCommand().getProgress().test()
+                            .assertValuesAndClear(0.5f)
+                            .perform(() -> commandA.execute())
+                            .assertNoValues();
+                }
+            }
+
+            @Nested
+            @DisplayName("When command execution is finished")
+            class WhenExecuteFinished extends WhenExecutionFinishedSpecification<Void, List<Integer>>
+            {
+                protected final Integer RESULT_A = 7;
+                protected final Integer RESULT_B = 9;
+                protected final List<Integer> RESULT = Arrays.asList(RESULT_A, RESULT_B);
+
+                @Override
+                protected void finishExecution()
+                {
+                    executionResultA.complete(RESULT_A);
+                    executionResultB.complete(RESULT_B);
+                }
+
+                @Nonnull
+                @Override
+                public ReactiveCommand<Void, List<Integer>> getCommand()
+                {
+                    return command;
+                }
+
+                @Override
+                protected void execute()
+                {
+                    command.execute();
+                }
+
+                @Test
+                @DisplayName("Result observable should emit correct result")
+                public void testResult()
+                {
+                    final List<Integer> result = getCommand().getResult().test()
+                            .perform(this::finishExecution)
+                            .getOnNextEvents().get(0);
+
+                    assertIterableEquals(RESULT, result);
+                }
+
+                @Test
+                @DisplayName("Progress observable should emit correct values")
+                public void testProgress()
+                {
+                    getCommand().getProgress().test()
+                            .assertValuesAndClear(0.0f)
+                            .perform(this::finishExecution)
+                            .assertValues(0.5f, 1.0f);
+                }
+            }
+
+            @Nested
+            @DisplayName("When command execution is finished with one error")
+            class WhenExecuteFinishedWithOneError extends WhenExecutionFinishedWithErrorSpecification<Void, List<Integer>>
+            {
+                protected final Throwable ERROR_A = new RuntimeException("Error A");
+                protected final Integer RESULT_B = 9;
+
+                @Override
+                protected void finishExecution()
+                {
+                    executionResultA.completeExceptionally(ERROR_A);
+                    executionResultB.complete(RESULT_B);
+                }
+
+                @Nonnull
+                @Override
+                public ReactiveCommand<Void, List<Integer>> getCommand()
+                {
+                    return command;
+                }
+
+                @Override
+                protected void execute()
+                {
+                    command.execute();
+                }
+
+                @Nonnull
+                @Override
+                protected Throwable getError()
+                {
+                    return ERROR_A;
+                }
+
+                @Test
+                @DisplayName("Progress observable should emit correct values")
+                public void testProgress()
+                {
+                    getCommand().getProgress().test()
+                            .assertValuesAndClear(0.0f)
+                            .perform(this::finishExecution)
+                            .assertValues(0.5f, 1.0f);
+                }
+            }
+
+            @Nested
+            @DisplayName("When command execution is finished with multiple errors")
+            class WhenExecuteFinishedWithMultipleErrors extends WhenExecutionFinishedWithErrorSpecification<Void, List<Integer>>
+            {
+                protected final Throwable ERROR_A = new RuntimeException("Error A");
+                protected final Throwable ERROR_B = new RuntimeException("Error B");
+
+                @Override
+                protected void finishExecution()
+                {
+                    executionResultA.completeExceptionally(ERROR_A);
+                    executionResultB.completeExceptionally(ERROR_B);
+                }
+
+                @Nonnull
+                @Override
+                public ReactiveCommand<Void, List<Integer>> getCommand()
+                {
+                    return command;
+                }
+
+                @Override
+                protected void execute()
+                {
+                    command.execute();
+                }
+
+                @Nonnull
+                @Override
+                protected Throwable getError()
+                {
+                    return ERROR_A;
+                }
+
+                @Test
+                @DisplayName("Error observable should emit correct errors")
+                public void testError()
+                {
+                    getCommand().getError().test()
+                            .perform(this::finishExecution)
+                            .assertValues(ERROR_A, ERROR_B);
+                }
+
+                @Test
+                @DisplayName("Progress observable should emit correct values")
+                public void testProgress()
+                {
+                    getCommand().getProgress().test()
+                            .assertValuesAndClear(0.0f)
+                            .perform(this::finishExecution)
+                            .assertValues(0.5f, 1.0f);
+                }
+            }
+        }
+
+        @Nested
+        @DisplayName("When child command is executed after execution")
+        class WhenExecuteChildAfterExecute
+        {
+            protected final Integer RESULT_A = 7;
+            protected final Integer RESULT_B = 9;
+
+            @BeforeEach
+            protected void execute()
+            {
+                Mockito.when(executionA.get()).thenReturn(executionResultA);
+                executionResultA.complete(RESULT_A);
+
+                Mockito.when(executionB.get()).thenReturn(executionResultB);
+                executionResultB.complete(RESULT_B);
+
+                command.execute();
+            }
+
+            @Test
+            @DisplayName("Result observable should not emit any value")
+            public void testResult()
+            {
+                getCommand().getResult().test()
+                        .perform(() -> commandA.execute())
+                        .assertNoValues();
+            }
+
+            @Test
+            @DisplayName("Error observable should not emit any value")
+            public void testError()
+            {
+                getCommand().getError().test()
+                        .perform(() -> commandA.execute())
+                        .assertNoValues();
+            }
+
+            @Test
+            @DisplayName("CanExecute observable should emit false and true")
+            public void testCanExecute()
+            {
+                getCommand().canExecute().test()
+                        .assertValuesAndClear(true)
+                        .perform(() -> commandA.execute())
+                        .assertValues(false, true);
+            }
+
+            @Test
+            @DisplayName("IsExecuting observable should not emit any value")
+            public void testIsExecuting()
+            {
+                getCommand().isExecuting().test()
+                        .assertValuesAndClear(false)
+                        .perform(() -> commandA.execute())
+                        .assertNoValues();
+            }
+
+            @Test
+            @DisplayName("ExecutionCount observable should not emit any value")
+            public void testExecutionCount()
+            {
+                getCommand().getExecutionCount().test()
+                        .assertValuesAndClear(1)
+                        .perform(() -> commandA.execute())
+                        .assertNoValues();
+            }
+
+            @Test
+            @DisplayName("HasBeenExecuted observable should not emit any value")
+            public void testHasBeenExecuted()
+            {
+                getCommand().hasBeenExecuted().test()
+                        .assertValuesAndClear(true)
+                        .perform(() -> commandA.execute())
+                        .assertNoValues();
+            }
+
+            @Test
+            @DisplayName("Progress observable should not emit any value")
+            public void testProgress()
+            {
+                getCommand().getProgress().test()
+                        .assertValuesAndClear(1.0f)
+                        .perform(() -> commandA.execute())
+                        .assertNoValues();
+            }
+        }
+
+        @Nested
+        @DisplayName("When child command is executed after execution with error")
+        class WhenExecuteChildAfterExecuteWithError
+        {
+            protected final Throwable ERROR_A = new RuntimeException("Error A");
+            protected final Throwable ERROR_B = new RuntimeException("Error B");
+
+            @BeforeEach
+            protected void execute()
+            {
+                Mockito.when(executionA.get()).thenReturn(executionResultA);
+                executionResultA.completeExceptionally(ERROR_A);
+
+                Mockito.when(executionB.get()).thenReturn(executionResultB);
+                executionResultB.completeExceptionally(ERROR_B);
+
+                command.execute();
+            }
+
+            @Test
+            @DisplayName("Result observable should not emit any value")
+            public void testResult()
+            {
+                getCommand().getResult().test()
+                        .perform(() -> commandA.execute())
+                        .assertNoValues();
+            }
+
+            @Test
+            @DisplayName("Error observable should not emit any value")
+            public void testError()
+            {
+                getCommand().getError().test()
+                        .perform(() -> commandA.execute())
+                        .assertNoValues();
+            }
+
+            @Test
+            @DisplayName("CanExecute observable should emit false and true")
+            public void testCanExecute()
+            {
+                getCommand().canExecute().test()
+                        .assertValuesAndClear(true)
+                        .perform(() -> commandA.execute())
+                        .assertValues(false, true);
+            }
+
+            @Test
+            @DisplayName("IsExecuting observable should not emit any value")
+            public void testIsExecuting()
+            {
+                getCommand().isExecuting().test()
+                        .assertValuesAndClear(false)
+                        .perform(() -> commandA.execute())
+                        .assertNoValues();
+            }
+
+            @Test
+            @DisplayName("ExecutionCount observable should not emit any value")
+            public void testExecutionCount()
+            {
+                getCommand().getExecutionCount().test()
+                        .assertValuesAndClear(1)
+                        .perform(() -> commandA.execute())
+                        .assertNoValues();
+            }
+
+            @Test
+            @DisplayName("HasBeenExecuted observable should not emit any value")
+            public void testHasBeenExecuted()
+            {
+                getCommand().hasBeenExecuted().test()
+                        .assertValuesAndClear(true)
+                        .perform(() -> commandA.execute())
+                        .assertNoValues();
+            }
+
+            @Test
+            @DisplayName("Progress observable should not emit any value")
+            public void testProgress()
+            {
+                getCommand().getProgress().test()
+                        .assertValuesAndClear(1.0f)
+                        .perform(() -> commandA.execute())
+                        .assertNoValues();
+            }
+        }
+
+        @Nested
+        @DisplayName("When command is subscribed after execution")
+        class WhenSubscribeAfterExecute extends WhenSubscribeAfterExecuteSpecification<Void, List<Integer>>
+        {
+            protected final Integer RESULT_A = 7;
+            protected final Integer RESULT_B = 9;
+
+            @Override
+            @BeforeEach
+            protected void executeCommand()
+            {
+                Mockito.when(executionA.get()).thenReturn(executionResultA);
+                executionResultA.complete(RESULT_A);
+
+                Mockito.when(executionB.get()).thenReturn(executionResultB);
+                executionResultB.complete(RESULT_B);
+
+                super.executeCommand();
+            }
+
+            @Nonnull
+            @Override
+            public ReactiveCommand<Void, List<Integer>> getCommand()
+            {
+                return command;
+            }
+
+            @Override
+            protected void execute()
+            {
+                command.execute();
+            }
+        }
+
+        @Nested
+        @DisplayName("When command is subscribed after execution with error")
+        class WhenSubscribeAfterExecuteWithError extends WhenSubscribeAfterExecuteWithErrorSpecification<Void, List<Integer>>
+        {
+            protected final Throwable ERROR_A = new RuntimeException("Error A");
+            protected final Throwable ERROR_B = new RuntimeException("Error B");
+
+            @Override
+            @BeforeEach
+            protected void executeCommand()
+            {
+                Mockito.when(executionA.get()).thenReturn(executionResultA);
+                executionResultA.completeExceptionally(ERROR_A);
+
+                Mockito.when(executionB.get()).thenReturn(executionResultB);
+                executionResultB.completeExceptionally(ERROR_B);
+
+                super.executeCommand();
+            }
+
+            @Nonnull
+            @Override
+            public ReactiveCommand<Void, List<Integer>> getCommand()
+            {
+                return command;
+            }
+
+            @Override
+            protected void execute()
+            {
+                command.execute();
+            }
+        }
+    }
+
+    abstract class WhenCreateFromCommandsWithInputSpecification extends WhenCreateSpecification<Integer, List<Integer>>
     {
         private AsyncFunction<Integer, Integer> executionA;
         private CompletableFuture<Integer> executionResultA;
@@ -68,11 +867,11 @@ public interface CompositeCommandSpecification extends BaseCommandSpecification
         {
             executionA = Mockito.mock(AsyncFunction.class);
             executionResultA = new CompletableFuture<>();
-            commandA = ReactiveCommand.createFromAsyncFunction(executionA);
+            commandA = new AsyncCommand<>(Observable.just(true), executionA);
 
             executionB = Mockito.mock(AsyncFunction.class);
             executionResultB = new CompletableFuture<>();
-            commandB = ReactiveCommand.createFromAsyncFunction(executionB);
+            commandB = new AsyncCommand<>(Observable.just(true), executionB);
 
             command = ReactiveCommand.createComposite(Arrays.asList(commandA, commandB));
         }
@@ -195,18 +994,17 @@ public interface CompositeCommandSpecification extends BaseCommandSpecification
                 return command;
             }
 
-            @Nullable
             @Override
-            protected Integer getInput()
+            protected void execute()
             {
-                return INPUT;
+                command.execute(INPUT);
             }
 
             @Test
             @DisplayName("Child commands should be executed")
             public void testChildCommands()
             {
-                getCommand().execute(getInput());
+                execute();
 
                 Mockito.verify(executionA).apply(INPUT);
                 Mockito.verify(executionB).apply(INPUT);
@@ -221,7 +1019,7 @@ public interface CompositeCommandSpecification extends BaseCommandSpecification
                 @BeforeEach
                 protected void startExecution()
                 {
-                    getCommand().execute(getInput());
+                    execute();
                 }
 
                 @Test
@@ -302,7 +1100,7 @@ public interface CompositeCommandSpecification extends BaseCommandSpecification
                 @BeforeEach
                 protected void startExecution()
                 {
-                    getCommand().execute(getInput());
+                    execute();
                 }
 
                 @Test
@@ -383,7 +1181,7 @@ public interface CompositeCommandSpecification extends BaseCommandSpecification
                 @BeforeEach
                 protected void startExecution()
                 {
-                    getCommand().execute(getInput());
+                    execute();
                     executionResultA.complete(RESULT_A);
                 }
 
@@ -478,18 +1276,10 @@ public interface CompositeCommandSpecification extends BaseCommandSpecification
                     return command;
                 }
 
-                @Nullable
                 @Override
-                protected Integer getInput()
+                protected void execute()
                 {
-                    return INPUT;
-                }
-
-                @Nullable
-                @Override
-                protected List<Integer> getResult()
-                {
-                    return RESULT;
+                    command.execute(INPUT);
                 }
 
                 @Test
@@ -535,11 +1325,10 @@ public interface CompositeCommandSpecification extends BaseCommandSpecification
                     return command;
                 }
 
-                @Nullable
                 @Override
-                protected Integer getInput()
+                protected void execute()
                 {
-                    return INPUT;
+                    command.execute(INPUT);
                 }
 
                 @Nonnull
@@ -581,11 +1370,10 @@ public interface CompositeCommandSpecification extends BaseCommandSpecification
                     return command;
                 }
 
-                @Nullable
                 @Override
-                protected Integer getInput()
+                protected void execute()
                 {
-                    return INPUT;
+                    command.execute(INPUT);
                 }
 
                 @Nonnull
@@ -633,7 +1421,7 @@ public interface CompositeCommandSpecification extends BaseCommandSpecification
                 Mockito.when(executionB.apply(INPUT)).thenReturn(executionResultB);
                 executionResultB.complete(RESULT_B);
 
-                getCommand().execute(INPUT);
+                command.execute(INPUT);
             }
 
             @Test
@@ -722,7 +1510,7 @@ public interface CompositeCommandSpecification extends BaseCommandSpecification
                 Mockito.when(executionB.apply(INPUT)).thenReturn(executionResultB);
                 executionResultB.completeExceptionally(ERROR_B);
 
-                getCommand().execute(INPUT);
+                command.execute(INPUT);
             }
 
             @Test
@@ -804,7 +1592,7 @@ public interface CompositeCommandSpecification extends BaseCommandSpecification
 
             @Override
             @BeforeEach
-            protected void execute()
+            protected void executeCommand()
             {
                 Mockito.when(executionA.apply(INPUT)).thenReturn(executionResultA);
                 executionResultA.complete(RESULT_A);
@@ -812,7 +1600,7 @@ public interface CompositeCommandSpecification extends BaseCommandSpecification
                 Mockito.when(executionB.apply(INPUT)).thenReturn(executionResultB);
                 executionResultB.complete(RESULT_B);
 
-                super.execute();
+                super.executeCommand();
             }
 
             @Nonnull
@@ -822,11 +1610,10 @@ public interface CompositeCommandSpecification extends BaseCommandSpecification
                 return command;
             }
 
-            @Nullable
             @Override
-            protected Integer getInput()
+            protected void execute()
             {
-                return INPUT;
+                command.execute(INPUT);
             }
         }
 
@@ -840,7 +1627,7 @@ public interface CompositeCommandSpecification extends BaseCommandSpecification
 
             @Override
             @BeforeEach
-            protected void execute()
+            protected void executeCommand()
             {
                 Mockito.when(executionA.apply(INPUT)).thenReturn(executionResultA);
                 executionResultA.completeExceptionally(ERROR_A);
@@ -848,7 +1635,7 @@ public interface CompositeCommandSpecification extends BaseCommandSpecification
                 Mockito.when(executionB.apply(INPUT)).thenReturn(executionResultB);
                 executionResultB.completeExceptionally(ERROR_B);
 
-                super.execute();
+                super.executeCommand();
             }
 
             @Nonnull
@@ -858,11 +1645,10 @@ public interface CompositeCommandSpecification extends BaseCommandSpecification
                 return command;
             }
 
-            @Nullable
             @Override
-            protected Integer getInput()
+            protected void execute()
             {
-                return INPUT;
+                command.execute(INPUT);
             }
         }
     }
@@ -888,11 +1674,11 @@ public interface CompositeCommandSpecification extends BaseCommandSpecification
         {
             executionA = Mockito.mock(AsyncFunction.class);
             executionResultA = new CompletableFuture<>();
-            commandA = ReactiveCommand.createFromAsyncFunction(executionA);
+            commandA = new AsyncCommand<>(Observable.just(true), executionA);
 
             executionB = Mockito.mock(AsyncFunction.class);
             executionResultB = new CompletableFuture<>();
-            commandB = ReactiveCommand.createFromAsyncFunction(executionB);
+            commandB = new AsyncCommand<>(Observable.just(true), executionB);
 
             testScheduler = Schedulers.test();
             testSubject = TestSubject.create(testScheduler);
@@ -967,10 +1753,10 @@ public interface CompositeCommandSpecification extends BaseCommandSpecification
                 return command;
             }
 
-            @Nullable
-            protected Integer getInput()
+            @Override
+            protected void execute()
             {
-                return INPUT;
+                command.execute(INPUT);
             }
 
             @Override
@@ -1004,10 +1790,10 @@ public interface CompositeCommandSpecification extends BaseCommandSpecification
                 return command;
             }
 
-            @Nullable
-            protected Integer getInput()
+            @Override
+            protected void execute()
             {
-                return INPUT;
+                command.execute(INPUT);
             }
 
             @Override
@@ -1039,9 +1825,9 @@ public interface CompositeCommandSpecification extends BaseCommandSpecification
             }
 
             @Override
-            protected Integer getInput()
+            protected void execute()
             {
-                return null;
+                command.execute(INPUT);
             }
 
             @Test

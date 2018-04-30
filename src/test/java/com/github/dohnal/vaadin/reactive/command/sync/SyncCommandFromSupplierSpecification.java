@@ -14,7 +14,6 @@
 package com.github.dohnal.vaadin.reactive.command.sync;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.function.Supplier;
 
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
@@ -86,25 +85,26 @@ public interface SyncCommandFromSupplierSpecification extends BaseCommandSpecifi
                 return command;
             }
 
-            @Nullable
             @Override
-            protected Void getInput()
+            protected void execute()
             {
-                return null;
+                command.execute();
             }
 
-            @Nullable
-            @Override
-            protected Integer getResult()
+            @Test
+            @DisplayName("Result observable should emit correct result")
+            public void testResult()
             {
-                return RESULT;
+                getCommand().getResult().test()
+                        .perform(this::execute)
+                        .assertValue(RESULT);
             }
 
             @Test
             @DisplayName("Supplier should be run")
             public void testSupplier()
             {
-                command.execute(getInput());
+                execute();
 
                 Mockito.verify(execution).get();
             }
@@ -129,11 +129,10 @@ public interface SyncCommandFromSupplierSpecification extends BaseCommandSpecifi
                 return command;
             }
 
-            @Nullable
             @Override
-            protected Void getInput()
+            protected void execute()
             {
-                return null;
+                command.execute();
             }
 
             @Nonnull
@@ -147,14 +146,14 @@ public interface SyncCommandFromSupplierSpecification extends BaseCommandSpecifi
             @DisplayName("Exception should be thrown if no one is subscribed to Error observable")
             public void testUnhandledError()
             {
-                assertThrows(getError().getClass(), () -> getCommand().execute(getInput()));
+                assertThrows(getError().getClass(), this::execute);
             }
 
             @Test
             @DisplayName("Supplier should be run")
             public void testSupplier()
             {
-                assertThrows(getError().getClass(), () -> command.execute(getInput()));
+                assertThrows(getError().getClass(), this::execute);
 
                 Mockito.verify(execution).get();
             }
@@ -164,6 +163,16 @@ public interface SyncCommandFromSupplierSpecification extends BaseCommandSpecifi
         @DisplayName("When command is subscribed after execution")
         class WhenSubscribeAfterExecute extends WhenSubscribeAfterExecuteSpecification<Void, Integer>
         {
+            protected final Integer RESULT = 5;
+
+            @BeforeEach
+            protected void executeCommand()
+            {
+                Mockito.when(execution.get()).thenReturn(RESULT);
+
+                super.executeCommand();
+            }
+
             @Nonnull
             @Override
             public ReactiveCommand<Void, Integer> getCommand()
@@ -171,11 +180,10 @@ public interface SyncCommandFromSupplierSpecification extends BaseCommandSpecifi
                 return command;
             }
 
-            @Nullable
             @Override
-            protected Void getInput()
+            protected void execute()
             {
-                return null;
+                command.execute();
             }
         }
 
@@ -183,6 +191,16 @@ public interface SyncCommandFromSupplierSpecification extends BaseCommandSpecifi
         @DisplayName("When command is subscribed after execution with error")
         class WhenSubscribeAfterExecuteWithError extends WhenSubscribeAfterExecuteWithErrorSpecification<Void, Integer>
         {
+            private final Throwable ERROR = new RuntimeException("Error");
+
+            @BeforeEach
+            protected void executeCommand()
+            {
+                Mockito.when(execution.get()).thenThrow(ERROR);
+
+                super.executeCommand();
+            }
+
             @Nonnull
             @Override
             public ReactiveCommand<Void, Integer> getCommand()
@@ -190,11 +208,10 @@ public interface SyncCommandFromSupplierSpecification extends BaseCommandSpecifi
                 return command;
             }
 
-            @Nullable
             @Override
-            protected Void getInput()
+            protected void execute()
             {
-                return null;
+                command.execute();
             }
         }
     }
@@ -281,9 +298,9 @@ public interface SyncCommandFromSupplierSpecification extends BaseCommandSpecifi
             }
 
             @Override
-            protected Void getInput()
+            protected void execute()
             {
-                return null;
+                command.execute();
             }
         }
     }

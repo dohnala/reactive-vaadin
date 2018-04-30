@@ -14,7 +14,6 @@
 package com.github.dohnal.vaadin.reactive.command.sync;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.function.Consumer;
 
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
@@ -68,6 +67,18 @@ public interface SyncCommandFromConsumerSpecification extends BaseCommandSpecifi
         }
 
         @Nested
+        @DisplayName("When command is executed with no input")
+        class WhenExecuteWithInput
+        {
+            @Test
+            @DisplayName("IllegalArgumentException should be thrown")
+            public void testExecute()
+            {
+                assertThrows(IllegalArgumentException.class, () -> command.execute());
+            }
+        }
+
+        @Nested
         @DisplayName("When command is executed")
         class WhenExecute extends WhenExecuteSpecification<Integer, Void>
         {
@@ -86,25 +97,26 @@ public interface SyncCommandFromConsumerSpecification extends BaseCommandSpecifi
                 return command;
             }
 
-            @Nullable
             @Override
-            protected Integer getInput()
+            protected void execute()
             {
-                return INPUT;
+                command.execute(INPUT);
             }
 
-            @Nullable
-            @Override
-            protected Void getResult()
+            @Test
+            @DisplayName("Result observable should not emit any value")
+            public void testResult()
             {
-                return null;
+                getCommand().getResult().test()
+                        .perform(this::execute)
+                        .assertNoValues();
             }
 
             @Test
             @DisplayName("Consumer should be run")
             public void testConsumer()
             {
-                command.execute(getInput());
+                execute();
 
                 Mockito.verify(execution).accept(INPUT);
             }
@@ -130,11 +142,10 @@ public interface SyncCommandFromConsumerSpecification extends BaseCommandSpecifi
                 return command;
             }
 
-            @Nullable
             @Override
-            protected Integer getInput()
+            protected void execute()
             {
-                return INPUT;
+                command.execute(INPUT);
             }
 
             @Nonnull
@@ -148,14 +159,14 @@ public interface SyncCommandFromConsumerSpecification extends BaseCommandSpecifi
             @DisplayName("Error should be thrown if no one is subscribed to Error observable")
             public void testUnhandledError()
             {
-                assertThrows(getError().getClass(), () -> getCommand().execute(getInput()));
+                assertThrows(getError().getClass(), this::execute);
             }
 
             @Test
             @DisplayName("Consumer should be run")
             public void testConsumer()
             {
-                assertThrows(getError().getClass(), () -> command.execute(getInput()));
+                assertThrows(getError().getClass(), this::execute);
 
                 Mockito.verify(execution).accept(INPUT);
             }
@@ -174,11 +185,10 @@ public interface SyncCommandFromConsumerSpecification extends BaseCommandSpecifi
                 return command;
             }
 
-            @Nullable
             @Override
-            protected Integer getInput()
+            protected void execute()
             {
-                return INPUT;
+                command.execute(INPUT);
             }
         }
 
@@ -195,11 +205,10 @@ public interface SyncCommandFromConsumerSpecification extends BaseCommandSpecifi
                 return command;
             }
 
-            @Nullable
             @Override
-            protected Integer getInput()
+            protected void execute()
             {
-                return INPUT;
+                command.execute(INPUT);
             }
         }
     }
@@ -288,9 +297,9 @@ public interface SyncCommandFromConsumerSpecification extends BaseCommandSpecifi
             }
 
             @Override
-            protected Integer getInput()
+            protected void execute()
             {
-                return INPUT;
+                command.execute(INPUT);
             }
         }
     }

@@ -14,7 +14,6 @@
 package com.github.dohnal.vaadin.reactive.command.sync;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.function.Function;
 
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
@@ -68,6 +67,18 @@ public interface SyncCommandFromFunctionSpecification extends BaseCommandSpecifi
         }
 
         @Nested
+        @DisplayName("When command is executed with no input")
+        class WhenExecuteWithInput
+        {
+            @Test
+            @DisplayName("IllegalArgumentException should be thrown")
+            public void testExecute()
+            {
+                assertThrows(IllegalArgumentException.class, () -> command.execute());
+            }
+        }
+
+        @Nested
         @DisplayName("When command is executed")
         class WhenExecute extends WhenExecuteSpecification<Integer, Integer>
         {
@@ -87,25 +98,26 @@ public interface SyncCommandFromFunctionSpecification extends BaseCommandSpecifi
                 return command;
             }
 
-            @Nullable
             @Override
-            protected Integer getInput()
+            protected void execute()
             {
-                return INPUT;
+                command.execute(INPUT);
             }
 
-            @Nullable
-            @Override
-            protected Integer getResult()
+            @Test
+            @DisplayName("Result observable should emit correct result")
+            public void testResult()
             {
-                return RESULT;
+                getCommand().getResult().test()
+                        .perform(this::execute)
+                        .assertValue(RESULT);
             }
 
             @Test
             @DisplayName("Function should be run")
             public void testFunction()
             {
-                command.execute(getInput());
+                execute();
 
                 Mockito.verify(execution).apply(INPUT);
             }
@@ -131,11 +143,10 @@ public interface SyncCommandFromFunctionSpecification extends BaseCommandSpecifi
                 return command;
             }
 
-            @Nullable
             @Override
-            protected Integer getInput()
+            protected void execute()
             {
-                return INPUT;
+                command.execute(INPUT);
             }
 
             @Nonnull
@@ -149,14 +160,14 @@ public interface SyncCommandFromFunctionSpecification extends BaseCommandSpecifi
             @DisplayName("Error should be thrown if no one is subscribed to Error observable")
             public void testUnhandledError()
             {
-                assertThrows(getError().getClass(), () -> getCommand().execute(getInput()));
+                assertThrows(getError().getClass(), this::execute);
             }
 
             @Test
             @DisplayName("Function should be run")
             public void testFunction()
             {
-                assertThrows(getError().getClass(), () -> command.execute(getInput()));
+                assertThrows(getError().getClass(), this::execute);
 
                 Mockito.verify(execution).apply(INPUT);
             }
@@ -167,6 +178,15 @@ public interface SyncCommandFromFunctionSpecification extends BaseCommandSpecifi
         class WhenSubscribeAfterExecute extends WhenSubscribeAfterExecuteSpecification<Integer, Integer>
         {
             protected final Integer INPUT = 5;
+            protected final Integer RESULT = 5;
+
+            @BeforeEach
+            protected void executeCommand()
+            {
+                Mockito.when(execution.apply(INPUT)).thenReturn(RESULT);
+
+                super.executeCommand();
+            }
 
             @Nonnull
             @Override
@@ -175,11 +195,10 @@ public interface SyncCommandFromFunctionSpecification extends BaseCommandSpecifi
                 return command;
             }
 
-            @Nullable
             @Override
-            protected Integer getInput()
+            protected void execute()
             {
-                return INPUT;
+                command.execute(INPUT);
             }
         }
 
@@ -188,6 +207,15 @@ public interface SyncCommandFromFunctionSpecification extends BaseCommandSpecifi
         class WhenSubscribeAfterExecuteWithError extends WhenSubscribeAfterExecuteWithErrorSpecification<Integer, Integer>
         {
             protected final Integer INPUT = 5;
+            private final Throwable ERROR = new RuntimeException("Error");
+
+            @BeforeEach
+            protected void executeCommand()
+            {
+                Mockito.when(execution.apply(INPUT)).thenThrow(ERROR);
+
+                super.executeCommand();
+            }
 
             @Nonnull
             @Override
@@ -196,11 +224,10 @@ public interface SyncCommandFromFunctionSpecification extends BaseCommandSpecifi
                 return command;
             }
 
-            @Nullable
             @Override
-            protected Integer getInput()
+            protected void execute()
             {
-                return INPUT;
+                command.execute(INPUT);
             }
         }
     }
@@ -289,9 +316,9 @@ public interface SyncCommandFromFunctionSpecification extends BaseCommandSpecifi
             }
 
             @Override
-            protected Integer getInput()
+            protected void execute()
             {
-                return INPUT;
+                command.execute(INPUT);
             }
         }
     }

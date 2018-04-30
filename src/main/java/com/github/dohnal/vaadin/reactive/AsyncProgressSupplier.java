@@ -14,6 +14,7 @@
 package com.github.dohnal.vaadin.reactive;
 
 import javax.annotation.Nonnull;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
@@ -36,6 +37,8 @@ public interface AsyncProgressSupplier<T> extends Function<ProgressContext, Comp
     @Nonnull
     static AsyncProgressSupplier<Void> create(final @Nonnull Consumer<ProgressContext> consumer)
     {
+        Objects.requireNonNull(consumer, "Consumer cannot be null");
+
         return progress -> CompletableFuture.runAsync(() -> consumer.accept(progress));
     }
 
@@ -50,6 +53,9 @@ public interface AsyncProgressSupplier<T> extends Function<ProgressContext, Comp
     static AsyncProgressSupplier<Void> create(final @Nonnull Consumer<ProgressContext> consumer,
                                               final @Nonnull Executor executor)
     {
+        Objects.requireNonNull(consumer, "Consumer cannot be null");
+        Objects.requireNonNull(executor, "Executor cannot be null");
+
         return progress -> CompletableFuture.runAsync(() -> consumer.accept(progress), executor);
     }
 
@@ -63,6 +69,8 @@ public interface AsyncProgressSupplier<T> extends Function<ProgressContext, Comp
     @Nonnull
     static <T> AsyncProgressSupplier<T> create(final @Nonnull Function<ProgressContext, T> function)
     {
+        Objects.requireNonNull(function, "Function cannot be null");
+
         return progress -> CompletableFuture.supplyAsync(() -> function.apply(progress));
     }
 
@@ -78,6 +86,9 @@ public interface AsyncProgressSupplier<T> extends Function<ProgressContext, Comp
     static <T> AsyncProgressSupplier<T> create(final @Nonnull Function<ProgressContext, T> function,
                                                final @Nonnull Executor executor)
     {
+        Objects.requireNonNull(function, "Function cannot be null");
+        Objects.requireNonNull(executor, "Executor cannot be null");
+
         return progress -> CompletableFuture.supplyAsync(() -> function.apply(progress), executor);
     }
 }

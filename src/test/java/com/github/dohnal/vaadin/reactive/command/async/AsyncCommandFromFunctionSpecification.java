@@ -14,7 +14,6 @@
 package com.github.dohnal.vaadin.reactive.command.async;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.concurrent.Executor;
 import java.util.function.Function;
 
@@ -29,6 +28,8 @@ import rx.Observable;
 import rx.schedulers.Schedulers;
 import rx.schedulers.TestScheduler;
 import rx.subjects.TestSubject;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Tests for {@link ReactiveCommand} created by
@@ -69,6 +70,18 @@ public interface AsyncCommandFromFunctionSpecification extends BaseCommandSpecif
         }
 
         @Nested
+        @DisplayName("When command is executed with no input")
+        class WhenExecuteWithInput
+        {
+            @Test
+            @DisplayName("IllegalArgumentException should be thrown")
+            public void testExecute()
+            {
+                assertThrows(IllegalArgumentException.class, () -> command.execute());
+            }
+        }
+
+        @Nested
         @DisplayName("When command is executed")
         class WhenExecute extends WhenExecuteSpecification<Integer, Integer>
         {
@@ -88,25 +101,26 @@ public interface AsyncCommandFromFunctionSpecification extends BaseCommandSpecif
                 return command;
             }
 
-            @Nullable
             @Override
-            protected Integer getInput()
+            protected void execute()
             {
-                return INPUT;
+                command.execute(INPUT);
             }
 
-            @Nullable
-            @Override
-            protected Integer getResult()
+            @Test
+            @DisplayName("Result observable should emit correct result")
+            public void testResult()
             {
-                return RESULT;
+                getCommand().getResult().test()
+                        .perform(this::execute)
+                        .assertValue(RESULT);
             }
 
             @Test
             @DisplayName("Function should be run")
             public void testFunction()
             {
-                command.execute(getInput());
+                execute();
 
                 Mockito.verify(execution).apply(INPUT);
             }
@@ -132,11 +146,10 @@ public interface AsyncCommandFromFunctionSpecification extends BaseCommandSpecif
                 return command;
             }
 
-            @Nullable
             @Override
-            protected Integer getInput()
+            protected void execute()
             {
-                return INPUT;
+                command.execute(INPUT);
             }
 
             @Nonnull
@@ -150,7 +163,7 @@ public interface AsyncCommandFromFunctionSpecification extends BaseCommandSpecif
             @DisplayName("Function should be run")
             public void testFunction()
             {
-                command.execute(getInput());
+                execute();
 
                 Mockito.verify(execution).apply(INPUT);
             }
@@ -161,6 +174,15 @@ public interface AsyncCommandFromFunctionSpecification extends BaseCommandSpecif
         class WhenSubscribeAfterExecute extends WhenSubscribeAfterExecuteSpecification<Integer, Integer>
         {
             protected final Integer INPUT = 5;
+            protected final Integer RESULT = 7;
+
+            @BeforeEach
+            protected void executeCommand()
+            {
+                Mockito.when(execution.apply(INPUT)).thenReturn(RESULT);
+
+                super.executeCommand();
+            }
 
             @Nonnull
             @Override
@@ -169,11 +191,10 @@ public interface AsyncCommandFromFunctionSpecification extends BaseCommandSpecif
                 return command;
             }
 
-            @Nullable
             @Override
-            protected Integer getInput()
+            protected void execute()
             {
-                return INPUT;
+                command.execute(INPUT);
             }
         }
 
@@ -183,6 +204,15 @@ public interface AsyncCommandFromFunctionSpecification extends BaseCommandSpecif
                 Integer>
         {
             protected final Integer INPUT = 5;
+            private final Throwable ERROR = new RuntimeException("Error");
+
+            @BeforeEach
+            protected void executeCommand()
+            {
+                Mockito.when(execution.apply(INPUT)).thenThrow(ERROR);
+
+                super.executeCommand();
+            }
 
             @Nonnull
             @Override
@@ -191,11 +221,10 @@ public interface AsyncCommandFromFunctionSpecification extends BaseCommandSpecif
                 return command;
             }
 
-            @Nullable
             @Override
-            protected Integer getInput()
+            protected void execute()
             {
-                return INPUT;
+                command.execute(INPUT);
             }
         }
     }
@@ -286,16 +315,16 @@ public interface AsyncCommandFromFunctionSpecification extends BaseCommandSpecif
             }
 
             @Override
-            protected Integer getInput()
+            protected void execute()
             {
-                return INPUT;
+                command.execute(INPUT);
             }
 
             @Test
             @DisplayName("Function should not be run")
             public void testFunction()
             {
-                command.execute(getInput());
+                execute();
 
                 Mockito.verify(execution, Mockito.never()).apply(Mockito.any());
             }

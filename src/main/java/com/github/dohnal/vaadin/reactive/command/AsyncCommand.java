@@ -15,9 +15,12 @@ package com.github.dohnal.vaadin.reactive.command;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
 import com.github.dohnal.vaadin.reactive.AsyncFunction;
+import com.github.dohnal.vaadin.reactive.AsyncSupplier;
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
 import rx.Observable;
 
@@ -30,7 +33,27 @@ import rx.Observable;
  */
 public final class AsyncCommand<T, R> extends AbstractCommand<T, R>
 {
-    protected final AsyncFunction<T, R> execution;
+    protected final AsyncSupplier<R> noInputExecution;
+
+    protected final AsyncFunction<T, R> inputExecution;
+
+    /**
+     * Creates new asynchronous reactive command with given execution
+     *
+     * @param canExecute observable which controls command executability
+     * @param execution execution
+     */
+    public AsyncCommand(final @Nonnull Observable<Boolean> canExecute,
+                        final @Nonnull AsyncSupplier<R> execution)
+    {
+        super(canExecute);
+
+        Objects.requireNonNull(canExecute, "CanExecute cannot be null");
+        Objects.requireNonNull(execution, "Execution cannot be null");
+
+        this.noInputExecution = execution;
+        this.inputExecution = null;
+    }
 
     /**
      * Creates new asynchronous reactive command with given execution
@@ -43,17 +66,29 @@ public final class AsyncCommand<T, R> extends AbstractCommand<T, R>
     {
         super(canExecute);
 
-        this.execution = execution;
+        Objects.requireNonNull(canExecute, "CanExecute cannot be null");
+        Objects.requireNonNull(execution, "Execution cannot be null");
+
+        this.noInputExecution = null;
+        this.inputExecution = execution;
     }
 
     @Override
     public final void executeInternal(final @Nullable T input)
     {
+        if (input == null && noInputExecution == null)
+        {
+            throw new IllegalArgumentException("Input is null, but command requires input");
+        }
+
         handleStart();
 
-        execution.apply(input)
+        final CompletableFuture<R> resultFuture = input == null ?
+                noInputExecution.get() : inputExecution.apply(input);
+
+        resultFuture
                 .handle((result, error) -> {
-                    if (error instanceof CompletionException)
+                    if (error != null && error instanceof CompletionException)
                     {
                         handleResult(result, error.getCause());
                     }

@@ -15,6 +15,7 @@ package com.github.dohnal.vaadin.reactive.command;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Objects;
 
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
 import com.github.dohnal.vaadin.reactive.ReactiveProperty;
@@ -49,6 +50,8 @@ public abstract class AbstractCommand<T, R> implements ReactiveCommand<T, R>
      */
     public AbstractCommand(final @Nonnull Observable<Boolean> canExecute)
     {
+        Objects.requireNonNull(canExecute, "CanExecute cannot be null");
+
         this.result = PublishSubject.create();
         this.error = PublishSubject.create();
         this.isExecuting = ReactiveProperty.withValue(false);
@@ -124,8 +127,19 @@ public abstract class AbstractCommand<T, R> implements ReactiveCommand<T, R>
     }
 
     @Override
-    public final void execute(final @Nullable T input)
+    public final void execute()
     {
+        if (Boolean.TRUE.equals(canExecute.getValue()))
+        {
+            executeInternal(null);
+        }
+    }
+
+    @Override
+    public final void execute(final @Nonnull T input)
+    {
+        Objects.requireNonNull(input, "Input cannot be null");
+
         if (Boolean.TRUE.equals(canExecute.getValue()))
         {
             executeInternal(input);
@@ -151,7 +165,10 @@ public abstract class AbstractCommand<T, R> implements ReactiveCommand<T, R>
     {
         if (error == null)
         {
-            this.result.onNext(result);
+            if (result != null)
+            {
+                this.result.onNext(result);
+            }
         }
         else
         {
@@ -173,6 +190,8 @@ public abstract class AbstractCommand<T, R> implements ReactiveCommand<T, R>
      */
     protected void handleError(final @Nonnull Throwable throwable)
     {
+        Objects.requireNonNull(throwable, "Throwable cannot be null");
+
         // TODO: log
     }
 

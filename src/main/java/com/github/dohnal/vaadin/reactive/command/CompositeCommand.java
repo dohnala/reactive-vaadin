@@ -18,6 +18,7 @@ import javax.annotation.Nullable;
 import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
@@ -53,6 +54,9 @@ public final class CompositeCommand<T, R> extends AbstractCommand<T, List<R>>
                         values -> Arrays.stream(Arrays.copyOf(values, values.length, Boolean[].class))
                                 .allMatch(Boolean.TRUE::equals)),
                 (x, y) -> x && y));
+
+        Objects.requireNonNull(canExecute, "CanExecute cannot be null");
+        Objects.requireNonNull(commands, "Commands cannot be null");
 
         if (commands.size() == 0)
         {
@@ -110,12 +114,21 @@ public final class CompositeCommand<T, R> extends AbstractCommand<T, List<R>>
                     this.handleComplete();
                 });
 
-        commands.forEach(command -> command.execute(input));
+        if (input == null)
+        {
+            commands.forEach(ReactiveCommand::execute);
+        }
+        else
+        {
+            commands.forEach(command -> command.execute(input));
+        }
     }
 
     @Nonnull
     private Float computeProgress(final @Nonnull Float... values)
     {
+        Objects.requireNonNull(values, "Values cannot be null");
+
         return Arrays.stream(values).reduce(0.0f, (x, y) -> x + y) / commands.size();
     }
 }

@@ -14,6 +14,7 @@
 package com.github.dohnal.vaadin.reactive;
 
 import javax.annotation.Nonnull;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Supplier;
@@ -45,6 +46,8 @@ public interface AsyncSupplier<T> extends Supplier<CompletableFuture<T>>
     @Nonnull
     static AsyncSupplier<Void> create(final @Nonnull Executor executor)
     {
+        Objects.requireNonNull(executor, "Executor cannot be null");
+
         return create(() -> {}, executor);
     }
 
@@ -57,6 +60,8 @@ public interface AsyncSupplier<T> extends Supplier<CompletableFuture<T>>
     @Nonnull
     static AsyncSupplier<Void> create(final @Nonnull Runnable runnable)
     {
+        Objects.requireNonNull(runnable, "Runnable cannot be null");
+
         return () -> CompletableFuture.runAsync(runnable);
     }
 
@@ -71,6 +76,9 @@ public interface AsyncSupplier<T> extends Supplier<CompletableFuture<T>>
     static AsyncSupplier<Void> create(final @Nonnull Runnable runnable,
                                       final @Nonnull Executor executor)
     {
+        Objects.requireNonNull(runnable, "Runnable cannot be null");
+        Objects.requireNonNull(executor, "Executor cannot be null");
+
         return () -> CompletableFuture.runAsync(runnable, executor);
     }
 
@@ -84,6 +92,8 @@ public interface AsyncSupplier<T> extends Supplier<CompletableFuture<T>>
     @Nonnull
     static <T> AsyncSupplier<T> create(final @Nonnull Supplier<T> supplier)
     {
+        Objects.requireNonNull(supplier, "Supplier cannot be null");
+
         return () -> CompletableFuture.supplyAsync(supplier);
     }
 
@@ -99,6 +109,9 @@ public interface AsyncSupplier<T> extends Supplier<CompletableFuture<T>>
     static <T> AsyncSupplier<T> create(final @Nonnull Supplier<T> supplier,
                                        final @Nonnull Executor executor)
     {
+        Objects.requireNonNull(supplier, "Supplier cannot be null");
+        Objects.requireNonNull(executor, "Executor cannot be null");
+
         return () -> CompletableFuture.supplyAsync(supplier, executor);
     }
 }

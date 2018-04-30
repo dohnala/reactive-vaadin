@@ -14,7 +14,6 @@
 package com.github.dohnal.vaadin.reactive;
 
 import javax.annotation.Nonnull;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.function.BiConsumer;
@@ -53,38 +52,6 @@ public class AsyncProgressFunctionTest
     @DisplayName("When new asynchronous progress function is created")
     class WhenCreate
     {
-        @Nested
-        @DisplayName("From asynchronous progress supplier")
-        class FromAsyncProgressSupplier
-        {
-            protected final Integer RESULT = 5;
-
-            private ProgressContext progressContext;
-            private AsyncProgressSupplier<Integer> asyncProgressSupplier;
-            private AsyncProgressFunction<Void, Integer> asyncProgressFunction;
-
-            @BeforeEach
-            @SuppressWarnings("unchecked")
-            protected void create()
-            {
-                progressContext = Mockito.mock(ProgressContext.class);
-                asyncProgressSupplier = Mockito.mock(AsyncProgressSupplier.class);
-                asyncProgressFunction = AsyncProgressFunction.create(asyncProgressSupplier);
-
-                Mockito.when(asyncProgressSupplier.apply(progressContext))
-                        .thenReturn(CompletableFuture.completedFuture(RESULT));
-            }
-
-            @Test
-            @DisplayName("When run, asynchronous progress supplier should be run and correct result should be returned")
-            public void testResult() throws ExecutionException, InterruptedException
-            {
-                assertEquals(RESULT, asyncProgressFunction.apply(progressContext, null).get());
-
-                Mockito.verify(asyncProgressSupplier).apply(progressContext);
-            }
-        }
-
         @Nested
         @DisplayName("From bi-consumer")
         class FromBiConsumer

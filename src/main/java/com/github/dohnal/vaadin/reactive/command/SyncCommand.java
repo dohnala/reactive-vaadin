@@ -15,7 +15,9 @@ package com.github.dohnal.vaadin.reactive.command;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Objects;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
 import rx.Observable;
@@ -29,7 +31,27 @@ import rx.Observable;
  */
 public final class SyncCommand<T, R> extends AbstractCommand<T, R>
 {
-    protected final Function<T, R> execution;
+    protected final Supplier<R> noInputExecution;
+
+    protected final Function<T, R> inputExecution;
+
+    /**
+     * Creates new synchronous reactive command with given execution
+     *
+     * @param canExecute observable which controls command executability
+     * @param execution execution
+     */
+    public SyncCommand(final @Nonnull Observable<Boolean> canExecute,
+                       final @Nonnull Supplier<R> execution)
+    {
+        super(canExecute);
+
+        Objects.requireNonNull(canExecute, "CanExecute cannot be null");
+        Objects.requireNonNull(execution, "Execution cannot be null");
+
+        this.noInputExecution = execution;
+        this.inputExecution = null;
+    }
 
     /**
      * Creates new synchronous reactive command with given execution
@@ -42,17 +64,34 @@ public final class SyncCommand<T, R> extends AbstractCommand<T, R>
     {
         super(canExecute);
 
-        this.execution = execution;
+        Objects.requireNonNull(canExecute, "CanExecute cannot be null");
+        Objects.requireNonNull(execution, "Execution cannot be null");
+
+        this.noInputExecution = null;
+        this.inputExecution = execution;
     }
 
     @Override
     public final void executeInternal(final @Nullable T input)
     {
+        if (input == null && noInputExecution == null)
+        {
+            throw new IllegalArgumentException("Input is null, but command requires input");
+        }
+
         try
         {
             handleStart();
 
-            handleResult(execution.apply(input), null);
+            if (input == null)
+            {
+                handleResult(noInputExecution.get(), null);
+            }
+            else
+            {
+                handleResult(inputExecution.apply(input), null);
+            }
+
         }
         catch (final Throwable error)
         {
@@ -67,6 +106,8 @@ public final class SyncCommand<T, R> extends AbstractCommand<T, R>
     @Override
     protected void handleError(final @Nonnull Throwable throwable)
     {
+        Objects.requireNonNull(throwable, "Throwable cannot be null");
+
         throw new RuntimeException("Unexpected error during command execution", throwable);
     }
 }

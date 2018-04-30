@@ -13,16 +13,12 @@
 
 package com.github.dohnal.vaadin.reactive;
 
-import com.github.dohnal.vaadin.reactive.command.async.AsyncCommandFromAsyncFunctionSpecification;
-import com.github.dohnal.vaadin.reactive.command.async.AsyncCommandFromAsyncSupplierSpecification;
 import com.github.dohnal.vaadin.reactive.command.async.AsyncCommandFromConsumerSpecification;
 import com.github.dohnal.vaadin.reactive.command.async.AsyncCommandFromFunctionSpecification;
 import com.github.dohnal.vaadin.reactive.command.async.AsyncCommandFromRunnableSpecification;
 import com.github.dohnal.vaadin.reactive.command.async.AsyncCommandFromSupplierSpecification;
 import com.github.dohnal.vaadin.reactive.command.async.AsyncEmptyCommandSpecification;
 import com.github.dohnal.vaadin.reactive.command.composite.CompositeCommandSpecification;
-import com.github.dohnal.vaadin.reactive.command.progress.ProgressCommandFromAsyncProgressFunctionSpecification;
-import com.github.dohnal.vaadin.reactive.command.progress.ProgressCommandFromAsyncProgressSupplierSpecification;
 import com.github.dohnal.vaadin.reactive.command.progress.ProgressCommandFromBiConsumerSpecification;
 import com.github.dohnal.vaadin.reactive.command.progress.ProgressCommandFromBiFunctionSpecification;
 import com.github.dohnal.vaadin.reactive.command.progress.ProgressCommandFromConsumerSpecification;
@@ -100,9 +96,7 @@ public class ReactiveCommandTest
             AsyncCommandFromRunnableSpecification,
             AsyncCommandFromSupplierSpecification,
             AsyncCommandFromConsumerSpecification,
-            AsyncCommandFromFunctionSpecification,
-            AsyncCommandFromAsyncSupplierSpecification,
-            AsyncCommandFromAsyncFunctionSpecification
+            AsyncCommandFromFunctionSpecification
     {
         @Nested
         @DisplayName("As empty")
@@ -143,22 +137,6 @@ public class ReactiveCommandTest
         @Nested
         @DisplayName("From function with CanExecute")
         class FromFunctionWithCanExecute extends WhenCreateFromFunctionWithCanExecuteSpecification {}
-
-        @Nested
-        @DisplayName("From asynchronous supplier")
-        class FromAsyncSupplier extends WhenCreateFromAsyncSupplierSpecification {}
-
-        @Nested
-        @DisplayName("From asynchronous supplier with CanExecute")
-        class FromAsyncSupplierWithCanExecute extends WhenCreateFromAsyncSupplierWithCanExecuteSpecification {}
-
-        @Nested
-        @DisplayName("From asynchronous function")
-        class FromAsyncFunction extends WhenCreateFromAsyncFunctionSpecification {}
-
-        @Nested
-        @DisplayName("From asynchronous function with CanExecute")
-        class FromAsyncFunctionWithCanExecute extends WhenCreateFromAsyncFunctionWithCanExecuteSpecification {}
     }
 
     @Nested
@@ -167,9 +145,7 @@ public class ReactiveCommandTest
             ProgressCommandFromConsumerSpecification,
             ProgressCommandFromFunctionSpecification,
             ProgressCommandFromBiFunctionSpecification,
-            ProgressCommandFromBiConsumerSpecification,
-            ProgressCommandFromAsyncProgressSupplierSpecification,
-            ProgressCommandFromAsyncProgressFunctionSpecification
+            ProgressCommandFromBiConsumerSpecification
     {
         @Nested
         @DisplayName("From consumer")
@@ -202,22 +178,6 @@ public class ReactiveCommandTest
         @Nested
         @DisplayName("From bi-function with CanExecute")
         class FromBiFunctionWithCanExecute extends WhenCreateFromBiFunctionWithCanExecuteSpecification {}
-
-        @Nested
-        @DisplayName("From asynchronous progress supplier")
-        class FromAsyncProgressSupplier extends WhenCreateFromAsyncProgressSupplierSpecification {}
-
-        @Nested
-        @DisplayName("From asynchronous progress supplier with CanExecute")
-        class FromAsyncProgressSupplierWithCanExecute extends WhenCreateFromAsyncProgressSupplierWithCanExecuteSpecification {}
-
-        @Nested
-        @DisplayName("From asynchronous progress function")
-        class FromAsyncProgressFunction extends WhenCreateFromAsyncProgressFunctionSpecification {}
-
-        @Nested
-        @DisplayName("From asynchronous progress function with CanExecute")
-        class FromAsyncProgressFunctionWithCanExecute extends WhenCreateFromAsyncProgressFunctionWithCanExecuteSpecification {}
     }
 
     @Nested
@@ -229,8 +189,12 @@ public class ReactiveCommandTest
         class FromNoChildCommands extends WhenCreateFromNoCommandsSpecification {}
 
         @Nested
-        @DisplayName("From child commands")
-        class FromChildCommands extends WhenCreateFromCommandsSpecification {}
+        @DisplayName("From child commands with no input")
+        class FromChildCommandsWithNoInput extends WhenCreateFromCommandsWithNoInputSpecification {}
+
+        @Nested
+        @DisplayName("From child commands with input")
+        class FromChildCommandsWithInput extends WhenCreateFromCommandsWithInputSpecification {}
 
         @Nested
         @DisplayName("From child commands with CanExecute")

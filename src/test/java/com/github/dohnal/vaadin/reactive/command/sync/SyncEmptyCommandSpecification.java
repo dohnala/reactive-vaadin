@@ -14,13 +14,13 @@
 package com.github.dohnal.vaadin.reactive.command.sync;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
 import com.github.dohnal.vaadin.reactive.command.BaseCommandSpecification;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import rx.Observable;
 import rx.schedulers.Schedulers;
 import rx.schedulers.TestScheduler;
@@ -63,18 +63,19 @@ public interface SyncEmptyCommandSpecification extends BaseCommandSpecification
                 return command;
             }
 
-            @Nullable
             @Override
-            protected Void getInput()
+            protected void execute()
             {
-                return null;
+                command.execute();
             }
 
-            @Nullable
-            @Override
-            protected Void getResult()
+            @Test
+            @DisplayName("Result observable should not emit any value")
+            public void testResult()
             {
-                return null;
+                getCommand().getResult().test()
+                        .perform(this::execute)
+                        .assertNoValues();
             }
         }
 
@@ -89,11 +90,10 @@ public interface SyncEmptyCommandSpecification extends BaseCommandSpecification
                 return command;
             }
 
-            @Nullable
             @Override
-            protected Void getInput()
+            protected void execute()
             {
-                return null;
+                command.execute();
             }
         }
     }
@@ -176,9 +176,9 @@ public interface SyncEmptyCommandSpecification extends BaseCommandSpecification
             }
 
             @Override
-            protected Void getInput()
+            protected void execute()
             {
-                return null;
+                command.execute();
             }
         }
     }

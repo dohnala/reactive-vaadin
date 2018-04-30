@@ -14,7 +14,6 @@
 package com.github.dohnal.vaadin.reactive.command.progress;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.concurrent.Executor;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
@@ -30,6 +29,8 @@ import org.mockito.Mockito;
 import rx.schedulers.Schedulers;
 import rx.schedulers.TestScheduler;
 import rx.subjects.TestSubject;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Tests for {@link ReactiveCommand} created by
@@ -70,6 +71,18 @@ public interface ProgressCommandFromBiConsumerSpecification extends BaseCommandS
         }
 
         @Nested
+        @DisplayName("When command is executed with no input")
+        class WhenExecuteWithInput
+        {
+            @Test
+            @DisplayName("IllegalArgumentException should be thrown")
+            public void testExecute()
+            {
+                assertThrows(IllegalArgumentException.class, () -> command.execute());
+            }
+        }
+
+        @Nested
         @DisplayName("When command is executed")
         class WhenExecute extends WhenExecuteSpecification<Integer, Void>
         {
@@ -98,18 +111,19 @@ public interface ProgressCommandFromBiConsumerSpecification extends BaseCommandS
                 return command;
             }
 
-            @Nullable
             @Override
-            protected Integer getInput()
+            protected void execute()
             {
-                return INPUT;
+                command.execute(INPUT);
             }
 
-            @Nullable
-            @Override
-            protected Void getResult()
+            @Test
+            @DisplayName("Result observable should not emit any value")
+            public void testResult()
             {
-                return null;
+                getCommand().getResult().test()
+                        .perform(this::execute)
+                        .assertNoValues();
             }
 
             @Test
@@ -119,7 +133,7 @@ public interface ProgressCommandFromBiConsumerSpecification extends BaseCommandS
             {
                 getCommand().getProgress().test()
                         .assertValuesAndClear(0.0f)
-                        .perform(() -> getCommand().execute(getInput()))
+                        .perform(this::execute)
                         .assertValues(0.25f, 0.5f, 0.75f, 1.0f);
             }
 
@@ -127,7 +141,7 @@ public interface ProgressCommandFromBiConsumerSpecification extends BaseCommandS
             @DisplayName("BiConsumer should be run")
             public void testBiConsumer()
             {
-                command.execute(getInput());
+                execute();
 
                 Mockito.verify(execution).accept(Mockito.any(ProgressContext.class), Mockito.anyInt());
             }
@@ -162,11 +176,10 @@ public interface ProgressCommandFromBiConsumerSpecification extends BaseCommandS
                 return command;
             }
 
-            @Nullable
             @Override
-            protected Integer getInput()
+            protected void execute()
             {
-                return INPUT;
+                command.execute(INPUT);
             }
 
             @Nonnull
@@ -183,7 +196,7 @@ public interface ProgressCommandFromBiConsumerSpecification extends BaseCommandS
             {
                 getCommand().getProgress().test()
                         .assertValuesAndClear(0.0f)
-                        .perform(() -> getCommand().execute(getInput()))
+                        .perform(this::execute)
                         .assertValues(0.25f, 0.5f, 1.0f);
             }
 
@@ -191,7 +204,7 @@ public interface ProgressCommandFromBiConsumerSpecification extends BaseCommandS
             @DisplayName("BiConsumer should be run")
             public void testBiConsumer()
             {
-                command.execute(getInput());
+                execute();
 
                 Mockito.verify(execution).accept(Mockito.any(ProgressContext.class), Mockito.anyInt());
             }
@@ -210,11 +223,10 @@ public interface ProgressCommandFromBiConsumerSpecification extends BaseCommandS
                 return command;
             }
 
-            @Nullable
             @Override
-            protected Integer getInput()
+            protected void execute()
             {
-                return INPUT;
+                command.execute(INPUT);
             }
         }
 
@@ -231,11 +243,10 @@ public interface ProgressCommandFromBiConsumerSpecification extends BaseCommandS
                 return command;
             }
 
-            @Nullable
             @Override
-            protected Integer getInput()
+            protected void execute()
             {
-                return null;
+                command.execute(INPUT);
             }
         }
     }
@@ -326,16 +337,16 @@ public interface ProgressCommandFromBiConsumerSpecification extends BaseCommandS
             }
 
             @Override
-            protected Integer getInput()
+            protected void execute()
             {
-                return INPUT;
+                command.execute(INPUT);
             }
 
             @Test
             @DisplayName("BiConsumer should not be run")
             public void testBiConsumer()
             {
-                command.execute(getInput());
+                execute();
 
                 Mockito.verify(execution, Mockito.never()).accept(Mockito.any(), Mockito.anyInt());
             }

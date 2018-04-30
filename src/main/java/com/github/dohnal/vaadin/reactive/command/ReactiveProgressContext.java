@@ -30,6 +30,8 @@ public final class ReactiveProgressContext implements ProgressContext
 
     public ReactiveProgressContext(final @Nonnull ReactiveProperty<Float> property)
     {
+        Objects.requireNonNull(property, "Property cannot be null");
+
         this.property = property;
     }
 

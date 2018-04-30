@@ -14,6 +14,7 @@
 package com.github.dohnal.vaadin.reactive;
 
 import javax.annotation.Nonnull;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.BiConsumer;
@@ -29,19 +30,6 @@ import java.util.function.BiFunction;
 public interface AsyncProgressFunction<T, R> extends BiFunction<ProgressContext, T, CompletableFuture<R>>
 {
     /**
-     * Creates asynchronous progress function from asynchronous progress supplier
-     *
-     * @param supplier supplier
-     * @param <R> type of result
-     * @return asynchronous progress function
-     */
-    @Nonnull
-    static <R> AsyncProgressFunction<Void, R> create(final @Nonnull AsyncProgressSupplier<R> supplier)
-    {
-        return (progress, input) -> supplier.apply(progress);
-    }
-
-    /**
      * Creates asynchronous progress function from consumer
      *
      * @param consumer consumer
@@ -51,6 +39,8 @@ public interface AsyncProgressFunction<T, R> extends BiFunction<ProgressContext,
     @Nonnull
     static <T> AsyncProgressFunction<T, Void> create(final @Nonnull BiConsumer<ProgressContext, T> consumer)
     {
+        Objects.requireNonNull(consumer, "Consumer cannot be null");
+
         return (progress, input) -> CompletableFuture.runAsync(() -> consumer.accept(progress, input));
     }
 
@@ -66,6 +56,9 @@ public interface AsyncProgressFunction<T, R> extends BiFunction<ProgressContext,
     static <T> AsyncProgressFunction<T, Void> create(final @Nonnull BiConsumer<ProgressContext, T> consumer,
                                                      final @Nonnull Executor executor)
     {
+        Objects.requireNonNull(consumer, "Consumer cannot be null");
+        Objects.requireNonNull(executor, "Executor cannot be null");
+
         return (progress, input) -> CompletableFuture.runAsync(() -> consumer.accept(progress, input), executor);
     }
 
@@ -80,6 +73,8 @@ public interface AsyncProgressFunction<T, R> extends BiFunction<ProgressContext,
     @Nonnull
     static <T, R> AsyncProgressFunction<T, R> create(final @Nonnull BiFunction<ProgressContext, T, R> function)
     {
+        Objects.requireNonNull(function, "Function cannot be null");
+
         return (progress, input) -> CompletableFuture.supplyAsync(() -> function.apply(progress, input));
     }
 
@@ -96,6 +91,9 @@ public interface AsyncProgressFunction<T, R> extends BiFunction<ProgressContext,
     static <T, R> AsyncProgressFunction<T, R> create(final @Nonnull BiFunction<ProgressContext, T, R> function,
                                                      final @Nonnull Executor executor)
     {
+        Objects.requireNonNull(function, "Function cannot be null");
+        Objects.requireNonNull(executor, "Executor cannot be null");
+
         return (progress, input) -> CompletableFuture.supplyAsync(() -> function.apply(progress, input), executor);
     }
 }

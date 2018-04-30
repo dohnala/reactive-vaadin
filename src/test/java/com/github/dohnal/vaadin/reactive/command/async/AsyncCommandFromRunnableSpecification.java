@@ -14,7 +14,6 @@
 package com.github.dohnal.vaadin.reactive.command.async;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.concurrent.Executor;
 
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
@@ -83,25 +82,26 @@ public interface AsyncCommandFromRunnableSpecification extends BaseCommandSpecif
                 return command;
             }
 
-            @Nullable
             @Override
-            protected Void getInput()
+            protected void execute()
             {
-                return null;
+                command.execute();
             }
 
-            @Nullable
-            @Override
-            protected Void getResult()
+            @Test
+            @DisplayName("Result observable should not emit any value")
+            public void testResult()
             {
-                return null;
+                getCommand().getResult().test()
+                        .perform(this::execute)
+                        .assertNoValues();
             }
 
             @Test
             @DisplayName("Runnable should be run")
             public void testRunnable()
             {
-                command.execute(getInput());
+                execute();
 
                 Mockito.verify(execution).run();
             }
@@ -126,11 +126,10 @@ public interface AsyncCommandFromRunnableSpecification extends BaseCommandSpecif
                 return command;
             }
 
-            @Nullable
             @Override
-            protected Void getInput()
+            protected void execute()
             {
-                return null;
+                command.execute();
             }
 
             @Nonnull
@@ -144,7 +143,7 @@ public interface AsyncCommandFromRunnableSpecification extends BaseCommandSpecif
             @DisplayName("Runnable should be run")
             public void testRunnable()
             {
-                command.execute(getInput());
+                execute();
 
                 Mockito.verify(execution).run();
             }
@@ -161,11 +160,10 @@ public interface AsyncCommandFromRunnableSpecification extends BaseCommandSpecif
                 return command;
             }
 
-            @Nullable
             @Override
-            protected Void getInput()
+            protected void execute()
             {
-                return null;
+                command.execute();
             }
         }
 
@@ -180,11 +178,10 @@ public interface AsyncCommandFromRunnableSpecification extends BaseCommandSpecif
                 return command;
             }
 
-            @Nullable
             @Override
-            protected Void getInput()
+            protected void execute()
             {
-                return null;
+                command.execute();
             }
         }
     }
@@ -271,16 +268,16 @@ public interface AsyncCommandFromRunnableSpecification extends BaseCommandSpecif
             }
 
             @Override
-            protected Void getInput()
+            protected void execute()
             {
-                return null;
+                command.execute();
             }
 
             @Test
             @DisplayName("Runnable should not be run")
             public void testRunnable()
             {
-                command.execute(getInput());
+                execute();
 
                 Mockito.verify(execution, Mockito.never()).run();
             }

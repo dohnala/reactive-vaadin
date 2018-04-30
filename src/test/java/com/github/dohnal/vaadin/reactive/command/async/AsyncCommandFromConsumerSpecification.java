@@ -14,7 +14,6 @@
 package com.github.dohnal.vaadin.reactive.command.async;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
@@ -29,6 +28,8 @@ import rx.Observable;
 import rx.schedulers.Schedulers;
 import rx.schedulers.TestScheduler;
 import rx.subjects.TestSubject;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Tests for {@link ReactiveCommand} created by
@@ -69,6 +70,18 @@ public interface AsyncCommandFromConsumerSpecification extends BaseCommandSpecif
         }
 
         @Nested
+        @DisplayName("When command is executed with no input")
+        class WhenExecuteWithInput
+        {
+            @Test
+            @DisplayName("IllegalArgumentException should be thrown")
+            public void testExecute()
+            {
+                assertThrows(IllegalArgumentException.class, () -> command.execute());
+            }
+        }
+
+        @Nested
         @DisplayName("When command is executed")
         class WhenExecute extends WhenExecuteSpecification<Integer, Void>
         {
@@ -87,25 +100,26 @@ public interface AsyncCommandFromConsumerSpecification extends BaseCommandSpecif
                 return command;
             }
 
-            @Nullable
             @Override
-            protected Integer getInput()
+            protected void execute()
             {
-                return INPUT;
+                command.execute(INPUT);
             }
 
-            @Nullable
-            @Override
-            protected Void getResult()
+            @Test
+            @DisplayName("Result observable should not emit any value")
+            public void testResult()
             {
-                return null;
+                getCommand().getResult().test()
+                        .perform(this::execute)
+                        .assertNoValues();
             }
 
             @Test
             @DisplayName("Consumer should be run")
             public void testConsumer()
             {
-                command.execute(getInput());
+                execute();
 
                 Mockito.verify(execution).accept(INPUT);
             }
@@ -131,11 +145,10 @@ public interface AsyncCommandFromConsumerSpecification extends BaseCommandSpecif
                 return command;
             }
 
-            @Nullable
             @Override
-            protected Integer getInput()
+            protected void execute()
             {
-                return INPUT;
+                command.execute(INPUT);
             }
 
             @Nonnull
@@ -149,7 +162,7 @@ public interface AsyncCommandFromConsumerSpecification extends BaseCommandSpecif
             @DisplayName("Consumer should be run")
             public void testConsumer()
             {
-                command.execute(getInput());
+                execute();
 
                 Mockito.verify(execution).accept(INPUT);
             }
@@ -168,11 +181,10 @@ public interface AsyncCommandFromConsumerSpecification extends BaseCommandSpecif
                 return command;
             }
 
-            @Nullable
             @Override
-            protected Integer getInput()
+            protected void execute()
             {
-                return INPUT;
+                command.execute(INPUT);
             }
         }
 
@@ -189,11 +201,10 @@ public interface AsyncCommandFromConsumerSpecification extends BaseCommandSpecif
                 return command;
             }
 
-            @Nullable
             @Override
-            protected Integer getInput()
+            protected void execute()
             {
-                return INPUT;
+                command.execute(INPUT);
             }
         }
     }
@@ -284,16 +295,16 @@ public interface AsyncCommandFromConsumerSpecification extends BaseCommandSpecif
             }
 
             @Override
-            protected Integer getInput()
+            protected void execute()
             {
-                return INPUT;
+                command.execute(INPUT);
             }
 
             @Test
             @DisplayName("Consumer should not be run")
             public void testConsumer()
             {
-                command.execute(getInput());
+                execute();
 
                 Mockito.verify(execution, Mockito.never()).accept(Mockito.any());
             }

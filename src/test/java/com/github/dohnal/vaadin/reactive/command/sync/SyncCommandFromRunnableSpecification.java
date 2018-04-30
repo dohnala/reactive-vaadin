@@ -14,7 +14,6 @@
 package com.github.dohnal.vaadin.reactive.command.sync;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
 import com.github.dohnal.vaadin.reactive.command.BaseCommandSpecification;
@@ -82,25 +81,26 @@ public interface SyncCommandFromRunnableSpecification extends BaseCommandSpecifi
                 return command;
             }
 
-            @Nullable
             @Override
-            protected Void getInput()
+            protected void execute()
             {
-                return null;
+                command.execute();
             }
 
-            @Nullable
-            @Override
-            protected Void getResult()
+            @Test
+            @DisplayName("Result observable should not emit any value")
+            public void testResult()
             {
-                return null;
+                getCommand().getResult().test()
+                        .perform(this::execute)
+                        .assertNoValues();
             }
 
             @Test
             @DisplayName("Runnable should be run")
             public void testRunnable()
             {
-                command.execute(getInput());
+                command.execute();
 
                 Mockito.verify(execution).run();
             }
@@ -125,11 +125,10 @@ public interface SyncCommandFromRunnableSpecification extends BaseCommandSpecifi
                 return command;
             }
 
-            @Nullable
             @Override
-            protected Void getInput()
+            protected void execute()
             {
-                return null;
+                command.execute();
             }
 
             @Nonnull
@@ -143,14 +142,14 @@ public interface SyncCommandFromRunnableSpecification extends BaseCommandSpecifi
             @DisplayName("Error should be thrown if no one is subscribed to Error observable")
             public void testUnhandledError()
             {
-                assertThrows(getError().getClass(), () -> getCommand().execute(getInput()));
+                assertThrows(getError().getClass(), this::execute);
             }
 
             @Test
             @DisplayName("Runnable should be run")
             public void testRunnable()
             {
-                assertThrows(getError().getClass(), () -> command.execute(getInput()));
+                assertThrows(getError().getClass(), this::execute);
 
                 Mockito.verify(execution).run();
             }
@@ -167,11 +166,10 @@ public interface SyncCommandFromRunnableSpecification extends BaseCommandSpecifi
                 return command;
             }
 
-            @Nullable
             @Override
-            protected Void getInput()
+            protected void execute()
             {
-                return null;
+                command.execute();
             }
         }
 
@@ -186,11 +184,10 @@ public interface SyncCommandFromRunnableSpecification extends BaseCommandSpecifi
                 return command;
             }
 
-            @Nullable
             @Override
-            protected Void getInput()
+            protected void execute()
             {
-                return null;
+                command.execute();
             }
         }
     }
@@ -276,9 +273,9 @@ public interface SyncCommandFromRunnableSpecification extends BaseCommandSpecifi
             }
 
             @Override
-            protected Void getInput()
+            protected void execute()
             {
-                return null;
+                command.execute();
             }
         }
     }

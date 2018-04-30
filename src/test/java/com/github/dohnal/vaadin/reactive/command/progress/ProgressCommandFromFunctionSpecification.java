@@ -14,7 +14,6 @@
 package com.github.dohnal.vaadin.reactive.command.progress;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.concurrent.Executor;
 import java.util.function.Function;
 
@@ -97,18 +96,19 @@ public interface ProgressCommandFromFunctionSpecification extends BaseCommandSpe
                 return command;
             }
 
-            @Nullable
             @Override
-            protected Void getInput()
+            protected void execute()
             {
-                return null;
+                command.execute();
             }
 
-            @Nullable
-            @Override
-            protected Integer getResult()
+            @Test
+            @DisplayName("Result observable should emit correct result")
+            public void testResult()
             {
-                return RESULT;
+                getCommand().getResult().test()
+                        .perform(this::execute)
+                        .assertValue(RESULT);
             }
 
             @Test
@@ -118,7 +118,7 @@ public interface ProgressCommandFromFunctionSpecification extends BaseCommandSpe
             {
                 getCommand().getProgress().test()
                         .assertValuesAndClear(0.0f)
-                        .perform(() -> getCommand().execute(getInput()))
+                        .perform(this::execute)
                         .assertValues(0.25f, 0.5f, 0.75f, 1.0f);
             }
 
@@ -126,7 +126,7 @@ public interface ProgressCommandFromFunctionSpecification extends BaseCommandSpe
             @DisplayName("Function should be run")
             public void testFunction()
             {
-                command.execute(getInput());
+                execute();
 
                 Mockito.verify(execution).apply(Mockito.any(ProgressContext.class));
             }
@@ -160,11 +160,10 @@ public interface ProgressCommandFromFunctionSpecification extends BaseCommandSpe
                 return command;
             }
 
-            @Nullable
             @Override
-            protected Void getInput()
+            protected void execute()
             {
-                return null;
+                command.execute();
             }
 
             @Nonnull
@@ -181,7 +180,7 @@ public interface ProgressCommandFromFunctionSpecification extends BaseCommandSpe
             {
                 getCommand().getProgress().test()
                         .assertValuesAndClear(0.0f)
-                        .perform(() -> getCommand().execute(getInput()))
+                        .perform(this::execute)
                         .assertValues(0.25f, 0.5f, 1.0f);
             }
 
@@ -189,7 +188,7 @@ public interface ProgressCommandFromFunctionSpecification extends BaseCommandSpe
             @DisplayName("Function should be run")
             public void testFunction()
             {
-                command.execute(getInput());
+                execute();
 
                 Mockito.verify(execution).apply(Mockito.any(ProgressContext.class));
             }
@@ -199,6 +198,16 @@ public interface ProgressCommandFromFunctionSpecification extends BaseCommandSpe
         @DisplayName("When command is subscribed after execution")
         class WhenSubscribeAfterExecute extends WhenSubscribeAfterExecuteSpecification<Void, Integer>
         {
+            protected final Integer RESULT = 7;
+
+            @BeforeEach
+            protected void executeCommand()
+            {
+                Mockito.when(execution.apply(Mockito.any(ProgressContext.class))).thenReturn(RESULT);
+
+                super.executeCommand();
+            }
+
             @Nonnull
             @Override
             public ReactiveCommand<Void, Integer> getCommand()
@@ -206,11 +215,10 @@ public interface ProgressCommandFromFunctionSpecification extends BaseCommandSpe
                 return command;
             }
 
-            @Nullable
             @Override
-            protected Void getInput()
+            protected void execute()
             {
-                return null;
+                command.execute();
             }
         }
 
@@ -218,6 +226,16 @@ public interface ProgressCommandFromFunctionSpecification extends BaseCommandSpe
         @DisplayName("When command is subscribed after execution with error")
         class WhenSubscribeAfterExecuteWithError extends WhenSubscribeAfterExecuteWithErrorSpecification<Void, Integer>
         {
+            private final Throwable ERROR = new RuntimeException("Error");
+
+            @BeforeEach
+            protected void executeCommand()
+            {
+                Mockito.when(execution.apply(Mockito.any(ProgressContext.class))).thenThrow(ERROR);
+
+                super.executeCommand();
+            }
+
             @Nonnull
             @Override
             public ReactiveCommand<Void, Integer> getCommand()
@@ -225,11 +243,10 @@ public interface ProgressCommandFromFunctionSpecification extends BaseCommandSpe
                 return command;
             }
 
-            @Nullable
             @Override
-            protected Void getInput()
+            protected void execute()
             {
-                return null;
+                command.execute();
             }
         }
     }
@@ -318,16 +335,16 @@ public interface ProgressCommandFromFunctionSpecification extends BaseCommandSpe
             }
 
             @Override
-            protected Void getInput()
+            protected void execute()
             {
-                return null;
+                command.execute();
             }
 
             @Test
             @DisplayName("Function should not be run")
             public void testFunction()
             {
-                command.execute(getInput());
+                execute();
 
                 Mockito.verify(execution, Mockito.never()).apply(Mockito.any());
             }
