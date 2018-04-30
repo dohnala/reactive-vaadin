@@ -13,7 +13,7 @@
 
 package com.github.dohnal.vaadin.reactive;
 
-import javax.annotation.Nullable;
+import javax.annotation.Nonnull;
 
 /**
  * Represents property which can be set
@@ -28,5 +28,5 @@ public interface Property<T>
      *
      * @param value value
      */
-    void setValue(final @Nullable T value);
+    void setValue(final @Nonnull T value);
 }

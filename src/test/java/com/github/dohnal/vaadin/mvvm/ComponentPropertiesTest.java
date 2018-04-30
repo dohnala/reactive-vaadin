@@ -16,11 +16,13 @@ package com.github.dohnal.vaadin.mvvm;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import com.github.dohnal.vaadin.reactive.ObservableProperty;
 import com.github.dohnal.vaadin.reactive.Property;
 import com.vaadin.data.HasItems;
 import com.vaadin.data.HasValue;
+import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.ProgressBar;
 import com.vaadin.ui.TextField;
@@ -31,6 +33,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 /**
  * Tests for {@link ComponentProperties}
@@ -223,6 +226,139 @@ public class ComponentPropertiesTest implements ComponentProperties
     }
 
     @Nested
+    @DisplayName("When valueOfNullable property is created with field")
+    class WhenCreateValueOfNullableField
+    {
+        private ComboBox<Integer> field;
+        private ObservableProperty<Optional<Integer>> property;
+
+        @BeforeEach
+        @SuppressWarnings("unchecked")
+        protected void create()
+        {
+            field = new ComboBox();
+            field.setItems(Arrays.asList(1, 2, 3, 4, 5));
+            property = valueOfNullable(field);
+        }
+
+        @Test
+        @DisplayName("Property should not emit any value")
+        public void testProperty()
+        {
+            property.asObservable().test()
+                    .assertNoValues();
+        }
+
+        @Nested
+        @DisplayName("When property value is set")
+        class WhenSetPropertyValue
+        {
+            protected final Integer VALUE = 5;
+
+            @Test
+            @DisplayName("Field's value should be correct")
+            public void testField()
+            {
+                property.setValue(Optional.of(VALUE));
+
+                assertEquals(VALUE, field.getValue());
+            }
+
+            @Test
+            @DisplayName("Property should emit correct value")
+            public void testProperty()
+            {
+                property.asObservable().test()
+                        .perform(() -> property.setValue(Optional.of(VALUE)))
+                        .assertValue(Optional.of(VALUE));
+            }
+        }
+
+        @Nested
+        @DisplayName("When property value is set to null")
+        class WhenSetNullPropertyValue
+        {
+            @BeforeEach
+            protected void setInitialValue()
+            {
+                field.setValue(3);
+            }
+
+            @Test
+            @DisplayName("Field's value should be null")
+            public void testField()
+            {
+                property.setValue(Optional.empty());
+
+                assertNull(field.getValue());
+            }
+
+            @Test
+            @DisplayName("Property should emit empty value")
+            public void testProperty()
+            {
+                property.asObservable().test()
+                        .perform(() -> property.setValue(Optional.empty()))
+                        .assertValue(Optional.empty());
+            }
+        }
+
+        @Nested
+        @DisplayName("When field value is set")
+        class WhenSetFieldValue
+        {
+            protected final Integer VALUE = 5;
+
+            @Test
+            @DisplayName("Field's value should be correct")
+            public void testField()
+            {
+                field.setValue(VALUE);
+
+                assertEquals(VALUE, field.getValue());
+            }
+
+            @Test
+            @DisplayName("Property should emit correct value")
+            public void testProperty()
+            {
+                property.asObservable().test()
+                        .perform(() -> field.setValue(VALUE))
+                        .assertValue(Optional.of(VALUE));
+            }
+        }
+
+        @Nested
+        @DisplayName("When field value is set to null")
+        class WhenSetNullFieldValue
+        {
+            @BeforeEach
+            protected void setInitialValue()
+            {
+                field.setValue(3);
+            }
+
+            @Test
+            @DisplayName("Field's value should be null")
+            public void testField()
+            {
+                field.setValue(null);
+
+                assertNull(field.getValue());
+            }
+
+            @Test
+            @DisplayName("Property should emit empty value")
+            public void testProperty()
+            {
+                property.asObservable().test()
+                        .perform(() -> field.setValue(null))
+                        .assertValue(Optional.empty());
+            }
+        }
+    }
+
+    @Nested
     @DisplayName("When valueOf property is created with progress bar")
     class WhenCreateValueOfProgressBar
     {
@@ -254,20 +390,6 @@ public class ComponentPropertiesTest implements ComponentProperties
                 property.setValue(0.5f);
 
                 Mockito.verify(progressBar).setValue(0.5f);
-            }
-        }
-
-        @Nested
-        @DisplayName("When property value is set to null")
-        class WhenSetNull
-        {
-            @Test
-            @DisplayName("Progress bar's setValue should be called with 0")
-            public void testProgressBar()
-            {
-                property.setValue(null);
-
-                Mockito.verify(progressBar).setValue(0.0f);
             }
         }
     }

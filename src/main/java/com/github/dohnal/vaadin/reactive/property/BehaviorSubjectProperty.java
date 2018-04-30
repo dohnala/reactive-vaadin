@@ -45,8 +45,10 @@ public final class BehaviorSubjectProperty<T> implements ReactiveProperty<T>
      *
      * @param defaultValue default value
      */
-    public BehaviorSubjectProperty(final @Nullable T defaultValue)
+    public BehaviorSubjectProperty(final @Nonnull T defaultValue)
     {
+        Objects.requireNonNull(defaultValue, "Default value cannot be null");
+
         this.subject = BehaviorSubject.create(defaultValue);
     }
 
@@ -59,6 +61,8 @@ public final class BehaviorSubjectProperty<T> implements ReactiveProperty<T>
     {
         this();
 
+        Objects.requireNonNull(observable, "Observable cannot be null");
+
         observable.subscribe(this::setValue);
     }
 
@@ -69,6 +73,8 @@ public final class BehaviorSubjectProperty<T> implements ReactiveProperty<T>
      */
     public BehaviorSubjectProperty(final @Nonnull ReactiveProperty<? extends T> anotherProperty)
     {
+        Objects.requireNonNull(anotherProperty, "Another property cannot be null");
+
         if (anotherProperty.hasValue())
         {
             this.subject = BehaviorSubject.create(anotherProperty.getValue());
@@ -89,8 +95,10 @@ public final class BehaviorSubjectProperty<T> implements ReactiveProperty<T>
     }
 
     @Override
-    public final void setValue(final @Nullable T value)
+    public final void setValue(final @Nonnull T value)
     {
+        Objects.requireNonNull(value, "Value cannot be null");
+
         if (!Objects.equals(value, getValue()))
         {
             subject.onNext(value);
@@ -106,6 +114,8 @@ public final class BehaviorSubjectProperty<T> implements ReactiveProperty<T>
     @Override
     public final void updateValue(final @Nonnull Function<? super T, ? extends T> update)
     {
+        Objects.requireNonNull(update, "Update cannot be null");
+
         setValue(update.apply(getValue()));
     }
 

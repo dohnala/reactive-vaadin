@@ -15,6 +15,7 @@ package com.github.dohnal.vaadin.reactive;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Objects;
 import java.util.function.Function;
 
 import com.github.dohnal.vaadin.reactive.property.BehaviorSubjectProperty;
@@ -48,8 +49,10 @@ public interface ReactiveProperty<T> extends ObservableProperty<T>
      * @return created property
      */
     @Nonnull
-    static <T> ReactiveProperty<T> withValue(final @Nullable T defaultValue)
+    static <T> ReactiveProperty<T> withValue(final @Nonnull T defaultValue)
     {
+        Objects.requireNonNull(defaultValue, "Default value cannot be null");
+
         return new BehaviorSubjectProperty<>(defaultValue);
     }
 
@@ -63,6 +66,8 @@ public interface ReactiveProperty<T> extends ObservableProperty<T>
     @Nonnull
     static <T> ReactiveProperty<T> fromObservable(final @Nonnull Observable<? extends T> observable)
     {
+        Objects.requireNonNull(observable, "Observable cannot be null");
+
         return new BehaviorSubjectProperty<>(observable);
     }
 
@@ -76,12 +81,14 @@ public interface ReactiveProperty<T> extends ObservableProperty<T>
     @Nonnull
     static <T> ReactiveProperty<T> fromProperty(final @Nonnull ReactiveProperty<? extends T> property)
     {
+        Objects.requireNonNull(property, "Property cannot be null");
+
         return new BehaviorSubjectProperty<>(property);
     }
 
     /**
      * Returns current value
-     * NOTE: if this property has not value, this method still return null
+     * NOTE: returns null if this property has no value (created with {@link #empty()})
      *
      * @return current value
      * @see #hasValue()
@@ -95,7 +102,7 @@ public interface ReactiveProperty<T> extends ObservableProperty<T>
      * @param value value
      */
     @Override
-    void setValue(final @Nullable T value);
+    void setValue(final @Nonnull T value);
 
     /**
      * Return if this property has any value

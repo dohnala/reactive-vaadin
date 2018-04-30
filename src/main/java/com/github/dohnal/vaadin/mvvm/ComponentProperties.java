@@ -14,8 +14,9 @@
 package com.github.dohnal.vaadin.mvvm;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.Collection;
+import java.util.Objects;
+import java.util.Optional;
 
 import com.github.dohnal.vaadin.reactive.ObservableProperty;
 import com.github.dohnal.vaadin.reactive.Property;
@@ -41,6 +42,8 @@ public interface ComponentProperties extends ComponentEvents
     @Nonnull
     default Property<Boolean> visibleOf(final @Nonnull Component component)
     {
+        Objects.requireNonNull(component, "Component cannot be null");
+
         return value -> component.setVisible(Boolean.TRUE.equals(value));
     }
 
@@ -53,6 +56,8 @@ public interface ComponentProperties extends ComponentEvents
     @Nonnull
     default Property<Boolean> enabledOf(final @Nonnull Component component)
     {
+        Objects.requireNonNull(component, "Component cannot be null");
+
         return value -> component.setEnabled(Boolean.TRUE.equals(value));
     }
 
@@ -65,11 +70,14 @@ public interface ComponentProperties extends ComponentEvents
     @Nonnull
     default Property<Boolean> readOnlyOf(final @Nonnull HasValue<?> field)
     {
+        Objects.requireNonNull(field, "Field cannot be null");
+
         return value -> field.setReadOnly(Boolean.TRUE.equals(value));
     }
 
     /**
-     * Returns value property of given field
+     * Returns value property of given field with not null values
+     * If field can contain null values, use {@link #valueOfNullable(HasValue)}
      *
      * @param field field
      * @param <T> type of value in field
@@ -78,6 +86,8 @@ public interface ComponentProperties extends ComponentEvents
     @Nonnull
     default <T> ObservableProperty<T> valueOf(final @Nonnull HasValue<T> field)
     {
+        Objects.requireNonNull(field, "Field cannot be null");
+
         return new ObservableProperty<T>()
         {
             @Nonnull
@@ -88,9 +98,39 @@ public interface ComponentProperties extends ComponentEvents
             }
 
             @Override
-            public void setValue(final @Nullable T value)
+            public void setValue(final @Nonnull T value)
             {
                 field.setValue(value);
+            }
+        };
+    }
+
+    /**
+     * Returns value property of given nullable field, which values are wrapped
+     * in {@link Optional} to support null values
+     *
+     * @param field field
+     * @param <T> type of value in field
+     * @return value property
+     */
+    @Nonnull
+    default <T> ObservableProperty<Optional<T>> valueOfNullable(final @Nonnull HasValue<T> field)
+    {
+        Objects.requireNonNull(field, "Field cannot be null");
+
+        return new ObservableProperty<Optional<T>>()
+        {
+            @Nonnull
+            @Override
+            public Observable<Optional<T>> asObservable()
+            {
+                return valueChangedOf(field).map(event -> Optional.ofNullable(event.getValue()));
+            }
+
+            @Override
+            public void setValue(final @Nonnull Optional<T> value)
+            {
+                field.setValue(value.orElse(field.getEmptyValue()));
             }
         };
     }
@@ -104,7 +144,9 @@ public interface ComponentProperties extends ComponentEvents
     @Nonnull
     default Property<Float> valueOf(final @Nonnull ProgressBar progressBar)
     {
-        return value -> progressBar.setValue(value != null ? value : 0.0f);
+        Objects.requireNonNull(progressBar, "Progress bar cannot be null");
+
+        return progressBar::setValue;
     }
 
     /**
@@ -118,6 +160,8 @@ public interface ComponentProperties extends ComponentEvents
     @Nonnull
     default <T, C extends Collection<T>> Property<C> itemsOf(final @Nonnull HasItems<T> component)
     {
+        Objects.requireNonNull(component, "Component bar cannot be null");
+
         return component::setItems;
     }
 }
