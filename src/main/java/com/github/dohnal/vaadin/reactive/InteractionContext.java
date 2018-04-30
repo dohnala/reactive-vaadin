@@ -13,6 +13,7 @@
 
 package com.github.dohnal.vaadin.reactive;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.github.dohnal.vaadin.reactive.exceptions.AlreadyHandledInteractionException;
@@ -42,10 +43,18 @@ public interface InteractionContext<T, R>
     boolean isHandled();
 
     /**
+     * Handles interaction with no result
+     *
+     * @throws IllegalArgumentException if the interaction requires result
+     * @throws AlreadyHandledInteractionException if the interaction is already handled
+     */
+    void handle();
+
+    /**
      * Handles interaction with given result
      *
      * @param result result
      * @throws AlreadyHandledInteractionException if the interaction is already handled
      */
-    void handle(final @Nullable R result);
+    void handle(final @Nonnull R result);
 }

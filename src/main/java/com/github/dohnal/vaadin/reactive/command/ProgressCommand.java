@@ -79,7 +79,7 @@ public final class ProgressCommand<T, R> extends AbstractCommand<T, R>
     {
         if (input == null && noInputExecution == null)
         {
-            throw new IllegalArgumentException("Input is null, but command requires input");
+            throw new IllegalArgumentException("Command requires input");
         }
 
         handleStart();

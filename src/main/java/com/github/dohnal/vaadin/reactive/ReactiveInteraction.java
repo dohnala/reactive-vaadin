@@ -14,7 +14,6 @@
 package com.github.dohnal.vaadin.reactive;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.function.Consumer;
 
 import com.github.dohnal.vaadin.reactive.exceptions.UnhandledInteractionException;
@@ -43,22 +42,12 @@ public interface ReactiveInteraction<T, R> extends IsObservable<InteractionConte
     }
 
     /**
-     * Invokes interaction with given input and call an action when the interaction is handled
+     * Invokes interaction with no input and call an action when the interaction is handled
      *
-     * @param input input
      * @param action action called when interaction is handled and result is available
      * @throws UnhandledInteractionException if no handler is subscribed
      */
-    void invoke(final @Nullable T input, final @Nonnull Consumer<? super R> action);
-
-    /**
-     * Invokes interaction with given input and call an action when the interaction is handled
-     *
-     * @param input input
-     * @param action action called when interaction is handled
-     * @throws UnhandledInteractionException if no handler is subscribed
-     */
-    void invoke(final @Nullable T input, final @Nonnull Runnable action);
+    void invoke(final @Nonnull Runnable action);
 
     /**
      * Invokes interaction with no input and call an action when the interaction is handled
@@ -69,10 +58,20 @@ public interface ReactiveInteraction<T, R> extends IsObservable<InteractionConte
     void invoke(final @Nonnull Consumer<? super R> action);
 
     /**
-     * Invokes interaction with no input and call an action when the interaction is handled
+     * Invokes interaction with given input and call an action when the interaction is handled
      *
+     * @param input input
+     * @param action action called when interaction is handled
+     * @throws UnhandledInteractionException if no handler is subscribed
+     */
+    void invoke(final @Nonnull T input, final @Nonnull Runnable action);
+
+    /**
+     * Invokes interaction with given input and call an action when the interaction is handled
+     *
+     * @param input input
      * @param action action called when interaction is handled and result is available
      * @throws UnhandledInteractionException if no handler is subscribed
      */
-    void invoke(final @Nonnull Runnable action);
+    void invoke(final @Nonnull T input, final @Nonnull Consumer<? super R> action);
 }

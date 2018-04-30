@@ -37,16 +37,16 @@ public class ReactiveInteractionTest implements
     class WhenCreate
     {
         @Nested
-        @DisplayName("When interaction is invoked with input and consumer")
-        class WhenHandledWithInputAndConsumer
+        @DisplayName("When interaction is invoked with runnable")
+        class WhenHandledWithRunnable
         {
             @Nested
             @DisplayName("When handler is subscribed")
-            class WhenSubscriber extends InvokeWithInputAndConsumerWhenSubscriberSpecification {}
+            class WhenSubscriber extends InvokeWithRunnableWhenSubscriberSpecification {}
 
             @Nested
             @DisplayName("When no handler is subscribed")
-            class WhenNoSubscribed extends InvokeWithInputAndConsumerWhenNoSubscriberSpecification {}
+            class WhenNoSubscribed extends InvokeWithRunnableWhenNoSubscriberSpecification {}
         }
 
         @Nested
@@ -76,16 +76,16 @@ public class ReactiveInteractionTest implements
         }
 
         @Nested
-        @DisplayName("When interaction is invoked with runnable")
-        class WhenHandledWithRunnable
+        @DisplayName("When interaction is invoked with input and consumer")
+        class WhenHandledWithInputAndConsumer
         {
             @Nested
             @DisplayName("When handler is subscribed")
-            class WhenSubscriber extends InvokeWithRunnableWhenSubscriberSpecification {}
+            class WhenSubscriber extends InvokeWithInputAndConsumerWhenSubscriberSpecification {}
 
             @Nested
             @DisplayName("When no handler is subscribed")
-            class WhenNoSubscribed extends InvokeWithRunnableWhenNoSubscriberSpecification {}
+            class WhenNoSubscribed extends InvokeWithInputAndConsumerWhenNoSubscriberSpecification {}
         }
     }
 }

@@ -13,10 +13,11 @@
 
 package com.github.dohnal.vaadin.reactive.interaction;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import java.util.List;
 
+import com.github.dohnal.vaadin.reactive.InteractionContext;
 import com.github.dohnal.vaadin.reactive.ReactiveInteraction;
+import com.github.dohnal.vaadin.reactive.exceptions.AlreadyHandledInteractionException;
 import com.github.dohnal.vaadin.reactive.exceptions.UnhandledInteractionException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -24,18 +25,23 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 /**
  * Specification for {@link ReactiveInteraction} invoked by {@link ReactiveInteraction#invoke(Object, Runnable)}
  *
  * @author dohnal
  */
-public interface InvokeWithInputAndRunnableSpecification extends BaseInteractionSpecification
+public interface InvokeWithInputAndRunnableSpecification
 {
-    abstract class InvokeWithInputAndRunnableWhenSubscriberSpecification extends InvokeWhenSubscriberSpecification
+    abstract class InvokeWithInputAndRunnableWhenSubscriberSpecification
     {
         protected final Integer INPUT = 5;
 
-        private ReactiveInteraction<Integer, Boolean> interaction;
+        private ReactiveInteraction<Integer, Void> interaction;
         private Runnable runnable;
 
         @BeforeEach
@@ -46,23 +52,18 @@ public interface InvokeWithInputAndRunnableSpecification extends BaseInteraction
             runnable = Mockito.mock(Runnable.class);
         }
 
-        @Nonnull
-        @Override
-        public ReactiveInteraction<Integer, Boolean> getInteraction()
+        @Test
+        @DisplayName("Observable should emit correct interaction context")
+        public void testObservable()
         {
-            return interaction;
-        }
+            final List<InteractionContext<Integer, Void>> interactionContexts =
+                    interaction.asObservable().test()
+                            .perform(() -> interaction.invoke(INPUT, runnable))
+                            .getOnNextEvents();
 
-        @Nullable
-        @Override
-        protected Integer getInput()
-        {
-            return INPUT;
-        }
-
-        protected void invoke()
-        {
-            interaction.invoke(INPUT, runnable);
+            assertEquals(1, interactionContexts.size());
+            assertEquals(INPUT, interactionContexts.get(0).getInput());
+            assertFalse(interactionContexts.get(0).isHandled());
         }
 
         @Test
@@ -71,35 +72,35 @@ public interface InvokeWithInputAndRunnableSpecification extends BaseInteraction
         {
             interaction.asObservable().test();
 
-            invoke();
+            interaction.invoke(INPUT, runnable);
 
             Mockito.verify(runnable, Mockito.never()).run();
         }
 
         @Nested
         @DisplayName("When interaction is handled")
-        class WhenHandle extends WhenHandleSpecification
+        class WhenHandle
         {
-            protected final Boolean RESULT = true;
+            private InteractionContext<Integer, Void> interactionContext;
 
-            @Nonnull
-            @Override
-            public ReactiveInteraction<Integer, Boolean> getInteraction()
+            @BeforeEach
+            protected void handle()
             {
-                return interaction;
+                final List<InteractionContext<Integer, Void>> interactionContexts =
+                        interaction.asObservable().test()
+                                .perform(() -> interaction.invoke(INPUT, runnable))
+                                .getOnNextEvents();
+
+                interactionContext = interactionContexts.get(0);
+
+                interactionContext.handle();
             }
 
-            @Override
-            protected void invoke()
+            @Test()
+            @DisplayName("IsHandled should be true")
+            public void testObservable()
             {
-                interaction.invoke(runnable);
-            }
-
-            @Nullable
-            @Override
-            protected Boolean getResult()
-            {
-                return RESULT;
+                assertTrue(interactionContext.isHandled());
             }
 
             @Test
@@ -112,28 +113,42 @@ public interface InvokeWithInputAndRunnableSpecification extends BaseInteraction
 
         @Nested
         @DisplayName("When interaction is handled multiple times")
-        class WhenHandleMultipleTimes extends WhenHandleMultipleTimesSpecification
+        class WhenHandleMultipleTimes
         {
-            protected final Boolean RESULT = true;
+            private InteractionContext<Integer, Void> interactionContext;
 
-            @Nonnull
-            @Override
-            public ReactiveInteraction<Integer, Boolean> getInteraction()
+            @BeforeEach
+            protected void handle()
             {
-                return interaction;
+                final List<InteractionContext<Integer, Void>> interactionContexts =
+                        interaction.asObservable().test()
+                                .perform(() -> interaction.invoke(INPUT, runnable))
+                                .getOnNextEvents();
+
+                interactionContext = interactionContexts.get(0);
+
+                interactionContext.handle();
             }
 
-            @Override
-            protected void invoke()
+            @Test
+            @DisplayName("AlreadyHandledInteractionException should be thrown")
+            public void testError()
             {
-                interaction.invoke(runnable);
+                assertThrows(AlreadyHandledInteractionException.class, () -> interactionContext.handle());
             }
 
-            @Nullable
-            @Override
-            protected Boolean getResult()
+            @Test()
+            @DisplayName("IsHandled should be true")
+            public void testObservable()
             {
-                return RESULT;
+                try
+                {
+                    interactionContext.handle();
+                }
+                catch (AlreadyHandledInteractionException e)
+                {
+                    assertTrue(interactionContext.isHandled());
+                }
             }
 
             @Test
@@ -145,7 +160,7 @@ public interface InvokeWithInputAndRunnableSpecification extends BaseInteraction
         }
     }
 
-    abstract class InvokeWithInputAndRunnableWhenNoSubscriberSpecification extends InvokeWhenNoSubscriberSpecification
+    abstract class InvokeWithInputAndRunnableWhenNoSubscriberSpecification
     {
         protected final Integer INPUT = 5;
 
@@ -160,16 +175,26 @@ public interface InvokeWithInputAndRunnableSpecification extends BaseInteraction
             runnable = Mockito.mock(Runnable.class);
         }
 
-        @Nonnull
-        @Override
-        public ReactiveInteraction<Integer, Boolean> getInteraction()
+        @Test
+        @DisplayName("UnhandledInteractionException should be thrown")
+        public void testError()
         {
-            return interaction;
+            assertThrows(UnhandledInteractionException.class, () -> interaction.invoke(INPUT, runnable));
         }
 
-        protected void invoke()
+        @Test()
+        @DisplayName("Observable should not emit any value")
+        public void testObservable()
         {
-            interaction.invoke(INPUT, runnable);
+            try
+            {
+                interaction.invoke(INPUT, runnable);
+            }
+            catch (UnhandledInteractionException e)
+            {
+                interaction.asObservable().test()
+                        .assertNoValues();
+            }
         }
 
         @Test
@@ -178,7 +203,7 @@ public interface InvokeWithInputAndRunnableSpecification extends BaseInteraction
         {
             try
             {
-                invoke();
+                interaction.invoke(INPUT, runnable);
             }
             catch (UnhandledInteractionException e)
             {

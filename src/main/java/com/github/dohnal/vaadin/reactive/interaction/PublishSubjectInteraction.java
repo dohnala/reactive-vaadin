@@ -15,6 +15,7 @@ package com.github.dohnal.vaadin.reactive.interaction;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
@@ -45,32 +46,37 @@ public final class PublishSubjectInteraction<T, R> implements ReactiveInteractio
     }
 
     @Override
-    public void invoke(final @Nullable T input, final @Nonnull Consumer<? super R> action)
+    public void invoke(final @Nonnull Runnable action)
     {
-        if (!subject.hasObservers())
-        {
-            throw new UnhandledInteractionException("No handler is subscribed");
-        }
+        Objects.requireNonNull(action, "Action cannot be null");
 
-        subject.onNext(new DefaultInteractionContext(input, action));
+        invokeInternal(new DefaultInteractionContext(null, action));
     }
 
     @Override
     public void invoke(final @Nonnull Consumer<? super R> action)
     {
-        invoke(null, action);
+        Objects.requireNonNull(action, "Action cannot be null");
+
+        invokeInternal(new DefaultInteractionContext(null, action));
     }
 
     @Override
-    public void invoke(final @Nullable T input, final @Nonnull Runnable action)
+    public void invoke(final @Nonnull T input, final @Nonnull Runnable action)
     {
-        invoke(input, result -> action.run());
+        Objects.requireNonNull(input, "Input cannot be null");
+        Objects.requireNonNull(action, "Action cannot be null");
+
+        invokeInternal(new DefaultInteractionContext(input, action));
     }
 
     @Override
-    public void invoke(final @Nonnull Runnable action)
+    public void invoke(final @Nonnull T input, final @Nonnull Consumer<? super R> action)
     {
-        invoke(null, action);
+        Objects.requireNonNull(input, "Input cannot be null");
+        Objects.requireNonNull(action, "Action cannot be null");
+
+        invokeInternal(new DefaultInteractionContext(input, action));
     }
 
     @Nonnull
@@ -80,19 +86,47 @@ public final class PublishSubjectInteraction<T, R> implements ReactiveInteractio
         return subject;
     }
 
+    private void invokeInternal(final @Nonnull InteractionContext<T, R> interactionContext)
+    {
+        Objects.requireNonNull(interactionContext, "Interaction context cannot be null");
+
+        if (!subject.hasObservers())
+        {
+            throw new UnhandledInteractionException("No handler is subscribed");
+        }
+
+        subject.onNext(interactionContext);
+    }
+
     private class DefaultInteractionContext implements InteractionContext<T, R>
     {
         private final T input;
 
-        private final Consumer<? super R> action;
+        private final Runnable noInputAction;
+
+        private final Consumer<? super R> inputAction;
 
         private final AtomicReference<Boolean> isHandled;
 
         public DefaultInteractionContext(final @Nullable T input,
+                                         final @Nonnull Runnable action)
+        {
+            Objects.requireNonNull(action, "Action cannot be null");
+
+            this.input = input;
+            this.noInputAction = action;
+            this.inputAction = null;
+            this.isHandled = new AtomicReference<>(false);
+        }
+
+        public DefaultInteractionContext(final @Nullable T input,
                                          final @Nonnull Consumer<? super R> action)
         {
+            Objects.requireNonNull(action, "Action cannot be null");
+
             this.input = input;
-            this.action = action;
+            this.noInputAction = null;
+            this.inputAction = action;
             this.isHandled = new AtomicReference<>(false);
         }
 
@@ -110,11 +144,36 @@ public final class PublishSubjectInteraction<T, R> implements ReactiveInteractio
         }
 
         @Override
-        public void handle(final @Nullable R result)
+        public void handle()
+        {
+            handleInternal(null);
+        }
+
+        @Override
+        public void handle(final @Nonnull R result)
+        {
+            Objects.requireNonNull(result, "Result cannot be null");
+
+            handleInternal(result);
+        }
+
+        private void handleInternal(final @Nullable R result)
         {
             if (isHandled.compareAndSet(false, true))
             {
-                action.accept(result);
+                if (result == null)
+                {
+                    if (noInputAction == null)
+                    {
+                        throw new IllegalArgumentException("Interaction requires input");
+                    }
+
+                    noInputAction.run();
+                }
+                else
+                {
+                    inputAction.accept(result);
+                }
             }
             else
             {
