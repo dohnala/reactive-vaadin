@@ -15,6 +15,7 @@ package com.github.dohnal.vaadin.mvvm;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 import com.github.dohnal.vaadin.reactive.Disposable;
@@ -49,6 +50,8 @@ public abstract class AbstractView<M extends AbstractViewModel>
      */
     public AbstractView(final @Nonnull M viewModel)
     {
+        Objects.requireNonNull(viewModel, "View model cannot be null");
+
         this.viewModel = viewModel;
     }
 
@@ -64,6 +67,8 @@ public abstract class AbstractView<M extends AbstractViewModel>
     @Override
     public <T> PropertyBinder<T> bind(final @Nonnull Property<T> property)
     {
+        Objects.requireNonNull(property, "Property cannot be null");
+
         return ReactiveBinder.super.bind(withUIAccess(property));
     }
 
@@ -79,6 +84,8 @@ public abstract class AbstractView<M extends AbstractViewModel>
     @Override
     public <T> ObservablePropertyBinder<T> bind(final @Nonnull ObservableProperty<T> property)
     {
+        Objects.requireNonNull(property, "Property cannot be null");
+
         final ObservablePropertyBinder<T> binder = ReactiveBinder.super.bind(withUIAccess(property));
 
         return new ObservablePropertyBinderDecorator<T>(binder)
@@ -104,6 +111,8 @@ public abstract class AbstractView<M extends AbstractViewModel>
     @Override
     public <T> ObservableBinder<T> when(final @Nonnull Observable<T> observable)
     {
+        Objects.requireNonNull(observable, "Observable cannot be null");
+
         final ObservableBinder<T> binder = ReactiveBinder.super.when(observable);
 
         return new ObservableBinderDecorator<T>(binder)
@@ -135,6 +144,8 @@ public abstract class AbstractView<M extends AbstractViewModel>
     @Nonnull
     protected <T> Property<T> withUIAccess(final @Nonnull Property<T> property)
     {
+        Objects.requireNonNull(property, "Property cannot be null");
+
         return value -> withUIAccess(() -> property.setValue(value));
     }
 
@@ -149,6 +160,8 @@ public abstract class AbstractView<M extends AbstractViewModel>
     @Nonnull
     protected <T> ObservableProperty<T> withUIAccess(final @Nonnull ObservableProperty<T> property)
     {
+        Objects.requireNonNull(property, "Property cannot be null");
+
         return new ObservableProperty<T>()
         {
             @Nonnull
@@ -174,6 +187,8 @@ public abstract class AbstractView<M extends AbstractViewModel>
      */
     protected void withUIAccess(final @Nonnull Runnable action)
     {
+        Objects.requireNonNull(action, "Action cannot be null");
+
         final UI ui = getUI();
 
         if (ui != null && ui.isAttached())
