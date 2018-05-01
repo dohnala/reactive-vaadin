@@ -38,6 +38,154 @@ public interface AsyncEmptyCommandSpecification extends BaseCommandSpecification
 {
     abstract class WhenCreateEmptySpecification extends WhenCreateSpecification<Void, Void>
     {
+        private ReactiveCommand<Void, Void> command;
+
+        @BeforeEach
+        protected void create()
+        {
+            command = ReactiveCommand.createAsync();
+        }
+
+        @Nonnull
+        @Override
+        public ReactiveCommand<Void, Void> getCommand()
+        {
+            return command;
+        }
+
+        @Nested
+        @DisplayName("When command is executed")
+        class WhenExecute extends WhenExecuteSpecification<Void, Void>
+        {
+            @Nonnull
+            @Override
+            public ReactiveCommand<Void, Void> getCommand()
+            {
+                return command;
+            }
+
+            @Override
+            protected void execute()
+            {
+                command.execute().await();
+            }
+
+            @Test
+            @DisplayName("Result observable should not emit any value")
+            public void testResult()
+            {
+                getCommand().getResult().test()
+                        .perform(this::execute)
+                        .assertNoValues();
+            }
+        }
+
+        @Nested
+        @DisplayName("When command is subscribed after execution")
+        class WhenSubscribeAfterExecute extends WhenSubscribeAfterExecuteSpecification<Void, Void>
+        {
+            @Nonnull
+            @Override
+            public ReactiveCommand<Void, Void> getCommand()
+            {
+                return command;
+            }
+
+            @Override
+            protected void execute()
+            {
+                command.execute().await();
+            }
+        }
+    }
+
+    abstract class WhenCreateEmptyWithCanExecuteSpecification extends WhenCreateWithCanExecuteSpecification<Void, Void>
+    {
+        private TestScheduler testScheduler;
+        private TestSubject<Boolean> testSubject;
+        private ReactiveCommand<Void, Void> command;
+
+        @BeforeEach
+        protected void create()
+        {
+            testScheduler = Schedulers.test();
+            testSubject = TestSubject.create(testScheduler);
+            command = ReactiveCommand.createAsync(testSubject);
+        }
+
+        @Nonnull
+        @Override
+        public ReactiveCommand<Void, Void> getCommand()
+        {
+            return command;
+        }
+
+        @Nested
+        @DisplayName("When CanExecute observable emits true")
+        class WhenCanExecuteEmitsTrue extends WhenCanExecuteEmitsTrueSpecification<Void, Void>
+        {
+            @Nonnull
+            @Override
+            public ReactiveCommand<Void, Void> getCommand()
+            {
+                return command;
+            }
+
+            @Override
+            protected void emitsTrue()
+            {
+                testSubject.onNext(true);
+                testScheduler.triggerActions();
+            }
+        }
+
+        @Nested
+        @DisplayName("When CanExecute observable emits false")
+        class WhenCanExecuteEmitsFalse extends WhenCanExecuteEmitsFalseSpecification<Void, Void>
+        {
+            @Nonnull
+            @Override
+            public ReactiveCommand<Void, Void> getCommand()
+            {
+                return command;
+            }
+
+            @Override
+            protected void emitsFalse()
+            {
+                testSubject.onNext(false);
+                testScheduler.triggerActions();
+            }
+        }
+
+        @Nested
+        @DisplayName("When command is executed while disabled")
+        class WhenExecuteWhileDisabled extends WhenExecuteWhileDisabledSpecification<Void, Void>
+        {
+            @BeforeEach
+            public void disableCommand()
+            {
+                testSubject.onNext(false);
+                testScheduler.triggerActions();
+            }
+
+            @Nonnull
+            @Override
+            public ReactiveCommand<Void, Void> getCommand()
+            {
+                return command;
+            }
+
+            @Override
+            protected void execute()
+            {
+                command.execute().await();
+            }
+        }
+    }
+
+    abstract class WhenCreateEmptyWithExecutorSpecification extends WhenCreateSpecification<Void, Void>
+    {
         private TestExecutor executor;
         private ReactiveCommand<Void, Void> command;
 
@@ -101,7 +249,8 @@ public interface AsyncEmptyCommandSpecification extends BaseCommandSpecification
         }
     }
 
-    abstract class WhenCreateEmptyWithCanExecuteSpecification extends WhenCreateWithCanExecuteSpecification<Void, Void>
+    abstract class WhenCreateEmptyWithCanExecuteAndExecutorSpecification extends
+            WhenCreateWithCanExecuteSpecification<Void, Void>
     {
         private TestExecutor testExecutor;
         private TestScheduler testScheduler;

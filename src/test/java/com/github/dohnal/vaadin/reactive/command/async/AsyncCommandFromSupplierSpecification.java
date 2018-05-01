@@ -40,6 +40,274 @@ public interface AsyncCommandFromSupplierSpecification extends BaseCommandSpecif
 {
     abstract class WhenCreateFromSupplierSpecification extends WhenCreateSpecification<Void, Integer>
     {
+        private Supplier<Integer> execution;
+        private ReactiveCommand<Void, Integer> command;
+
+        @BeforeEach
+        @SuppressWarnings("unchecked")
+        protected void create()
+        {
+            execution = Mockito.mock(Supplier.class);
+            command = ReactiveCommand.createAsync(execution);
+        }
+
+        @Nonnull
+        @Override
+        public ReactiveCommand<Void, Integer> getCommand()
+        {
+            return command;
+        }
+
+        @Test
+        @DisplayName("Supplier should not be run")
+        public void testSupplier()
+        {
+            Mockito.verify(execution, Mockito.never()).get();
+        }
+
+        @Nested
+        @DisplayName("When command is executed")
+        class WhenExecute extends WhenExecuteSpecification<Void, Integer>
+        {
+            protected final Integer RESULT = 5;
+
+            @BeforeEach
+            protected void mockExecution()
+            {
+                Mockito.when(execution.get()).thenReturn(RESULT);
+            }
+
+            @Nonnull
+            @Override
+            public ReactiveCommand<Void, Integer> getCommand()
+            {
+                return command;
+            }
+
+            @Override
+            protected void execute()
+            {
+                command.execute().await();
+            }
+
+            @Test
+            @DisplayName("Result observable should emit correct result")
+            public void testResult()
+            {
+                getCommand().getResult().test()
+                        .perform(this::execute)
+                        .assertValue(RESULT);
+            }
+
+            @Test
+            @DisplayName("Supplier should be run")
+            public void testSupplier()
+            {
+                execute();
+
+                Mockito.verify(execution).get();
+            }
+        }
+
+        @Nested
+        @DisplayName("When command is executed with error")
+        class WhenExecuteWithError extends WhenExecuteWithErrorSpecification<Void, Integer>
+        {
+            private final Throwable ERROR = new RuntimeException("Error");
+
+            @BeforeEach
+            protected void mockExecution()
+            {
+                Mockito.when(execution.get()).thenThrow(ERROR);
+            }
+
+            @Nonnull
+            @Override
+            public ReactiveCommand<Void, Integer> getCommand()
+            {
+                return command;
+            }
+
+            @Override
+            protected void execute()
+            {
+                command.execute().await();
+            }
+
+            @Nonnull
+            @Override
+            protected Throwable getError()
+            {
+                return ERROR;
+            }
+
+            @Test
+            @DisplayName("Supplier should be run")
+            public void testSupplier()
+            {
+                execute();
+
+                Mockito.verify(execution).get();
+            }
+        }
+
+        @Nested
+        @DisplayName("When command is subscribed after execution")
+        class WhenSubscribeAfterExecute extends WhenSubscribeAfterExecuteSpecification<Void, Integer>
+        {
+            protected final Integer RESULT = 7;
+
+            @BeforeEach
+            protected void executeCommand()
+            {
+                Mockito.when(execution.get()).thenReturn(RESULT);
+
+                super.executeCommand();
+            }
+
+            @Nonnull
+            @Override
+            public ReactiveCommand<Void, Integer> getCommand()
+            {
+                return command;
+            }
+
+            @Override
+            protected void execute()
+            {
+                command.execute().await();
+            }
+        }
+
+        @Nested
+        @DisplayName("When command is subscribed after execution with error")
+        class WhenSubscribeAfterExecuteWithError extends WhenSubscribeAfterExecuteWithErrorSpecification<Void, Integer>
+        {
+            private final Throwable ERROR = new RuntimeException("Error");
+
+            @BeforeEach
+            protected void executeCommand()
+            {
+                Mockito.when(execution.get()).thenThrow(ERROR);
+
+                super.executeCommand();
+            }
+
+            @Nonnull
+            @Override
+            public ReactiveCommand<Void, Integer> getCommand()
+            {
+                return command;
+            }
+
+            @Override
+            protected void execute()
+            {
+                command.execute().await();
+            }
+        }
+    }
+
+    abstract class WhenCreateFromSupplierWithCanExecuteSpecification extends
+            WhenCreateWithCanExecuteSpecification<Void, Integer>
+    {
+        private Supplier<Integer> execution;
+        private TestScheduler testScheduler;
+        private TestSubject<Boolean> testSubject;
+        private ReactiveCommand<Void, Integer> command;
+
+        @BeforeEach
+        @SuppressWarnings("unchecked")
+        protected void create()
+        {
+            execution = Mockito.mock(Supplier.class);
+            testScheduler = Schedulers.test();
+            testSubject = TestSubject.create(testScheduler);
+            command = ReactiveCommand.createAsync(testSubject, execution);
+        }
+
+        @Nonnull
+        @Override
+        public ReactiveCommand<Void, Integer> getCommand()
+        {
+            return command;
+        }
+
+        @Nested
+        @DisplayName("When CanExecute observable emits true")
+        class WhenCanExecuteEmitsTrue extends WhenCanExecuteEmitsTrueSpecification<Void, Integer>
+        {
+            @Nonnull
+            @Override
+            public ReactiveCommand<Void, Integer> getCommand()
+            {
+                return command;
+            }
+
+            @Override
+            protected void emitsTrue()
+            {
+                testSubject.onNext(true);
+                testScheduler.triggerActions();
+            }
+        }
+
+        @Nested
+        @DisplayName("When CanExecute observable emits true")
+        class WhenCanExecuteEmitsFalse extends WhenCanExecuteEmitsFalseSpecification<Void, Integer>
+        {
+            @Nonnull
+            @Override
+            public ReactiveCommand<Void, Integer> getCommand()
+            {
+                return command;
+            }
+
+            @Override
+            protected void emitsFalse()
+            {
+                testSubject.onNext(false);
+                testScheduler.triggerActions();
+            }
+        }
+
+        @Nested
+        @DisplayName("When command is executed while disabled")
+        class WhenExecuteWhileDisabled extends WhenExecuteWhileDisabledSpecification<Void, Integer>
+        {
+            @BeforeEach
+            public void disableCommand()
+            {
+                testSubject.onNext(false);
+                testScheduler.triggerActions();
+            }
+
+            @Nonnull
+            @Override
+            public ReactiveCommand<Void, Integer> getCommand()
+            {
+                return command;
+            }
+
+            @Override
+            protected void execute()
+            {
+                command.execute().await();
+            }
+
+            @Test
+            @DisplayName("Supplier should not be run")
+            public void testSupplier()
+            {
+                execute();
+
+                Mockito.verify(execution, Mockito.never()).get();
+            }
+        }
+    }
+
+    abstract class WhenCreateFromSupplierWithExecutorSpecification extends WhenCreateSpecification<Void, Integer>
+    {
         private TestExecutor testExecutor;
         private Supplier<Integer> execution;
         private ReactiveCommand<Void, Integer> command;
@@ -210,7 +478,7 @@ public interface AsyncCommandFromSupplierSpecification extends BaseCommandSpecif
         }
     }
 
-    abstract class WhenCreateFromSupplierWithCanExecuteSpecification extends
+    abstract class WhenCreateFromSupplierWithCanExecuteAndExecutorSpecification extends
             WhenCreateWithCanExecuteSpecification<Void, Integer>
     {
         private TestExecutor testExecutor;

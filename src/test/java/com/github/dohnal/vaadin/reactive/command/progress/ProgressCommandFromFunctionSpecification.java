@@ -40,6 +40,315 @@ public interface ProgressCommandFromFunctionSpecification extends BaseCommandSpe
 {
     abstract class WhenCreateFromFunctionSpecification extends WhenCreateSpecification<Void, Integer>
     {
+        private Function<ProgressContext, Integer> execution;
+        private ReactiveCommand<Void, Integer> command;
+
+        @BeforeEach
+        @SuppressWarnings("unchecked")
+        protected void create()
+        {
+            execution = Mockito.mock(Function.class);
+            command = ReactiveCommand.createProgress(execution);
+        }
+
+        @Nonnull
+        @Override
+        public ReactiveCommand<Void, Integer> getCommand()
+        {
+            return command;
+        }
+
+        @Test
+        @DisplayName("Function should not be run")
+        public void testFunction()
+        {
+            Mockito.verify(execution, Mockito.never()).apply(Mockito.any());
+        }
+
+        @Nested
+        @DisplayName("When command is executed")
+        class WhenExecute extends WhenExecuteSpecification<Void, Integer>
+        {
+            protected final Integer RESULT = 5;
+
+            @BeforeEach
+            protected void mockExecution()
+            {
+                Mockito.doAnswer(invocation -> {
+                    final ProgressContext progressContext = invocation.getArgument(0);
+
+                    progressContext.set(0.0f);
+                    progressContext.set(0.25f);
+                    progressContext.set(0.5f);
+                    progressContext.set(0.75f);
+                    progressContext.set(1.0f);
+
+                    return RESULT;
+                }).when(execution).apply(Mockito.any(ProgressContext.class));
+            }
+
+            @Nonnull
+            @Override
+            public ReactiveCommand<Void, Integer> getCommand()
+            {
+                return command;
+            }
+
+            @Override
+            protected void execute()
+            {
+                command.execute().await();
+            }
+
+            @Test
+            @DisplayName("Result observable should emit correct result")
+            public void testResult()
+            {
+                getCommand().getResult().test()
+                        .perform(this::execute)
+                        .assertValue(RESULT);
+            }
+
+            @Test
+            @Override
+            @DisplayName("Progress observable should emit correct values")
+            public void testProgress()
+            {
+                getCommand().getProgress().test()
+                        .assertValuesAndClear(0.0f)
+                        .perform(this::execute)
+                        .assertValues(0.25f, 0.5f, 0.75f, 1.0f);
+            }
+
+            @Test
+            @DisplayName("Function should be run")
+            public void testFunction()
+            {
+                execute();
+
+                Mockito.verify(execution).apply(Mockito.any(ProgressContext.class));
+            }
+        }
+
+        @Nested
+        @DisplayName("When command is executed with error")
+        class WhenExecuteWithError extends WhenExecuteWithErrorSpecification<Void, Integer>
+        {
+            protected final Throwable ERROR = new RuntimeException("Error");
+
+            @BeforeEach
+            protected void mockExecution()
+            {
+                Mockito.doAnswer(invocation -> {
+                    final ProgressContext progressContext = invocation.getArgument(0);
+
+                    progressContext.set(0.0f);
+                    progressContext.set(0.25f);
+                    progressContext.set(0.5f);
+
+                    throw ERROR;
+
+                }).when(execution).apply(Mockito.any(ProgressContext.class));
+            }
+
+            @Nonnull
+            @Override
+            public ReactiveCommand<Void, Integer> getCommand()
+            {
+                return command;
+            }
+
+            @Override
+            protected void execute()
+            {
+                command.execute().await();
+            }
+
+            @Nonnull
+            @Override
+            protected Throwable getError()
+            {
+                return ERROR;
+            }
+
+            @Test
+            @Override
+            @DisplayName("Progress observable should emit correct values")
+            public void testProgress()
+            {
+                getCommand().getProgress().test()
+                        .assertValuesAndClear(0.0f)
+                        .perform(this::execute)
+                        .assertValues(0.25f, 0.5f, 1.0f);
+            }
+
+            @Test
+            @DisplayName("Function should be run")
+            public void testFunction()
+            {
+                execute();
+
+                Mockito.verify(execution).apply(Mockito.any(ProgressContext.class));
+            }
+        }
+
+        @Nested
+        @DisplayName("When command is subscribed after execution")
+        class WhenSubscribeAfterExecute extends WhenSubscribeAfterExecuteSpecification<Void, Integer>
+        {
+            protected final Integer RESULT = 7;
+
+            @BeforeEach
+            protected void executeCommand()
+            {
+                Mockito.when(execution.apply(Mockito.any(ProgressContext.class))).thenReturn(RESULT);
+
+                super.executeCommand();
+            }
+
+            @Nonnull
+            @Override
+            public ReactiveCommand<Void, Integer> getCommand()
+            {
+                return command;
+            }
+
+            @Override
+            protected void execute()
+            {
+                command.execute().await();
+            }
+        }
+
+        @Nested
+        @DisplayName("When command is subscribed after execution with error")
+        class WhenSubscribeAfterExecuteWithError extends WhenSubscribeAfterExecuteWithErrorSpecification<Void, Integer>
+        {
+            private final Throwable ERROR = new RuntimeException("Error");
+
+            @BeforeEach
+            protected void executeCommand()
+            {
+                Mockito.when(execution.apply(Mockito.any(ProgressContext.class))).thenThrow(ERROR);
+
+                super.executeCommand();
+            }
+
+            @Nonnull
+            @Override
+            public ReactiveCommand<Void, Integer> getCommand()
+            {
+                return command;
+            }
+
+            @Override
+            protected void execute()
+            {
+                command.execute().await();
+            }
+        }
+    }
+
+    abstract class WhenCreateFromFunctionWithCanExecuteSpecification extends
+            WhenCreateWithCanExecuteSpecification<Void, Integer>
+    {
+        private Function<ProgressContext, Integer> execution;
+        private TestScheduler testScheduler;
+        private TestSubject<Boolean> testSubject;
+        private ReactiveCommand<Void, Integer> command;
+
+        @BeforeEach
+        @SuppressWarnings("unchecked")
+        protected void create()
+        {
+            execution = Mockito.mock(Function.class);
+            testScheduler = Schedulers.test();
+            testSubject = TestSubject.create(testScheduler);
+            command = ReactiveCommand.createProgress(testSubject, execution);
+        }
+
+        @Nonnull
+        @Override
+        public ReactiveCommand<Void, Integer> getCommand()
+        {
+            return command;
+        }
+
+        @Nested
+        @DisplayName("When CanExecute observable emits true")
+        class WhenCanExecuteEmitsTrue extends WhenCanExecuteEmitsTrueSpecification<Void, Integer>
+        {
+            @Nonnull
+            @Override
+            public ReactiveCommand<Void, Integer> getCommand()
+            {
+                return command;
+            }
+
+            @Override
+            protected void emitsTrue()
+            {
+                testSubject.onNext(true);
+                testScheduler.triggerActions();
+            }
+        }
+
+        @Nested
+        @DisplayName("When CanExecute observable emits false")
+        class WhenCanExecuteEmitsFalse extends WhenCanExecuteEmitsFalseSpecification<Void, Integer>
+        {
+            @Nonnull
+            @Override
+            public ReactiveCommand<Void, Integer> getCommand()
+            {
+                return command;
+            }
+
+            @Override
+            protected void emitsFalse()
+            {
+                testSubject.onNext(false);
+                testScheduler.triggerActions();
+            }
+        }
+
+        @Nested
+        @DisplayName("When command is executed while disabled")
+        class WhenExecuteWhileDisabled extends WhenExecuteWhileDisabledSpecification<Void, Integer>
+        {
+            @BeforeEach
+            public void disableCommand()
+            {
+                testSubject.onNext(false);
+                testScheduler.triggerActions();
+            }
+
+            @Nonnull
+            @Override
+            public ReactiveCommand<Void, Integer> getCommand()
+            {
+                return command;
+            }
+
+            @Override
+            protected void execute()
+            {
+                command.execute().await();
+            }
+
+            @Test
+            @DisplayName("Function should not be run")
+            public void testFunction()
+            {
+                execute();
+
+                Mockito.verify(execution, Mockito.never()).apply(Mockito.any());
+            }
+        }
+    }
+
+    abstract class WhenCreateFromFunctionWithExecutorSpecification extends WhenCreateSpecification<Void, Integer>
+    {
         private TestExecutor testExecutor;
         private Function<ProgressContext, Integer> execution;
         private ReactiveCommand<Void, Integer> command;
@@ -251,7 +560,7 @@ public interface ProgressCommandFromFunctionSpecification extends BaseCommandSpe
         }
     }
 
-    abstract class WhenCreateFromFunctionWithCanExecuteSpecification extends
+    abstract class WhenCreateFromFunctionWithCanExecuteAndExecutorSpecification extends
             WhenCreateWithCanExecuteSpecification<Void, Integer>
     {
         private TestExecutor testExecutor;

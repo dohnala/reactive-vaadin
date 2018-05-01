@@ -42,6 +42,273 @@ public interface AsyncCommandFromConsumerSpecification extends BaseCommandSpecif
 {
     abstract class WhenCreateFromConsumerSpecification extends WhenCreateSpecification<Integer, Void>
     {
+        private Consumer<Integer> execution;
+        private ReactiveCommand<Integer, Void> command;
+
+        @BeforeEach
+        @SuppressWarnings("unchecked")
+        protected void create()
+        {
+            execution = Mockito.mock(Consumer.class);
+            command = ReactiveCommand.createAsync(execution);
+        }
+
+        @Nonnull
+        @Override
+        public ReactiveCommand<Integer, Void> getCommand()
+        {
+            return command;
+        }
+
+        @Test
+        @DisplayName("Consumer should not be run")
+        public void testConsumer()
+        {
+            Mockito.verify(execution, Mockito.never()).accept(Mockito.anyInt());
+        }
+
+        @Nested
+        @DisplayName("When command is executed with no input")
+        class WhenExecuteWithInput
+        {
+            @Test
+            @DisplayName("IllegalArgumentException should be thrown")
+            public void testExecute()
+            {
+                assertThrows(IllegalArgumentException.class, () -> command.execute().await());
+            }
+        }
+
+        @Nested
+        @DisplayName("When command is executed")
+        class WhenExecute extends WhenExecuteSpecification<Integer, Void>
+        {
+            protected final Integer INPUT = 5;
+
+            @BeforeEach
+            protected void mockExecution()
+            {
+                Mockito.doNothing().when(execution).accept(INPUT);
+            }
+
+            @Nonnull
+            @Override
+            public ReactiveCommand<Integer, Void> getCommand()
+            {
+                return command;
+            }
+
+            @Override
+            protected void execute()
+            {
+                command.execute(INPUT).await();
+            }
+
+            @Test
+            @DisplayName("Result observable should not emit any value")
+            public void testResult()
+            {
+                getCommand().getResult().test()
+                        .perform(this::execute)
+                        .assertNoValues();
+            }
+
+            @Test
+            @DisplayName("Consumer should be run")
+            public void testConsumer()
+            {
+                execute();
+
+                Mockito.verify(execution).accept(INPUT);
+            }
+        }
+
+        @Nested
+        @DisplayName("When command is executed with error")
+        class WhenExecuteWithError extends WhenExecuteWithErrorSpecification<Integer, Void>
+        {
+            protected final Integer INPUT = 5;
+            protected final Throwable ERROR = new RuntimeException("Error");
+
+            @BeforeEach
+            protected void mockExecution()
+            {
+                Mockito.doThrow(ERROR).when(execution).accept(INPUT);
+            }
+
+            @Nonnull
+            @Override
+            public ReactiveCommand<Integer, Void> getCommand()
+            {
+                return command;
+            }
+
+            @Override
+            protected void execute()
+            {
+                command.execute(INPUT).await();
+            }
+
+            @Nonnull
+            @Override
+            protected Throwable getError()
+            {
+                return ERROR;
+            }
+
+            @Test
+            @DisplayName("Consumer should be run")
+            public void testConsumer()
+            {
+                execute();
+
+                Mockito.verify(execution).accept(INPUT);
+            }
+        }
+
+        @Nested
+        @DisplayName("When subscribed after execution")
+        class WhenSubscribeAfterExecute extends WhenSubscribeAfterExecuteSpecification<Integer, Void>
+        {
+            protected final Integer INPUT = 5;
+
+            @Nonnull
+            @Override
+            public ReactiveCommand<Integer, Void> getCommand()
+            {
+                return command;
+            }
+
+            @Override
+            protected void execute()
+            {
+                command.execute(INPUT).await();
+            }
+        }
+
+        @Nested
+        @DisplayName("When subscribed after execution with error")
+        class WhenSubscribeAfterExecuteWithError extends WhenSubscribeAfterExecuteWithErrorSpecification<Integer, Void>
+        {
+            protected final Integer INPUT = 5;
+
+            @Nonnull
+            @Override
+            public ReactiveCommand<Integer, Void> getCommand()
+            {
+                return command;
+            }
+
+            @Override
+            protected void execute()
+            {
+                command.execute(INPUT).await();
+            }
+        }
+    }
+
+    abstract class WhenCreateFromConsumerWithCanExecuteSpecification extends
+            WhenCreateWithCanExecuteSpecification<Integer, Void>
+    {
+        private Consumer<Integer> execution;
+        private TestScheduler testScheduler;
+        private TestSubject<Boolean> testSubject;
+        private ReactiveCommand<Integer, Void> command;
+
+        @BeforeEach
+        @SuppressWarnings("unchecked")
+        protected void create()
+        {
+            execution = Mockito.mock(Consumer.class);
+            testScheduler = Schedulers.test();
+            testSubject = TestSubject.create(testScheduler);
+            command = ReactiveCommand.createAsync(testSubject, execution);
+        }
+
+        @Nonnull
+        @Override
+        public ReactiveCommand<Integer, Void> getCommand()
+        {
+            return command;
+        }
+
+        @Nested
+        @DisplayName("When CanExecute observable emits true")
+        class WhenCanExecuteEmitsTrue extends WhenCanExecuteEmitsTrueSpecification<Integer, Void>
+        {
+            @Nonnull
+            @Override
+            public ReactiveCommand<Integer, Void> getCommand()
+            {
+                return command;
+            }
+
+            @Override
+            protected void emitsTrue()
+            {
+                testSubject.onNext(true);
+                testScheduler.triggerActions();
+            }
+        }
+
+        @Nested
+        @DisplayName("When CanExecute observable emits false")
+        class WhenCanExecuteEmitsFalse extends WhenCanExecuteEmitsFalseSpecification<Integer, Void>
+        {
+            @Nonnull
+            @Override
+            public ReactiveCommand<Integer, Void> getCommand()
+            {
+                return command;
+            }
+
+            @Override
+            protected void emitsFalse()
+            {
+                testSubject.onNext(false);
+                testScheduler.triggerActions();
+            }
+        }
+
+        @Nested
+        @DisplayName("When command is executed while disabled")
+        class WhenExecuteWhileDisabled extends WhenExecuteWhileDisabledSpecification<Integer, Void>
+        {
+            protected final Integer INPUT = 5;
+
+            @BeforeEach
+            public void disableCommand()
+            {
+                testSubject.onNext(false);
+                testScheduler.triggerActions();
+            }
+
+            @Nonnull
+            @Override
+            public ReactiveCommand<Integer, Void> getCommand()
+            {
+                return command;
+            }
+
+            @Override
+            protected void execute()
+            {
+                command.execute(INPUT).await();
+            }
+
+            @Test
+            @DisplayName("Consumer should not be run")
+            public void testConsumer()
+            {
+                execute();
+
+                Mockito.verify(execution, Mockito.never()).accept(Mockito.any());
+            }
+        }
+    }
+
+    abstract class WhenCreateFromConsumerWithExecutorSpecification extends WhenCreateSpecification<Integer, Void>
+    {
         private TestExecutor testExecutor;
         private Consumer<Integer> execution;
         private ReactiveCommand<Integer, Void> command;
@@ -209,7 +476,7 @@ public interface AsyncCommandFromConsumerSpecification extends BaseCommandSpecif
         }
     }
 
-    abstract class WhenCreateFromConsumerWithCanExecuteSpecification extends
+    abstract class WhenCreateFromConsumerWithCanExecuteAndExecutorSpecification extends
             WhenCreateWithCanExecuteSpecification<Integer, Void>
     {
         private TestExecutor testExecutor;

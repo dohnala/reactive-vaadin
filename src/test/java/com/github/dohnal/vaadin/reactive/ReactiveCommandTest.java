@@ -107,12 +107,28 @@ public class ReactiveCommandTest
         class AsEmptyWithCanExecute extends WhenCreateEmptyWithCanExecuteSpecification {}
 
         @Nested
+        @DisplayName("As empty with executor")
+        class AsEmptyWithExecutor extends WhenCreateEmptyWithExecutorSpecification {}
+
+        @Nested
+        @DisplayName("As empty with CanExecute and executor")
+        class AsEmptyWithCanExecuteAndExecutor extends WhenCreateEmptyWithCanExecuteAndExecutorSpecification {}
+
+        @Nested
         @DisplayName("From runnable")
         class FromRunnable extends WhenCreateFromRunnableSpecification {}
 
         @Nested
         @DisplayName("From runnable with CanExecute")
         class FromRunnableWithCanExecute extends WhenCreateFromRunnableWithCanExecuteSpecification {}
+
+        @Nested
+        @DisplayName("From runnable with executor")
+        class FromRunnableWithExecutor extends WhenCreateFromRunnableWithExecutorSpecification {}
+
+        @Nested
+        @DisplayName("From runnable with CanExecute and executor")
+        class FromRunnableWithCanExecuteAndExecutor extends WhenCreateFromRunnableWithCanExecuteAndExecutorSpecification {}
 
         @Nested
         @DisplayName("From supplier")
@@ -123,6 +139,14 @@ public class ReactiveCommandTest
         class FromSupplierWithCanExecute extends WhenCreateFromSupplierWithCanExecuteSpecification {}
 
         @Nested
+        @DisplayName("From supplier with executor")
+        class FromSupplierWithExecutor extends WhenCreateFromSupplierWithExecutorSpecification {}
+
+        @Nested
+        @DisplayName("From supplier with CanExecute and executor")
+        class FromSupplierWithCanExecuteAndExecutor extends WhenCreateFromSupplierWithCanExecuteAndExecutorSpecification {}
+
+        @Nested
         @DisplayName("From consumer")
         class FromConsumer extends WhenCreateFromConsumerSpecification {}
 
@@ -131,12 +155,28 @@ public class ReactiveCommandTest
         class FromConsumerWithCanExecute extends WhenCreateFromConsumerWithCanExecuteSpecification {}
 
         @Nested
+        @DisplayName("From consumer with executor")
+        class FromConsumerWithExecutor extends WhenCreateFromConsumerWithExecutorSpecification {}
+
+        @Nested
+        @DisplayName("From consumer with CanExecute and executor")
+        class FromConsumerWithCanExecuteAndExecutor extends WhenCreateFromConsumerWithCanExecuteAndExecutorSpecification {}
+
+        @Nested
         @DisplayName("From function")
         class FromFunction extends WhenCreateFromFunctionSpecification {}
 
         @Nested
         @DisplayName("From function with CanExecute")
         class FromFunctionWithCanExecute extends WhenCreateFromFunctionWithCanExecuteSpecification {}
+
+        @Nested
+        @DisplayName("From function with executor")
+        class FromFunctionWithExecutor extends WhenCreateFromFunctionWithExecutorSpecification {}
+
+        @Nested
+        @DisplayName("From function with CanExecute and executor")
+        class FromFunctionWithCanExecuteAndExecutor extends WhenCreateFromFunctionWithCanExecuteAndExecutorSpecification {}
     }
 
     @Nested
@@ -156,12 +196,28 @@ public class ReactiveCommandTest
         class FromConsumerWithCanExecute extends WhenCreateFromConsumerWithCanExecuteSpecification {}
 
         @Nested
+        @DisplayName("From consumer with executor")
+        class FromConsumerWithExecutor extends WhenCreateFromConsumerWithExecutorSpecification {}
+
+        @Nested
+        @DisplayName("From consumer with CanExecute and executor")
+        class FromConsumerWithCanExecuteAndExecutor extends WhenCreateFromConsumerWithCanExecuteAndExecutorSpecification {}
+
+        @Nested
         @DisplayName("From function")
         class FromFunction extends WhenCreateFromFunctionSpecification {}
 
         @Nested
         @DisplayName("From function with CanExecute")
         class FromFunctionWithCanExecute extends WhenCreateFromFunctionWithCanExecuteSpecification {}
+
+        @Nested
+        @DisplayName("From function with executor")
+        class FromFunctionWithExecutor extends WhenCreateFromFunctionWithExecutorSpecification {}
+
+        @Nested
+        @DisplayName("From function with CanExecute and executor")
+        class FromFunctionWithCanExecuteAndExecutor extends WhenCreateFromFunctionWithCanExecuteAndExecutorSpecification {}
 
         @Nested
         @DisplayName("From bi-consumer")
@@ -172,12 +228,28 @@ public class ReactiveCommandTest
         class FromBiConsumerWithCanExecute extends WhenCreateFromBiConsumerWithCanExecuteSpecification {}
 
         @Nested
+        @DisplayName("From bi-consumer with executor")
+        class FromBiConsumerWithExecutor extends WhenCreateFromBiConsumerWithExecutorSpecification {}
+
+        @Nested
+        @DisplayName("From bi-consumer supplier with CanExecute and executor")
+        class FromBiConsumerWithCanExecuteAndExecutor extends WhenCreateFromBiConsumerWithCanExecuteAndExecutorSpecification {}
+
+        @Nested
         @DisplayName("From bi-function")
         class FromBiFunction extends WhenCreateFromBiFunctionSpecification {}
 
         @Nested
         @DisplayName("From bi-function with CanExecute")
         class FromBiFunctionWithCanExecute extends WhenCreateFromBiFunctionWithCanExecuteSpecification {}
+
+        @Nested
+        @DisplayName("From bi-function with executor")
+        class FromBiFunctionWithExecutor extends WhenCreateFromBiFunctionWithExecutorSpecification {}
+
+        @Nested
+        @DisplayName("From bi-function with CanExecute and executor")
+        class FromBiFunctionWithCanExecuteAndExecutor extends WhenCreateFromBiFunctionWithCanExecuteAndExecutorSpecification {}
     }
 
     @Nested

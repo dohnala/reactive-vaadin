@@ -42,6 +42,333 @@ public interface ProgressCommandFromBiFunctionSpecification extends BaseCommandS
 {
     abstract class WhenCreateFromBiFunctionSpecification extends WhenCreateSpecification<Integer, Integer>
     {
+        private BiFunction<ProgressContext, Integer, Integer> execution;
+        private ReactiveCommand<Integer, Integer> command;
+
+        @BeforeEach
+        @SuppressWarnings("unchecked")
+        protected void create()
+        {
+            execution = Mockito.mock(BiFunction.class);
+            command = ReactiveCommand.createProgress(execution);
+        }
+
+        @Nonnull
+        @Override
+        public ReactiveCommand<Integer, Integer> getCommand()
+        {
+            return command;
+        }
+
+        @Test
+        @DisplayName("BiFunction should not be run")
+        public void testBiFunction()
+        {
+            Mockito.verify(execution, Mockito.never()).apply(Mockito.any(), Mockito.any());
+        }
+
+        @Nested
+        @DisplayName("When command is executed with no input")
+        class WhenExecuteWithInput
+        {
+            @Test
+            @DisplayName("IllegalArgumentException should be thrown")
+            public void testExecute()
+            {
+                assertThrows(IllegalArgumentException.class, () -> command.execute().await());
+            }
+        }
+
+        @Nested
+        @DisplayName("When command is executed")
+        class WhenExecute extends WhenExecuteSpecification<Integer, Integer>
+        {
+            protected final Integer INPUT = 5;
+            protected final Integer RESULT = 7;
+
+            @BeforeEach
+            protected void mockExecution()
+            {
+                Mockito.doAnswer(invocation -> {
+                    final ProgressContext progressContext = invocation.getArgument(0);
+
+                    progressContext.set(0.0f);
+                    progressContext.set(0.25f);
+                    progressContext.set(0.5f);
+                    progressContext.set(0.75f);
+                    progressContext.set(1.0f);
+
+                    return RESULT;
+                }).when(execution).apply(Mockito.any(ProgressContext.class), Mockito.anyInt());
+            }
+
+            @Nonnull
+            @Override
+            public ReactiveCommand<Integer, Integer> getCommand()
+            {
+                return command;
+            }
+
+            @Override
+            protected void execute()
+            {
+                command.execute(INPUT).await();
+            }
+
+            @Test
+            @DisplayName("Result observable should emit correct result")
+            public void testResult()
+            {
+                getCommand().getResult().test()
+                        .perform(this::execute)
+                        .assertValue(RESULT);
+            }
+
+            @Test
+            @Override
+            @DisplayName("Progress observable should emit correct values")
+            public void testProgress()
+            {
+                getCommand().getProgress().test()
+                        .assertValuesAndClear(0.0f)
+                        .perform(this::execute)
+                        .assertValues(0.25f, 0.5f, 0.75f, 1.0f);
+            }
+
+            @Test
+            @DisplayName("BiFunction should be run")
+            public void testBiFunction()
+            {
+                execute();
+
+                Mockito.verify(execution).apply(Mockito.any(ProgressContext.class), Mockito.anyInt());
+            }
+        }
+
+        @Nested
+        @DisplayName("When command is executed with error")
+        class WhenExecuteWithError extends WhenExecuteWithErrorSpecification<Integer, Integer>
+        {
+            protected final Integer INPUT = 5;
+            protected final Throwable ERROR = new RuntimeException("Error");
+
+            @BeforeEach
+            protected void mockExecution()
+            {
+                Mockito.doAnswer(invocation -> {
+                    final ProgressContext progressContext = invocation.getArgument(0);
+
+                    progressContext.set(0.0f);
+                    progressContext.set(0.25f);
+                    progressContext.set(0.5f);
+
+                    throw ERROR;
+
+                }).when(execution).apply(Mockito.any(ProgressContext.class), Mockito.anyInt());
+            }
+
+            @Nonnull
+            @Override
+            public ReactiveCommand<Integer, Integer> getCommand()
+            {
+                return command;
+            }
+
+            @Override
+            protected void execute()
+            {
+                command.execute(INPUT).await();
+            }
+
+            @Nonnull
+            @Override
+            protected Throwable getError()
+            {
+                return ERROR;
+            }
+
+            @Test
+            @Override
+            @DisplayName("Progress observable should emit correct values")
+            public void testProgress()
+            {
+                getCommand().getProgress().test()
+                        .assertValuesAndClear(0.0f)
+                        .perform(this::execute)
+                        .assertValues(0.25f, 0.5f, 1.0f);
+            }
+
+            @Test
+            @DisplayName("BiFunction should be run")
+            public void testBiFunction()
+            {
+                execute();
+
+                Mockito.verify(execution).apply(Mockito.any(ProgressContext.class), Mockito.anyInt());
+            }
+        }
+
+        @Nested
+        @DisplayName("When command is subscribed after execution")
+        class WhenSubscribeAfterExecute extends WhenSubscribeAfterExecuteSpecification<Integer, Integer>
+        {
+            protected final Integer INPUT = 5;
+            protected final Integer RESULT = 7;
+
+            @BeforeEach
+            protected void executeCommand()
+            {
+                Mockito.when(execution.apply(Mockito.any(ProgressContext.class), Mockito.anyInt())).thenReturn(RESULT);
+
+                super.executeCommand();
+            }
+
+            @Nonnull
+            @Override
+            public ReactiveCommand<Integer, Integer> getCommand()
+            {
+                return command;
+            }
+
+            @Override
+            protected void execute()
+            {
+                command.execute(INPUT).await();
+            }
+        }
+
+        @Nested
+        @DisplayName("When command is subscribed after execution with error")
+        class WhenSubscribeAfterExecuteWithError extends WhenSubscribeAfterExecuteWithErrorSpecification<Integer, Integer>
+        {
+            protected final Integer INPUT = 5;
+            private final Throwable ERROR = new RuntimeException("Error");
+
+            @BeforeEach
+            protected void executeCommand()
+            {
+                Mockito.when(execution.apply(Mockito.any(ProgressContext.class), Mockito.anyInt())).thenThrow(ERROR);
+
+                super.executeCommand();
+            }
+
+            @Nonnull
+            @Override
+            public ReactiveCommand<Integer, Integer> getCommand()
+            {
+                return command;
+            }
+
+            @Override
+            protected void execute()
+            {
+                command.execute(INPUT).await();
+            }
+        }
+    }
+
+    abstract class WhenCreateFromBiFunctionWithCanExecuteSpecification extends
+            WhenCreateWithCanExecuteSpecification<Integer, Integer>
+    {
+        private BiFunction<ProgressContext, Integer, Integer> execution;
+        private TestScheduler testScheduler;
+        private TestSubject<Boolean> testSubject;
+        private ReactiveCommand<Integer, Integer> command;
+
+        @BeforeEach
+        @SuppressWarnings("unchecked")
+        protected void create()
+        {
+            execution = Mockito.mock(BiFunction.class);
+            testScheduler = Schedulers.test();
+            testSubject = TestSubject.create(testScheduler);
+            command = ReactiveCommand.createProgress(testSubject, execution);
+        }
+
+        @Nonnull
+        @Override
+        public ReactiveCommand<Integer, Integer> getCommand()
+        {
+            return command;
+        }
+
+        @Nested
+        @DisplayName("When CanExecute observable emits true")
+        class WhenCanExecuteEmitsTrue extends WhenCanExecuteEmitsTrueSpecification<Integer, Integer>
+        {
+            @Nonnull
+            @Override
+            public ReactiveCommand<Integer, Integer> getCommand()
+            {
+                return command;
+            }
+
+            @Override
+            protected void emitsTrue()
+            {
+                testSubject.onNext(true);
+                testScheduler.triggerActions();
+            }
+        }
+
+        @Nested
+        @DisplayName("When CanExecute observable emits false")
+        class WhenCanExecuteEmitsFalse extends WhenCanExecuteEmitsFalseSpecification<Integer, Integer>
+        {
+            @Nonnull
+            @Override
+            public ReactiveCommand<Integer, Integer> getCommand()
+            {
+                return command;
+            }
+
+            @Override
+            protected void emitsFalse()
+            {
+                testSubject.onNext(false);
+                testScheduler.triggerActions();
+            }
+        }
+
+        @Nested
+        @DisplayName("When command is executed while disabled")
+        class WhenExecuteWhileDisabled extends WhenExecuteWhileDisabledSpecification<Integer, Integer>
+        {
+            protected final Integer INPUT = 5;
+
+            @BeforeEach
+            public void disableCommand()
+            {
+                testSubject.onNext(false);
+                testScheduler.triggerActions();
+            }
+
+            @Nonnull
+            @Override
+            public ReactiveCommand<Integer, Integer> getCommand()
+            {
+                return command;
+            }
+
+            @Override
+            protected void execute()
+            {
+                command.execute(INPUT).await();
+            }
+
+            @Test
+            @DisplayName("BiFunction should not be run")
+            public void testBiFunction()
+            {
+                execute();
+
+                Mockito.verify(execution, Mockito.never()).apply(Mockito.any(), Mockito.anyInt());
+            }
+        }
+    }
+
+    abstract class WhenCreateFromBiFunctionWithExecutorSpecification extends WhenCreateSpecification<Integer, Integer>
+    {
         private TestExecutor testExecutor;
         private BiFunction<ProgressContext, Integer, Integer> execution;
         private ReactiveCommand<Integer, Integer> command;
@@ -269,7 +596,7 @@ public interface ProgressCommandFromBiFunctionSpecification extends BaseCommandS
         }
     }
 
-    abstract class WhenCreateFromBiFunctionWithCanExecuteSpecification extends
+    abstract class WhenCreateFromBiFunctionWithCanExecuteAndExecutorSpecification extends
             WhenCreateWithCanExecuteSpecification<Integer, Integer>
     {
         private TestExecutor testExecutor;
