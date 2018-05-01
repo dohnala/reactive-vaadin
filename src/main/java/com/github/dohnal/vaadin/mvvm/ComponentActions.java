@@ -14,6 +14,7 @@
 package com.github.dohnal.vaadin.mvvm;
 
 import javax.annotation.Nonnull;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -36,6 +37,8 @@ public interface ComponentActions
     @Nonnull
     default Runnable show(final @Nonnull Notification notification)
     {
+        Objects.requireNonNull(notification, "Notification cannot be null");
+
         return () -> notification.show(Page.getCurrent());
     }
 
@@ -48,6 +51,8 @@ public interface ComponentActions
     @Nonnull
     default <T> Consumer<T> show(final @Nonnull Function<T, Notification> notificationFunction)
     {
+        Objects.requireNonNull(notificationFunction, "Notification function cannot be null");
+
         return value -> notificationFunction.apply(value).show(Page.getCurrent());
     }
 }

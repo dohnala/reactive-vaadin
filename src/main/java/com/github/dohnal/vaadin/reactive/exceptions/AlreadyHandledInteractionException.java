@@ -14,6 +14,7 @@
 package com.github.dohnal.vaadin.reactive.exceptions;
 
 import javax.annotation.Nonnull;
+import java.util.Objects;
 
 /**
  * Indicates that an interaction is trying to be handled, but it is already handled
@@ -25,5 +26,7 @@ public class AlreadyHandledInteractionException extends RuntimeException
     public AlreadyHandledInteractionException(final @Nonnull String message)
     {
         super(message);
+
+        Objects.requireNonNull(message, "Message cannot be null");
     }
 }

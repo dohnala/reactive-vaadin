@@ -14,6 +14,7 @@
 package com.github.dohnal.vaadin.mvvm;
 
 import javax.annotation.Nonnull;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -39,6 +40,8 @@ public interface ComponentEvents
     @Nonnull
     default Observable<Button.ClickEvent> clickedOn(final @Nonnull Button button)
     {
+        Objects.requireNonNull(button, "Button cannot be null");
+
         return toObservable(consumer -> consumer::accept, button::addClickListener);
     }
 
@@ -52,6 +55,8 @@ public interface ComponentEvents
     @Nonnull
     default <T> Observable<HasValue.ValueChangeEvent<T>> valueChangedOf(final @Nonnull HasValue<T> field)
     {
+        Objects.requireNonNull(field, "Field cannot be null");
+
         return toObservable(consumer -> consumer::accept, field::addValueChangeListener);
     }
 
@@ -69,6 +74,9 @@ public interface ComponentEvents
     default <T, L> Observable<T> toObservable(final @Nonnull Function<Consumer<T>, L> createListener,
                                               final @Nonnull Function<L, Registration> registerListener)
     {
+        Objects.requireNonNull(createListener, "Create listener cannot be null");
+        Objects.requireNonNull(registerListener, "Register listener cannot be null");
+
         return Observable.create(eventEmitter -> {
             final L listener = createListener.apply(eventEmitter::onNext);
 

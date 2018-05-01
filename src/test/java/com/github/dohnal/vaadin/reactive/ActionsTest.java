@@ -65,7 +65,7 @@ public class ActionsTest implements Actions
             @DisplayName("Command should be executed with null input")
             public void testExecution()
             {
-                Mockito.verify(command).execute(null);
+                Mockito.verify(command).execute();
             }
         }
     }

@@ -170,7 +170,7 @@ public class EventsTest implements Events
     }
 
     @Nested
-    @DisplayName("When succeed event is created with command")
+    @DisplayName("When failed event is created with command")
     class WhenCreateFailed
     {
         protected final RuntimeException ERROR = new RuntimeException("Error");
@@ -205,7 +205,7 @@ public class EventsTest implements Events
             public void testEvent()
             {
                 event.test()
-                        .perform(() -> command.execute(null))
+                        .perform(() -> command.execute())
                         .assertValue(ERROR);
             }
         }
@@ -291,7 +291,7 @@ public class EventsTest implements Events
                     command.getError().test();
 
                     event.test()
-                            .perform(() -> command.execute(null))
+                            .perform(() -> command.execute())
                             .assertValue(1);
                 }
             }

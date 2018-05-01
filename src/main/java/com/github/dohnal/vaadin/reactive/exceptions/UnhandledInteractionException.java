@@ -14,6 +14,7 @@
 package com.github.dohnal.vaadin.reactive.exceptions;
 
 import javax.annotation.Nonnull;
+import java.util.Objects;
 
 /**
  * Indicates that an interaction is unhandled because no handler is subscribed to it
@@ -25,5 +26,7 @@ public class UnhandledInteractionException extends RuntimeException
     public UnhandledInteractionException(final @Nonnull String message)
     {
         super(message);
+
+        Objects.requireNonNull(message, "Message cannot be null");
     }
 }

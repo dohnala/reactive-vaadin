@@ -14,6 +14,7 @@
 package com.github.dohnal.vaadin.reactive;
 
 import javax.annotation.Nonnull;
+import java.util.Objects;
 
 import rx.Observable;
 
@@ -34,6 +35,8 @@ public interface Events
     @Nonnull
     default <T> Observable<T> changed(final @Nonnull Observable<T> observable)
     {
+        Objects.requireNonNull(observable, "Observable cannot be null");
+
         return observable;
     }
 
@@ -47,6 +50,8 @@ public interface Events
     @Nonnull
     default <T> Observable<T> changed(final @Nonnull IsObservable<T> isObservable)
     {
+        Objects.requireNonNull(isObservable, "IsObservable cannot be null");
+
         return changed(isObservable.asObservable());
     }
 
@@ -60,6 +65,8 @@ public interface Events
     @Nonnull
     default <R> Observable<R> succeed(final @Nonnull ReactiveCommand<?, R> command)
     {
+        Objects.requireNonNull(command, "Command cannot be null");
+
         return command.getResult();
     }
 
@@ -72,6 +79,8 @@ public interface Events
     @Nonnull
     default Observable<Throwable> failed(final @Nonnull ReactiveCommand<?, ?> command)
     {
+        Objects.requireNonNull(command, "Command cannot be null");
+
         return command.getError();
     }
 
@@ -85,6 +94,8 @@ public interface Events
     @Nonnull
     default Observable<Integer> completed(final @Nonnull ReactiveCommand<?, ?> command)
     {
+        Objects.requireNonNull(command, "Command cannot be null");
+
         return command.getExecutionCount().filter(count -> count > 0);
     }
 
@@ -99,6 +110,8 @@ public interface Events
     @Nonnull
     default <T, R> Observable<InteractionContext<T, R>> invoked(final @Nonnull ReactiveInteraction<T, R> interaction)
     {
+        Objects.requireNonNull(interaction, "Interaction cannot be null");
+
         return interaction.asObservable();
     }
 }

@@ -14,7 +14,7 @@
 package com.github.dohnal.vaadin.reactive;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 /**
@@ -33,7 +33,9 @@ public interface Actions
     @Nonnull
     default Runnable execute(final @Nonnull ReactiveCommand<Void, ?> command)
     {
-        return () -> command.execute(null);
+        Objects.requireNonNull(command, "Command cannot be null");
+
+        return command::execute;
     }
 
     /**
@@ -46,8 +48,11 @@ public interface Actions
      */
     @Nonnull
     default <T> Runnable executeWithInput(final @Nonnull ReactiveCommand<? super T, ?> command,
-                                          final @Nullable T input)
+                                          final @Nonnull T input)
     {
+        Objects.requireNonNull(command, "Command cannot be null");
+        Objects.requireNonNull(input, "Input cannot be null");
+
         return () -> command.execute(input);
     }
 
@@ -62,6 +67,8 @@ public interface Actions
     @Nonnull
     default <T> Consumer<T> executeWithInput(final @Nonnull ReactiveCommand<? super T, ?> command)
     {
+        Objects.requireNonNull(command, "Command cannot be null");
+
         return command::execute;
     }
 }
