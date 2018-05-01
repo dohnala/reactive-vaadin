@@ -14,6 +14,7 @@
 package com.github.dohnal.vaadin.reactive.binder;
 
 import javax.annotation.Nonnull;
+import java.util.Objects;
 
 import com.github.dohnal.vaadin.reactive.Disposable;
 import com.github.dohnal.vaadin.reactive.IsObservable;
@@ -39,6 +40,8 @@ public class ObservablePropertyBinderDecorator<T> implements ObservablePropertyB
      */
     public ObservablePropertyBinderDecorator(final @Nonnull ObservablePropertyBinder<T> binder)
     {
+        Objects.requireNonNull(binder, "Binder cannot be null");
+
         this.binder = binder;
     }
 
@@ -46,20 +49,26 @@ public class ObservablePropertyBinderDecorator<T> implements ObservablePropertyB
     @Override
     public Disposable to(final @Nonnull Observable<? extends T> observable)
     {
+        Objects.requireNonNull(observable, "Observable cannot be null");
+
         return binder.to(observable);
     }
 
     @Nonnull
     @Override
-    public Disposable to(final @Nonnull IsObservable<? extends T> observable)
+    public Disposable to(final @Nonnull IsObservable<? extends T> isObservable)
     {
-        return binder.to(observable);
+        Objects.requireNonNull(isObservable, "IsObservable cannot be null");
+
+        return binder.to(isObservable);
     }
 
     @Nonnull
     @Override
     public Disposable to(final @Nonnull ObservableProperty<T> anotherProperty)
     {
+        Objects.requireNonNull(anotherProperty, "Another property cannot be null");
+
         return binder.to(anotherProperty);
     }
 }

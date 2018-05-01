@@ -14,6 +14,7 @@
 package com.github.dohnal.vaadin.reactive;
 
 import javax.annotation.Nonnull;
+import java.util.Objects;
 
 import com.github.dohnal.vaadin.reactive.binder.DefaultObservableBinder;
 import com.github.dohnal.vaadin.reactive.binder.DefaultObservablePropertyBinder;
@@ -37,6 +38,8 @@ public interface ReactiveBinder extends Events, Actions
     @Nonnull
     default <T> PropertyBinder<T> bind(final @Nonnull Property<T> property)
     {
+        Objects.requireNonNull(property, "Property cannot be null");
+
         return new DefaultPropertyBinder<>(property);
     }
 
@@ -50,6 +53,8 @@ public interface ReactiveBinder extends Events, Actions
     @Nonnull
     default <T> ObservablePropertyBinder<T> bind(final @Nonnull ObservableProperty<T> property)
     {
+        Objects.requireNonNull(property, "Property cannot be null");
+
         return new DefaultObservablePropertyBinder<>(property);
     }
 
@@ -63,6 +68,8 @@ public interface ReactiveBinder extends Events, Actions
     @Nonnull
     default <T> ObservableBinder<T> when(final @Nonnull Observable<T> observable)
     {
+        Objects.requireNonNull(observable, "Observable cannot be null");
+
         return new DefaultObservableBinder<>(observable);
     }
 
@@ -76,6 +83,8 @@ public interface ReactiveBinder extends Events, Actions
     @Nonnull
     default <T> ObservableBinder<T> when(final @Nonnull IsObservable<T> isObservable)
     {
+        Objects.requireNonNull(isObservable, "IsObservable cannot be null");
+
         return when(isObservable.asObservable());
     }
 }

@@ -14,6 +14,7 @@
 package com.github.dohnal.vaadin.reactive.binder;
 
 import javax.annotation.Nonnull;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 import com.github.dohnal.vaadin.reactive.Disposable;
@@ -33,6 +34,8 @@ public final class DefaultObservableBinder<T> implements ObservableBinder<T>
 
     public DefaultObservableBinder(final @Nonnull Observable<T> observable)
     {
+        Objects.requireNonNull(observable, "Observable cannot be null");
+
         this.observable = observable;
     }
 
@@ -40,6 +43,8 @@ public final class DefaultObservableBinder<T> implements ObservableBinder<T>
     @Override
     public final Disposable then(final @Nonnull Consumer<? super T> action)
     {
+        Objects.requireNonNull(action, "Action cannot be null");
+
         final Subscription subscription = observable.subscribe(action::accept);
 
         return subscription::unsubscribe;
@@ -49,6 +54,8 @@ public final class DefaultObservableBinder<T> implements ObservableBinder<T>
     @Override
     public final Disposable then(final @Nonnull Runnable action)
     {
+        Objects.requireNonNull(action, "Action cannot be null");
+
         final Subscription subscription = observable.subscribe(value -> action.run());
 
         return subscription::unsubscribe;

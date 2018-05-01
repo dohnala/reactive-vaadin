@@ -37,9 +37,9 @@ public interface PropertyBinder<T>
     /**
      * Binds property to given observable which updates property value whenever observable emits new value
      *
-     * @param observable observable
+     * @param isObservable observable
      * @return disposable to unbind property from given observable
      */
     @Nonnull
-    Disposable to(final @Nonnull IsObservable<? extends T> observable);
+    Disposable to(final @Nonnull IsObservable<? extends T> isObservable);
 }

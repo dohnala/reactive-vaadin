@@ -14,6 +14,7 @@
 package com.github.dohnal.vaadin.reactive.binder;
 
 import javax.annotation.Nonnull;
+import java.util.Objects;
 
 import com.github.dohnal.vaadin.reactive.Disposable;
 import com.github.dohnal.vaadin.reactive.IsObservable;
@@ -34,6 +35,8 @@ public final class DefaultObservablePropertyBinder<T> implements ObservablePrope
 
     public DefaultObservablePropertyBinder(final @Nonnull ObservableProperty<T> property)
     {
+        Objects.requireNonNull(property, "Property cannot be null");
+
         this.property = property;
     }
 
@@ -41,6 +44,8 @@ public final class DefaultObservablePropertyBinder<T> implements ObservablePrope
     @Override
     public final Disposable to(final @Nonnull Observable<? extends T> observable)
     {
+        Objects.requireNonNull(observable, "Observable cannot be null");
+
         @SuppressWarnings("Convert2MethodRef")
         final Subscription subscription = observable.subscribe(value -> property.setValue(value));
 
@@ -51,6 +56,8 @@ public final class DefaultObservablePropertyBinder<T> implements ObservablePrope
     @Override
     public final Disposable to(final @Nonnull IsObservable<? extends T> isObservable)
     {
+        Objects.requireNonNull(isObservable, "IsObservable cannot be null");
+
         return to(isObservable.asObservable());
     }
 
@@ -58,6 +65,8 @@ public final class DefaultObservablePropertyBinder<T> implements ObservablePrope
     @Override
     public final Disposable to(final @Nonnull ObservableProperty<T> anotherProperty)
     {
+        Objects.requireNonNull(anotherProperty, "Another property cannot be null");
+
         final Subscription propertySubscription = property.asObservable()
                 .subscribe(anotherProperty::setValue);
 

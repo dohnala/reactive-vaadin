@@ -14,6 +14,7 @@
 package com.github.dohnal.vaadin.reactive.binder;
 
 import javax.annotation.Nonnull;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 import com.github.dohnal.vaadin.reactive.Disposable;
@@ -37,6 +38,8 @@ public class ObservableBinderDecorator<T> implements ObservableBinder<T>
      */
     public ObservableBinderDecorator(final @Nonnull ObservableBinder<T> binder)
     {
+        Objects.requireNonNull(binder, "Binder cannot be null");
+
         this.binder = binder;
     }
 
@@ -44,6 +47,8 @@ public class ObservableBinderDecorator<T> implements ObservableBinder<T>
     @Override
     public Disposable then(final @Nonnull Consumer<? super T> action)
     {
+        Objects.requireNonNull(action, "Action cannot be null");
+
         return binder.then(action);
     }
 
@@ -51,6 +56,8 @@ public class ObservableBinderDecorator<T> implements ObservableBinder<T>
     @Override
     public Disposable then(final @Nonnull Runnable action)
     {
+        Objects.requireNonNull(action, "Action cannot be null");
+
         return binder.then(action);
     }
 }
