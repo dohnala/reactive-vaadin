@@ -91,7 +91,7 @@ public final class ProgressCommand<T, R> extends AbstractCommand<T, R>
 
         resultFuture
                 .handle((result, error) -> {
-                    if (error != null && error instanceof CompletionException)
+                    if (error instanceof CompletionException)
                     {
                         handleResult(result, error.getCause());
                     }
