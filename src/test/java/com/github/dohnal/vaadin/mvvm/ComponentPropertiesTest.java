@@ -410,7 +410,7 @@ public class ComponentPropertiesTest implements ComponentProperties
         }
 
         @Test
-        @DisplayName("Field should not be changed")
+        @DisplayName("Component should not be changed")
         public void testComponent()
         {
             Mockito.verifyZeroInteractions(component);
@@ -421,7 +421,7 @@ public class ComponentPropertiesTest implements ComponentProperties
         class WhenSetValue
         {
             @Test
-            @DisplayName("Progress bar's setItems should be called with correct value")
+            @DisplayName("Component's setItems should be called with correct value")
             public void testComponent()
             {
                 final List<Integer> values = Arrays.asList(0, 1, 2);
