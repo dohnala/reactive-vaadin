@@ -17,6 +17,7 @@ import javax.annotation.Nonnull;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import com.vaadin.server.Page;
 import com.vaadin.ui.Notification;
@@ -31,15 +32,15 @@ public interface ComponentActions
     /**
      * Returns an action which shows given notification in current page
      *
-     * @param notification notification
+     * @param notificationSupplier notification supplier
      * @return action
      */
     @Nonnull
-    default Runnable show(final @Nonnull Notification notification)
+    default Runnable show(final @Nonnull Supplier<Notification> notificationSupplier)
     {
-        Objects.requireNonNull(notification, "Notification cannot be null");
+        Objects.requireNonNull(notificationSupplier, "Notification supplier cannot be null");
 
-        return () -> notification.show(Page.getCurrent());
+        return () -> notificationSupplier.get().show(Page.getCurrent());
     }
 
     /**

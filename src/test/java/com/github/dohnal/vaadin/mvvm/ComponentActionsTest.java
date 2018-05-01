@@ -15,6 +15,7 @@ package com.github.dohnal.vaadin.mvvm;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import com.vaadin.server.Page;
 import com.vaadin.ui.Notification;
@@ -52,20 +53,26 @@ public class ComponentActionsTest implements ComponentActions
     class WhenCreateShowWithNotification
     {
         private Notification notification;
+        private Supplier<Notification> notificationSupplier;
         private Runnable action;
 
         @BeforeEach
+        @SuppressWarnings("unchecked")
         protected void create()
         {
             notification = Mockito.mock(Notification.class);
-            action = show(notification);
+            notificationSupplier = Mockito.mock(Supplier.class);
+
+            Mockito.when(notificationSupplier.get()).thenReturn(notification);
+
+            action = show(notificationSupplier);
         }
 
         @Test
-        @DisplayName("Notification should not be shown")
+        @DisplayName("Notification supplier should not be shown")
         public void testExecution()
         {
-            Mockito.verifyZeroInteractions(notification);
+            Mockito.verifyZeroInteractions(notificationSupplier);
         }
 
         @Nested
@@ -79,8 +86,15 @@ public class ComponentActionsTest implements ComponentActions
             }
 
             @Test
-            @DisplayName("Notification should be shown")
+            @DisplayName("Notification supplier should be called")
             public void testExecution()
+            {
+                Mockito.verify(notificationSupplier).get();
+            }
+
+            @Test
+            @DisplayName("Notification should be shown")
+            public void testNotification()
             {
                 Mockito.verify(notification).show(page);
             }
