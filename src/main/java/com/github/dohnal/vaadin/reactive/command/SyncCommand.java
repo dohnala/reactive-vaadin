@@ -20,6 +20,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
+import rx.Completable;
 import rx.Observable;
 
 /**
@@ -72,7 +73,7 @@ public final class SyncCommand<T, R> extends AbstractCommand<T, R>
     }
 
     @Override
-    public final void executeInternal(final @Nullable T input)
+    public final Completable executeInternal(final @Nullable T input)
     {
         if (input == null && noInputExecution == null)
         {
@@ -92,10 +93,14 @@ public final class SyncCommand<T, R> extends AbstractCommand<T, R>
                 handleResult(inputExecution.apply(input), null);
             }
 
+            return Completable.complete();
+
         }
         catch (final Throwable error)
         {
             handleResult(null, error);
+
+            return Completable.error(error);
         }
         finally
         {

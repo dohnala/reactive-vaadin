@@ -23,6 +23,7 @@ import com.github.dohnal.vaadin.reactive.AsyncProgressFunction;
 import com.github.dohnal.vaadin.reactive.AsyncProgressSupplier;
 import com.github.dohnal.vaadin.reactive.ProgressContext;
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
+import rx.Completable;
 import rx.Observable;
 
 /**
@@ -75,33 +76,41 @@ public final class ProgressCommand<T, R> extends AbstractCommand<T, R>
     }
 
     @Override
-    public final void executeInternal(final @Nullable T input)
+    public final Completable executeInternal(final @Nullable T input)
     {
         if (input == null && noInputExecution == null)
         {
             throw new IllegalArgumentException("Command requires input");
         }
 
+        return Completable.fromFuture(
+                startExecution(input)
+                        .handle(this::handleExecution)
+                        .whenComplete((result, error) -> handleComplete()));
+    }
+
+    @Nonnull
+    private CompletableFuture<R> startExecution(final @Nullable T input)
+    {
         handleStart();
 
         final ProgressContext progressContext = new ReactiveProgressContext(progress);
 
-        final CompletableFuture<R> resultFuture = input == null ?
-                noInputExecution.apply(progressContext) : inputExecution.apply(progressContext, input);
+        return input == null ? noInputExecution.apply(progressContext) : inputExecution.apply(progressContext, input);
+    }
 
-        resultFuture
-                .handle((result, error) -> {
-                    if (error instanceof CompletionException)
-                    {
-                        handleResult(result, error.getCause());
-                    }
-                    else
-                    {
-                        handleResult(result, error);
-                    }
+    @Nullable
+    private R handleExecution(final @Nullable R result, final @Nonnull Throwable error)
+    {
+        if (error instanceof CompletionException)
+        {
+            handleResult(result, error.getCause());
+        }
+        else
+        {
+            handleResult(result, error);
+        }
 
-                    return result;
-                })
-                .whenComplete((result, error) -> handleComplete());
+        return result;
     }
 }

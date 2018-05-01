@@ -22,6 +22,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
+import rx.Completable;
 import rx.Observable;
 import rx.Subscription;
 
@@ -68,7 +69,7 @@ public final class CompositeCommand<T, R> extends AbstractCommand<T, List<R>>
 
     @Override
     @SuppressWarnings("unchecked")
-    protected final void executeInternal(final @Nullable T input)
+    protected final Completable executeInternal(final @Nullable T input)
     {
         handleStart();
 
@@ -99,13 +100,15 @@ public final class CompositeCommand<T, R> extends AbstractCommand<T, List<R>>
                         values -> computeProgress(Arrays.copyOf(values, values.length, Float[].class)))
                 .subscribe(progress::setValue);
 
-        // After all child commands finished execution, handle complete
-        final Subscription isExecutingSubscription = Observable.zip(commands.stream()
+        final Observable<?> execution = Observable.zip(commands.stream()
                 .map(command -> command.isExecuting()
                         .filter(Boolean.FALSE::equals)
                         .skip(1)
                         .take(1))
-                .collect(Collectors.toList()), values -> values)
+                .collect(Collectors.toList()), values -> values);
+
+        // After all child commands finished execution, handle complete
+        final Subscription isExecutingSubscription = execution
                 .subscribe(values -> {}, error -> {}, () -> {
                     resultSubscription.unsubscribe();
                     errorSubscription.unsubscribe();
@@ -122,6 +125,8 @@ public final class CompositeCommand<T, R> extends AbstractCommand<T, List<R>>
         {
             commands.forEach(command -> command.execute(input));
         }
+
+        return Completable.fromObservable(execution);
     }
 
     @Nonnull

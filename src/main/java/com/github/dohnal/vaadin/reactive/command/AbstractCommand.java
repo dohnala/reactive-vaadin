@@ -19,6 +19,7 @@ import java.util.Objects;
 
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
 import com.github.dohnal.vaadin.reactive.ReactiveProperty;
+import rx.Completable;
 import rx.Observable;
 import rx.subjects.PublishSubject;
 
@@ -73,7 +74,7 @@ public abstract class AbstractCommand<T, R> implements ReactiveCommand<T, R>
     /**
      * Internally executes this command
      */
-    protected abstract void executeInternal(final @Nullable T input);
+    protected abstract Completable executeInternal(final @Nullable T input);
 
     @Nonnull
     @Override
@@ -127,23 +128,27 @@ public abstract class AbstractCommand<T, R> implements ReactiveCommand<T, R>
     }
 
     @Override
-    public final void execute()
+    public final Completable execute()
     {
         if (Boolean.TRUE.equals(canExecute.getValue()))
         {
-            executeInternal(null);
+            return executeInternal(null);
         }
+
+        return Completable.complete();
     }
 
     @Override
-    public final void execute(final @Nonnull T input)
+    public final Completable execute(final @Nonnull T input)
     {
         Objects.requireNonNull(input, "Input cannot be null");
 
         if (Boolean.TRUE.equals(canExecute.getValue()))
         {
-            executeInternal(input);
+            return executeInternal(input);
         }
+
+        return Completable.complete();
     }
 
     /**

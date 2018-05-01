@@ -27,6 +27,7 @@ import com.github.dohnal.vaadin.reactive.command.AsyncCommand;
 import com.github.dohnal.vaadin.reactive.command.CompositeCommand;
 import com.github.dohnal.vaadin.reactive.command.ProgressCommand;
 import com.github.dohnal.vaadin.reactive.command.SyncCommand;
+import rx.Completable;
 import rx.Observable;
 
 /**
@@ -989,12 +990,16 @@ public interface ReactiveCommand<T, R>
     /**
      * Executes this command with no input
      *
+     * @return completable to notify when an execution is completed
      * @throws IllegalArgumentException if this command requires input
      */
-    void execute();
+    Completable execute();
 
     /**
      * Executes this command with given input
+     *
+     * @param input command input
+     * @return completable to notify when an execution is completed
      */
-    void execute(final @Nonnull T input);
+    Completable execute(final @Nonnull T input);
 }
