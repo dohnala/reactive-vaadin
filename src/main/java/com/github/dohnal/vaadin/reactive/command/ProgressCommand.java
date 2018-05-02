@@ -23,8 +23,8 @@ import com.github.dohnal.vaadin.reactive.AsyncProgressFunction;
 import com.github.dohnal.vaadin.reactive.AsyncProgressSupplier;
 import com.github.dohnal.vaadin.reactive.ProgressContext;
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
-import rx.Completable;
-import rx.Observable;
+import io.reactivex.Completable;
+import io.reactivex.Observable;
 
 /**
  * Asynchronous implementation of {@link ReactiveCommand} with support of controlling progress

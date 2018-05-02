@@ -16,14 +16,13 @@ package com.github.dohnal.vaadin.reactive.property;
 import javax.annotation.Nonnull;
 
 import com.github.dohnal.vaadin.reactive.ReactiveProperty;
+import io.reactivex.Observable;
+import io.reactivex.schedulers.TestScheduler;
+import io.reactivex.subjects.PublishSubject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import rx.Observable;
-import rx.schedulers.Schedulers;
-import rx.schedulers.TestScheduler;
-import rx.subjects.TestSubject;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -38,14 +37,15 @@ public interface PropertyFromObservableSpecification extends BasePropertySpecifi
     abstract class WhenCreateFromObservableSpecification
     {
         private TestScheduler testScheduler;
-        private TestSubject<Integer> testSubject;
+        private PublishSubject<Integer> testSubject;
         private ReactiveProperty<Integer> property;
 
         @BeforeEach
         void createFromObservable()
         {
-            testScheduler = Schedulers.test();
-            testSubject = TestSubject.create(testScheduler);
+            testScheduler = new TestScheduler();
+            testSubject = PublishSubject.create();
+            testSubject.observeOn(testScheduler);
             property = ReactiveProperty.fromObservable(testSubject);
         }
 

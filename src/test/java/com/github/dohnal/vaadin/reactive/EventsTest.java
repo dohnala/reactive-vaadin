@@ -14,20 +14,16 @@
 package com.github.dohnal.vaadin.reactive;
 
 import javax.annotation.Nonnull;
-import java.util.List;
 
+import io.reactivex.Observable;
+import io.reactivex.observers.TestObserver;
+import io.reactivex.schedulers.TestScheduler;
+import io.reactivex.subjects.PublishSubject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import rx.Observable;
-import rx.schedulers.Schedulers;
-import rx.schedulers.TestScheduler;
-import rx.subjects.TestSubject;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 
 /**
  * Tests of {@link Events}
@@ -42,15 +38,17 @@ public class EventsTest implements Events
     class WhenCreateChangedWithObservable
     {
         private TestScheduler testScheduler;
-        private TestSubject<Integer> testSubject;
+        private PublishSubject<Integer> testSubject;
         private Observable<Integer> event;
 
         @BeforeEach
         @SuppressWarnings("unchecked")
         protected void create()
         {
-            testScheduler = Schedulers.test();
-            testSubject = TestSubject.create(testScheduler);
+            testScheduler = new TestScheduler();
+            testSubject = PublishSubject.create();
+            testSubject.observeOn(testScheduler);
+
             event = changed(testSubject);
         }
 
@@ -58,8 +56,7 @@ public class EventsTest implements Events
         @DisplayName("Event should not emit any value")
         public void testEvent()
         {
-            event.test()
-                    .assertNoValues();
+            event.test().assertNoValues();
         }
 
         @Nested
@@ -70,12 +67,12 @@ public class EventsTest implements Events
             @DisplayName("Event should emit correct value")
             public void testEvent()
             {
-                event.test()
-                        .perform(() -> {
-                            testSubject.onNext(5);
-                            testScheduler.triggerActions();
-                        })
-                        .assertValue(5);
+                final TestObserver<Integer> testObserver = event.test();
+
+                testSubject.onNext(5);
+                testScheduler.triggerActions();
+
+                testObserver.assertValue(5);
             }
         }
     }
@@ -85,15 +82,17 @@ public class EventsTest implements Events
     class WhenCreateChangedWithIsObservable
     {
         private TestScheduler testScheduler;
-        private TestSubject<Integer> testSubject;
+        private PublishSubject<Integer> testSubject;
         private Observable<Integer> event;
 
         @BeforeEach
         @SuppressWarnings("unchecked")
         protected void create()
         {
-            testScheduler = Schedulers.test();
-            testSubject = TestSubject.create(testScheduler);
+            testScheduler = new TestScheduler();
+            testSubject = PublishSubject.create();
+            testSubject.observeOn(testScheduler);
+
             event = changed(new IsObservable<Integer>()
             {
                 @Nonnull
@@ -109,8 +108,7 @@ public class EventsTest implements Events
         @DisplayName("Event should not emit any value")
         public void testEvent()
         {
-            event.test()
-                    .assertNoValues();
+            event.test().assertNoValues();
         }
 
         @Nested
@@ -121,12 +119,12 @@ public class EventsTest implements Events
             @DisplayName("Event should emit correct value")
             public void testEvent()
             {
-                event.test()
-                        .perform(() -> {
-                            testSubject.onNext(5);
-                            testScheduler.triggerActions();
-                        })
-                        .assertValue(5);
+                final TestObserver<Integer> testObserver = event.test();
+
+                testSubject.onNext(5);
+                testScheduler.triggerActions();
+
+                testObserver.assertValue(5);
             }
         }
     }
@@ -150,8 +148,7 @@ public class EventsTest implements Events
         @DisplayName("Event should not emit any value")
         public void testEvent()
         {
-            event.test()
-                    .assertNoValues();
+            event.test().assertNoValues();
         }
 
         @Nested
@@ -162,9 +159,11 @@ public class EventsTest implements Events
             @DisplayName("Event should emit correct value")
             public void testEvent()
             {
-                event.test()
-                        .perform(() -> command.execute(5))
-                        .assertValue(6);
+                final TestObserver<Integer> testObserver = event.test();
+
+                command.execute(5);
+
+                testObserver.assertValue(6);
             }
         }
     }
@@ -192,8 +191,7 @@ public class EventsTest implements Events
         @DisplayName("Event should not emit any value")
         public void testEvent()
         {
-            event.test()
-                    .assertNoValues();
+            event.test().assertNoValues();
         }
 
         @Nested
@@ -204,9 +202,11 @@ public class EventsTest implements Events
             @DisplayName("Event should emit correct value")
             public void testEvent()
             {
-                event.test()
-                        .perform(() -> command.execute())
-                        .assertValue(ERROR);
+                final TestObserver<Throwable> testObserver = event.test();
+
+                command.execute();
+
+                testObserver.assertValue(ERROR);
             }
         }
     }
@@ -246,9 +246,11 @@ public class EventsTest implements Events
                 @DisplayName("Event should emit correct value")
                 public void testEvent()
                 {
-                    event.test()
-                            .perform(() -> command.execute(5))
-                            .assertValue(1);
+                    final TestObserver<Integer> testObserver = event.test();
+
+                    command.execute(5);
+
+                    testObserver.assertValue(1);
                 }
             }
         }
@@ -290,9 +292,11 @@ public class EventsTest implements Events
                 {
                     command.getError().test();
 
-                    event.test()
-                            .perform(() -> command.execute())
-                            .assertValue(1);
+                    final TestObserver<Integer> testObserver = event.test();
+
+                    command.execute();
+
+                    testObserver.assertValue(1);
                 }
             }
         }
@@ -329,13 +333,13 @@ public class EventsTest implements Events
             @DisplayName("Event should emit correct value")
             public void testEvent()
             {
-                final List<InteractionContext<Integer, Boolean>> interactionContexts = event.test()
-                        .perform(() -> interaction.invoke(5, Mockito.mock(Runnable.class)))
-                        .getOnNextEvents();
+                final TestObserver<InteractionContext<Integer, Boolean>> testObserver = event.test();
 
-                assertEquals(1, interactionContexts.size());
-                assertEquals(new Integer(5), interactionContexts.get(0).getInput());
-                assertFalse(interactionContexts.get(0).isHandled());
+                interaction.invoke(5, Mockito.mock(Runnable.class));
+
+                testObserver.assertValue(interactionContext ->
+                        new Integer(5).equals(interactionContext.getInput()) &&
+                                !interactionContext.isHandled());
             }
         }
     }

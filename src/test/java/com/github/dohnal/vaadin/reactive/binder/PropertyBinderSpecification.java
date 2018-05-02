@@ -15,20 +15,19 @@ package com.github.dohnal.vaadin.reactive.binder;
 
 import javax.annotation.Nonnull;
 
-import com.github.dohnal.vaadin.reactive.Disposable;
 import com.github.dohnal.vaadin.reactive.IsObservable;
 import com.github.dohnal.vaadin.reactive.Property;
 import com.github.dohnal.vaadin.reactive.PropertyBinder;
 import com.github.dohnal.vaadin.reactive.ReactiveBinder;
+import io.reactivex.Observable;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.TestScheduler;
+import io.reactivex.subjects.PublishSubject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import rx.Observable;
-import rx.schedulers.Schedulers;
-import rx.schedulers.TestScheduler;
-import rx.subjects.TestSubject;
 
 /**
  * Specification for binding property by {@link PropertyBinder}
@@ -40,7 +39,7 @@ public interface PropertyBinderSpecification
     abstract class WhenBindPropertyToObservableSpecification implements ReactiveBinder
     {
         private TestScheduler testScheduler;
-        private TestSubject<Integer> sourceObservable;
+        private PublishSubject<Integer> sourceObservable;
         private Property<Integer> property;
         private Disposable disposable;
 
@@ -48,8 +47,9 @@ public interface PropertyBinderSpecification
         @SuppressWarnings("unchecked")
         protected void bind()
         {
-            testScheduler = Schedulers.test();
-            sourceObservable = TestSubject.create(testScheduler);
+            testScheduler = new TestScheduler();
+            sourceObservable = PublishSubject.create();
+            sourceObservable.observeOn(testScheduler);
             property = Mockito.mock(Property.class);
 
             disposable = bind(property).to(sourceObservable);
@@ -104,7 +104,7 @@ public interface PropertyBinderSpecification
     abstract class WhenBindPropertyToIsObservableSpecification implements ReactiveBinder
     {
         private TestScheduler testScheduler;
-        private TestSubject<Integer> sourceObservable;
+        private PublishSubject<Integer> sourceObservable;
         private Property<Integer> property;
         private Disposable disposable;
 
@@ -112,8 +112,9 @@ public interface PropertyBinderSpecification
         @SuppressWarnings("unchecked")
         protected void bind()
         {
-            testScheduler = Schedulers.test();
-            sourceObservable = TestSubject.create(testScheduler);
+            testScheduler = new TestScheduler();
+            sourceObservable = PublishSubject.create();
+            sourceObservable.observeOn(testScheduler);
             property = Mockito.mock(Property.class);
 
             disposable = bind(property).to(new IsObservable<Integer>()

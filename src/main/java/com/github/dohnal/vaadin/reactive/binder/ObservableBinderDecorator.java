@@ -17,8 +17,8 @@ import javax.annotation.Nonnull;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-import com.github.dohnal.vaadin.reactive.Disposable;
 import com.github.dohnal.vaadin.reactive.ObservableBinder;
+import io.reactivex.disposables.Disposable;
 
 /**
  * Decorator for {@link ObservableBinder} which can be extended to provide behavior extensions

@@ -19,8 +19,8 @@ import java.util.Objects;
 import java.util.function.Function;
 
 import com.github.dohnal.vaadin.reactive.ReactiveProperty;
-import rx.Observable;
-import rx.subjects.BehaviorSubject;
+import io.reactivex.Observable;
+import io.reactivex.subjects.BehaviorSubject;
 
 /**
  * Basic implementation of {@link ReactiveProperty} based on {@link BehaviorSubject}
@@ -49,7 +49,7 @@ public final class BehaviorSubjectProperty<T> implements ReactiveProperty<T>
     {
         Objects.requireNonNull(defaultValue, "Default value cannot be null");
 
-        this.subject = BehaviorSubject.create(defaultValue);
+        this.subject = BehaviorSubject.createDefault(defaultValue);
     }
 
     /**
@@ -77,7 +77,9 @@ public final class BehaviorSubjectProperty<T> implements ReactiveProperty<T>
 
         if (anotherProperty.hasValue())
         {
-            this.subject = BehaviorSubject.create(anotherProperty.getValue());
+            Objects.requireNonNull(anotherProperty.getValue());
+
+            this.subject = BehaviorSubject.createDefault(anotherProperty.getValue());
         }
         else
         {

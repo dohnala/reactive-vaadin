@@ -27,8 +27,8 @@ import com.github.dohnal.vaadin.reactive.command.AsyncCommand;
 import com.github.dohnal.vaadin.reactive.command.CompositeCommand;
 import com.github.dohnal.vaadin.reactive.command.ProgressCommand;
 import com.github.dohnal.vaadin.reactive.command.SyncCommand;
-import rx.Completable;
-import rx.Observable;
+import io.reactivex.Completable;
+import io.reactivex.Observable;
 
 /**
  * Reactive command encapsulates an execution and provides a reactive way how to listen for its

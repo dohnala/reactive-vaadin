@@ -19,7 +19,7 @@ import java.util.Objects;
 import com.github.dohnal.vaadin.reactive.binder.DefaultObservableBinder;
 import com.github.dohnal.vaadin.reactive.binder.DefaultObservablePropertyBinder;
 import com.github.dohnal.vaadin.reactive.binder.DefaultPropertyBinder;
-import rx.Observable;
+import io.reactivex.Observable;
 
 /**
  * Base interface for binders which can bind properties and observables

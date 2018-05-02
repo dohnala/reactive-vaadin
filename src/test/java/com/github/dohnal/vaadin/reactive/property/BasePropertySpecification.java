@@ -16,6 +16,7 @@ package com.github.dohnal.vaadin.reactive.property;
 import javax.annotation.Nonnull;
 
 import com.github.dohnal.vaadin.reactive.ReactiveProperty;
+import io.reactivex.observers.TestObserver;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -68,10 +69,13 @@ public interface BasePropertySpecification
         @DisplayName("Observable should emit correct value")
         public void testObservable()
         {
-            getProperty().asObservable().test()
-                    .assertValuesAndClear(5)
-                    .perform(() -> emitValue(7))
-                    .assertValue(7);
+            final TestObserver<Integer> testObserver = getProperty().asObservable().test();
+
+            testObserver.assertValue(5);
+
+            emitValue(7);
+
+            testObserver.assertValues(5, 7);
         }
 
         @Test
@@ -111,10 +115,13 @@ public interface BasePropertySpecification
         @DisplayName("Observable should not emit any value")
         public void testObservable()
         {
-            getProperty().asObservable().test()
-                    .assertValuesAndClear(5)
-                    .perform(() -> emitValue(5))
-                    .assertNoValues();
+            final TestObserver<Integer> testObserver = getProperty().asObservable().test();
+
+            testObserver.assertValue(5);
+
+            emitValue(5);
+
+            testObserver.assertValue(5);
         }
 
         @Test
@@ -151,10 +158,13 @@ public interface BasePropertySpecification
         @DisplayName("Observable should emit correct value")
         public void testObservable()
         {
-            getProperty().asObservable().test()
-                    .assertValuesAndClear(5)
-                    .perform(() -> getProperty().setValue(7))
-                    .assertValue(7);
+            final TestObserver<Integer> testObserver = getProperty().asObservable().test();
+
+            testObserver.assertValue(5);
+
+            getProperty().setValue(7);
+
+            testObserver.assertValues(5, 7);
         }
 
         @Test
@@ -191,10 +201,13 @@ public interface BasePropertySpecification
         @DisplayName("Observable should not emit any value")
         public void testObservable()
         {
-            getProperty().asObservable().test()
-                    .assertValuesAndClear(5)
-                    .perform(() -> getProperty().setValue(5))
-                    .assertNoValues();
+            final TestObserver<Integer> testObserver = getProperty().asObservable().test();
+
+            testObserver.assertValue(5);
+
+            getProperty().setValue(5);
+
+            testObserver.assertValue(5);
         }
 
         @Test
@@ -231,10 +244,13 @@ public interface BasePropertySpecification
         @DisplayName("Observable should emit correct value")
         public void testObservable()
         {
-            getProperty().asObservable().test()
-                    .assertValuesAndClear(5)
-                    .perform(() -> getProperty().updateValue(value -> value + 2))
-                    .assertValue(7);
+            final TestObserver<Integer> testObserver = getProperty().asObservable().test();
+
+            testObserver.assertValue(5);
+
+            getProperty().updateValue(value -> value + 2);
+
+            testObserver.assertValues(5, 7);
         }
 
         @Test
@@ -271,10 +287,13 @@ public interface BasePropertySpecification
         @DisplayName("Observable should not emit any value")
         public void testObservable()
         {
-            getProperty().asObservable().test()
-                    .assertValuesAndClear(5)
-                    .perform(() -> getProperty().updateValue(value -> value))
-                    .assertNoValues();
+            final TestObserver<Integer> testObserver = getProperty().asObservable().test();
+
+            testObserver.assertValue(5);
+
+            getProperty().updateValue(value -> value);
+
+            testObserver.assertValue(5);
         }
 
         @Test

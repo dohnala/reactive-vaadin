@@ -21,14 +21,14 @@ import java.util.function.BiFunction;
 import com.github.dohnal.vaadin.reactive.ProgressContext;
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
 import com.github.dohnal.vaadin.reactive.command.BaseCommandSpecification;
+import io.reactivex.observers.TestObserver;
+import io.reactivex.schedulers.TestScheduler;
+import io.reactivex.subjects.PublishSubject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import rx.schedulers.Schedulers;
-import rx.schedulers.TestScheduler;
-import rx.subjects.TestSubject;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -76,7 +76,7 @@ public interface ProgressCommandFromBiConsumerSpecification extends BaseCommandS
             @DisplayName("IllegalArgumentException should be thrown")
             public void testExecute()
             {
-                assertThrows(IllegalArgumentException.class, () -> command.execute().await());
+                assertThrows(IllegalArgumentException.class, () -> command.execute().blockingAwait());
             }
         }
 
@@ -112,16 +112,18 @@ public interface ProgressCommandFromBiConsumerSpecification extends BaseCommandS
             @Override
             protected void execute()
             {
-                command.execute(INPUT).await();
+                command.execute(INPUT).blockingAwait();
             }
 
             @Test
             @DisplayName("Result observable should not emit any value")
             public void testResult()
             {
-                getCommand().getResult().test()
-                        .perform(this::execute)
-                        .assertNoValues();
+                final TestObserver<Void> testObserver = getCommand().getResult().test();
+
+                execute();
+
+                testObserver.assertNoValues();
             }
 
             @Test
@@ -129,10 +131,13 @@ public interface ProgressCommandFromBiConsumerSpecification extends BaseCommandS
             @DisplayName("Progress observable should emit correct values")
             public void testProgress()
             {
-                getCommand().getProgress().test()
-                        .assertValuesAndClear(0.0f)
-                        .perform(this::execute)
-                        .assertValues(0.25f, 0.5f, 0.75f, 1.0f);
+                final TestObserver<Float> testObserver = getCommand().getProgress().test();
+
+                testObserver.assertValue(0.0f);
+
+                execute();
+
+                testObserver.assertValues(0.0f, 0.25f, 0.5f, 0.75f, 1.0f);
             }
 
             @Test
@@ -177,7 +182,7 @@ public interface ProgressCommandFromBiConsumerSpecification extends BaseCommandS
             @Override
             protected void execute()
             {
-                command.execute(INPUT).await();
+                command.execute(INPUT).blockingAwait();
             }
 
             @Nonnull
@@ -192,10 +197,13 @@ public interface ProgressCommandFromBiConsumerSpecification extends BaseCommandS
             @DisplayName("Progress observable should emit correct values")
             public void testProgress()
             {
-                getCommand().getProgress().test()
-                        .assertValuesAndClear(0.0f)
-                        .perform(this::execute)
-                        .assertValues(0.25f, 0.5f, 1.0f);
+                final TestObserver<Float> testObserver = getCommand().getProgress().test();
+
+                testObserver.assertValue(0.0f);
+
+                execute();
+
+                testObserver.assertValues(0.0f, 0.25f, 0.5f, 1.0f);
             }
 
             @Test
@@ -224,7 +232,7 @@ public interface ProgressCommandFromBiConsumerSpecification extends BaseCommandS
             @Override
             protected void execute()
             {
-                command.execute(INPUT).await();
+                command.execute(INPUT).blockingAwait();
             }
         }
 
@@ -244,7 +252,7 @@ public interface ProgressCommandFromBiConsumerSpecification extends BaseCommandS
             @Override
             protected void execute()
             {
-                command.execute(INPUT).await();
+                command.execute(INPUT).blockingAwait();
             }
         }
     }
@@ -254,7 +262,7 @@ public interface ProgressCommandFromBiConsumerSpecification extends BaseCommandS
     {
         private BiConsumer<ProgressContext, Integer> execution;
         private TestScheduler testScheduler;
-        private TestSubject<Boolean> testSubject;
+        private PublishSubject<Boolean> testSubject;
         private ReactiveCommand<Integer, Void> command;
 
         @BeforeEach
@@ -262,8 +270,9 @@ public interface ProgressCommandFromBiConsumerSpecification extends BaseCommandS
         protected void create()
         {
             execution = Mockito.mock(BiConsumer.class);
-            testScheduler = Schedulers.test();
-            testSubject = TestSubject.create(testScheduler);
+            testScheduler = new TestScheduler();
+            testSubject = PublishSubject.create();
+            testSubject.observeOn(testScheduler);
             command = ReactiveCommand.createProgress(testSubject, execution);
         }
 
@@ -335,7 +344,7 @@ public interface ProgressCommandFromBiConsumerSpecification extends BaseCommandS
             @Override
             protected void execute()
             {
-                command.execute(INPUT).await();
+                command.execute(INPUT).blockingAwait();
             }
 
             @Test
@@ -429,9 +438,11 @@ public interface ProgressCommandFromBiConsumerSpecification extends BaseCommandS
             @DisplayName("Result observable should not emit any value")
             public void testResult()
             {
-                getCommand().getResult().test()
-                        .perform(this::execute)
-                        .assertNoValues();
+                final TestObserver<Void> testObserver = getCommand().getResult().test();
+
+                execute();
+
+                testObserver.assertNoValues();
             }
 
             @Test
@@ -439,10 +450,13 @@ public interface ProgressCommandFromBiConsumerSpecification extends BaseCommandS
             @DisplayName("Progress observable should emit correct values")
             public void testProgress()
             {
-                getCommand().getProgress().test()
-                        .assertValuesAndClear(0.0f)
-                        .perform(this::execute)
-                        .assertValues(0.25f, 0.5f, 0.75f, 1.0f);
+                final TestObserver<Float> testObserver = getCommand().getProgress().test();
+
+                testObserver.assertValue(0.0f);
+
+                execute();
+
+                testObserver.assertValues(0.0f, 0.25f, 0.5f, 0.75f, 1.0f);
             }
 
             @Test
@@ -502,10 +516,13 @@ public interface ProgressCommandFromBiConsumerSpecification extends BaseCommandS
             @DisplayName("Progress observable should emit correct values")
             public void testProgress()
             {
-                getCommand().getProgress().test()
-                        .assertValuesAndClear(0.0f)
-                        .perform(this::execute)
-                        .assertValues(0.25f, 0.5f, 1.0f);
+                final TestObserver<Float> testObserver = getCommand().getProgress().test();
+
+                testObserver.assertValue(0.0f);
+
+                execute();
+
+                testObserver.assertValues(0.0f, 0.25f, 0.5f, 1.0f);
             }
 
             @Test
@@ -565,7 +582,7 @@ public interface ProgressCommandFromBiConsumerSpecification extends BaseCommandS
         private TestExecutor testExecutor;
         private BiConsumer<ProgressContext, Integer> execution;
         private TestScheduler testScheduler;
-        private TestSubject<Boolean> testSubject;
+        private PublishSubject<Boolean> testSubject;
         private ReactiveCommand<Integer, Void> command;
 
         @BeforeEach
@@ -574,8 +591,9 @@ public interface ProgressCommandFromBiConsumerSpecification extends BaseCommandS
         {
             testExecutor = new TestExecutor();
             execution = Mockito.mock(BiConsumer.class);
-            testScheduler = Schedulers.test();
-            testSubject = TestSubject.create(testScheduler);
+            testScheduler = new TestScheduler();
+            testSubject = PublishSubject.create();
+            testSubject.observeOn(testScheduler);
             command = ReactiveCommand.createProgress(testSubject, execution, testExecutor);
         }
 

@@ -13,15 +13,15 @@
 
 package com.github.dohnal.vaadin.reactive.binder;
 
-import com.github.dohnal.vaadin.reactive.Disposable;
 import com.github.dohnal.vaadin.reactive.IsObservable;
 import com.github.dohnal.vaadin.reactive.PropertyBinder;
+import io.reactivex.Observable;
+import io.reactivex.disposables.Disposable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import rx.Observable;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

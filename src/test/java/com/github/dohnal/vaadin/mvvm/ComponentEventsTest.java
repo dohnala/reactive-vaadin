@@ -13,18 +13,15 @@
 
 package com.github.dohnal.vaadin.mvvm;
 
-import java.util.List;
-
 import com.vaadin.data.HasValue;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.TextField;
+import io.reactivex.Observable;
+import io.reactivex.observers.TestObserver;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import rx.Observable;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Tests of {@link ComponentEvents}
@@ -65,12 +62,11 @@ public class ComponentEventsTest implements ComponentEvents
             @DisplayName("Event should emit correct value")
             public void testEvent()
             {
-                final List<Button.ClickEvent> events = event.test()
-                        .perform(() -> button.click())
-                        .getOnNextEvents();
+                final TestObserver<Button.ClickEvent> testObserver = event.test();
 
-                assertEquals(events.size(), 1);
-                assertEquals(events.get(0).getButton(), button);
+                button.click();
+
+                testObserver.assertValue(clickEvent -> clickEvent.getButton().equals(button));
             }
         }
     }
@@ -106,14 +102,14 @@ public class ComponentEventsTest implements ComponentEvents
             @DisplayName("Event should emit correct value")
             public void testEvent()
             {
-                final List<HasValue.ValueChangeEvent<String>> events = event.test()
-                        .perform(() -> field.setValue("value"))
-                        .getOnNextEvents();
+                final TestObserver<HasValue.ValueChangeEvent<String>> testObserver = event.test();
 
-                assertEquals(events.size(), 1);
-                assertEquals(events.get(0).getSource(), field);
-                assertEquals(events.get(0).getOldValue(), "");
-                assertEquals(events.get(0).getValue(), "value");
+                field.setValue("value");
+
+                testObserver.assertValue(valueChangeEvent ->
+                        valueChangeEvent.getSource().equals(field) &&
+                                valueChangeEvent.getOldValue().equals("") &&
+                                valueChangeEvent.getValue().equals("value"));
             }
         }
     }

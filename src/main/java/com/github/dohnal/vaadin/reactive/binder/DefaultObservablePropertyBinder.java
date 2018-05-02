@@ -16,12 +16,12 @@ package com.github.dohnal.vaadin.reactive.binder;
 import javax.annotation.Nonnull;
 import java.util.Objects;
 
-import com.github.dohnal.vaadin.reactive.Disposable;
 import com.github.dohnal.vaadin.reactive.IsObservable;
 import com.github.dohnal.vaadin.reactive.ObservableProperty;
 import com.github.dohnal.vaadin.reactive.ObservablePropertyBinder;
-import rx.Observable;
-import rx.Subscription;
+import io.reactivex.Observable;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.internal.disposables.ListCompositeDisposable;
 
 /**
  * Default implementation of {@link ObservablePropertyBinder)}
@@ -42,14 +42,12 @@ public final class DefaultObservablePropertyBinder<T> implements ObservablePrope
 
     @Nonnull
     @Override
+    @SuppressWarnings("Convert2MethodRef")
     public final Disposable to(final @Nonnull Observable<? extends T> observable)
     {
         Objects.requireNonNull(observable, "Observable cannot be null");
 
-        @SuppressWarnings("Convert2MethodRef")
-        final Subscription subscription = observable.subscribe(value -> property.setValue(value));
-
-        return subscription::unsubscribe;
+        return observable.subscribe(value -> property.setValue(value));
     }
 
     @Nonnull
@@ -63,20 +61,13 @@ public final class DefaultObservablePropertyBinder<T> implements ObservablePrope
 
     @Nonnull
     @Override
+    @SuppressWarnings("Convert2MethodRef")
     public final Disposable to(final @Nonnull ObservableProperty<T> anotherProperty)
     {
         Objects.requireNonNull(anotherProperty, "Another property cannot be null");
 
-        final Subscription propertySubscription = property.asObservable()
-                .subscribe(anotherProperty::setValue);
-
-        @SuppressWarnings("Convert2MethodRef")
-        final Subscription anotherPropertySubscription = anotherProperty.asObservable()
-                .subscribe(value -> property.setValue(value));
-
-        return () -> {
-            propertySubscription.unsubscribe();
-            anotherPropertySubscription.unsubscribe();
-        };
+        return new ListCompositeDisposable(
+                property.asObservable().subscribe(anotherProperty::setValue),
+                anotherProperty.asObservable().subscribe(value -> property.setValue(value)));
     }
 }

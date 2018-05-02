@@ -16,12 +16,11 @@ package com.github.dohnal.vaadin.reactive.binder;
 import javax.annotation.Nonnull;
 import java.util.Objects;
 
-import com.github.dohnal.vaadin.reactive.Disposable;
 import com.github.dohnal.vaadin.reactive.IsObservable;
 import com.github.dohnal.vaadin.reactive.Property;
 import com.github.dohnal.vaadin.reactive.PropertyBinder;
-import rx.Observable;
-import rx.Subscription;
+import io.reactivex.Observable;
+import io.reactivex.disposables.Disposable;
 
 /**
  * Default implementation of {@link PropertyBinder)}
@@ -46,9 +45,7 @@ public final class DefaultPropertyBinder<T> implements PropertyBinder<T>
     {
         Objects.requireNonNull(observable, "Observable cannot be null");
 
-        final Subscription subscription = observable.subscribe(property::setValue);
-
-        return subscription::unsubscribe;
+        return observable.subscribe(property::setValue);
     }
 
     @Nonnull

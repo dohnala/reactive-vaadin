@@ -14,6 +14,7 @@
 package com.github.dohnal.vaadin.reactive.command;
 
 import com.github.dohnal.vaadin.reactive.ReactiveProperty;
+import io.reactivex.observers.TestObserver;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -57,10 +58,13 @@ public class ReactiveProgressTest
             @DisplayName("Value should not change")
             public void testValue()
             {
-                progressProperty.asObservable().test()
-                        .assertValuesAndClear(0.0f)
-                        .perform(() -> progress.set(-0.5f))
-                        .assertNoValues();
+                final TestObserver<Float> testObserver = progressProperty.asObservable().test();
+
+                testObserver.assertValue(0.0f);
+
+                progress.set(-0.5f);
+
+                testObserver.assertValue(0.0f);
             }
         }
 
@@ -72,10 +76,13 @@ public class ReactiveProgressTest
             @DisplayName("Value should not change")
             public void testValue()
             {
-                progressProperty.asObservable().test()
-                        .assertValuesAndClear(0.0f)
-                        .perform(() -> progress.set(0.0f))
-                        .assertNoValues();
+                final TestObserver<Float> testObserver = progressProperty.asObservable().test();
+
+                testObserver.assertValue(0.0f);
+
+                progress.set(0.0f);
+
+                testObserver.assertValue(0.0f);
             }
         }
 
@@ -87,10 +94,13 @@ public class ReactiveProgressTest
             @DisplayName("Value should be one")
             public void testValue()
             {
-                progressProperty.asObservable().test()
-                        .assertValuesAndClear(0.0f)
-                        .perform(() -> progress.set(1.0f))
-                        .assertValue(1.0f);
+                final TestObserver<Float> testObserver = progressProperty.asObservable().test();
+
+                testObserver.assertValue(0.0f);
+
+                progress.set(1.0f);
+
+                testObserver.assertValues(0.0f, 1.0f);
             }
         }
 
@@ -102,10 +112,13 @@ public class ReactiveProgressTest
             @DisplayName("Value should be one")
             public void testValue()
             {
-                progressProperty.asObservable().test()
-                        .assertValuesAndClear(0.0f)
-                        .perform(() -> progress.set(2.0f))
-                        .assertValue(1.0f);
+                final TestObserver<Float> testObserver = progressProperty.asObservable().test();
+
+                testObserver.assertValue(0.0f);
+
+                progress.set(2.0f);
+
+                testObserver.assertValues(0.0f, 1.0f);
             }
         }
 
@@ -117,10 +130,13 @@ public class ReactiveProgressTest
             @DisplayName("Value should be correct")
             public void testValue()
             {
-                progressProperty.asObservable().test()
-                        .assertValuesAndClear(0.0f)
-                        .perform(() -> progress.set(0.5f))
-                        .assertValue(0.5f);
+                final TestObserver<Float> testObserver = progressProperty.asObservable().test();
+
+                testObserver.assertValue(0.0f);
+
+                progress.set(0.5f);
+
+                testObserver.assertValues(0.0f, 0.5f);
             }
 
             @Nested
@@ -133,10 +149,13 @@ public class ReactiveProgressTest
                 {
                     progress.set(0.5f);
 
-                    progressProperty.asObservable().test()
-                            .assertValuesAndClear(0.5f)
-                            .perform(() -> progress.set(0.3f))
-                            .assertNoValues();
+                    final TestObserver<Float> testObserver = progressProperty.asObservable().test();
+
+                    testObserver.assertValue(0.5f);
+
+                    progress.set(0.3f);
+
+                    testObserver.assertValue(0.5f);
                 }
             }
         }
@@ -149,10 +168,13 @@ public class ReactiveProgressTest
             @DisplayName("Value should not change")
             public void testValue()
             {
-                progressProperty.asObservable().test()
-                        .assertValuesAndClear(0.0f)
-                        .perform(() -> progress.add(-0.5f))
-                        .assertNoValues();
+                final TestObserver<Float> testObserver = progressProperty.asObservable().test();
+
+                testObserver.assertValue(0.0f);
+
+                progress.add(-0.5f);
+
+                testObserver.assertValue(0.0f);
             }
         }
 
@@ -164,10 +186,13 @@ public class ReactiveProgressTest
             @DisplayName("Value should not change")
             public void testValue()
             {
-                progressProperty.asObservable().test()
-                        .assertValuesAndClear(0.0f)
-                        .perform(() -> progress.add(0.0f))
-                        .assertNoValues();
+                final TestObserver<Float> testObserver = progressProperty.asObservable().test();
+
+                testObserver.assertValue(0.0f);
+
+                progress.add(0.0f);
+
+                testObserver.assertValue(0.0f);
             }
         }
 
@@ -179,10 +204,13 @@ public class ReactiveProgressTest
             @DisplayName("Value should be one")
             public void testValue()
             {
-                progressProperty.asObservable().test()
-                        .assertValuesAndClear(0.0f)
-                        .perform(() -> progress.add(1.0f))
-                        .assertValue(1.0f);
+                final TestObserver<Float> testObserver = progressProperty.asObservable().test();
+
+                testObserver.assertValue(0.0f);
+
+                progress.add(1.0f);
+
+                testObserver.assertValues(0.0f, 1.0f);
             }
         }
 
@@ -194,10 +222,13 @@ public class ReactiveProgressTest
             @DisplayName("Value should be one")
             public void testValue()
             {
-                progressProperty.asObservable().test()
-                        .assertValuesAndClear(0.0f)
-                        .perform(() -> progress.add(2.0f))
-                        .assertValue(1.0f);
+                final TestObserver<Float> testObserver = progressProperty.asObservable().test();
+
+                testObserver.assertValue(0.0f);
+
+                progress.add(2.0f);
+
+                testObserver.assertValues(0.0f, 1.0f);
             }
         }
 
@@ -209,10 +240,13 @@ public class ReactiveProgressTest
             @DisplayName("Value should be correct")
             public void testValue()
             {
-                progressProperty.asObservable().test()
-                        .assertValuesAndClear(0.0f)
-                        .perform(() -> progress.add(0.5f))
-                        .assertValue(0.5f);
+                final TestObserver<Float> testObserver = progressProperty.asObservable().test();
+
+                testObserver.assertValue(0.0f);
+
+                progress.add(0.5f);
+
+                testObserver.assertValues(0.0f, 0.5f);
             }
 
             @Nested
@@ -225,10 +259,13 @@ public class ReactiveProgressTest
                 {
                     progress.set(0.5f);
 
-                    progressProperty.asObservable().test()
-                            .assertValuesAndClear(0.5f)
-                            .perform(() -> progress.add(-0.3f))
-                            .assertNoValues();
+                    final TestObserver<Float> testObserver = progressProperty.asObservable().test();
+
+                    testObserver.assertValue(0.5f);
+
+                    progress.add(-0.3f);
+
+                    testObserver.assertValue(0.5f);
                 }
             }
         }

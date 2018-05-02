@@ -26,6 +26,7 @@ import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.ProgressBar;
 import com.vaadin.ui.TextField;
+import io.reactivex.observers.TestObserver;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -193,9 +194,11 @@ public class ComponentPropertiesTest implements ComponentProperties
             @DisplayName("Property should emit correct value")
             public void testProperty()
             {
-                property.asObservable().test()
-                        .perform(() -> property.setValue(VALUE))
-                        .assertValue(VALUE);
+                final TestObserver<String> testObserver = property.asObservable().test();
+
+                property.setValue(VALUE);
+
+                testObserver.assertValue(VALUE);
             }
         }
 
@@ -218,9 +221,11 @@ public class ComponentPropertiesTest implements ComponentProperties
             @DisplayName("Property should emit correct value")
             public void testProperty()
             {
-                property.asObservable().test()
-                        .perform(() -> field.setValue(VALUE))
-                        .assertValue(VALUE);
+                final TestObserver<String> testObserver = property.asObservable().test();
+
+                property.setValue(VALUE);
+
+                testObserver.assertValue(VALUE);
             }
         }
     }
@@ -268,9 +273,11 @@ public class ComponentPropertiesTest implements ComponentProperties
             @DisplayName("Property should emit correct value")
             public void testProperty()
             {
-                property.asObservable().test()
-                        .perform(() -> property.setValue(Optional.of(VALUE)))
-                        .assertValue(Optional.of(VALUE));
+                final TestObserver<Optional<Integer>> testObserver = property.asObservable().test();
+
+                property.setValue(Optional.of(VALUE));
+
+                testObserver.assertValue(Optional.of(VALUE));
             }
         }
 
@@ -297,9 +304,11 @@ public class ComponentPropertiesTest implements ComponentProperties
             @DisplayName("Property should emit empty value")
             public void testProperty()
             {
-                property.asObservable().test()
-                        .perform(() -> property.setValue(Optional.empty()))
-                        .assertValue(Optional.empty());
+                final TestObserver<Optional<Integer>> testObserver = property.asObservable().test();
+
+                property.setValue(Optional.empty());
+
+                testObserver.assertValue(Optional.empty());
             }
         }
 
@@ -322,9 +331,11 @@ public class ComponentPropertiesTest implements ComponentProperties
             @DisplayName("Property should emit correct value")
             public void testProperty()
             {
-                property.asObservable().test()
-                        .perform(() -> field.setValue(VALUE))
-                        .assertValue(Optional.of(VALUE));
+                final TestObserver<Optional<Integer>> testObserver = property.asObservable().test();
+
+                field.setValue(VALUE);
+
+                testObserver.assertValue(Optional.of(VALUE));
             }
         }
 
@@ -351,9 +362,11 @@ public class ComponentPropertiesTest implements ComponentProperties
             @DisplayName("Property should emit empty value")
             public void testProperty()
             {
-                property.asObservable().test()
-                        .perform(() -> field.setValue(null))
-                        .assertValue(Optional.empty());
+                final TestObserver<Optional<Integer>> testObserver = property.asObservable().test();
+
+                field.setValue(null);
+
+                testObserver.assertValue(Optional.empty());
             }
         }
     }

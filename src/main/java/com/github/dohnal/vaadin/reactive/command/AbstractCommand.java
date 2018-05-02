@@ -19,9 +19,9 @@ import java.util.Objects;
 
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
 import com.github.dohnal.vaadin.reactive.ReactiveProperty;
-import rx.Completable;
-import rx.Observable;
-import rx.subjects.PublishSubject;
+import io.reactivex.Completable;
+import io.reactivex.Observable;
+import io.reactivex.subjects.PublishSubject;
 
 /**
  * Abstract implementation of {@link ReactiveCommand}
@@ -80,14 +80,14 @@ public abstract class AbstractCommand<T, R> implements ReactiveCommand<T, R>
     @Override
     public final Observable<R> getResult()
     {
-        return result.asObservable();
+        return result;
     }
 
     @Nonnull
     @Override
     public final Observable<Throwable> getError()
     {
-        return error.asObservable();
+        return error;
     }
 
     @Nonnull

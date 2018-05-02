@@ -24,7 +24,7 @@ import com.vaadin.data.HasItems;
 import com.vaadin.data.HasValue;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.ProgressBar;
-import rx.Observable;
+import io.reactivex.Observable;
 
 /**
  * List of all component properties

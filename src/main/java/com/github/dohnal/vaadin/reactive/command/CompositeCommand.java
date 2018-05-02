@@ -22,9 +22,9 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
-import rx.Completable;
-import rx.Observable;
-import rx.Subscription;
+import io.reactivex.Completable;
+import io.reactivex.Observable;
+import io.reactivex.disposables.Disposable;
 
 /**
  * Composite implementation of {@link ReactiveCommand}
@@ -74,22 +74,22 @@ public final class CompositeCommand<T, R> extends AbstractCommand<T, List<R>>
         handleStart();
 
         // Zip child results and subscribe them to result subject
-        final Subscription resultSubscription = Observable
+        final Disposable resultSubscription = Observable
                 .zip(commands.stream()
                                 .map(command -> command.getResult().take(1))
                                 .collect(Collectors.toList()),
                         results -> Arrays.asList((R[]) results))
-                .subscribe(result);
+                .subscribe(result::onNext);
 
         // Merge child errors and subscribe them to error subject
-        final Subscription errorSubscription = Observable
+        final Disposable errorSubscription = Observable
                 .merge(commands.stream()
                         .map(command -> command.getError().take(1))
                         .collect(Collectors.toList()))
-                .subscribe(error);
+                .subscribe(error::onNext);
 
         // Compute progress from child commands and subscribe them to progress property
-        final Subscription progressSubscription = Observable
+        final Disposable progressSubscription = Observable
                 .combineLatest(commands.stream()
                                 .map(command -> command.getProgress()
                                         .withLatestFrom(command.isExecuting().take(3), AbstractMap.SimpleImmutableEntry::new)
@@ -108,11 +108,11 @@ public final class CompositeCommand<T, R> extends AbstractCommand<T, List<R>>
                 .collect(Collectors.toList()), values -> values);
 
         // After all child commands finished execution, handle complete
-        final Subscription isExecutingSubscription = execution
+        final Disposable isExecutingSubscription = execution
                 .subscribe(values -> {}, error -> {}, () -> {
-                    resultSubscription.unsubscribe();
-                    errorSubscription.unsubscribe();
-                    progressSubscription.unsubscribe();
+                    resultSubscription.dispose();
+                    errorSubscription.dispose();
+                    progressSubscription.dispose();
 
                     this.handleComplete();
                 });

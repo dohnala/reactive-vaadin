@@ -18,15 +18,15 @@ import java.util.function.Consumer;
 
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
 import com.github.dohnal.vaadin.reactive.command.BaseCommandSpecification;
+import io.reactivex.Observable;
+import io.reactivex.observers.TestObserver;
+import io.reactivex.schedulers.TestScheduler;
+import io.reactivex.subjects.PublishSubject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import rx.Observable;
-import rx.schedulers.Schedulers;
-import rx.schedulers.TestScheduler;
-import rx.subjects.TestSubject;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -107,9 +107,11 @@ public interface SyncCommandFromConsumerSpecification extends BaseCommandSpecifi
             @DisplayName("Result observable should not emit any value")
             public void testResult()
             {
-                getCommand().getResult().test()
-                        .perform(this::execute)
-                        .assertNoValues();
+                final TestObserver<Void> testObserver = getCommand().getResult().test();
+
+                execute();
+
+                testObserver.assertNoValues();
             }
 
             @Test
@@ -218,7 +220,7 @@ public interface SyncCommandFromConsumerSpecification extends BaseCommandSpecifi
     {
         private Consumer<Integer> execution;
         private TestScheduler testScheduler;
-        private TestSubject<Boolean> testSubject;
+        private PublishSubject<Boolean> testSubject;
         private ReactiveCommand<Integer, Void> command;
 
         @BeforeEach
@@ -226,8 +228,9 @@ public interface SyncCommandFromConsumerSpecification extends BaseCommandSpecifi
         protected void create()
         {
             execution = Mockito.mock(Consumer.class);
-            testScheduler = Schedulers.test();
-            testSubject = TestSubject.create(testScheduler);
+            testScheduler = new TestScheduler();
+            testSubject = PublishSubject.create();
+            testSubject.observeOn(testScheduler);
             command = ReactiveCommand.create(testSubject, execution);
         }
 

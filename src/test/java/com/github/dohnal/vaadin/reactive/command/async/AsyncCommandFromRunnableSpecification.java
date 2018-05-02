@@ -18,15 +18,15 @@ import java.util.concurrent.Executor;
 
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
 import com.github.dohnal.vaadin.reactive.command.BaseCommandSpecification;
+import io.reactivex.Observable;
+import io.reactivex.observers.TestObserver;
+import io.reactivex.schedulers.TestScheduler;
+import io.reactivex.subjects.PublishSubject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import rx.Observable;
-import rx.schedulers.Schedulers;
-import rx.schedulers.TestScheduler;
-import rx.subjects.TestSubject;
 
 /**
  * Tests for {@link ReactiveCommand} created by
@@ -83,16 +83,18 @@ public interface AsyncCommandFromRunnableSpecification extends BaseCommandSpecif
             @Override
             protected void execute()
             {
-                command.execute().await();
+                command.execute().blockingAwait();
             }
 
             @Test
             @DisplayName("Result observable should not emit any value")
             public void testResult()
             {
-                getCommand().getResult().test()
-                        .perform(this::execute)
-                        .assertNoValues();
+                final TestObserver<Void> testObserver = getCommand().getResult().test();
+
+                execute();
+
+                testObserver.assertNoValues();
             }
 
             @Test
@@ -127,7 +129,7 @@ public interface AsyncCommandFromRunnableSpecification extends BaseCommandSpecif
             @Override
             protected void execute()
             {
-                command.execute().await();
+                command.execute().blockingAwait();
             }
 
             @Nonnull
@@ -161,7 +163,7 @@ public interface AsyncCommandFromRunnableSpecification extends BaseCommandSpecif
             @Override
             protected void execute()
             {
-                command.execute().await();
+                command.execute().blockingAwait();
             }
         }
 
@@ -179,7 +181,7 @@ public interface AsyncCommandFromRunnableSpecification extends BaseCommandSpecif
             @Override
             protected void execute()
             {
-                command.execute().await();
+                command.execute().blockingAwait();
             }
         }
     }
@@ -189,15 +191,16 @@ public interface AsyncCommandFromRunnableSpecification extends BaseCommandSpecif
     {
         private Runnable execution;
         private TestScheduler testScheduler;
-        private TestSubject<Boolean> testSubject;
+        private PublishSubject<Boolean> testSubject;
         private ReactiveCommand<Void, Void> command;
 
         @BeforeEach
         protected void create()
         {
             execution = Mockito.mock(Runnable.class);
-            testScheduler = Schedulers.test();
-            testSubject = TestSubject.create(testScheduler);
+            testScheduler = new TestScheduler();
+            testSubject = PublishSubject.create();
+            testSubject.observeOn(testScheduler);
             command = ReactiveCommand.createAsync(testSubject, execution);
         }
 
@@ -267,7 +270,7 @@ public interface AsyncCommandFromRunnableSpecification extends BaseCommandSpecif
             @Override
             protected void execute()
             {
-                command.execute().await();
+                command.execute().blockingAwait();
             }
 
             @Test
@@ -336,9 +339,11 @@ public interface AsyncCommandFromRunnableSpecification extends BaseCommandSpecif
             @DisplayName("Result observable should not emit any value")
             public void testResult()
             {
-                getCommand().getResult().test()
-                        .perform(this::execute)
-                        .assertNoValues();
+                final TestObserver<Void> testObserver = getCommand().getResult().test();
+
+                execute();
+
+                testObserver.assertNoValues();
             }
 
             @Test
@@ -436,15 +441,16 @@ public interface AsyncCommandFromRunnableSpecification extends BaseCommandSpecif
         private TestExecutor testExecutor = new TestExecutor();
         private Runnable execution;
         private TestScheduler testScheduler;
-        private TestSubject<Boolean> testSubject;
+        private PublishSubject<Boolean> testSubject;
         private ReactiveCommand<Void, Void> command;
 
         @BeforeEach
         protected void create()
         {
             execution = Mockito.mock(Runnable.class);
-            testScheduler = Schedulers.test();
-            testSubject = TestSubject.create(testScheduler);
+            testScheduler = new TestScheduler();
+            testSubject = PublishSubject.create();
+            testSubject.observeOn(testScheduler);
             command = ReactiveCommand.createAsync(testSubject, execution, testExecutor);
         }
 

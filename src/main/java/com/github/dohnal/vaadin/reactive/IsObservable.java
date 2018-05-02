@@ -15,7 +15,7 @@ package com.github.dohnal.vaadin.reactive;
 
 import javax.annotation.Nonnull;
 
-import rx.Observable;
+import io.reactivex.Observable;
 
 /**
  * Represents something which can be observed

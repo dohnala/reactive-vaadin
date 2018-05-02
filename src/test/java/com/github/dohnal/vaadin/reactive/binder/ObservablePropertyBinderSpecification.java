@@ -15,19 +15,19 @@ package com.github.dohnal.vaadin.reactive.binder;
 
 import javax.annotation.Nonnull;
 
-import com.github.dohnal.vaadin.reactive.Disposable;
 import com.github.dohnal.vaadin.reactive.IsObservable;
 import com.github.dohnal.vaadin.reactive.ObservablePropertyBinder;
 import com.github.dohnal.vaadin.reactive.ReactiveBinder;
 import com.github.dohnal.vaadin.reactive.ReactiveProperty;
+import io.reactivex.Observable;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.observers.TestObserver;
+import io.reactivex.schedulers.TestScheduler;
+import io.reactivex.subjects.PublishSubject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import rx.Observable;
-import rx.schedulers.Schedulers;
-import rx.schedulers.TestScheduler;
-import rx.subjects.TestSubject;
 
 /**
  * Specification for binding observable property by {@link ObservablePropertyBinder}
@@ -39,15 +39,16 @@ public interface ObservablePropertyBinderSpecification
     abstract class WhenBindObservablePropertyToObservableSpecification implements ReactiveBinder
     {
         private TestScheduler testScheduler;
-        private TestSubject<Integer> sourceObservable;
+        private PublishSubject<Integer> sourceObservable;
         private ReactiveProperty<Integer> property;
         private Disposable disposable;
 
         @BeforeEach
         protected void bind()
         {
-            testScheduler = Schedulers.test();
-            sourceObservable = TestSubject.create(testScheduler);
+            testScheduler = new TestScheduler();
+            sourceObservable = PublishSubject.create();
+            sourceObservable.observeOn(testScheduler);
             property = ReactiveProperty.empty();
 
             disposable = bind(property).to(sourceObservable);
@@ -69,12 +70,12 @@ public interface ObservablePropertyBinderSpecification
             @DisplayName("Property value should be set with correct value")
             public void testPropertyValue()
             {
-                property.asObservable().test()
-                        .perform(() -> {
-                            sourceObservable.onNext(7);
-                            testScheduler.triggerActions();
-                        })
-                        .assertValue(7);
+                final TestObserver<Integer> testObserver = property.asObservable().test();
+
+                sourceObservable.onNext(7);
+                testScheduler.triggerActions();
+
+                testObserver.assertValue(7);
             }
         }
 
@@ -86,13 +87,13 @@ public interface ObservablePropertyBinderSpecification
             @DisplayName("Property value should not be set")
             public void testPropertyValue()
             {
-                property.asObservable().test()
-                        .perform(() -> {
-                            disposable.dispose();
-                            sourceObservable.onNext(7);
-                            testScheduler.triggerActions();
-                        })
-                        .assertNoValues();
+                final TestObserver<Integer> testObserver = property.asObservable().test();
+
+                disposable.dispose();
+                sourceObservable.onNext(7);
+                testScheduler.triggerActions();
+
+                testObserver.assertNoValues();
             }
         }
     }
@@ -100,15 +101,16 @@ public interface ObservablePropertyBinderSpecification
     abstract class WhenBindObservablePropertyToIsObservableSpecification implements ReactiveBinder
     {
         private TestScheduler testScheduler;
-        private TestSubject<Integer> sourceObservable;
+        private PublishSubject<Integer> sourceObservable;
         private ReactiveProperty<Integer> property;
         private Disposable disposable;
 
         @BeforeEach
         protected void bind()
         {
-            testScheduler = Schedulers.test();
-            sourceObservable = TestSubject.create(testScheduler);
+            testScheduler = new TestScheduler();
+            sourceObservable = PublishSubject.create();
+            sourceObservable.observeOn(testScheduler);
             property = ReactiveProperty.empty();
 
             disposable = bind(property).to(new IsObservable<Integer>()
@@ -138,12 +140,12 @@ public interface ObservablePropertyBinderSpecification
             @DisplayName("Property value should be set with correct value")
             public void testPropertyValue()
             {
-                property.asObservable().test()
-                        .perform(() -> {
-                            sourceObservable.onNext(7);
-                            testScheduler.triggerActions();
-                        })
-                        .assertValue(7);
+                final TestObserver<Integer> testObserver = property.asObservable().test();
+
+                sourceObservable.onNext(7);
+                testScheduler.triggerActions();
+
+                testObserver.assertValue(7);
             }
         }
 
@@ -155,13 +157,13 @@ public interface ObservablePropertyBinderSpecification
             @DisplayName("Property value should not be set")
             public void testPropertyValue()
             {
-                property.asObservable().test()
-                        .perform(() -> {
-                            disposable.dispose();
-                            sourceObservable.onNext(7);
-                            testScheduler.triggerActions();
-                        })
-                        .assertNoValues();
+                final TestObserver<Integer> testObserver = property.asObservable().test();
+
+                disposable.dispose();
+                sourceObservable.onNext(7);
+                testScheduler.triggerActions();
+
+                testObserver.assertNoValues();
             }
         }
     }
@@ -205,9 +207,11 @@ public interface ObservablePropertyBinderSpecification
             @DisplayName("Property value should be set with correct value")
             public void testPropertyValue()
             {
-                property.asObservable().test()
-                        .perform(() -> sourceProperty.setValue(7))
-                        .assertValue(7);
+                final TestObserver<Integer> testObserver = property.asObservable().test();
+
+                sourceProperty.setValue(7);
+
+                testObserver.assertValue(7);
             }
         }
 
@@ -219,9 +223,11 @@ public interface ObservablePropertyBinderSpecification
             @DisplayName("Source property value should be set with correct value")
             public void testSourcePropertyValue()
             {
-                sourceProperty.asObservable().test()
-                        .perform(() -> property.setValue(7))
-                        .assertValue(7);
+                final TestObserver<Integer> testObserver = sourceProperty.asObservable().test();
+
+                property.setValue(7);
+
+                testObserver.assertValue(7);
             }
         }
 
@@ -233,12 +239,12 @@ public interface ObservablePropertyBinderSpecification
             @DisplayName("Property value should not be set")
             public void testPropertyValue()
             {
-                property.asObservable().test()
-                        .perform(() -> {
-                            disposable.dispose();
-                            sourceProperty.setValue(7);
-                        })
-                        .assertNoValues();
+                final TestObserver<Integer> testObserver = property.asObservable().test();
+
+                disposable.dispose();
+                sourceProperty.setValue(7);
+
+                testObserver.assertNoValues();
             }
         }
 
@@ -250,12 +256,12 @@ public interface ObservablePropertyBinderSpecification
             @DisplayName("Source property value should not be set")
             public void testPropertyValue()
             {
-                sourceProperty.asObservable().test()
-                        .perform(() -> {
-                            disposable.dispose();
-                            property.setValue(7);
-                        })
-                        .assertNoValues();
+                final TestObserver<Integer> testObserver = sourceProperty.asObservable().test();
+
+                disposable.dispose();
+                property.setValue(7);
+
+                testObserver.assertNoValues();
             }
         }
     }

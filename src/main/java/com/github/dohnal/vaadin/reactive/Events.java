@@ -16,7 +16,7 @@ package com.github.dohnal.vaadin.reactive;
 import javax.annotation.Nonnull;
 import java.util.Objects;
 
-import rx.Observable;
+import io.reactivex.Observable;
 
 /**
  * List of all events

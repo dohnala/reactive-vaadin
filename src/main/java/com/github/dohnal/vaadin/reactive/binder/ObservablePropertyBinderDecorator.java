@@ -16,11 +16,11 @@ package com.github.dohnal.vaadin.reactive.binder;
 import javax.annotation.Nonnull;
 import java.util.Objects;
 
-import com.github.dohnal.vaadin.reactive.Disposable;
 import com.github.dohnal.vaadin.reactive.IsObservable;
 import com.github.dohnal.vaadin.reactive.ObservableProperty;
 import com.github.dohnal.vaadin.reactive.ObservablePropertyBinder;
-import rx.Observable;
+import io.reactivex.Observable;
+import io.reactivex.disposables.Disposable;
 
 /**
  * Decorator for {@link ObservablePropertyBinder} which can be extended to provide behavior extensions

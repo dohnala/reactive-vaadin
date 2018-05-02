@@ -14,11 +14,9 @@
 package com.github.dohnal.vaadin.mvvm;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-import com.github.dohnal.vaadin.reactive.Disposable;
 import com.github.dohnal.vaadin.reactive.ObservableBinder;
 import com.github.dohnal.vaadin.reactive.ObservableProperty;
 import com.github.dohnal.vaadin.reactive.ObservablePropertyBinder;
@@ -29,7 +27,8 @@ import com.github.dohnal.vaadin.reactive.binder.ObservableBinderDecorator;
 import com.github.dohnal.vaadin.reactive.binder.ObservablePropertyBinderDecorator;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.UI;
-import rx.Observable;
+import io.reactivex.Observable;
+import io.reactivex.disposables.Disposable;
 
 /**
  * Base class for all view in MVVM pattern
@@ -172,7 +171,7 @@ public abstract class AbstractView<M extends AbstractViewModel>
             }
 
             @Override
-            public void setValue(final @Nullable T value)
+            public void setValue(final @Nonnull T value)
             {
                 withUIAccess(() -> property.setValue(value));
             }

@@ -16,19 +16,18 @@ package com.github.dohnal.vaadin.reactive.binder;
 import javax.annotation.Nonnull;
 import java.util.function.Consumer;
 
-import com.github.dohnal.vaadin.reactive.Disposable;
 import com.github.dohnal.vaadin.reactive.IsObservable;
 import com.github.dohnal.vaadin.reactive.ObservableBinder;
 import com.github.dohnal.vaadin.reactive.ReactiveBinder;
+import io.reactivex.Observable;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.TestScheduler;
+import io.reactivex.subjects.PublishSubject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import rx.Observable;
-import rx.schedulers.Schedulers;
-import rx.schedulers.TestScheduler;
-import rx.subjects.TestSubject;
 
 /**
  * Specification for binding observable by {@link ObservableBinder}
@@ -40,7 +39,7 @@ public interface ObservableBinderSpecification
     abstract class WhenBindObservableToConsumerSpecification implements ReactiveBinder
     {
         private TestScheduler testScheduler;
-        private TestSubject<Integer> observable;
+        private PublishSubject<Integer> observable;
         private Consumer<Integer> consumer;
         private Disposable disposable;
 
@@ -48,8 +47,9 @@ public interface ObservableBinderSpecification
         @SuppressWarnings("unchecked")
         protected void bind()
         {
-            testScheduler = Schedulers.test();
-            observable = TestSubject.create(testScheduler);
+            testScheduler = new TestScheduler();
+            observable = PublishSubject.create();
+            observable.observeOn(testScheduler);
             consumer = Mockito.mock(Consumer.class);
 
             disposable = when(observable).then(consumer);
@@ -99,7 +99,7 @@ public interface ObservableBinderSpecification
     abstract class WhenBindObservableToRunnableSpecification implements ReactiveBinder
     {
         private TestScheduler testScheduler;
-        private TestSubject<Integer> observable;
+        private PublishSubject<Integer> observable;
         private Runnable runnable;
         private Disposable disposable;
 
@@ -107,8 +107,9 @@ public interface ObservableBinderSpecification
         @SuppressWarnings("unchecked")
         protected void bind()
         {
-            testScheduler = Schedulers.test();
-            observable = TestSubject.create(testScheduler);
+            testScheduler = new TestScheduler();
+            observable = PublishSubject.create();
+            observable.observeOn(testScheduler);
             runnable = Mockito.mock(Runnable.class);
 
             disposable = when(observable).then(runnable);
@@ -158,7 +159,7 @@ public interface ObservableBinderSpecification
     abstract class WhenBindIsObservableToConsumerSpecification implements ReactiveBinder
     {
         private TestScheduler testScheduler;
-        private TestSubject<Integer> observable;
+        private PublishSubject<Integer> observable;
         private Consumer<Integer> consumer;
         private Disposable disposable;
 
@@ -166,8 +167,9 @@ public interface ObservableBinderSpecification
         @SuppressWarnings("unchecked")
         protected void bind()
         {
-            testScheduler = Schedulers.test();
-            observable = TestSubject.create(testScheduler);
+            testScheduler = new TestScheduler();
+            observable = PublishSubject.create();
+            observable.observeOn(testScheduler);
             consumer = Mockito.mock(Consumer.class);
 
             disposable = when(new IsObservable<Integer>()
@@ -225,7 +227,7 @@ public interface ObservableBinderSpecification
     abstract class WhenBindIsObservableToRunnableSpecification implements ReactiveBinder
     {
         private TestScheduler testScheduler;
-        private TestSubject<Integer> observable;
+        private PublishSubject<Integer> observable;
         private Runnable runnable;
         private Disposable disposable;
 
@@ -233,8 +235,9 @@ public interface ObservableBinderSpecification
         @SuppressWarnings("unchecked")
         protected void bind()
         {
-            testScheduler = Schedulers.test();
-            observable = TestSubject.create(testScheduler);
+            testScheduler = new TestScheduler();
+            observable = PublishSubject.create();
+            observable.observeOn(testScheduler);
             runnable = Mockito.mock(Runnable.class);
 
             disposable = when(new IsObservable<Integer>()

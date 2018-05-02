@@ -24,15 +24,15 @@ import com.github.dohnal.vaadin.reactive.AsyncSupplier;
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
 import com.github.dohnal.vaadin.reactive.command.AsyncCommand;
 import com.github.dohnal.vaadin.reactive.command.BaseCommandSpecification;
+import io.reactivex.Observable;
+import io.reactivex.observers.TestObserver;
+import io.reactivex.schedulers.TestScheduler;
+import io.reactivex.subjects.PublishSubject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import rx.Observable;
-import rx.schedulers.Schedulers;
-import rx.schedulers.TestScheduler;
-import rx.subjects.TestSubject;
 
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -111,68 +111,87 @@ public interface CompositeCommandSpecification extends BaseCommandSpecification
             @DisplayName("Result observable should not emit any value")
             public void testResult()
             {
-                getCommand().getResult().test()
-                        .perform(() -> commandA.execute())
-                        .assertNoValues();
+                final TestObserver<List<Integer>> testObserver = getCommand().getResult().test();
+
+                commandA.execute();
+
+                testObserver.assertNoValues();
             }
 
             @Test
             @DisplayName("Error observable should not emit any value")
             public void testError()
             {
-                getCommand().getError().test()
-                        .perform(() -> commandA.execute())
-                        .assertNoValues();
+                final TestObserver<Throwable> testObserver = getCommand().getError().test();
+
+                commandA.execute();
+
+                testObserver.assertNoValues();
             }
 
             @Test
             @DisplayName("CanExecute observable should emit false and true")
             public void testCanExecute()
             {
-                getCommand().canExecute().test()
-                        .assertValuesAndClear(true)
-                        .perform(() -> commandA.execute())
-                        .assertValues(false, true);
+                final TestObserver<Boolean> testObserver = getCommand().canExecute().test();
+
+                testObserver.assertValue(true);
+
+                commandA.execute();
+
+                testObserver.assertValues(true, false, true);
             }
 
             @Test
             @DisplayName("IsExecuting observable should not emit any value")
             public void testIsExecuting()
             {
-                getCommand().isExecuting().test()
-                        .assertValuesAndClear(false)
-                        .perform(() -> commandA.execute())
-                        .assertNoValues();
+                final TestObserver<Boolean> testObserver = getCommand().isExecuting().test();
+
+                testObserver.assertValue(false);
+
+                commandA.execute();
+
+                testObserver.assertValue(false);
             }
 
             @Test
             @DisplayName("ExecutionCount observable should not emit any value")
             public void testExecutionCount()
             {
-                getCommand().getExecutionCount().test()
-                        .assertValuesAndClear(0)
-                        .perform(() -> commandA.execute())
-                        .assertNoValues();
+                final TestObserver<Integer> testObserver = getCommand().getExecutionCount().test();
+
+                testObserver.assertValue(0);
+
+                commandA.execute();
+
+                testObserver.assertValue(0);
             }
 
             @Test
             @DisplayName("HasBeenExecuted observable should not emit any value")
             public void testHasBeenExecuted()
             {
-                getCommand().hasBeenExecuted().test()
-                        .assertValuesAndClear(false)
-                        .perform(() -> commandA.execute())
-                        .assertNoValues();
+                final TestObserver<Boolean> testObserver = getCommand().hasBeenExecuted().test();
+
+                testObserver.assertValue(false);
+
+                commandA.execute();
+
+                testObserver.assertValue(false);
             }
 
             @Test
             @DisplayName("Progress observable should not emit any value")
             public void testProgress()
             {
-                getCommand().getProgress().test()
-                        .assertValuesAndClear(0.0f)
-                        .perform(() -> commandA.execute())
-                        .assertNoValues();
+                final TestObserver<Float> testObserver = getCommand().getProgress().test();
+
+                testObserver.assertValue(0.0f);
+
+                commandA.execute();
+
+                testObserver.assertValue(0.0f);
             }
         }
 
@@ -226,68 +245,88 @@ public interface CompositeCommandSpecification extends BaseCommandSpecification
                 @DisplayName("Result observable should not emit any value")
                 public void testResult()
                 {
-                    getCommand().getResult().test()
-                            .perform(() -> executionResultA.complete(RESULT_A))
-                            .assertNoValues();
+                    final TestObserver<List<Integer>> testObserver = getCommand().getResult().test();
+
+                    executionResultA.complete(RESULT_A);
+
+                    testObserver.assertNoValues();
                 }
 
                 @Test
                 @DisplayName("Error observable should not emit any value")
                 public void testError()
                 {
-                    getCommand().getError().test()
-                            .perform(() -> executionResultA.complete(RESULT_A))
-                            .assertNoValues();
+                    final TestObserver<Throwable> testObserver = getCommand().getError().test();
+
+                    executionResultA.complete(RESULT_A);
+
+                    testObserver.assertNoValues();
                 }
 
                 @Test
                 @DisplayName("CanExecute observable should not emit any value")
                 public void testCanExecute()
                 {
-                    getCommand().canExecute().test()
-                            .assertValuesAndClear(false)
-                            .perform(() -> executionResultA.complete(RESULT_A))
-                            .assertNoValues();
+                    final TestObserver<Boolean> testObserver = getCommand().canExecute().test();
+
+                    testObserver.assertValue(false);
+
+                    executionResultA.complete(RESULT_A);
+
+                    testObserver.assertValue(false);
                 }
 
                 @Test
                 @DisplayName("IsExecuting observable should not emit any value")
                 public void testIsExecuting()
                 {
-                    getCommand().isExecuting().test()
-                            .assertValuesAndClear(true)
-                            .perform(() -> executionResultA.complete(RESULT_A))
-                            .assertNoValues();
+                    final TestObserver<Boolean> testObserver = getCommand().isExecuting().test();
+
+                    testObserver.assertValue(true);
+
+                    executionResultA.complete(RESULT_A);
+
+                    testObserver.assertValue(true);
                 }
 
                 @Test
                 @DisplayName("ExecutionCount observable should not emit any value")
                 public void testExecutionCount()
                 {
-                    getCommand().getExecutionCount().test()
-                            .assertValuesAndClear(0)
-                            .perform(() -> executionResultA.complete(RESULT_A))
-                            .assertNoValues();
+                    final TestObserver<Integer> testObserver = getCommand().getExecutionCount().test();
+
+                    testObserver.assertValue(0);
+
+                    executionResultA.complete(RESULT_A);
+
+                    testObserver.assertValue(0);
                 }
 
                 @Test
                 @DisplayName("HasBeenExecuted observable should not emit any value")
                 public void testHasBeenExecuted()
                 {
-                    getCommand().hasBeenExecuted().test()
-                            .assertValuesAndClear(false)
-                            .perform(() -> executionResultA.complete(RESULT_A))
-                            .assertNoValues();
+                    final TestObserver<Boolean> testObserver = getCommand().hasBeenExecuted().test();
+
+                    testObserver.assertValue(false);
+
+                    executionResultA.complete(RESULT_A);
+
+                    testObserver.assertValue(false);
                 }
 
                 @Test
                 @DisplayName("Progress observable should emit correct value")
                 public void testProgress()
                 {
-                    getCommand().getProgress().test()
-                            .assertValuesAndClear(0.0f)
-                            .perform(() -> executionResultA.complete(RESULT_A))
-                            .assertValue(0.5f);
+                    final TestObserver<Float> testObserver = getCommand().getProgress().test();
+
+                    testObserver.assertValue(0.0f);
+
+                    executionResultA.complete(RESULT_A);
+
+                    testObserver.assertValues(0.0f, 0.5f);
+
                 }
             }
 
@@ -307,68 +346,87 @@ public interface CompositeCommandSpecification extends BaseCommandSpecification
                 @DisplayName("Result observable should not emit any value")
                 public void testResult()
                 {
-                    getCommand().getResult().test()
-                            .perform(() -> executionResultA.completeExceptionally(ERROR_A))
-                            .assertNoValues();
+                    final TestObserver<List<Integer>> testObserver = getCommand().getResult().test();
+
+                    executionResultA.completeExceptionally(ERROR_A);
+
+                    testObserver.assertNoValues();
                 }
 
                 @Test
                 @DisplayName("Error observable should emit correct error")
                 public void testError()
                 {
-                    getCommand().getError().test()
-                            .perform(() -> executionResultA.completeExceptionally(ERROR_A))
-                            .assertValue(ERROR_A);
+                    final TestObserver<Throwable> testObserver = getCommand().getError().test();
+
+                    executionResultA.completeExceptionally(ERROR_A);
+
+                    testObserver.assertValue(ERROR_A);
                 }
 
                 @Test
                 @DisplayName("CanExecute observable should not emit any value")
                 public void testCanExecute()
                 {
-                    getCommand().canExecute().test()
-                            .assertValuesAndClear(false)
-                            .perform(() -> executionResultA.completeExceptionally(ERROR_A))
-                            .assertNoValues();
+                    final TestObserver<Boolean> testObserver = getCommand().canExecute().test();
+
+                    testObserver.assertValue(false);
+
+                    executionResultA.completeExceptionally(ERROR_A);
+
+                    testObserver.assertValue(false);
                 }
 
                 @Test
                 @DisplayName("IsExecuting observable should not emit any value")
                 public void testIsExecuting()
                 {
-                    getCommand().isExecuting().test()
-                            .assertValuesAndClear(true)
-                            .perform(() -> executionResultA.completeExceptionally(ERROR_A))
-                            .assertNoValues();
+                    final TestObserver<Boolean> testObserver = getCommand().isExecuting().test();
+
+                    testObserver.assertValue(true);
+
+                    executionResultA.completeExceptionally(ERROR_A);
+
+                    testObserver.assertValue(true);
                 }
 
                 @Test
                 @DisplayName("ExecutionCount observable should not emit any value")
                 public void testExecutionCount()
                 {
-                    getCommand().getExecutionCount().test()
-                            .assertValuesAndClear(0)
-                            .perform(() -> executionResultA.completeExceptionally(ERROR_A))
-                            .assertNoValues();
+                    final TestObserver<Integer> testObserver = getCommand().getExecutionCount().test();
+
+                    testObserver.assertValue(0);
+
+                    executionResultA.completeExceptionally(ERROR_A);
+
+                    testObserver.assertValue(0);
                 }
 
                 @Test
                 @DisplayName("HasBeenExecuted observable should not emit any value")
                 public void testHasBeenExecuted()
                 {
-                    getCommand().hasBeenExecuted().test()
-                            .assertValuesAndClear(false)
-                            .perform(() -> executionResultA.completeExceptionally(ERROR_A))
-                            .assertNoValues();
+                    final TestObserver<Boolean> testObserver = getCommand().hasBeenExecuted().test();
+
+                    testObserver.assertValue(false);
+
+                    executionResultA.completeExceptionally(ERROR_A);
+
+                    testObserver.assertValue(false);
                 }
 
                 @Test
                 @DisplayName("Progress observable should emit correct value")
                 public void testProgress()
                 {
-                    getCommand().getProgress().test()
-                            .assertValuesAndClear(0.0f)
-                            .perform(() -> executionResultA.completeExceptionally(ERROR_A))
-                            .assertValue(0.5f);
+                    final TestObserver<Float> testObserver = getCommand().getProgress().test();
+
+                    testObserver.assertValue(0.0f);
+
+                    executionResultA.completeExceptionally(ERROR_A);
+
+                    testObserver.assertValues(0.0f, 0.5f);
                 }
             }
 
@@ -389,68 +447,87 @@ public interface CompositeCommandSpecification extends BaseCommandSpecification
                 @DisplayName("Result observable should not emit any value")
                 public void testResult()
                 {
-                    getCommand().getResult().test()
-                            .perform(() -> commandA.execute())
-                            .assertNoValues();
+                    final TestObserver<List<Integer>> testObserver = getCommand().getResult().test();
+
+                    commandA.execute();
+
+                    testObserver.assertNoValues();
                 }
 
                 @Test
                 @DisplayName("Error observable should not emit any value")
                 public void testError()
                 {
-                    getCommand().getError().test()
-                            .perform(() -> commandA.execute())
-                            .assertNoValues();
+                    final TestObserver<Throwable> testObserver = getCommand().getError().test();
+
+                    commandA.execute();
+
+                    testObserver.assertNoValues();
                 }
 
                 @Test
                 @DisplayName("CanExecute observable should not emit any value")
                 public void testCanExecute()
                 {
-                    getCommand().canExecute().test()
-                            .assertValuesAndClear(false)
-                            .perform(() -> commandA.execute())
-                            .assertNoValues();
+                    final TestObserver<Boolean> testObserver = getCommand().canExecute().test();
+
+                    testObserver.assertValue(false);
+
+                    commandA.execute();
+
+                    testObserver.assertValue(false);
                 }
 
                 @Test
                 @DisplayName("IsExecuting observable should not emit any value")
                 public void testIsExecuting()
                 {
-                    getCommand().isExecuting().test()
-                            .assertValuesAndClear(true)
-                            .perform(() -> commandA.execute())
-                            .assertNoValues();
+                    final TestObserver<Boolean> testObserver = getCommand().isExecuting().test();
+
+                    testObserver.assertValue(true);
+
+                    commandA.execute();
+
+                    testObserver.assertValue(true);
                 }
 
                 @Test
                 @DisplayName("ExecutionCount observable should not emit any value")
                 public void testExecutionCount()
                 {
-                    getCommand().getExecutionCount().test()
-                            .assertValuesAndClear(0)
-                            .perform(() -> commandA.execute())
-                            .assertNoValues();
+                    final TestObserver<Integer> testObserver = getCommand().getExecutionCount().test();
+
+                    testObserver.assertValue(0);
+
+                    commandA.execute();
+
+                    testObserver.assertValue(0);
                 }
 
                 @Test
                 @DisplayName("HasBeenExecuted observable should not emit any value")
                 public void testHasBeenExecuted()
                 {
-                    getCommand().hasBeenExecuted().test()
-                            .assertValuesAndClear(false)
-                            .perform(() -> commandA.execute())
-                            .assertNoValues();
+                    final TestObserver<Boolean> testObserver = getCommand().hasBeenExecuted().test();
+
+                    testObserver.assertValue(false);
+
+                    commandA.execute();
+
+                    testObserver.assertValue(false);
                 }
 
                 @Test
                 @DisplayName("Progress observable should not emit any value")
                 public void testProgress()
                 {
-                    getCommand().getProgress().test()
-                            .assertValuesAndClear(0.5f)
-                            .perform(() -> commandA.execute())
-                            .assertNoValues();
+                    final TestObserver<Float> testObserver = getCommand().getProgress().test();
+
+                    testObserver.assertValue(0.5f);
+
+                    commandA.execute();
+
+                    testObserver.assertValue(0.5f);
                 }
             }
 
@@ -483,12 +560,15 @@ public interface CompositeCommandSpecification extends BaseCommandSpecification
                 }
 
                 @Test
+                @SuppressWarnings("unchecked")
                 @DisplayName("Result observable should emit correct result")
                 public void testResult()
                 {
-                    final List<Integer> result = getCommand().getResult().test()
-                            .perform(this::finishExecution)
-                            .getOnNextEvents().get(0);
+                    final TestObserver<List<Integer>> testObserver = getCommand().getResult().test();
+
+                    finishExecution();
+
+                    final List<Integer> result = (List) testObserver.getEvents().get(0).get(0);
 
                     assertIterableEquals(RESULT, result);
                 }
@@ -497,10 +577,13 @@ public interface CompositeCommandSpecification extends BaseCommandSpecification
                 @DisplayName("Progress observable should emit correct values")
                 public void testProgress()
                 {
-                    getCommand().getProgress().test()
-                            .assertValuesAndClear(0.0f)
-                            .perform(this::finishExecution)
-                            .assertValues(0.5f, 1.0f);
+                    final TestObserver<Float> testObserver = getCommand().getProgress().test();
+
+                    testObserver.assertValue(0.0f);
+
+                    finishExecution();
+
+                    testObserver.assertValues(0.0f, 0.5f, 1.0f);
                 }
             }
 
@@ -542,10 +625,13 @@ public interface CompositeCommandSpecification extends BaseCommandSpecification
                 @DisplayName("Progress observable should emit correct values")
                 public void testProgress()
                 {
-                    getCommand().getProgress().test()
-                            .assertValuesAndClear(0.0f)
-                            .perform(this::finishExecution)
-                            .assertValues(0.5f, 1.0f);
+                    final TestObserver<Float> testObserver = getCommand().getProgress().test();
+
+                    testObserver.assertValue(0.0f);
+
+                    finishExecution();
+
+                    testObserver.assertValues(0.0f, 0.5f, 1.0f);
                 }
             }
 
@@ -587,19 +673,24 @@ public interface CompositeCommandSpecification extends BaseCommandSpecification
                 @DisplayName("Error observable should emit correct errors")
                 public void testError()
                 {
-                    getCommand().getError().test()
-                            .perform(this::finishExecution)
-                            .assertValues(ERROR_A, ERROR_B);
+                    final TestObserver<Throwable> testObserver = getCommand().getError().test();
+
+                    finishExecution();
+
+                    testObserver.assertValues(ERROR_A, ERROR_B);
                 }
 
                 @Test
                 @DisplayName("Progress observable should emit correct values")
                 public void testProgress()
                 {
-                    getCommand().getProgress().test()
-                            .assertValuesAndClear(0.0f)
-                            .perform(this::finishExecution)
-                            .assertValues(0.5f, 1.0f);
+                    final TestObserver<Float> testObserver = getCommand().getProgress().test();
+
+                    testObserver.assertValue(0.0f);
+
+                    finishExecution();
+
+                    testObserver.assertValues(0.0f, 0.5f, 1.0f);
                 }
             }
         }
@@ -627,68 +718,87 @@ public interface CompositeCommandSpecification extends BaseCommandSpecification
             @DisplayName("Result observable should not emit any value")
             public void testResult()
             {
-                getCommand().getResult().test()
-                        .perform(() -> commandA.execute())
-                        .assertNoValues();
+                final TestObserver<List<Integer>> testObserver = getCommand().getResult().test();
+
+                commandA.execute();
+
+                testObserver.assertNoValues();
             }
 
             @Test
             @DisplayName("Error observable should not emit any value")
             public void testError()
             {
-                getCommand().getError().test()
-                        .perform(() -> commandA.execute())
-                        .assertNoValues();
+                final TestObserver<Throwable> testObserver = getCommand().getError().test();
+
+                commandA.execute();
+
+                testObserver.assertNoValues();
             }
 
             @Test
             @DisplayName("CanExecute observable should emit false and true")
             public void testCanExecute()
             {
-                getCommand().canExecute().test()
-                        .assertValuesAndClear(true)
-                        .perform(() -> commandA.execute())
-                        .assertValues(false, true);
+                final TestObserver<Boolean> testObserver = getCommand().canExecute().test();
+
+                testObserver.assertValue(true);
+
+                commandA.execute();
+
+                testObserver.assertValues(true, false, true);
             }
 
             @Test
             @DisplayName("IsExecuting observable should not emit any value")
             public void testIsExecuting()
             {
-                getCommand().isExecuting().test()
-                        .assertValuesAndClear(false)
-                        .perform(() -> commandA.execute())
-                        .assertNoValues();
+                final TestObserver<Boolean> testObserver = getCommand().isExecuting().test();
+
+                testObserver.assertValue(false);
+
+                commandA.execute();
+
+                testObserver.assertValue(false);
             }
 
             @Test
             @DisplayName("ExecutionCount observable should not emit any value")
             public void testExecutionCount()
             {
-                getCommand().getExecutionCount().test()
-                        .assertValuesAndClear(1)
-                        .perform(() -> commandA.execute())
-                        .assertNoValues();
+                final TestObserver<Integer> testObserver = getCommand().getExecutionCount().test();
+
+                testObserver.assertValue(1);
+
+                commandA.execute();
+
+                testObserver.assertValue(1);
             }
 
             @Test
             @DisplayName("HasBeenExecuted observable should not emit any value")
             public void testHasBeenExecuted()
             {
-                getCommand().hasBeenExecuted().test()
-                        .assertValuesAndClear(true)
-                        .perform(() -> commandA.execute())
-                        .assertNoValues();
+                final TestObserver<Boolean> testObserver = getCommand().hasBeenExecuted().test();
+
+                testObserver.assertValue(true);
+
+                commandA.execute();
+
+                testObserver.assertValue(true);
             }
 
             @Test
             @DisplayName("Progress observable should not emit any value")
             public void testProgress()
             {
-                getCommand().getProgress().test()
-                        .assertValuesAndClear(1.0f)
-                        .perform(() -> commandA.execute())
-                        .assertNoValues();
+                final TestObserver<Float> testObserver = getCommand().getProgress().test();
+
+                testObserver.assertValue(1.0f);
+
+                commandA.execute();
+
+                testObserver.assertValue(1.0f);
             }
         }
 
@@ -715,68 +825,87 @@ public interface CompositeCommandSpecification extends BaseCommandSpecification
             @DisplayName("Result observable should not emit any value")
             public void testResult()
             {
-                getCommand().getResult().test()
-                        .perform(() -> commandA.execute())
-                        .assertNoValues();
+                final TestObserver<List<Integer>> testObserver = getCommand().getResult().test();
+
+                commandA.execute();
+
+                testObserver.assertNoValues();
             }
 
             @Test
             @DisplayName("Error observable should not emit any value")
             public void testError()
             {
-                getCommand().getError().test()
-                        .perform(() -> commandA.execute())
-                        .assertNoValues();
+                final TestObserver<Throwable> testObserver = getCommand().getError().test();
+
+                commandA.execute();
+
+                testObserver.assertNoValues();
             }
 
             @Test
             @DisplayName("CanExecute observable should emit false and true")
             public void testCanExecute()
             {
-                getCommand().canExecute().test()
-                        .assertValuesAndClear(true)
-                        .perform(() -> commandA.execute())
-                        .assertValues(false, true);
+                final TestObserver<Boolean> testObserver = getCommand().canExecute().test();
+
+                testObserver.assertValue(true);
+
+                commandA.execute();
+
+                testObserver.assertValues(true, false, true);
             }
 
             @Test
             @DisplayName("IsExecuting observable should not emit any value")
             public void testIsExecuting()
             {
-                getCommand().isExecuting().test()
-                        .assertValuesAndClear(false)
-                        .perform(() -> commandA.execute())
-                        .assertNoValues();
+                final TestObserver<Boolean> testObserver = getCommand().isExecuting().test();
+
+                testObserver.assertValue(false);
+
+                commandA.execute();
+
+                testObserver.assertValue(false);
             }
 
             @Test
             @DisplayName("ExecutionCount observable should not emit any value")
             public void testExecutionCount()
             {
-                getCommand().getExecutionCount().test()
-                        .assertValuesAndClear(1)
-                        .perform(() -> commandA.execute())
-                        .assertNoValues();
+                final TestObserver<Integer> testObserver = getCommand().getExecutionCount().test();
+
+                testObserver.assertValue(1);
+
+                commandA.execute();
+
+                testObserver.assertValue(1);
             }
 
             @Test
             @DisplayName("HasBeenExecuted observable should not emit any value")
             public void testHasBeenExecuted()
             {
-                getCommand().hasBeenExecuted().test()
-                        .assertValuesAndClear(true)
-                        .perform(() -> commandA.execute())
-                        .assertNoValues();
+                final TestObserver<Boolean> testObserver = getCommand().hasBeenExecuted().test();
+
+                testObserver.assertValue(true);
+
+                commandA.execute();
+
+                testObserver.assertValue(true);
             }
 
             @Test
             @DisplayName("Progress observable should not emit any value")
             public void testProgress()
             {
-                getCommand().getProgress().test()
-                        .assertValuesAndClear(1.0f)
-                        .perform(() -> commandA.execute())
-                        .assertNoValues();
+                final TestObserver<Float> testObserver = getCommand().getProgress().test();
+
+                testObserver.assertValue(1.0f);
+
+                commandA.execute();
+
+                testObserver.assertValue(1.0f);
             }
         }
 
@@ -909,68 +1038,87 @@ public interface CompositeCommandSpecification extends BaseCommandSpecification
             @DisplayName("Result observable should not emit any value")
             public void testResult()
             {
-                getCommand().getResult().test()
-                        .perform(() -> commandA.execute(INPUT))
-                        .assertNoValues();
+                final TestObserver<List<Integer>> testObserver = getCommand().getResult().test();
+
+                commandA.execute(INPUT);
+
+                testObserver.assertNoValues();
             }
 
             @Test
             @DisplayName("Error observable should not emit any value")
             public void testError()
             {
-                getCommand().getError().test()
-                        .perform(() -> commandA.execute(INPUT))
-                        .assertNoValues();
+                final TestObserver<Throwable> testObserver = getCommand().getError().test();
+
+                commandA.execute(INPUT);
+
+                testObserver.assertNoValues();
             }
 
             @Test
             @DisplayName("CanExecute observable should emit false and true")
             public void testCanExecute()
             {
-                getCommand().canExecute().test()
-                        .assertValuesAndClear(true)
-                        .perform(() -> commandA.execute(INPUT))
-                        .assertValues(false, true);
+                final TestObserver<Boolean> testObserver = getCommand().canExecute().test();
+
+                testObserver.assertValue(true);
+
+                commandA.execute(INPUT);
+
+                testObserver.assertValues(true, false, true);
             }
 
             @Test
             @DisplayName("IsExecuting observable should not emit any value")
             public void testIsExecuting()
             {
-                getCommand().isExecuting().test()
-                        .assertValuesAndClear(false)
-                        .perform(() -> commandA.execute(INPUT))
-                        .assertNoValues();
+                final TestObserver<Boolean> testObserver = getCommand().isExecuting().test();
+
+                testObserver.assertValue(false);
+
+                commandA.execute(INPUT);
+
+                testObserver.assertValue(false);
             }
 
             @Test
             @DisplayName("ExecutionCount observable should not emit any value")
             public void testExecutionCount()
             {
-                getCommand().getExecutionCount().test()
-                        .assertValuesAndClear(0)
-                        .perform(() -> commandA.execute(INPUT))
-                        .assertNoValues();
+                final TestObserver<Integer> testObserver = getCommand().getExecutionCount().test();
+
+                testObserver.assertValue(0);
+
+                commandA.execute(INPUT);
+
+                testObserver.assertValue(0);
             }
 
             @Test
             @DisplayName("HasBeenExecuted observable should not emit any value")
             public void testHasBeenExecuted()
             {
-                getCommand().hasBeenExecuted().test()
-                        .assertValuesAndClear(false)
-                        .perform(() -> commandA.execute(INPUT))
-                        .assertNoValues();
+                final TestObserver<Boolean> testObserver = getCommand().hasBeenExecuted().test();
+
+                testObserver.assertValue(false);
+
+                commandA.execute(INPUT);
+
+                testObserver.assertValue(false);
             }
 
             @Test
             @DisplayName("Progress observable should not emit any value")
             public void testProgress()
             {
-                getCommand().getProgress().test()
-                        .assertValuesAndClear(0.0f)
-                        .perform(() -> commandA.execute(INPUT))
-                        .assertNoValues();
+                final TestObserver<Float> testObserver = getCommand().getProgress().test();
+
+                testObserver.assertValue(0.0f);
+
+                commandA.execute(INPUT);
+
+                testObserver.assertValue(0.0f);
             }
         }
 
@@ -1026,68 +1174,88 @@ public interface CompositeCommandSpecification extends BaseCommandSpecification
                 @DisplayName("Result observable should not emit any value")
                 public void testResult()
                 {
-                    getCommand().getResult().test()
-                            .perform(() -> executionResultA.complete(RESULT_A))
-                            .assertNoValues();
+                    final TestObserver<List<Integer>> testObserver = getCommand().getResult().test();
+
+                    executionResultA.complete(RESULT_A);
+
+                    testObserver.assertNoValues();
                 }
 
                 @Test
                 @DisplayName("Error observable should not emit any value")
                 public void testError()
                 {
-                    getCommand().getError().test()
-                            .perform(() -> executionResultA.complete(RESULT_A))
-                            .assertNoValues();
+                    final TestObserver<Throwable> testObserver = getCommand().getError().test();
+
+                    executionResultA.complete(RESULT_A);
+
+                    testObserver.assertNoValues();
                 }
 
                 @Test
                 @DisplayName("CanExecute observable should not emit any value")
                 public void testCanExecute()
                 {
-                    getCommand().canExecute().test()
-                            .assertValuesAndClear(false)
-                            .perform(() -> executionResultA.complete(RESULT_A))
-                            .assertNoValues();
+                    final TestObserver<Boolean> testObserver = getCommand().canExecute().test();
+
+                    testObserver.assertValue(false);
+
+                    executionResultA.complete(RESULT_A);
+
+                    testObserver.assertValue(false);
                 }
 
                 @Test
                 @DisplayName("IsExecuting observable should not emit any value")
                 public void testIsExecuting()
                 {
-                    getCommand().isExecuting().test()
-                            .assertValuesAndClear(true)
-                            .perform(() -> executionResultA.complete(RESULT_A))
-                            .assertNoValues();
+                    final TestObserver<Boolean> testObserver = getCommand().isExecuting().test();
+
+                    testObserver.assertValue(true);
+
+                    executionResultA.complete(RESULT_A);
+
+                    testObserver.assertValue(true);
                 }
 
                 @Test
                 @DisplayName("ExecutionCount observable should not emit any value")
                 public void testExecutionCount()
                 {
-                    getCommand().getExecutionCount().test()
-                            .assertValuesAndClear(0)
-                            .perform(() -> executionResultA.complete(RESULT_A))
-                            .assertNoValues();
+                    final TestObserver<Integer> testObserver = getCommand().getExecutionCount().test();
+
+                    testObserver.assertValue(0);
+
+                    executionResultA.complete(RESULT_A);
+
+                    testObserver.assertValue(0);
                 }
 
                 @Test
                 @DisplayName("HasBeenExecuted observable should not emit any value")
                 public void testHasBeenExecuted()
                 {
-                    getCommand().hasBeenExecuted().test()
-                            .assertValuesAndClear(false)
-                            .perform(() -> executionResultA.complete(RESULT_A))
-                            .assertNoValues();
+                    final TestObserver<Boolean> testObserver = getCommand().hasBeenExecuted().test();
+
+                    testObserver.assertValue(false);
+
+                    executionResultA.complete(RESULT_A);
+
+                    testObserver.assertValue(false);
                 }
 
                 @Test
                 @DisplayName("Progress observable should emit correct value")
                 public void testProgress()
                 {
-                    getCommand().getProgress().test()
-                            .assertValuesAndClear(0.0f)
-                            .perform(() -> executionResultA.complete(RESULT_A))
-                            .assertValue(0.5f);
+                    final TestObserver<Float> testObserver = getCommand().getProgress().test();
+
+                    testObserver.assertValue(0.0f);
+
+                    executionResultA.complete(RESULT_A);
+
+                    testObserver.assertValues(0.0f, 0.5f);
+
                 }
             }
 
@@ -1107,68 +1275,87 @@ public interface CompositeCommandSpecification extends BaseCommandSpecification
                 @DisplayName("Result observable should not emit any value")
                 public void testResult()
                 {
-                    getCommand().getResult().test()
-                            .perform(() -> executionResultA.completeExceptionally(ERROR_A))
-                            .assertNoValues();
+                    final TestObserver<List<Integer>> testObserver = getCommand().getResult().test();
+
+                    executionResultA.completeExceptionally(ERROR_A);
+
+                    testObserver.assertNoValues();
                 }
 
                 @Test
                 @DisplayName("Error observable should emit correct error")
                 public void testError()
                 {
-                    getCommand().getError().test()
-                            .perform(() -> executionResultA.completeExceptionally(ERROR_A))
-                            .assertValue(ERROR_A);
+                    final TestObserver<Throwable> testObserver = getCommand().getError().test();
+
+                    executionResultA.completeExceptionally(ERROR_A);
+
+                    testObserver.assertValue(ERROR_A);
                 }
 
                 @Test
                 @DisplayName("CanExecute observable should not emit any value")
                 public void testCanExecute()
                 {
-                    getCommand().canExecute().test()
-                            .assertValuesAndClear(false)
-                            .perform(() -> executionResultA.completeExceptionally(ERROR_A))
-                            .assertNoValues();
+                    final TestObserver<Boolean> testObserver = getCommand().canExecute().test();
+
+                    testObserver.assertValue(false);
+
+                    executionResultA.completeExceptionally(ERROR_A);
+
+                    testObserver.assertValue(false);
                 }
 
                 @Test
                 @DisplayName("IsExecuting observable should not emit any value")
                 public void testIsExecuting()
                 {
-                    getCommand().isExecuting().test()
-                            .assertValuesAndClear(true)
-                            .perform(() -> executionResultA.completeExceptionally(ERROR_A))
-                            .assertNoValues();
+                    final TestObserver<Boolean> testObserver = getCommand().isExecuting().test();
+
+                    testObserver.assertValue(true);
+
+                    executionResultA.completeExceptionally(ERROR_A);
+
+                    testObserver.assertValue(true);
                 }
 
                 @Test
                 @DisplayName("ExecutionCount observable should not emit any value")
                 public void testExecutionCount()
                 {
-                    getCommand().getExecutionCount().test()
-                            .assertValuesAndClear(0)
-                            .perform(() -> executionResultA.completeExceptionally(ERROR_A))
-                            .assertNoValues();
+                    final TestObserver<Integer> testObserver = getCommand().getExecutionCount().test();
+
+                    testObserver.assertValue(0);
+
+                    executionResultA.completeExceptionally(ERROR_A);
+
+                    testObserver.assertValue(0);
                 }
 
                 @Test
                 @DisplayName("HasBeenExecuted observable should not emit any value")
                 public void testHasBeenExecuted()
                 {
-                    getCommand().hasBeenExecuted().test()
-                            .assertValuesAndClear(false)
-                            .perform(() -> executionResultA.completeExceptionally(ERROR_A))
-                            .assertNoValues();
+                    final TestObserver<Boolean> testObserver = getCommand().hasBeenExecuted().test();
+
+                    testObserver.assertValue(false);
+
+                    executionResultA.completeExceptionally(ERROR_A);
+
+                    testObserver.assertValue(false);
                 }
 
                 @Test
                 @DisplayName("Progress observable should emit correct value")
                 public void testProgress()
                 {
-                    getCommand().getProgress().test()
-                            .assertValuesAndClear(0.0f)
-                            .perform(() -> executionResultA.completeExceptionally(ERROR_A))
-                            .assertValue(0.5f);
+                    final TestObserver<Float> testObserver = getCommand().getProgress().test();
+
+                    testObserver.assertValue(0.0f);
+
+                    executionResultA.completeExceptionally(ERROR_A);
+
+                    testObserver.assertValues(0.0f, 0.5f);
                 }
             }
 
@@ -1182,6 +1369,7 @@ public interface CompositeCommandSpecification extends BaseCommandSpecification
                 protected void startExecution()
                 {
                     execute();
+
                     executionResultA.complete(RESULT_A);
                 }
 
@@ -1189,68 +1377,87 @@ public interface CompositeCommandSpecification extends BaseCommandSpecification
                 @DisplayName("Result observable should not emit any value")
                 public void testResult()
                 {
-                    getCommand().getResult().test()
-                            .perform(() -> commandA.execute(INPUT))
-                            .assertNoValues();
+                    final TestObserver<List<Integer>> testObserver = getCommand().getResult().test();
+
+                    commandA.execute(INPUT);
+
+                    testObserver.assertNoValues();
                 }
 
                 @Test
                 @DisplayName("Error observable should not emit any value")
                 public void testError()
                 {
-                    getCommand().getError().test()
-                            .perform(() -> commandA.execute(INPUT))
-                            .assertNoValues();
+                    final TestObserver<Throwable> testObserver = getCommand().getError().test();
+
+                    commandA.execute(INPUT);
+
+                    testObserver.assertNoValues();
                 }
 
                 @Test
                 @DisplayName("CanExecute observable should not emit any value")
                 public void testCanExecute()
                 {
-                    getCommand().canExecute().test()
-                            .assertValuesAndClear(false)
-                            .perform(() -> commandA.execute(INPUT))
-                            .assertNoValues();
+                    final TestObserver<Boolean> testObserver = getCommand().canExecute().test();
+
+                    testObserver.assertValue(false);
+
+                    commandA.execute(INPUT);
+
+                    testObserver.assertValue(false);
                 }
 
                 @Test
                 @DisplayName("IsExecuting observable should not emit any value")
                 public void testIsExecuting()
                 {
-                    getCommand().isExecuting().test()
-                            .assertValuesAndClear(true)
-                            .perform(() -> commandA.execute(INPUT))
-                            .assertNoValues();
+                    final TestObserver<Boolean> testObserver = getCommand().isExecuting().test();
+
+                    testObserver.assertValue(true);
+
+                    commandA.execute(INPUT);
+
+                    testObserver.assertValue(true);
                 }
 
                 @Test
                 @DisplayName("ExecutionCount observable should not emit any value")
                 public void testExecutionCount()
                 {
-                    getCommand().getExecutionCount().test()
-                            .assertValuesAndClear(0)
-                            .perform(() -> commandA.execute(INPUT))
-                            .assertNoValues();
+                    final TestObserver<Integer> testObserver = getCommand().getExecutionCount().test();
+
+                    testObserver.assertValue(0);
+
+                    commandA.execute(INPUT);
+
+                    testObserver.assertValue(0);
                 }
 
                 @Test
                 @DisplayName("HasBeenExecuted observable should not emit any value")
                 public void testHasBeenExecuted()
                 {
-                    getCommand().hasBeenExecuted().test()
-                            .assertValuesAndClear(false)
-                            .perform(() -> commandA.execute(INPUT))
-                            .assertNoValues();
+                    final TestObserver<Boolean> testObserver = getCommand().hasBeenExecuted().test();
+
+                    testObserver.assertValue(false);
+
+                    commandA.execute(INPUT);
+
+                    testObserver.assertValue(false);
                 }
 
                 @Test
                 @DisplayName("Progress observable should not emit any value")
                 public void testProgress()
                 {
-                    getCommand().getProgress().test()
-                            .assertValuesAndClear(0.5f)
-                            .perform(() -> commandA.execute(INPUT))
-                            .assertNoValues();
+                    final TestObserver<Float> testObserver = getCommand().getProgress().test();
+
+                    testObserver.assertValue(0.5f);
+
+                    commandA.execute(INPUT);
+
+                    testObserver.assertValue(0.5f);
                 }
             }
 
@@ -1283,12 +1490,15 @@ public interface CompositeCommandSpecification extends BaseCommandSpecification
                 }
 
                 @Test
+                @SuppressWarnings("unchecked")
                 @DisplayName("Result observable should emit correct result")
                 public void testResult()
                 {
-                    final List<Integer> result = getCommand().getResult().test()
-                            .perform(this::finishExecution)
-                            .getOnNextEvents().get(0);
+                    final TestObserver<List<Integer>> testObserver = getCommand().getResult().test();
+
+                    finishExecution();
+
+                    final List<Integer> result = (List) testObserver.getEvents().get(0).get(0);
 
                     assertIterableEquals(RESULT, result);
                 }
@@ -1297,10 +1507,13 @@ public interface CompositeCommandSpecification extends BaseCommandSpecification
                 @DisplayName("Progress observable should emit correct values")
                 public void testProgress()
                 {
-                    getCommand().getProgress().test()
-                            .assertValuesAndClear(0.0f)
-                            .perform(this::finishExecution)
-                            .assertValues(0.5f, 1.0f);
+                    final TestObserver<Float> testObserver = getCommand().getProgress().test();
+
+                    testObserver.assertValue(0.0f);
+
+                    finishExecution();
+
+                    testObserver.assertValues(0.0f, 0.5f, 1.0f);
                 }
             }
 
@@ -1342,10 +1555,13 @@ public interface CompositeCommandSpecification extends BaseCommandSpecification
                 @DisplayName("Progress observable should emit correct values")
                 public void testProgress()
                 {
-                    getCommand().getProgress().test()
-                            .assertValuesAndClear(0.0f)
-                            .perform(this::finishExecution)
-                            .assertValues(0.5f, 1.0f);
+                    final TestObserver<Float> testObserver = getCommand().getProgress().test();
+
+                    testObserver.assertValue(0.0f);
+
+                    finishExecution();
+
+                    testObserver.assertValues(0.0f, 0.5f, 1.0f);
                 }
             }
 
@@ -1387,19 +1603,24 @@ public interface CompositeCommandSpecification extends BaseCommandSpecification
                 @DisplayName("Error observable should emit correct errors")
                 public void testError()
                 {
-                    getCommand().getError().test()
-                            .perform(this::finishExecution)
-                            .assertValues(ERROR_A, ERROR_B);
+                    final TestObserver<Throwable> testObserver = getCommand().getError().test();
+
+                    finishExecution();
+
+                    testObserver.assertValues(ERROR_A, ERROR_B);
                 }
 
                 @Test
                 @DisplayName("Progress observable should emit correct values")
                 public void testProgress()
                 {
-                    getCommand().getProgress().test()
-                            .assertValuesAndClear(0.0f)
-                            .perform(this::finishExecution)
-                            .assertValues(0.5f, 1.0f);
+                    final TestObserver<Float> testObserver = getCommand().getProgress().test();
+
+                    testObserver.assertValue(0.0f);
+
+                    finishExecution();
+
+                    testObserver.assertValues(0.0f, 0.5f, 1.0f);
                 }
             }
         }
@@ -1428,68 +1649,87 @@ public interface CompositeCommandSpecification extends BaseCommandSpecification
             @DisplayName("Result observable should not emit any value")
             public void testResult()
             {
-                getCommand().getResult().test()
-                        .perform(() -> commandA.execute(INPUT))
-                        .assertNoValues();
+                final TestObserver<List<Integer>> testObserver = getCommand().getResult().test();
+
+                commandA.execute(INPUT);
+
+                testObserver.assertNoValues();
             }
 
             @Test
             @DisplayName("Error observable should not emit any value")
             public void testError()
             {
-                getCommand().getError().test()
-                        .perform(() -> commandA.execute(INPUT))
-                        .assertNoValues();
+                final TestObserver<Throwable> testObserver = getCommand().getError().test();
+
+                commandA.execute(INPUT);
+
+                testObserver.assertNoValues();
             }
 
             @Test
             @DisplayName("CanExecute observable should emit false and true")
             public void testCanExecute()
             {
-                getCommand().canExecute().test()
-                        .assertValuesAndClear(true)
-                        .perform(() -> commandA.execute(INPUT))
-                        .assertValues(false, true);
+                final TestObserver<Boolean> testObserver = getCommand().canExecute().test();
+
+                testObserver.assertValue(true);
+
+                commandA.execute(INPUT);
+
+                testObserver.assertValues(true, false, true);
             }
 
             @Test
             @DisplayName("IsExecuting observable should not emit any value")
             public void testIsExecuting()
             {
-                getCommand().isExecuting().test()
-                        .assertValuesAndClear(false)
-                        .perform(() -> commandA.execute(INPUT))
-                        .assertNoValues();
+                final TestObserver<Boolean> testObserver = getCommand().isExecuting().test();
+
+                testObserver.assertValue(false);
+
+                commandA.execute(INPUT);
+
+                testObserver.assertValue(false);
             }
 
             @Test
             @DisplayName("ExecutionCount observable should not emit any value")
             public void testExecutionCount()
             {
-                getCommand().getExecutionCount().test()
-                        .assertValuesAndClear(1)
-                        .perform(() -> commandA.execute(INPUT))
-                        .assertNoValues();
+                final TestObserver<Integer> testObserver = getCommand().getExecutionCount().test();
+
+                testObserver.assertValue(1);
+
+                commandA.execute(INPUT);
+
+                testObserver.assertValue(1);
             }
 
             @Test
             @DisplayName("HasBeenExecuted observable should not emit any value")
             public void testHasBeenExecuted()
             {
-                getCommand().hasBeenExecuted().test()
-                        .assertValuesAndClear(true)
-                        .perform(() -> commandA.execute(INPUT))
-                        .assertNoValues();
+                final TestObserver<Boolean> testObserver = getCommand().hasBeenExecuted().test();
+
+                testObserver.assertValue(true);
+
+                commandA.execute(INPUT);
+
+                testObserver.assertValue(true);
             }
 
             @Test
             @DisplayName("Progress observable should not emit any value")
             public void testProgress()
             {
-                getCommand().getProgress().test()
-                        .assertValuesAndClear(1.0f)
-                        .perform(() -> commandA.execute(INPUT))
-                        .assertNoValues();
+                final TestObserver<Float> testObserver = getCommand().getProgress().test();
+
+                testObserver.assertValue(1.0f);
+
+                commandA.execute(INPUT);
+
+                testObserver.assertValue(1.0f);
             }
         }
 
@@ -1517,68 +1757,87 @@ public interface CompositeCommandSpecification extends BaseCommandSpecification
             @DisplayName("Result observable should not emit any value")
             public void testResult()
             {
-                getCommand().getResult().test()
-                        .perform(() -> commandA.execute(INPUT))
-                        .assertNoValues();
+                final TestObserver<List<Integer>> testObserver = getCommand().getResult().test();
+
+                commandA.execute(INPUT);
+
+                testObserver.assertNoValues();
             }
 
             @Test
             @DisplayName("Error observable should not emit any value")
             public void testError()
             {
-                getCommand().getError().test()
-                        .perform(() -> commandA.execute(INPUT))
-                        .assertNoValues();
+                final TestObserver<Throwable> testObserver = getCommand().getError().test();
+
+                commandA.execute(INPUT);
+
+                testObserver.assertNoValues();
             }
 
             @Test
             @DisplayName("CanExecute observable should emit false and true")
             public void testCanExecute()
             {
-                getCommand().canExecute().test()
-                        .assertValuesAndClear(true)
-                        .perform(() -> commandA.execute(INPUT))
-                        .assertValues(false, true);
+                final TestObserver<Boolean> testObserver = getCommand().canExecute().test();
+
+                testObserver.assertValue(true);
+
+                commandA.execute(INPUT);
+
+                testObserver.assertValues(true, false, true);
             }
 
             @Test
             @DisplayName("IsExecuting observable should not emit any value")
             public void testIsExecuting()
             {
-                getCommand().isExecuting().test()
-                        .assertValuesAndClear(false)
-                        .perform(() -> commandA.execute(INPUT))
-                        .assertNoValues();
+                final TestObserver<Boolean> testObserver = getCommand().isExecuting().test();
+
+                testObserver.assertValue(false);
+
+                commandA.execute(INPUT);
+
+                testObserver.assertValue(false);
             }
 
             @Test
             @DisplayName("ExecutionCount observable should not emit any value")
             public void testExecutionCount()
             {
-                getCommand().getExecutionCount().test()
-                        .assertValuesAndClear(1)
-                        .perform(() -> commandA.execute(INPUT))
-                        .assertNoValues();
+                final TestObserver<Integer> testObserver = getCommand().getExecutionCount().test();
+
+                testObserver.assertValue(1);
+
+                commandA.execute(INPUT);
+
+                testObserver.assertValue(1);
             }
 
             @Test
             @DisplayName("HasBeenExecuted observable should not emit any value")
             public void testHasBeenExecuted()
             {
-                getCommand().hasBeenExecuted().test()
-                        .assertValuesAndClear(true)
-                        .perform(() -> commandA.execute(INPUT))
-                        .assertNoValues();
+                final TestObserver<Boolean> testObserver = getCommand().hasBeenExecuted().test();
+
+                testObserver.assertValue(true);
+
+                commandA.execute(INPUT);
+
+                testObserver.assertValue(true);
             }
 
             @Test
             @DisplayName("Progress observable should not emit any value")
             public void testProgress()
             {
-                getCommand().getProgress().test()
-                        .assertValuesAndClear(1.0f)
-                        .perform(() -> commandA.execute(INPUT))
-                        .assertNoValues();
+                final TestObserver<Float> testObserver = getCommand().getProgress().test();
+
+                testObserver.assertValue(1.0f);
+
+                commandA.execute(INPUT);
+
+                testObserver.assertValue(1.0f);
             }
         }
 
@@ -1665,7 +1924,7 @@ public interface CompositeCommandSpecification extends BaseCommandSpecification
         private ReactiveCommand<Integer, Integer> commandB;
 
         private TestScheduler testScheduler;
-        private TestSubject<Boolean> testSubject;
+        private PublishSubject<Boolean> testSubject;
         private ReactiveCommand<Integer, List<Integer>> command;
 
         @BeforeEach
@@ -1680,8 +1939,9 @@ public interface CompositeCommandSpecification extends BaseCommandSpecification
             executionResultB = new CompletableFuture<>();
             commandB = new AsyncCommand<>(Observable.just(true), executionB);
 
-            testScheduler = Schedulers.test();
-            testSubject = TestSubject.create(testScheduler);
+            testScheduler = new TestScheduler();
+            testSubject = PublishSubject.create();
+            testSubject.observeOn(testScheduler);
             command = ReactiveCommand.createComposite(testSubject, Arrays.asList(commandA, commandB));
         }
 

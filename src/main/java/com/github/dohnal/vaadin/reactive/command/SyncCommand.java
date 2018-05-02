@@ -20,8 +20,8 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
-import rx.Completable;
-import rx.Observable;
+import io.reactivex.Completable;
+import io.reactivex.Observable;
 
 /**
  * Synchronous implementation of {@link ReactiveCommand}

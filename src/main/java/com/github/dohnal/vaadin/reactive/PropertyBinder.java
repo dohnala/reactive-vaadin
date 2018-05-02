@@ -15,7 +15,8 @@ package com.github.dohnal.vaadin.reactive;
 
 import javax.annotation.Nonnull;
 
-import rx.Observable;
+import io.reactivex.Observable;
+import io.reactivex.disposables.Disposable;
 
 /**
  * Binder used to bind property

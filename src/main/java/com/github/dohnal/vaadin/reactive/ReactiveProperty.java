@@ -19,7 +19,7 @@ import java.util.Objects;
 import java.util.function.Function;
 
 import com.github.dohnal.vaadin.reactive.property.BehaviorSubjectProperty;
-import rx.Observable;
+import io.reactivex.Observable;
 
 /**
  * Reactive property stores single editable value and also acts as observable
@@ -97,14 +97,6 @@ public interface ReactiveProperty<T> extends ObservableProperty<T>
     T getValue();
 
     /**
-     * Sets new value and notifies all subscribers
-     *
-     * @param value value
-     */
-    @Override
-    void setValue(final @Nonnull T value);
-
-    /**
      * Return if this property has any value
      *
      * @return if this property has any value
@@ -117,13 +109,4 @@ public interface ReactiveProperty<T> extends ObservableProperty<T>
      * @param update update function
      */
     void updateValue(final @Nonnull Function<? super T, ? extends T> update);
-
-    /**
-     * Return observable for this property which can be subscribed to
-     *
-     * @return observable for this property
-     */
-    @Nonnull
-    @Override
-    Observable<T> asObservable();
 }

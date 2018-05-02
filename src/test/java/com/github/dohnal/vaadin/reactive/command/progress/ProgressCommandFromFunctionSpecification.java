@@ -20,14 +20,14 @@ import java.util.function.Function;
 import com.github.dohnal.vaadin.reactive.ProgressContext;
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
 import com.github.dohnal.vaadin.reactive.command.BaseCommandSpecification;
+import io.reactivex.observers.TestObserver;
+import io.reactivex.schedulers.TestScheduler;
+import io.reactivex.subjects.PublishSubject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import rx.schedulers.Schedulers;
-import rx.schedulers.TestScheduler;
-import rx.subjects.TestSubject;
 
 /**
  * Tests for {@link ReactiveCommand} created by
@@ -97,16 +97,18 @@ public interface ProgressCommandFromFunctionSpecification extends BaseCommandSpe
             @Override
             protected void execute()
             {
-                command.execute().await();
+                command.execute().blockingAwait();
             }
 
             @Test
             @DisplayName("Result observable should emit correct result")
             public void testResult()
             {
-                getCommand().getResult().test()
-                        .perform(this::execute)
-                        .assertValue(RESULT);
+                final TestObserver<Integer> testObserver = getCommand().getResult().test();
+
+                execute();
+
+                testObserver.assertValue(RESULT);
             }
 
             @Test
@@ -114,10 +116,13 @@ public interface ProgressCommandFromFunctionSpecification extends BaseCommandSpe
             @DisplayName("Progress observable should emit correct values")
             public void testProgress()
             {
-                getCommand().getProgress().test()
-                        .assertValuesAndClear(0.0f)
-                        .perform(this::execute)
-                        .assertValues(0.25f, 0.5f, 0.75f, 1.0f);
+                final TestObserver<Float> testObserver = getCommand().getProgress().test();
+
+                testObserver.assertValue(0.0f);
+
+                execute();
+
+                testObserver.assertValues(0.0f, 0.25f, 0.5f, 0.75f, 1.0f);
             }
 
             @Test
@@ -161,7 +166,7 @@ public interface ProgressCommandFromFunctionSpecification extends BaseCommandSpe
             @Override
             protected void execute()
             {
-                command.execute().await();
+                command.execute().blockingAwait();
             }
 
             @Nonnull
@@ -176,10 +181,13 @@ public interface ProgressCommandFromFunctionSpecification extends BaseCommandSpe
             @DisplayName("Progress observable should emit correct values")
             public void testProgress()
             {
-                getCommand().getProgress().test()
-                        .assertValuesAndClear(0.0f)
-                        .perform(this::execute)
-                        .assertValues(0.25f, 0.5f, 1.0f);
+                final TestObserver<Float> testObserver = getCommand().getProgress().test();
+
+                testObserver.assertValue(0.0f);
+
+                execute();
+
+                testObserver.assertValues(0.0f, 0.25f, 0.5f, 1.0f);
             }
 
             @Test
@@ -216,7 +224,7 @@ public interface ProgressCommandFromFunctionSpecification extends BaseCommandSpe
             @Override
             protected void execute()
             {
-                command.execute().await();
+                command.execute().blockingAwait();
             }
         }
 
@@ -244,7 +252,7 @@ public interface ProgressCommandFromFunctionSpecification extends BaseCommandSpe
             @Override
             protected void execute()
             {
-                command.execute().await();
+                command.execute().blockingAwait();
             }
         }
     }
@@ -254,7 +262,7 @@ public interface ProgressCommandFromFunctionSpecification extends BaseCommandSpe
     {
         private Function<ProgressContext, Integer> execution;
         private TestScheduler testScheduler;
-        private TestSubject<Boolean> testSubject;
+        private PublishSubject<Boolean> testSubject;
         private ReactiveCommand<Void, Integer> command;
 
         @BeforeEach
@@ -262,8 +270,9 @@ public interface ProgressCommandFromFunctionSpecification extends BaseCommandSpe
         protected void create()
         {
             execution = Mockito.mock(Function.class);
-            testScheduler = Schedulers.test();
-            testSubject = TestSubject.create(testScheduler);
+            testScheduler = new TestScheduler();
+            testSubject = PublishSubject.create();
+            testSubject.observeOn(testScheduler);
             command = ReactiveCommand.createProgress(testSubject, execution);
         }
 
@@ -333,7 +342,7 @@ public interface ProgressCommandFromFunctionSpecification extends BaseCommandSpe
             @Override
             protected void execute()
             {
-                command.execute().await();
+                command.execute().blockingAwait();
             }
 
             @Test
@@ -415,9 +424,11 @@ public interface ProgressCommandFromFunctionSpecification extends BaseCommandSpe
             @DisplayName("Result observable should emit correct result")
             public void testResult()
             {
-                getCommand().getResult().test()
-                        .perform(this::execute)
-                        .assertValue(RESULT);
+                final TestObserver<Integer> testObserver = getCommand().getResult().test();
+
+                execute();
+
+                testObserver.assertValue(RESULT);
             }
 
             @Test
@@ -425,10 +436,13 @@ public interface ProgressCommandFromFunctionSpecification extends BaseCommandSpe
             @DisplayName("Progress observable should emit correct values")
             public void testProgress()
             {
-                getCommand().getProgress().test()
-                        .assertValuesAndClear(0.0f)
-                        .perform(this::execute)
-                        .assertValues(0.25f, 0.5f, 0.75f, 1.0f);
+                final TestObserver<Float> testObserver = getCommand().getProgress().test();
+
+                testObserver.assertValue(0.0f);
+
+                execute();
+
+                testObserver.assertValues(0.0f, 0.25f, 0.5f, 0.75f, 1.0f);
             }
 
             @Test
@@ -487,10 +501,13 @@ public interface ProgressCommandFromFunctionSpecification extends BaseCommandSpe
             @DisplayName("Progress observable should emit correct values")
             public void testProgress()
             {
-                getCommand().getProgress().test()
-                        .assertValuesAndClear(0.0f)
-                        .perform(this::execute)
-                        .assertValues(0.25f, 0.5f, 1.0f);
+                final TestObserver<Float> testObserver = getCommand().getProgress().test();
+
+                testObserver.assertValue(0.0f);
+
+                execute();
+
+                testObserver.assertValues(0.0f, 0.25f, 0.5f, 1.0f);
             }
 
             @Test
@@ -566,7 +583,7 @@ public interface ProgressCommandFromFunctionSpecification extends BaseCommandSpe
         private TestExecutor testExecutor;
         private Function<ProgressContext, Integer> execution;
         private TestScheduler testScheduler;
-        private TestSubject<Boolean> testSubject;
+        private PublishSubject<Boolean> testSubject;
         private ReactiveCommand<Void, Integer> command;
 
         @BeforeEach
@@ -575,8 +592,9 @@ public interface ProgressCommandFromFunctionSpecification extends BaseCommandSpe
         {
             testExecutor = new TestExecutor();
             execution = Mockito.mock(Function.class);
-            testScheduler = Schedulers.test();
-            testSubject = TestSubject.create(testScheduler);
+            testScheduler = new TestScheduler();
+            testSubject = PublishSubject.create();
+            testSubject.observeOn(testScheduler);
             command = ReactiveCommand.createProgress(testSubject, execution, testExecutor);
         }
 

@@ -13,22 +13,19 @@
 
 package com.github.dohnal.vaadin.reactive.interaction;
 
-import java.util.List;
 import java.util.function.Consumer;
 
 import com.github.dohnal.vaadin.reactive.InteractionContext;
 import com.github.dohnal.vaadin.reactive.ReactiveInteraction;
 import com.github.dohnal.vaadin.reactive.exceptions.AlreadyHandledInteractionException;
 import com.github.dohnal.vaadin.reactive.exceptions.UnhandledInteractionException;
+import io.reactivex.observers.TestObserver;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -56,14 +53,12 @@ public interface InvokeWithConsumerSpecification
         @DisplayName("Observable should emit correct interaction context")
         public void testObservable()
         {
-            final List<InteractionContext<Void, Boolean>> interactionContexts =
-                    interaction.asObservable().test()
-                            .perform(() -> interaction.invoke(consumer))
-                            .getOnNextEvents();
+            final TestObserver<InteractionContext<Void, Boolean>> testObserver = interaction.asObservable().test();
 
-            assertEquals(1, interactionContexts.size());
-            assertNull(interactionContexts.get(0).getInput());
-            assertFalse(interactionContexts.get(0).isHandled());
+            interaction.invoke(consumer);
+
+            testObserver.assertValue(interactionContext ->
+                    interactionContext.getInput() == null && !interactionContext.isHandled());
         }
 
         @Test
@@ -84,14 +79,14 @@ public interface InvokeWithConsumerSpecification
             private InteractionContext<Void, Boolean> interactionContext;
 
             @BeforeEach
+            @SuppressWarnings("unchecked")
             protected void invoke()
             {
-                final List<InteractionContext<Void, Boolean>> interactionContexts =
-                        interaction.asObservable().test()
-                                .perform(() -> interaction.invoke(consumer))
-                                .getOnNextEvents();
+                final TestObserver<InteractionContext<Void, Boolean>> testObserver = interaction.asObservable().test();
 
-                interactionContext = interactionContexts.get(0);
+                interaction.invoke(consumer);
+
+                interactionContext = (InteractionContext)testObserver.getEvents().get(0).get(0);
             }
 
             @Test()
@@ -111,14 +106,14 @@ public interface InvokeWithConsumerSpecification
             private InteractionContext<Void, Boolean> interactionContext;
 
             @BeforeEach
+            @SuppressWarnings("unchecked")
             protected void handle()
             {
-                final List<InteractionContext<Void, Boolean>> interactionContexts =
-                        interaction.asObservable().test()
-                                .perform(() -> interaction.invoke(consumer))
-                                .getOnNextEvents();
+                final TestObserver<InteractionContext<Void, Boolean>> testObserver = interaction.asObservable().test();
 
-                interactionContext = interactionContexts.get(0);
+                interaction.invoke(consumer);
+
+                interactionContext = (InteractionContext)testObserver.getEvents().get(0).get(0);
 
                 interactionContext.handle(RESULT);
             }
@@ -147,14 +142,14 @@ public interface InvokeWithConsumerSpecification
             private InteractionContext<Void, Boolean> interactionContext;
 
             @BeforeEach
+            @SuppressWarnings("unchecked")
             protected void handle()
             {
-                final List<InteractionContext<Void, Boolean>> interactionContexts =
-                        interaction.asObservable().test()
-                                .perform(() -> interaction.invoke(consumer))
-                                .getOnNextEvents();
+                final TestObserver<InteractionContext<Void, Boolean>> testObserver = interaction.asObservable().test();
 
-                interactionContext = interactionContexts.get(0);
+                interaction.invoke(consumer);
+
+                interactionContext = (InteractionContext)testObserver.getEvents().get(0).get(0);
 
                 interactionContext.handle(RESULT);
             }

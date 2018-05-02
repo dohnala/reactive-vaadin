@@ -21,8 +21,7 @@ import java.util.function.Function;
 import com.vaadin.data.HasValue;
 import com.vaadin.shared.Registration;
 import com.vaadin.ui.Button;
-import rx.Emitter;
-import rx.Observable;
+import io.reactivex.Observable;
 
 /**
  * List of all component events
@@ -82,8 +81,7 @@ public interface ComponentEvents
 
             final Registration registration = registerListener.apply(listener);
 
-            eventEmitter.setCancellation(registration::remove);
-
-        }, Emitter.BackpressureMode.BUFFER);
+            eventEmitter.setCancellable(registration::remove);
+        });
     }
 }

@@ -16,6 +16,8 @@ package com.github.dohnal.vaadin.reactive;
 import javax.annotation.Nonnull;
 import java.util.function.Consumer;
 
+import io.reactivex.disposables.Disposable;
+
 /**
  * Binder used to bind observable
  *
