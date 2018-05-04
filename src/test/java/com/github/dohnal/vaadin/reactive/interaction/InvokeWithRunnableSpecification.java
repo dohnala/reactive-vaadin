@@ -15,6 +15,7 @@ package com.github.dohnal.vaadin.reactive.interaction;
 
 import com.github.dohnal.vaadin.reactive.InteractionContext;
 import com.github.dohnal.vaadin.reactive.ReactiveInteraction;
+import com.github.dohnal.vaadin.reactive.ReactiveInteractionFactory;
 import com.github.dohnal.vaadin.reactive.exceptions.AlreadyHandledInteractionException;
 import com.github.dohnal.vaadin.reactive.exceptions.UnhandledInteractionException;
 import io.reactivex.observers.TestObserver;
@@ -34,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 public interface InvokeWithRunnableSpecification
 {
-    abstract class InvokeWithRunnableWhenSubscriberSpecification
+    abstract class InvokeWithRunnableWhenSubscriberSpecification implements ReactiveInteractionFactory
     {
         private ReactiveInteraction<Void, Void> interaction;
         private Runnable runnable;
@@ -43,7 +44,7 @@ public interface InvokeWithRunnableSpecification
         @SuppressWarnings("unchecked")
         protected void create()
         {
-            interaction = ReactiveInteraction.create();
+            interaction = createInteraction();
             runnable = Mockito.mock(Runnable.class);
         }
 
@@ -155,7 +156,7 @@ public interface InvokeWithRunnableSpecification
         }
     }
 
-    abstract class InvokeWithRunnableWhenNoSubscriberSpecification
+    abstract class InvokeWithRunnableWhenNoSubscriberSpecification implements ReactiveInteractionFactory
     {
         private ReactiveInteraction<Integer, Boolean> interaction;
         private Runnable runnable;
@@ -164,7 +165,7 @@ public interface InvokeWithRunnableSpecification
         @SuppressWarnings("unchecked")
         protected void create()
         {
-            interaction = ReactiveInteraction.create();
+            interaction = createInteraction();
             runnable = Mockito.mock(Runnable.class);
         }
 

@@ -17,6 +17,7 @@ import java.util.function.Consumer;
 
 import com.github.dohnal.vaadin.reactive.InteractionContext;
 import com.github.dohnal.vaadin.reactive.ReactiveInteraction;
+import com.github.dohnal.vaadin.reactive.ReactiveInteractionFactory;
 import com.github.dohnal.vaadin.reactive.exceptions.AlreadyHandledInteractionException;
 import com.github.dohnal.vaadin.reactive.exceptions.UnhandledInteractionException;
 import io.reactivex.observers.TestObserver;
@@ -36,7 +37,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 public interface InvokeWithConsumerSpecification
 {
-    abstract class InvokeWithConsumerWhenSubscriberSpecification
+    abstract class InvokeWithConsumerWhenSubscriberSpecification implements ReactiveInteractionFactory
     {
         private ReactiveInteraction<Void, Boolean> interaction;
         private Consumer<Boolean> consumer;
@@ -45,7 +46,7 @@ public interface InvokeWithConsumerSpecification
         @SuppressWarnings("unchecked")
         protected void create()
         {
-            interaction = ReactiveInteraction.create();
+            interaction = createInteraction();
             consumer = Mockito.mock(Consumer.class);
         }
 
@@ -184,7 +185,7 @@ public interface InvokeWithConsumerSpecification
         }
     }
 
-    abstract class InvokeWithConsumerWhenNoSubscriberSpecification
+    abstract class InvokeWithConsumerWhenNoSubscriberSpecification implements ReactiveInteractionFactory
     {
         private ReactiveInteraction<Integer, Boolean> interaction;
         private Consumer<Boolean> consumer;
@@ -193,7 +194,7 @@ public interface InvokeWithConsumerSpecification
         @SuppressWarnings("unchecked")
         protected void create()
         {
-            interaction = ReactiveInteraction.create();
+            interaction = createInteraction();
             consumer = Mockito.mock(Consumer.class);
         }
 

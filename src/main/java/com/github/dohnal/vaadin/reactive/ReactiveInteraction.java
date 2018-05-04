@@ -17,7 +17,6 @@ import javax.annotation.Nonnull;
 import java.util.function.Consumer;
 
 import com.github.dohnal.vaadin.reactive.exceptions.UnhandledInteractionException;
-import com.github.dohnal.vaadin.reactive.interaction.PublishSubjectInteraction;
 
 /**
  * Represents an interaction between collaborating parties.
@@ -28,19 +27,6 @@ import com.github.dohnal.vaadin.reactive.interaction.PublishSubjectInteraction;
  */
 public interface ReactiveInteraction<T, R> extends IsObservable<InteractionContext<T, R>>
 {
-    /**
-     * Creates new interaction
-     *
-     * @param <T> type of input
-     * @param <R> type of result
-     * @return created interaction
-     */
-    @Nonnull
-    static <T, R> ReactiveInteraction<T, R> create()
-    {
-        return new PublishSubjectInteraction<>();
-    }
-
     /**
      * Invokes interaction with no input and call an action when the interaction is handled
      *

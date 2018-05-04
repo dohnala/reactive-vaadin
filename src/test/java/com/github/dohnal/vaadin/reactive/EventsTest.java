@@ -304,7 +304,7 @@ public class EventsTest implements Events
 
     @Nested
     @DisplayName("When invoked event is created with interaction")
-    class WhenCreateInvoked
+    class WhenCreateInvoked implements ReactiveInteractionFactory
     {
         private ReactiveInteraction<Integer, Boolean> interaction;
         private Observable<InteractionContext<Integer, Boolean>> event;
@@ -313,7 +313,7 @@ public class EventsTest implements Events
         @SuppressWarnings("unchecked")
         protected void create()
         {
-            interaction = ReactiveInteraction.create();
+            interaction = createInteraction();
             event = invoked(interaction);
         }
 

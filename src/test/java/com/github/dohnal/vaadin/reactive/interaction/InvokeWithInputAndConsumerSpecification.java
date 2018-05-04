@@ -17,6 +17,7 @@ import java.util.function.Consumer;
 
 import com.github.dohnal.vaadin.reactive.InteractionContext;
 import com.github.dohnal.vaadin.reactive.ReactiveInteraction;
+import com.github.dohnal.vaadin.reactive.ReactiveInteractionFactory;
 import com.github.dohnal.vaadin.reactive.exceptions.AlreadyHandledInteractionException;
 import com.github.dohnal.vaadin.reactive.exceptions.UnhandledInteractionException;
 import io.reactivex.observers.TestObserver;
@@ -36,7 +37,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 public interface InvokeWithInputAndConsumerSpecification
 {
-    abstract class InvokeWithInputAndConsumerWhenSubscriberSpecification
+    abstract class InvokeWithInputAndConsumerWhenSubscriberSpecification implements ReactiveInteractionFactory
     {
         protected final Integer INPUT = 5;
 
@@ -47,7 +48,7 @@ public interface InvokeWithInputAndConsumerSpecification
         @SuppressWarnings("unchecked")
         protected void create()
         {
-            interaction = ReactiveInteraction.create();
+            interaction = createInteraction();
             consumer = Mockito.mock(Consumer.class);
         }
 
@@ -190,7 +191,7 @@ public interface InvokeWithInputAndConsumerSpecification
         }
     }
 
-    abstract class InvokeWithInputAndConsumerWhenNoSubscriberSpecification
+    abstract class InvokeWithInputAndConsumerWhenNoSubscriberSpecification implements ReactiveInteractionFactory
     {
         protected final Integer INPUT = 5;
 
@@ -201,7 +202,7 @@ public interface InvokeWithInputAndConsumerSpecification
         @SuppressWarnings("unchecked")
         protected void create()
         {
-            interaction = ReactiveInteraction.create();
+            interaction = createInteraction();
             consumer = Mockito.mock(Consumer.class);
         }
 
