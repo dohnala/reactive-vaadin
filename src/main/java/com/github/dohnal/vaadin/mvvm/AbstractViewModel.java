@@ -14,11 +14,15 @@
 package com.github.dohnal.vaadin.mvvm;
 
 import com.github.dohnal.vaadin.reactive.ReactiveBinder;
+import com.github.dohnal.vaadin.reactive.ReactiveCommandFactory;
+import com.github.dohnal.vaadin.reactive.ReactiveInteractionFactory;
+import com.github.dohnal.vaadin.reactive.ReactivePropertyFactory;
 
 /**
  * Base class for all view models in MVVM pattern
  *
  * @author dohnal
  */
-public class AbstractViewModel implements ReactiveBinder
+public class AbstractViewModel implements ReactiveBinder, ReactivePropertyFactory, ReactiveCommandFactory,
+        ReactiveInteractionFactory
 {}
