@@ -15,11 +15,7 @@ package com.github.dohnal.vaadin.reactive;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Objects;
 import java.util.function.Function;
-
-import com.github.dohnal.vaadin.reactive.property.BehaviorSubjectProperty;
-import io.reactivex.Observable;
 
 /**
  * Reactive property stores single editable value and also acts as observable
@@ -30,65 +26,8 @@ import io.reactivex.Observable;
 public interface ReactiveProperty<T> extends ObservableProperty<T>
 {
     /**
-     * Creates new property with no value
-     *
-     * @param <T> type of property
-     * @return created property
-     */
-    @Nonnull
-    static <T> ReactiveProperty<T> empty()
-    {
-        return new BehaviorSubjectProperty<>();
-    }
-
-    /**
-     * Creates new property with given default value
-     *
-     * @param defaultValue default value
-     * @param <T> type of property
-     * @return created property
-     */
-    @Nonnull
-    static <T> ReactiveProperty<T> withValue(final @Nonnull T defaultValue)
-    {
-        Objects.requireNonNull(defaultValue, "Default value cannot be null");
-
-        return new BehaviorSubjectProperty<>(defaultValue);
-    }
-
-    /**
-     * Creates new property from given observable
-     *
-     * @param observable observable
-     * @param <T> type of property
-     * @return created property
-     */
-    @Nonnull
-    static <T> ReactiveProperty<T> fromObservable(final @Nonnull Observable<? extends T> observable)
-    {
-        Objects.requireNonNull(observable, "Observable cannot be null");
-
-        return new BehaviorSubjectProperty<>(observable);
-    }
-
-    /**
-     * Creates new property from given property
-     *
-     * @param property property
-     * @param <T> type of property
-     * @return created property
-     */
-    @Nonnull
-    static <T> ReactiveProperty<T> fromProperty(final @Nonnull ReactiveProperty<? extends T> property)
-    {
-        Objects.requireNonNull(property, "Property cannot be null");
-
-        return new BehaviorSubjectProperty<>(property);
-    }
-
-    /**
      * Returns current value
-     * NOTE: returns null if this property has no value (created with {@link #empty()})
+     * NOTE: returns null if this property has no value
      *
      * @return current value
      * @see #hasValue()

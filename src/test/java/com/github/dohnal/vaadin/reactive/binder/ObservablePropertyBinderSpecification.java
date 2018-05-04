@@ -19,6 +19,7 @@ import com.github.dohnal.vaadin.reactive.IsObservable;
 import com.github.dohnal.vaadin.reactive.ObservablePropertyBinder;
 import com.github.dohnal.vaadin.reactive.ReactiveBinder;
 import com.github.dohnal.vaadin.reactive.ReactiveProperty;
+import com.github.dohnal.vaadin.reactive.ReactivePropertyFactory;
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.TestObserver;
@@ -36,7 +37,8 @@ import org.junit.jupiter.api.Test;
  */
 public interface ObservablePropertyBinderSpecification
 {
-    abstract class WhenBindObservablePropertyToObservableSpecification implements ReactiveBinder
+    abstract class WhenBindObservablePropertyToObservableSpecification
+            implements ReactiveBinder, ReactivePropertyFactory
     {
         private TestScheduler testScheduler;
         private PublishSubject<Integer> sourceObservable;
@@ -49,7 +51,7 @@ public interface ObservablePropertyBinderSpecification
             testScheduler = new TestScheduler();
             sourceObservable = PublishSubject.create();
             sourceObservable.observeOn(testScheduler);
-            property = ReactiveProperty.empty();
+            property = createProperty();
 
             disposable = bind(property).to(sourceObservable);
         }
@@ -98,7 +100,8 @@ public interface ObservablePropertyBinderSpecification
         }
     }
 
-    abstract class WhenBindObservablePropertyToIsObservableSpecification implements ReactiveBinder
+    abstract class WhenBindObservablePropertyToIsObservableSpecification
+            implements ReactiveBinder, ReactivePropertyFactory
     {
         private TestScheduler testScheduler;
         private PublishSubject<Integer> sourceObservable;
@@ -111,7 +114,7 @@ public interface ObservablePropertyBinderSpecification
             testScheduler = new TestScheduler();
             sourceObservable = PublishSubject.create();
             sourceObservable.observeOn(testScheduler);
-            property = ReactiveProperty.empty();
+            property = createProperty();
 
             disposable = bind(property).to(new IsObservable<Integer>()
             {
@@ -168,7 +171,8 @@ public interface ObservablePropertyBinderSpecification
         }
     }
 
-    abstract class WhenBindObservablePropertyToObservablePropertySpecification implements ReactiveBinder
+    abstract class WhenBindObservablePropertyToObservablePropertySpecification
+            implements ReactiveBinder, ReactivePropertyFactory
     {
         private ReactiveProperty<Integer> sourceProperty;
         private ReactiveProperty<Integer> property;
@@ -177,8 +181,8 @@ public interface ObservablePropertyBinderSpecification
         @BeforeEach
         protected void bind()
         {
-            sourceProperty = ReactiveProperty.empty();
-            property = ReactiveProperty.empty();
+            sourceProperty = createProperty();
+            property = createProperty();
 
             disposable = bind(property).to(sourceProperty);
         }

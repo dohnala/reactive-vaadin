@@ -41,7 +41,7 @@ public class ReactivePropertyTest implements
         class AsEmpty extends WhenCreateEmptySpecification {}
 
         @Nested
-        @DisplayName("With default value")
+        @DisplayName("From default value")
         class WithValue extends WhenCreateWithValueSpecification {}
 
         @Nested

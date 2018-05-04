@@ -19,6 +19,7 @@ import java.util.Objects;
 
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
 import com.github.dohnal.vaadin.reactive.ReactiveProperty;
+import com.github.dohnal.vaadin.reactive.ReactivePropertyFactory;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.subjects.PublishSubject;
@@ -30,7 +31,7 @@ import io.reactivex.subjects.PublishSubject;
  * @param <R> type of command result
  * @author dohnal
  */
-public abstract class AbstractCommand<T, R> implements ReactiveCommand<T, R>
+public abstract class AbstractCommand<T, R> implements ReactiveCommand<T, R>, ReactivePropertyFactory
 {
     protected final PublishSubject<R> result;
 
@@ -55,20 +56,20 @@ public abstract class AbstractCommand<T, R> implements ReactiveCommand<T, R>
 
         this.result = PublishSubject.create();
         this.error = PublishSubject.create();
-        this.isExecuting = ReactiveProperty.withValue(false);
-        this.executionCount = ReactiveProperty.withValue(0);
+        this.isExecuting = createProperty(false);
+        this.executionCount = createProperty(0);
 
         // By default, command cannot be executed while it is executing
         final Observable<Boolean> defaultCanExecute = this.isExecuting.asObservable().map(value -> !value);
 
         // Combine default command executability with custom one by performing logical and
-        this.canExecute = ReactiveProperty.fromObservable(
+        this.canExecute = createPropertyFrom(
                 Observable.combineLatest(
                         defaultCanExecute,
                         canExecute.startWith(true),
                         (x, y) -> x && y));
 
-        this.progress = ReactiveProperty.withValue(0.0f);
+        this.progress = createProperty(0.0f);
     }
 
     /**

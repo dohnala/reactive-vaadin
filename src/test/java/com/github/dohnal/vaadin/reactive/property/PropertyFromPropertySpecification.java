@@ -16,6 +16,7 @@ package com.github.dohnal.vaadin.reactive.property;
 import javax.annotation.Nonnull;
 
 import com.github.dohnal.vaadin.reactive.ReactiveProperty;
+import com.github.dohnal.vaadin.reactive.ReactivePropertyFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -27,13 +28,14 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Specification for {@link ReactiveProperty} created by {@link ReactiveProperty#fromProperty(ReactiveProperty)}
+ * Specification for {@link ReactiveProperty} created by
+ * {@link ReactivePropertyFactory#createPropertyFrom(ReactiveProperty)}
  *
  * @author dohnal
  */
 public interface PropertyFromPropertySpecification extends BasePropertySpecification
 {
-    abstract class WhenCreateFromEmptyPropertySpecification
+    abstract class WhenCreateFromEmptyPropertySpecification implements ReactivePropertyFactory
     {
         private ReactiveProperty<Integer> sourceProperty;
         private ReactiveProperty<Integer> property;
@@ -41,8 +43,8 @@ public interface PropertyFromPropertySpecification extends BasePropertySpecifica
         @BeforeEach
         void createFromEmptyProperty()
         {
-            sourceProperty = ReactiveProperty.empty();
-            property = ReactiveProperty.fromProperty(sourceProperty);
+            sourceProperty = createProperty();
+            property = createPropertyFrom(sourceProperty);
         }
 
         @Test
@@ -140,7 +142,7 @@ public interface PropertyFromPropertySpecification extends BasePropertySpecifica
         }
     }
 
-    abstract class WhenCreateFromPropertyWithValueSpecification
+    abstract class WhenCreateFromPropertyWithValueSpecification implements ReactivePropertyFactory
     {
         private ReactiveProperty<Integer> sourceProperty;
         private ReactiveProperty<Integer> property;
@@ -148,8 +150,8 @@ public interface PropertyFromPropertySpecification extends BasePropertySpecifica
         @BeforeEach
         void createPropertyFromObservable()
         {
-            sourceProperty = ReactiveProperty.withValue(5);
-            property = ReactiveProperty.fromProperty(sourceProperty);
+            sourceProperty = createProperty(5);
+            property = createPropertyFrom(sourceProperty);
         }
 
         @Test

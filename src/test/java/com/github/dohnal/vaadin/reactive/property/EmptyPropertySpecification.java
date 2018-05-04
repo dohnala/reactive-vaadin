@@ -16,6 +16,7 @@ package com.github.dohnal.vaadin.reactive.property;
 import javax.annotation.Nonnull;
 
 import com.github.dohnal.vaadin.reactive.ReactiveProperty;
+import com.github.dohnal.vaadin.reactive.ReactivePropertyFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -25,20 +26,20 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 /**
- * Specification for {@link ReactiveProperty} created by {@link ReactiveProperty#empty()}
+ * Specification for {@link ReactiveProperty} created by {@link ReactivePropertyFactory#createProperty()}
  *
  * @author dohnal
  */
 public interface EmptyPropertySpecification extends BasePropertySpecification
 {
-    abstract class WhenCreateEmptySpecification
+    abstract class WhenCreateEmptySpecification implements ReactivePropertyFactory
     {
         private ReactiveProperty<Integer> property;
 
         @BeforeEach
         void createEmpty()
         {
-            property = ReactiveProperty.empty();
+            property = createProperty();
         }
 
         @Test
