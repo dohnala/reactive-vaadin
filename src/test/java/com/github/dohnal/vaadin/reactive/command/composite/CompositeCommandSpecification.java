@@ -22,6 +22,7 @@ import java.util.concurrent.CompletableFuture;
 import com.github.dohnal.vaadin.reactive.AsyncFunction;
 import com.github.dohnal.vaadin.reactive.AsyncSupplier;
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
+import com.github.dohnal.vaadin.reactive.ReactiveCommandFactory;
 import com.github.dohnal.vaadin.reactive.command.AsyncCommand;
 import com.github.dohnal.vaadin.reactive.command.BaseCommandSpecification;
 import io.reactivex.Observable;
@@ -38,21 +39,26 @@ import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
+ * Specification for {@link ReactiveCommand} created by
+ * {@link ReactiveCommandFactory#createCompositeCommand(List)}
+ * {@link ReactiveCommandFactory#createCompositeCommand(Observable, List)}
+ *
  * @author dohnal
  */
 public interface CompositeCommandSpecification extends BaseCommandSpecification
 {
-    abstract class WhenCreateFromNoCommandsSpecification
+    abstract class WhenCreateFromNoCommandsSpecification implements ReactiveCommandFactory
     {
         @Test
         @DisplayName("Exception should be thrown")
         public void testCreate()
         {
-            assertThrows(IllegalArgumentException.class, () -> ReactiveCommand.createComposite(new ArrayList<>()));
+            assertThrows(IllegalArgumentException.class, () -> createCompositeCommand(new ArrayList<>()));
         }
     }
 
     abstract class WhenCreateFromCommandsWithNoInputSpecification extends WhenCreateSpecification<Void, List<Integer>>
+            implements ReactiveCommandFactory
     {
         private AsyncSupplier<Integer> executionA;
         private CompletableFuture<Integer> executionResultA;
@@ -76,7 +82,7 @@ public interface CompositeCommandSpecification extends BaseCommandSpecification
             executionResultB = new CompletableFuture<>();
             commandB = new AsyncCommand<>(Observable.just(true), executionB);
 
-            command = ReactiveCommand.createComposite(Arrays.asList(commandA, commandB));
+            command = createCompositeCommand(Arrays.asList(commandA, commandB));
         }
 
         @Nonnull
@@ -979,6 +985,7 @@ public interface CompositeCommandSpecification extends BaseCommandSpecification
     }
 
     abstract class WhenCreateFromCommandsWithInputSpecification extends WhenCreateSpecification<Integer, List<Integer>>
+            implements ReactiveCommandFactory
     {
         private AsyncFunction<Integer, Integer> executionA;
         private CompletableFuture<Integer> executionResultA;
@@ -1002,7 +1009,7 @@ public interface CompositeCommandSpecification extends BaseCommandSpecification
             executionResultB = new CompletableFuture<>();
             commandB = new AsyncCommand<>(Observable.just(true), executionB);
 
-            command = ReactiveCommand.createComposite(Arrays.asList(commandA, commandB));
+            command = createCompositeCommand(Arrays.asList(commandA, commandB));
         }
 
         @Nonnull
@@ -1913,7 +1920,7 @@ public interface CompositeCommandSpecification extends BaseCommandSpecification
     }
 
     abstract class WhenCreateFromCommandsWithCanExecuteSpecification extends
-            WhenCreateWithCanExecuteSpecification<Integer, List<Integer>>
+            WhenCreateWithCanExecuteSpecification<Integer, List<Integer>> implements ReactiveCommandFactory
     {
         private AsyncFunction<Integer, Integer> executionA;
         private CompletableFuture<Integer> executionResultA;
@@ -1942,7 +1949,7 @@ public interface CompositeCommandSpecification extends BaseCommandSpecification
             testScheduler = new TestScheduler();
             testSubject = PublishSubject.create();
             testSubject.observeOn(testScheduler);
-            command = ReactiveCommand.createComposite(testSubject, Arrays.asList(commandA, commandB));
+            command = createCompositeCommand(testSubject, Arrays.asList(commandA, commandB));
         }
 
         @Nonnull

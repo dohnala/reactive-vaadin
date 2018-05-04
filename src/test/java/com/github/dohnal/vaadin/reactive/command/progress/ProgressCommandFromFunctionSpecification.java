@@ -19,6 +19,7 @@ import java.util.function.Function;
 
 import com.github.dohnal.vaadin.reactive.ProgressContext;
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
+import com.github.dohnal.vaadin.reactive.ReactiveCommandFactory;
 import com.github.dohnal.vaadin.reactive.command.BaseCommandSpecification;
 import io.reactivex.observers.TestObserver;
 import io.reactivex.schedulers.TestScheduler;
@@ -31,14 +32,16 @@ import org.mockito.Mockito;
 
 /**
  * Tests for {@link ReactiveCommand} created by
- * {@link ReactiveCommand#createProgress(Function)}
- * {@link ReactiveCommand#createProgress(Function, Executor)}
+ * {@link ReactiveCommandFactory#createProgressCommand(Function)}
+ * {@link ReactiveCommandFactory#createProgressCommand(Function, Executor)}
  *
  * @author dohnal
  */
 public interface ProgressCommandFromFunctionSpecification extends BaseCommandSpecification
 {
     abstract class WhenCreateFromFunctionSpecification extends WhenCreateSpecification<Void, Integer>
+            implements ReactiveCommandFactory
+
     {
         private Function<ProgressContext, Integer> execution;
         private ReactiveCommand<Void, Integer> command;
@@ -48,7 +51,7 @@ public interface ProgressCommandFromFunctionSpecification extends BaseCommandSpe
         protected void create()
         {
             execution = Mockito.mock(Function.class);
-            command = ReactiveCommand.createProgress(execution);
+            command = createProgressCommand(execution);
         }
 
         @Nonnull
@@ -258,7 +261,7 @@ public interface ProgressCommandFromFunctionSpecification extends BaseCommandSpe
     }
 
     abstract class WhenCreateFromFunctionWithCanExecuteSpecification extends
-            WhenCreateWithCanExecuteSpecification<Void, Integer>
+            WhenCreateWithCanExecuteSpecification<Void, Integer> implements ReactiveCommandFactory
     {
         private Function<ProgressContext, Integer> execution;
         private TestScheduler testScheduler;
@@ -273,7 +276,7 @@ public interface ProgressCommandFromFunctionSpecification extends BaseCommandSpe
             testScheduler = new TestScheduler();
             testSubject = PublishSubject.create();
             testSubject.observeOn(testScheduler);
-            command = ReactiveCommand.createProgress(testSubject, execution);
+            command = createProgressCommand(testSubject, execution);
         }
 
         @Nonnull
@@ -357,6 +360,7 @@ public interface ProgressCommandFromFunctionSpecification extends BaseCommandSpe
     }
 
     abstract class WhenCreateFromFunctionWithExecutorSpecification extends WhenCreateSpecification<Void, Integer>
+            implements ReactiveCommandFactory
     {
         private TestExecutor testExecutor;
         private Function<ProgressContext, Integer> execution;
@@ -368,7 +372,7 @@ public interface ProgressCommandFromFunctionSpecification extends BaseCommandSpe
         {
             testExecutor = new TestExecutor();
             execution = Mockito.mock(Function.class);
-            command = ReactiveCommand.createProgress(execution, testExecutor);
+            command = createProgressCommand(execution, testExecutor);
         }
 
         @Nonnull
@@ -578,7 +582,7 @@ public interface ProgressCommandFromFunctionSpecification extends BaseCommandSpe
     }
 
     abstract class WhenCreateFromFunctionWithCanExecuteAndExecutorSpecification extends
-            WhenCreateWithCanExecuteSpecification<Void, Integer>
+            WhenCreateWithCanExecuteSpecification<Void, Integer> implements ReactiveCommandFactory
     {
         private TestExecutor testExecutor;
         private Function<ProgressContext, Integer> execution;
@@ -595,7 +599,7 @@ public interface ProgressCommandFromFunctionSpecification extends BaseCommandSpe
             testScheduler = new TestScheduler();
             testSubject = PublishSubject.create();
             testSubject.observeOn(testScheduler);
-            command = ReactiveCommand.createProgress(testSubject, execution, testExecutor);
+            command = createProgressCommand(testSubject, execution, testExecutor);
         }
 
         @Nonnull

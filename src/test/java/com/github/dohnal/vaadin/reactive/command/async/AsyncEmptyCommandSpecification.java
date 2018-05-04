@@ -17,6 +17,7 @@ import javax.annotation.Nonnull;
 import java.util.concurrent.Executor;
 
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
+import com.github.dohnal.vaadin.reactive.ReactiveCommandFactory;
 import com.github.dohnal.vaadin.reactive.command.BaseCommandSpecification;
 import io.reactivex.Observable;
 import io.reactivex.observers.TestObserver;
@@ -29,21 +30,22 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Tests for {@link ReactiveCommand} created by
- * {@link ReactiveCommand#createAsync(Executor)}
- * {@link ReactiveCommand#createAsync(Observable, Executor)}
+ * {@link ReactiveCommandFactory#createAsyncCommand(Executor)}
+ * {@link ReactiveCommandFactory#createAsyncCommand(Observable, Executor)}
  *
  * @author dohnal
  */
 public interface AsyncEmptyCommandSpecification extends BaseCommandSpecification
 {
     abstract class WhenCreateEmptySpecification extends WhenCreateSpecification<Void, Void>
+            implements ReactiveCommandFactory
     {
         private ReactiveCommand<Void, Void> command;
 
         @BeforeEach
         protected void create()
         {
-            command = ReactiveCommand.createAsync();
+            command = createAsyncCommand();
         }
 
         @Nonnull
@@ -102,6 +104,7 @@ public interface AsyncEmptyCommandSpecification extends BaseCommandSpecification
     }
 
     abstract class WhenCreateEmptyWithCanExecuteSpecification extends WhenCreateWithCanExecuteSpecification<Void, Void>
+            implements ReactiveCommandFactory
     {
         private TestScheduler testScheduler;
         private PublishSubject<Boolean> testSubject;
@@ -113,7 +116,7 @@ public interface AsyncEmptyCommandSpecification extends BaseCommandSpecification
             testScheduler = new TestScheduler();
             testSubject = PublishSubject.create();
             testSubject.observeOn(testScheduler);
-            command = ReactiveCommand.createAsync(testSubject);
+            command = createAsyncCommand(testSubject);
         }
 
         @Nonnull
@@ -188,6 +191,7 @@ public interface AsyncEmptyCommandSpecification extends BaseCommandSpecification
     }
 
     abstract class WhenCreateEmptyWithExecutorSpecification extends WhenCreateSpecification<Void, Void>
+            implements ReactiveCommandFactory
     {
         private TestExecutor executor;
         private ReactiveCommand<Void, Void> command;
@@ -196,7 +200,7 @@ public interface AsyncEmptyCommandSpecification extends BaseCommandSpecification
         protected void create()
         {
             executor = new TestExecutor();
-            command = ReactiveCommand.createAsync(executor);
+            command = createAsyncCommand(executor);
         }
 
         @Nonnull
@@ -255,7 +259,7 @@ public interface AsyncEmptyCommandSpecification extends BaseCommandSpecification
     }
 
     abstract class WhenCreateEmptyWithCanExecuteAndExecutorSpecification extends
-            WhenCreateWithCanExecuteSpecification<Void, Void>
+            WhenCreateWithCanExecuteSpecification<Void, Void> implements ReactiveCommandFactory
     {
         private TestExecutor testExecutor;
         private TestScheduler testScheduler;
@@ -269,7 +273,7 @@ public interface AsyncEmptyCommandSpecification extends BaseCommandSpecification
             testScheduler = new TestScheduler();
             testSubject = PublishSubject.create();
             testSubject.observeOn(testScheduler);
-            command = ReactiveCommand.createAsync(testSubject, testExecutor);
+            command = createAsyncCommand(testSubject, testExecutor);
         }
 
         @Nonnull

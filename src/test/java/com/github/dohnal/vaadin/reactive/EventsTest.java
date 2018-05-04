@@ -131,7 +131,7 @@ public class EventsTest implements Events
 
     @Nested
     @DisplayName("When succeed event is created with command")
-    class WhenCreateSucceed
+    class WhenCreateSucceed implements ReactiveCommandFactory
     {
         private ReactiveCommand<Integer, Integer> command;
         private Observable<Integer> event;
@@ -140,7 +140,7 @@ public class EventsTest implements Events
         @SuppressWarnings("unchecked")
         protected void create()
         {
-            command = ReactiveCommand.create(input -> input + 1);
+            command = createCommand(input -> input + 1);
             event = succeed(command);
         }
 
@@ -170,7 +170,7 @@ public class EventsTest implements Events
 
     @Nested
     @DisplayName("When failed event is created with command")
-    class WhenCreateFailed
+    class WhenCreateFailed implements ReactiveCommandFactory
     {
         protected final RuntimeException ERROR = new RuntimeException("Error");
 
@@ -181,7 +181,7 @@ public class EventsTest implements Events
         @SuppressWarnings("unchecked")
         protected void create()
         {
-            command = ReactiveCommand.create(() -> {
+            command = createCommand(() -> {
                 throw ERROR;
             });
             event = failed(command);
@@ -213,7 +213,7 @@ public class EventsTest implements Events
 
     @Nested
     @DisplayName("When completed event is created")
-    class WhenCreateCompleted
+    class WhenCreateCompleted implements ReactiveCommandFactory
     {
         @Nested
         @DisplayName("With command which succeed")
@@ -226,7 +226,7 @@ public class EventsTest implements Events
             @SuppressWarnings("unchecked")
             protected void create()
             {
-                command = ReactiveCommand.create(input -> input + 1);
+                command = createCommand(input -> input + 1);
                 event = completed(command);
             }
 
@@ -268,7 +268,7 @@ public class EventsTest implements Events
             @SuppressWarnings("unchecked")
             protected void create()
             {
-                command = ReactiveCommand.create(() -> {
+                command = createCommand(() -> {
                     throw ERROR;
                 });
                 event = completed(command);

@@ -18,6 +18,7 @@ import java.util.concurrent.Executor;
 import java.util.function.Function;
 
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
+import com.github.dohnal.vaadin.reactive.ReactiveCommandFactory;
 import com.github.dohnal.vaadin.reactive.command.BaseCommandSpecification;
 import io.reactivex.Observable;
 import io.reactivex.observers.TestObserver;
@@ -33,14 +34,15 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Tests for {@link ReactiveCommand} created by
- * {@link ReactiveCommand#createAsync(Function, Executor)}
- * {@link ReactiveCommand#createAsync(Observable, Function, Executor)}
+ * {@link ReactiveCommandFactory#createAsyncCommand(Function, Executor)}
+ * {@link ReactiveCommandFactory#createAsyncCommand(Observable, Function, Executor)}
  *
  * @author dohnal
  */
 public interface AsyncCommandFromFunctionSpecification extends BaseCommandSpecification
 {
     abstract class WhenCreateFromFunctionSpecification extends WhenCreateSpecification<Integer, Integer>
+            implements ReactiveCommandFactory
     {
         private Function<Integer, Integer> execution;
         private ReactiveCommand<Integer, Integer> command;
@@ -50,7 +52,7 @@ public interface AsyncCommandFromFunctionSpecification extends BaseCommandSpecif
         protected void create()
         {
             execution = Mockito.mock(Function.class);
-            command = ReactiveCommand.createAsync(execution);
+            command = createAsyncCommand(execution);
         }
 
         @Nonnull
@@ -230,7 +232,7 @@ public interface AsyncCommandFromFunctionSpecification extends BaseCommandSpecif
     }
 
     abstract class WhenCreateFromFunctionWithCanExecuteSpecification extends
-            WhenCreateWithCanExecuteSpecification<Integer, Integer>
+            WhenCreateWithCanExecuteSpecification<Integer, Integer> implements ReactiveCommandFactory
     {
         private Function<Integer, Integer> execution;
         private TestScheduler testScheduler;
@@ -245,7 +247,7 @@ public interface AsyncCommandFromFunctionSpecification extends BaseCommandSpecif
             testScheduler = new TestScheduler();
             testSubject = PublishSubject.create();
             testSubject.observeOn(testScheduler);
-            command = ReactiveCommand.createAsync(testSubject, execution);
+            command = createAsyncCommand(testSubject, execution);
         }
 
         @Nonnull
@@ -331,6 +333,7 @@ public interface AsyncCommandFromFunctionSpecification extends BaseCommandSpecif
     }
 
     abstract class WhenCreateFromFunctionWithExecutorSpecification extends WhenCreateSpecification<Integer, Integer>
+            implements ReactiveCommandFactory
     {
         private TestExecutor testExecutor;
         private Function<Integer, Integer> execution;
@@ -342,7 +345,7 @@ public interface AsyncCommandFromFunctionSpecification extends BaseCommandSpecif
         {
             testExecutor = new TestExecutor();
             execution = Mockito.mock(Function.class);
-            command = ReactiveCommand.createAsync(execution, testExecutor);
+            command = createAsyncCommand(execution, testExecutor);
         }
 
         @Nonnull
@@ -522,7 +525,7 @@ public interface AsyncCommandFromFunctionSpecification extends BaseCommandSpecif
     }
 
     abstract class WhenCreateFromFunctionWithCanExecuteAndExecutorSpecification extends
-            WhenCreateWithCanExecuteSpecification<Integer, Integer>
+            WhenCreateWithCanExecuteSpecification<Integer, Integer> implements ReactiveCommandFactory
     {
         private TestExecutor testExecutor;
         private Function<Integer, Integer> execution;
@@ -539,7 +542,7 @@ public interface AsyncCommandFromFunctionSpecification extends BaseCommandSpecif
             testScheduler = new TestScheduler();
             testSubject = PublishSubject.create();
             testSubject.observeOn(testScheduler);
-            command = ReactiveCommand.createAsync(testSubject, execution, testExecutor);
+            command = createAsyncCommand(testSubject, execution, testExecutor);
         }
 
         @Nonnull

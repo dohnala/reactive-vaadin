@@ -20,6 +20,7 @@ import java.util.function.BiFunction;
 
 import com.github.dohnal.vaadin.reactive.ProgressContext;
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
+import com.github.dohnal.vaadin.reactive.ReactiveCommandFactory;
 import com.github.dohnal.vaadin.reactive.command.BaseCommandSpecification;
 import io.reactivex.observers.TestObserver;
 import io.reactivex.schedulers.TestScheduler;
@@ -34,14 +35,15 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Tests for {@link ReactiveCommand} created by
- * {@link ReactiveCommand#createProgress(BiConsumer)}
- * {@link ReactiveCommand#createProgress(BiFunction, Executor)}
+ * {@link ReactiveCommandFactory#createProgressCommand(BiConsumer)}
+ * {@link ReactiveCommandFactory#createProgressCommand(BiFunction, Executor)}
  *
  * @author dohnal
  */
 public interface ProgressCommandFromBiConsumerSpecification extends BaseCommandSpecification
 {
     abstract class WhenCreateFromBiConsumerSpecification extends WhenCreateSpecification<Integer, Void>
+            implements ReactiveCommandFactory
     {
         private BiConsumer<ProgressContext, Integer> execution;
         private ReactiveCommand<Integer, Void> command;
@@ -51,7 +53,7 @@ public interface ProgressCommandFromBiConsumerSpecification extends BaseCommandS
         protected void create()
         {
             execution = Mockito.mock(BiConsumer.class);
-            command = ReactiveCommand.createProgress(execution);
+            command = createProgressCommand(execution);
         }
 
         @Nonnull
@@ -258,7 +260,7 @@ public interface ProgressCommandFromBiConsumerSpecification extends BaseCommandS
     }
 
     abstract class WhenCreateFromBiConsumerWithCanExecuteSpecification extends
-            WhenCreateWithCanExecuteSpecification<Integer, Void>
+            WhenCreateWithCanExecuteSpecification<Integer, Void> implements ReactiveCommandFactory
     {
         private BiConsumer<ProgressContext, Integer> execution;
         private TestScheduler testScheduler;
@@ -273,7 +275,7 @@ public interface ProgressCommandFromBiConsumerSpecification extends BaseCommandS
             testScheduler = new TestScheduler();
             testSubject = PublishSubject.create();
             testSubject.observeOn(testScheduler);
-            command = ReactiveCommand.createProgress(testSubject, execution);
+            command = createProgressCommand(testSubject, execution);
         }
 
         @Nonnull
@@ -359,6 +361,7 @@ public interface ProgressCommandFromBiConsumerSpecification extends BaseCommandS
     }
 
     abstract class WhenCreateFromBiConsumerWithExecutorSpecification extends WhenCreateSpecification<Integer, Void>
+            implements ReactiveCommandFactory
     {
         private TestExecutor testExecutor;
         private BiConsumer<ProgressContext, Integer> execution;
@@ -370,7 +373,7 @@ public interface ProgressCommandFromBiConsumerSpecification extends BaseCommandS
         {
             testExecutor = new TestExecutor();
             execution = Mockito.mock(BiConsumer.class);
-            command = ReactiveCommand.createProgress(execution, testExecutor);
+            command = createProgressCommand(execution, testExecutor);
         }
 
         @Nonnull
@@ -577,7 +580,7 @@ public interface ProgressCommandFromBiConsumerSpecification extends BaseCommandS
     }
 
     abstract class WhenCreateFromBiConsumerWithCanExecuteAndExecutorSpecification extends
-            WhenCreateWithCanExecuteSpecification<Integer, Void>
+            WhenCreateWithCanExecuteSpecification<Integer, Void> implements ReactiveCommandFactory
     {
         private TestExecutor testExecutor;
         private BiConsumer<ProgressContext, Integer> execution;
@@ -594,7 +597,7 @@ public interface ProgressCommandFromBiConsumerSpecification extends BaseCommandS
             testScheduler = new TestScheduler();
             testSubject = PublishSubject.create();
             testSubject.observeOn(testScheduler);
-            command = ReactiveCommand.createProgress(testSubject, execution, testExecutor);
+            command = createProgressCommand(testSubject, execution, testExecutor);
         }
 
         @Nonnull

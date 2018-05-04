@@ -16,6 +16,7 @@ package com.github.dohnal.vaadin.reactive.command.sync;
 import javax.annotation.Nonnull;
 
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
+import com.github.dohnal.vaadin.reactive.ReactiveCommandFactory;
 import com.github.dohnal.vaadin.reactive.command.BaseCommandSpecification;
 import io.reactivex.Observable;
 import io.reactivex.observers.TestObserver;
@@ -28,21 +29,22 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Specification for {@link ReactiveCommand} created by
- * {@link ReactiveCommand#create()}
- * {@link ReactiveCommand#create(Observable)}
+ * {@link ReactiveCommandFactory#createCommand()}
+ * {@link ReactiveCommandFactory#createCommand(Observable)}
  *
  * @author dohnal
  */
 public interface SyncEmptyCommandSpecification extends BaseCommandSpecification
 {
     abstract class WhenCreateEmptySpecification extends WhenCreateSpecification<Void, Void>
+            implements ReactiveCommandFactory
     {
         private ReactiveCommand<Void, Void> command;
 
         @BeforeEach
         protected void create()
         {
-            command = ReactiveCommand.create();
+            command = createCommand();
         }
 
         @Nonnull
@@ -101,6 +103,7 @@ public interface SyncEmptyCommandSpecification extends BaseCommandSpecification
     }
 
     abstract class WhenCreateEmptyWithCanExecuteSpecification extends WhenCreateWithCanExecuteSpecification<Void, Void>
+            implements ReactiveCommandFactory
     {
         private TestScheduler testScheduler;
         private PublishSubject<Boolean> testSubject;
@@ -112,7 +115,7 @@ public interface SyncEmptyCommandSpecification extends BaseCommandSpecification
             testScheduler = new TestScheduler();
             testSubject = PublishSubject.create();
             testSubject.observeOn(testScheduler);
-            command = ReactiveCommand.create(testSubject);
+            command = createCommand(testSubject);
         }
 
         @Nonnull

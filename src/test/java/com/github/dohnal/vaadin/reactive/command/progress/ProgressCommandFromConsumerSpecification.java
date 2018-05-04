@@ -19,6 +19,7 @@ import java.util.function.Consumer;
 
 import com.github.dohnal.vaadin.reactive.ProgressContext;
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
+import com.github.dohnal.vaadin.reactive.ReactiveCommandFactory;
 import com.github.dohnal.vaadin.reactive.command.BaseCommandSpecification;
 import io.reactivex.observers.TestObserver;
 import io.reactivex.schedulers.TestScheduler;
@@ -31,14 +32,15 @@ import org.mockito.Mockito;
 
 /**
  * Tests for {@link ReactiveCommand} created by
- * {@link ReactiveCommand#createProgress(Consumer)}
- * {@link ReactiveCommand#createProgress(Consumer, Executor)}
+ * {@link ReactiveCommandFactory#createProgressCommand(Consumer)}
+ * {@link ReactiveCommandFactory#createProgressCommand(Consumer, Executor)}
  *
  * @author dohnal
  */
 public interface ProgressCommandFromConsumerSpecification extends BaseCommandSpecification
 {
     abstract class WhenCreateFromConsumerSpecification extends WhenCreateSpecification<Void, Void>
+            implements ReactiveCommandFactory
     {
         private Consumer<ProgressContext> execution;
         private ReactiveCommand<Void, Void> command;
@@ -48,7 +50,7 @@ public interface ProgressCommandFromConsumerSpecification extends BaseCommandSpe
         protected void create()
         {
             execution = Mockito.mock(Consumer.class);
-            command = ReactiveCommand.createProgress(execution);
+            command = createProgressCommand(execution);
         }
 
         @Nonnull
@@ -236,7 +238,7 @@ public interface ProgressCommandFromConsumerSpecification extends BaseCommandSpe
     }
 
     abstract class WhenCreateFromConsumerWithCanExecuteSpecification extends
-            WhenCreateWithCanExecuteSpecification<Void, Void>
+            WhenCreateWithCanExecuteSpecification<Void, Void> implements ReactiveCommandFactory
     {
         private Consumer<ProgressContext> execution;
         private TestScheduler testScheduler;
@@ -251,7 +253,7 @@ public interface ProgressCommandFromConsumerSpecification extends BaseCommandSpe
             testScheduler = new TestScheduler();
             testSubject = PublishSubject.create();
             testSubject.observeOn(testScheduler);
-            command = ReactiveCommand.createProgress(testSubject, execution);
+            command = createProgressCommand(testSubject, execution);
         }
 
         @Nonnull
@@ -335,6 +337,7 @@ public interface ProgressCommandFromConsumerSpecification extends BaseCommandSpe
     }
 
     abstract class WhenCreateFromConsumerWithExecutorSpecification extends WhenCreateSpecification<Void, Void>
+            implements ReactiveCommandFactory
     {
         private TestExecutor testExecutor;
         private Consumer<ProgressContext> execution;
@@ -346,7 +349,7 @@ public interface ProgressCommandFromConsumerSpecification extends BaseCommandSpe
         {
             testExecutor = new TestExecutor();
             execution = Mockito.mock(Consumer.class);
-            command = ReactiveCommand.createProgress(execution, testExecutor);
+            command = createProgressCommand(execution, testExecutor);
         }
 
         @Nonnull
@@ -534,7 +537,7 @@ public interface ProgressCommandFromConsumerSpecification extends BaseCommandSpe
     }
 
     abstract class WhenCreateFromConsumerWithCanExecuteAndExecutorSpecification extends
-            WhenCreateWithCanExecuteSpecification<Void, Void>
+            WhenCreateWithCanExecuteSpecification<Void, Void> implements ReactiveCommandFactory
     {
         private TestExecutor testExecutor;
         private Consumer<ProgressContext> execution;
@@ -551,7 +554,7 @@ public interface ProgressCommandFromConsumerSpecification extends BaseCommandSpe
             testScheduler = new TestScheduler();
             testSubject = PublishSubject.create();
             testSubject.observeOn(testScheduler);
-            command = ReactiveCommand.createProgress(testSubject, execution, testExecutor);
+            command = createProgressCommand(testSubject, execution, testExecutor);
         }
 
         @Nonnull

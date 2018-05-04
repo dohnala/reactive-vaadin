@@ -17,6 +17,7 @@ import javax.annotation.Nonnull;
 import java.util.function.Function;
 
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
+import com.github.dohnal.vaadin.reactive.ReactiveCommandFactory;
 import com.github.dohnal.vaadin.reactive.command.BaseCommandSpecification;
 import io.reactivex.Observable;
 import io.reactivex.observers.TestObserver;
@@ -32,14 +33,15 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Specification for {@link ReactiveCommand} created by
- * {@link ReactiveCommand#create(Function)}
- * {@link ReactiveCommand#create(Observable, Function)}
+ * {@link ReactiveCommandFactory#createCommand(Function)}
+ * {@link ReactiveCommandFactory#createCommand(Observable, Function)}
  *
  * @author dohnal
  */
 public interface SyncCommandFromFunctionSpecification extends BaseCommandSpecification
 {
     abstract class WhenCreateFromFunctionSpecification extends WhenCreateSpecification<Integer, Integer>
+            implements ReactiveCommandFactory
     {
         private Function<Integer, Integer> execution;
         private ReactiveCommand<Integer, Integer> command;
@@ -49,7 +51,7 @@ public interface SyncCommandFromFunctionSpecification extends BaseCommandSpecifi
         protected void create()
         {
             execution = Mockito.mock(Function.class);
-            command = ReactiveCommand.create(execution);
+            command = createCommand(execution);
         }
 
         @Nonnull
@@ -235,7 +237,7 @@ public interface SyncCommandFromFunctionSpecification extends BaseCommandSpecifi
     }
 
     abstract class WhenCreateFromFunctionWithCanExecuteSpecification extends
-            WhenCreateWithCanExecuteSpecification<Integer, Integer>
+            WhenCreateWithCanExecuteSpecification<Integer, Integer> implements ReactiveCommandFactory
     {
         private Function<Integer, Integer> execution;
         private TestScheduler testScheduler;
@@ -250,7 +252,7 @@ public interface SyncCommandFromFunctionSpecification extends BaseCommandSpecifi
             testScheduler = new TestScheduler();
             testSubject = PublishSubject.create();
             testSubject.observeOn(testScheduler);
-            command = ReactiveCommand.create(testSubject, execution);
+            command = createCommand(testSubject, execution);
         }
 
         @Nonnull

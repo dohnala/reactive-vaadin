@@ -18,6 +18,7 @@ import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
+import com.github.dohnal.vaadin.reactive.ReactiveCommandFactory;
 import com.github.dohnal.vaadin.reactive.command.BaseCommandSpecification;
 import io.reactivex.Observable;
 import io.reactivex.observers.TestObserver;
@@ -33,14 +34,15 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Tests for {@link ReactiveCommand} created by
- * {@link ReactiveCommand#createAsync(Consumer, Executor)}
- * {@link ReactiveCommand#createAsync(Observable, Consumer, Executor)}
+ * {@link ReactiveCommandFactory#createAsyncCommand(Consumer, Executor)}
+ * {@link ReactiveCommandFactory#createAsyncCommand(Observable, Consumer, Executor)}
  *
  * @author dohnal
  */
 public interface AsyncCommandFromConsumerSpecification extends BaseCommandSpecification
 {
     abstract class WhenCreateFromConsumerSpecification extends WhenCreateSpecification<Integer, Void>
+            implements ReactiveCommandFactory
     {
         private Consumer<Integer> execution;
         private ReactiveCommand<Integer, Void> command;
@@ -50,7 +52,7 @@ public interface AsyncCommandFromConsumerSpecification extends BaseCommandSpecif
         protected void create()
         {
             execution = Mockito.mock(Consumer.class);
-            command = ReactiveCommand.createAsync(execution);
+            command = createAsyncCommand(execution);
         }
 
         @Nonnull
@@ -210,7 +212,7 @@ public interface AsyncCommandFromConsumerSpecification extends BaseCommandSpecif
     }
 
     abstract class WhenCreateFromConsumerWithCanExecuteSpecification extends
-            WhenCreateWithCanExecuteSpecification<Integer, Void>
+            WhenCreateWithCanExecuteSpecification<Integer, Void> implements ReactiveCommandFactory
     {
         private Consumer<Integer> execution;
         private TestScheduler testScheduler;
@@ -225,7 +227,7 @@ public interface AsyncCommandFromConsumerSpecification extends BaseCommandSpecif
             testScheduler = new TestScheduler();
             testSubject = PublishSubject.create();
             testSubject.observeOn(testScheduler);
-            command = ReactiveCommand.createAsync(testSubject, execution);
+            command = createAsyncCommand(testSubject, execution);
         }
 
         @Nonnull
@@ -311,6 +313,7 @@ public interface AsyncCommandFromConsumerSpecification extends BaseCommandSpecif
     }
 
     abstract class WhenCreateFromConsumerWithExecutorSpecification extends WhenCreateSpecification<Integer, Void>
+            implements ReactiveCommandFactory
     {
         private TestExecutor testExecutor;
         private Consumer<Integer> execution;
@@ -322,7 +325,7 @@ public interface AsyncCommandFromConsumerSpecification extends BaseCommandSpecif
         {
             testExecutor = new TestExecutor();
             execution = Mockito.mock(Consumer.class);
-            command = ReactiveCommand.createAsync(execution, testExecutor);
+            command = createAsyncCommand(execution, testExecutor);
         }
 
         @Nonnull
@@ -482,7 +485,7 @@ public interface AsyncCommandFromConsumerSpecification extends BaseCommandSpecif
     }
 
     abstract class WhenCreateFromConsumerWithCanExecuteAndExecutorSpecification extends
-            WhenCreateWithCanExecuteSpecification<Integer, Void>
+            WhenCreateWithCanExecuteSpecification<Integer, Void> implements ReactiveCommandFactory
     {
         private TestExecutor testExecutor;
         private Consumer<Integer> execution;
@@ -499,7 +502,7 @@ public interface AsyncCommandFromConsumerSpecification extends BaseCommandSpecif
             testScheduler = new TestScheduler();
             testSubject = PublishSubject.create();
             testSubject.observeOn(testScheduler);
-            command = ReactiveCommand.createAsync(testSubject, execution, testExecutor);
+            command = createAsyncCommand(testSubject, execution, testExecutor);
         }
 
         @Nonnull
