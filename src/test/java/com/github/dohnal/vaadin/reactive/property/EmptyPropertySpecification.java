@@ -43,6 +43,20 @@ public interface EmptyPropertySpecification extends BasePropertySpecification
         }
 
         @Test
+        @DisplayName("HasValue should be false")
+        public void testHasValue()
+        {
+            assertFalse(property.hasValue());
+        }
+
+        @Test
+        @DisplayName("IsReadOnly should be false")
+        public void testIsReadOnly()
+        {
+            assertFalse(property.isReadOnly());
+        }
+
+        @Test
         @DisplayName("Value should be null")
         public void testValue()
         {
@@ -55,13 +69,6 @@ public interface EmptyPropertySpecification extends BasePropertySpecification
         {
             property.asObservable().test()
                     .assertNoValues();
-        }
-
-        @Test
-        @DisplayName("HasValue should be false")
-        public void testHasValue()
-        {
-            assertFalse(property.hasValue());
         }
 
         @Nested
@@ -114,13 +121,21 @@ public interface EmptyPropertySpecification extends BasePropertySpecification
 
         @Nested
         @DisplayName("When property is subscribed")
-        class WhenSubscribe extends WhenSubscribeSpecification
+        class WhenSubscribe
         {
-            @Nonnull
-            @Override
-            public ReactiveProperty<Integer> getProperty()
+            @BeforeEach
+            void setInitialValue()
             {
-                return property;
+                property.setValue(5);
+                property.setValue(7);
+            }
+
+            @Test
+            @DisplayName("Observable should emit only last value")
+            public void testObservable()
+            {
+                property.asObservable().test()
+                        .assertValue(7);
             }
         }
     }

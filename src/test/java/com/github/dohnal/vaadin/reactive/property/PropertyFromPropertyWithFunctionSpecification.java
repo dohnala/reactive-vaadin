@@ -13,20 +13,18 @@
 
 package com.github.dohnal.vaadin.reactive.property;
 
-import javax.annotation.Nonnull;
+import java.util.function.Function;
 
 import com.github.dohnal.vaadin.reactive.ReactiveProperty;
 import com.github.dohnal.vaadin.reactive.ReactivePropertyFactory;
 import com.github.dohnal.vaadin.reactive.exceptions.ReadOnlyPropertyException;
-import io.reactivex.Observable;
 import io.reactivex.observers.TestObserver;
-import io.reactivex.schedulers.TestScheduler;
-import io.reactivex.subjects.PublishSubject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -34,25 +32,22 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Specification for {@link ReactiveProperty} created by
- * {@link ReactivePropertyFactory#createPropertyFrom(Observable)}
+ * {@link ReactivePropertyFactory#createPropertyFrom(ReactiveProperty, Function)}
  *
  * @author dohnal
  */
-public interface PropertyFromObservableSpecification extends BasePropertySpecification
+public interface PropertyFromPropertyWithFunctionSpecification extends BasePropertySpecification
 {
-    abstract class WhenCreateFromObservableSpecification implements ReactivePropertyFactory
+    abstract class WhenCreateFromPropertyWithFunctionSpecification implements ReactivePropertyFactory
     {
-        private TestScheduler testScheduler;
-        private PublishSubject<Integer> testSubject;
+        private ReactiveProperty<Integer> sourceProperty;
         private ReactiveProperty<Integer> property;
 
         @BeforeEach
-        void createFromObservable()
+        void createFromEmptyProperty()
         {
-            testScheduler = new TestScheduler();
-            testSubject = PublishSubject.create();
-            testSubject.observeOn(testScheduler);
-            property = createPropertyFrom(testSubject);
+            sourceProperty = createProperty();
+            property = createPropertyFrom(sourceProperty, value -> value * 2);
         }
 
         @Test
@@ -85,76 +80,82 @@ public interface PropertyFromObservableSpecification extends BasePropertySpecifi
         }
 
         @Nested
-        @DisplayName("When source observable emits different value")
-        class WhenSourceObservableEmitsDifferentValue extends WhenSourceEmitsDifferentValueSpecification
+        @DisplayName("When source property emits different value")
+        class WhenSourcePropertyEmitsDifferentValue
         {
-            @Nonnull
-            @Override
-            public ReactiveProperty<Integer> getProperty()
+            @Test
+            @DisplayName("HasValue should be true")
+            public void testHasValue()
             {
-                return property;
-            }
+                sourceProperty.setValue(5);
+                sourceProperty.setValue(7);
 
-            @Override
-            protected void emitValue(final @Nonnull Integer value)
-            {
-                testSubject.onNext(value);
-                testScheduler.triggerActions();
+                assertTrue(property.hasValue());
             }
-        }
-
-        @Nested
-        @DisplayName("When source observable emits same value")
-        class WhenSourceObservableEmitsSameValue extends WhenSourceEmitsSameValueSpecification
-        {
-            @Nonnull
-            @Override
-            public ReactiveProperty<Integer> getProperty()
-            {
-                return property;
-            }
-
-            @Override
-            protected void emitValue(final @Nonnull Integer value)
-            {
-                testSubject.onNext(value);
-                testScheduler.triggerActions();
-            }
-        }
-
-        @Nested
-        @DisplayName("When source observable emits error")
-        class WhenSourceObservableEmitsError
-        {
-            protected final Throwable ERROR = new RuntimeException("Error");
 
             @Test
-            @DisplayName("Property should emit error")
+            @DisplayName("Value should be correct")
+            public void testValue()
+            {
+                sourceProperty.setValue(5);
+                sourceProperty.setValue(7);
+
+                assertEquals(new Integer(14), property.getValue());
+            }
+
+            @Test
+            @DisplayName("Observable should emit correct value")
             public void testObservable()
             {
                 final TestObserver<Integer> testObserver = property.asObservable().test();
 
-                testSubject.onError(ERROR);
-                testScheduler.triggerActions();
+                sourceProperty.setValue(5);
 
-                testObserver.assertError(ERROR);
+                testObserver.assertValue(10);
+
+                sourceProperty.setValue(7);
+
+                testObserver.assertValues(10, 14);
             }
         }
 
         @Nested
-        @DisplayName("When source observable completes")
-        class WhenSourceObservableCompletes
+        @DisplayName("When source property emits same value")
+        class WhenSourcePropertyEmitsSameValue
         {
             @Test
-            @DisplayName("Property should complete")
+            @DisplayName("HasValue should be true")
+            public void testHasValue()
+            {
+                sourceProperty.setValue(5);
+                sourceProperty.setValue(5);
+
+                assertTrue(property.hasValue());
+            }
+
+            @Test
+            @DisplayName("Value should be correct")
+            public void testValue()
+            {
+                sourceProperty.setValue(5);
+                sourceProperty.setValue(5);
+
+                assertEquals(new Integer(10), property.getValue());
+            }
+
+            @Test
+            @DisplayName("Observable should not emit any value")
             public void testObservable()
             {
                 final TestObserver<Integer> testObserver = property.asObservable().test();
 
-                testSubject.onComplete();
-                testScheduler.triggerActions();
+                sourceProperty.setValue(5);
 
-                testObserver.assertComplete();
+                testObserver.assertValue(10);
+
+                sourceProperty.setValue(5);
+
+                testObserver.assertValue(10);
             }
         }
 
@@ -189,9 +190,8 @@ public interface PropertyFromObservableSpecification extends BasePropertySpecifi
             @BeforeEach
             void setInitialValue()
             {
-                testSubject.onNext(5);
-                testSubject.onNext(7);
-                testScheduler.triggerActions();
+                sourceProperty.setValue(5);
+                sourceProperty.setValue(7);
             }
 
             @Test
@@ -199,7 +199,7 @@ public interface PropertyFromObservableSpecification extends BasePropertySpecifi
             public void testObservable()
             {
                 property.asObservable().test()
-                        .assertValue(7);
+                        .assertValue(14);
             }
         }
     }

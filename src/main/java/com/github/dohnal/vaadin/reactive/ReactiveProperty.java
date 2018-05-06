@@ -17,6 +17,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.function.Function;
 
+import com.github.dohnal.vaadin.reactive.exceptions.ReadOnlyPropertyException;
+
 /**
  * Reactive property stores single editable value and also acts as observable
  *
@@ -26,26 +28,44 @@ import java.util.function.Function;
 public interface ReactiveProperty<T> extends ObservableProperty<T>
 {
     /**
-     * Returns current value
-     * NOTE: returns null if this property has no value
+     * Returns whether this property has any value
      *
-     * @return current value
+     * @return whether this property has any value
+     */
+    boolean hasValue();
+
+    /**
+     * Returns whether this property is read-only
+     *
+     * @return whether this property is read-only
+     */
+    boolean isReadOnly();
+
+    /**
+     * Returns current value or null if this property has no value
+     *
+     * @return current value or null if this property has no value
      * @see #hasValue()
      */
     @Nullable
     T getValue();
 
     /**
-     * Return if this property has any value
+     * Sets given value to this property
      *
-     * @return if this property has any value
+     * @param value value
+     * @throws ReadOnlyPropertyException if this property is read-only
+     * @see #isReadOnly()
      */
-    boolean hasValue();
+    @Override
+    void setValue(final @Nonnull T value);
 
     /**
-     * Updates a value by given update function and notifies all subscribers
+     * Updates a value by given update function
      *
      * @param update update function
+     * @throws ReadOnlyPropertyException if this property is read-only
+     * @see #isReadOnly()
      */
     void updateValue(final @Nonnull Function<? super T, ? extends T> update);
 }

@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -43,6 +44,20 @@ public interface PropertyWithValueSpecification extends BasePropertySpecificatio
         }
 
         @Test
+        @DisplayName("HasValue should be true")
+        public void testHasValue()
+        {
+            assertTrue(property.hasValue());
+        }
+
+        @Test
+        @DisplayName("IsReadOnly should be false")
+        public void testIsReadOnly()
+        {
+            assertFalse(property.isReadOnly());
+        }
+
+        @Test
         @DisplayName("Value should be correct")
         public void testValue()
         {
@@ -55,13 +70,6 @@ public interface PropertyWithValueSpecification extends BasePropertySpecificatio
         {
             property.asObservable().test()
                     .assertValue(5);
-        }
-
-        @Test
-        @DisplayName("HasValue should be true")
-        public void testHasValue()
-        {
-            assertTrue(property.hasValue());
         }
 
         @Nested
@@ -114,13 +122,21 @@ public interface PropertyWithValueSpecification extends BasePropertySpecificatio
 
         @Nested
         @DisplayName("When property is subscribed")
-        class WhenSubscribe extends WhenSubscribeSpecification
+        class WhenSubscribe
         {
-            @Nonnull
-            @Override
-            public ReactiveProperty<Integer> getProperty()
+            @BeforeEach
+            void setInitialValue()
             {
-                return property;
+                property.setValue(5);
+                property.setValue(7);
+            }
+
+            @Test
+            @DisplayName("Observable should emit only last value")
+            public void testObservable()
+            {
+                property.asObservable().test()
+                        .assertValue(7);
             }
         }
     }

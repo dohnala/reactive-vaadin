@@ -15,7 +15,12 @@ package com.github.dohnal.vaadin.reactive;
 
 import com.github.dohnal.vaadin.reactive.property.EmptyPropertySpecification;
 import com.github.dohnal.vaadin.reactive.property.PropertyFromObservableSpecification;
+import com.github.dohnal.vaadin.reactive.property.PropertyFromPropertiesSpecification;
+import com.github.dohnal.vaadin.reactive.property.PropertyFromPropertiesWithCombinerSpecification;
 import com.github.dohnal.vaadin.reactive.property.PropertyFromPropertySpecification;
+import com.github.dohnal.vaadin.reactive.property.PropertyFromPropertyWithFunctionSpecification;
+import com.github.dohnal.vaadin.reactive.property.PropertyFromTwoPropertiesSpecification;
+import com.github.dohnal.vaadin.reactive.property.PropertyFromTwoPropertiesWithCombinerSpecification;
 import com.github.dohnal.vaadin.reactive.property.PropertyWithValueSpecification;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -30,7 +35,12 @@ public class ReactivePropertyTest implements
         EmptyPropertySpecification,
         PropertyWithValueSpecification,
         PropertyFromObservableSpecification,
-        PropertyFromPropertySpecification
+        PropertyFromPropertySpecification,
+        PropertyFromPropertyWithFunctionSpecification,
+        PropertyFromTwoPropertiesSpecification,
+        PropertyFromTwoPropertiesWithCombinerSpecification,
+        PropertyFromPropertiesSpecification,
+        PropertyFromPropertiesWithCombinerSpecification
 {
     @Nested
     @DisplayName("When new reactive property is created")
@@ -55,5 +65,33 @@ public class ReactivePropertyTest implements
         @Nested
         @DisplayName("From property with default value")
         class FromPropertyWithValue extends WhenCreateFromPropertyWithValueSpecification {}
+
+        @Nested
+        @DisplayName("From property with function")
+        class FromPropertyWithFunction extends WhenCreateFromPropertyWithFunctionSpecification {}
+
+        @Nested
+        @DisplayName("From two properties")
+        class FromTwoProperties extends WhenCreateFromTwoPropertiesSpecification {}
+
+        @Nested
+        @DisplayName("From two properties with combiner")
+        class FromTwoPropertiesWithCombiner extends WhenCreateFromTwoPropertiesWithCombinerSpecification {}
+
+        @Nested
+        @DisplayName("From no properties")
+        class FromNoProperties extends WhenCreateFromNoPropertiesSpecification {}
+
+        @Nested
+        @DisplayName("From properties")
+        class FromProperties extends WhenCreateFromPropertiesSpecification {}
+
+        @Nested
+        @DisplayName("From no properties with combiner")
+        class FromNoPropertiesWithCombiner extends WhenCreateFromNoPropertiesWithCombinerSpecification {}
+
+        @Nested
+        @DisplayName("From properties with combiner")
+        class FromPropertiesWithCombiner extends WhenCreateFromPropertiesWithCombinerSpecification {}
     }
 }

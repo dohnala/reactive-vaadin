@@ -17,6 +17,7 @@ import javax.annotation.Nonnull;
 
 import com.github.dohnal.vaadin.reactive.ReactiveProperty;
 import com.github.dohnal.vaadin.reactive.ReactivePropertyFactory;
+import com.github.dohnal.vaadin.reactive.exceptions.ReadOnlyPropertyException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -25,6 +26,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -48,6 +50,20 @@ public interface PropertyFromPropertySpecification extends BasePropertySpecifica
         }
 
         @Test
+        @DisplayName("IsReadOnly should be true")
+        public void testIsReadOnly()
+        {
+            assertTrue(property.isReadOnly());
+        }
+
+        @Test
+        @DisplayName("HasValue should be false")
+        public void testHasValue()
+        {
+            assertFalse(property.hasValue());
+        }
+
+        @Test
         @DisplayName("Value should be null")
         public void testValue()
         {
@@ -60,13 +76,6 @@ public interface PropertyFromPropertySpecification extends BasePropertySpecifica
         {
             property.asObservable().test()
                     .assertNoValues();
-        }
-
-        @Test
-        @DisplayName("HasValue should be false")
-        public void testHasValue()
-        {
-            assertFalse(property.hasValue());
         }
 
         @Nested
@@ -106,62 +115,46 @@ public interface PropertyFromPropertySpecification extends BasePropertySpecifica
         }
 
         @Nested
-        @DisplayName("When different value is set")
-        class WhenSetDifferentValue extends WhenSetDifferentValueSpecification
+        @DisplayName("When value is set")
+        class WhenSetValue
         {
-            @Nonnull
-            @Override
-            public ReactiveProperty<Integer> getProperty()
+            @Test
+            @DisplayName("ReadOnlyPropertyException should be thrown")
+            public void testValue()
             {
-                return property;
-            }
-        }
-
-        @Nested
-        @DisplayName("When same value is set")
-        class WhenSetSameValue extends WhenSetSameValueSpecification
-        {
-            @Nonnull
-            @Override
-            public ReactiveProperty<Integer> getProperty()
-            {
-                return property;
+                assertThrows(ReadOnlyPropertyException.class, () -> property.setValue(5));
             }
         }
 
         @Nested
         @DisplayName("When different value is updated")
-        class WhenUpdateDifferentValue extends WhenUpdateDifferentValueSpecification
+        class WhenUpdateValue
         {
-            @Nonnull
-            @Override
-            public ReactiveProperty<Integer> getProperty()
+            @Test
+            @DisplayName("ReadOnlyPropertyException should be thrown")
+            public void testValue()
             {
-                return property;
-            }
-        }
-
-        @Nested
-        @DisplayName("When same value is updated")
-        class WhenUpdateSameValue extends WhenUpdateSameValueSpecification
-        {
-            @Nonnull
-            @Override
-            public ReactiveProperty<Integer> getProperty()
-            {
-                return property;
+                assertThrows(ReadOnlyPropertyException.class, () -> property.updateValue(value -> 5));
             }
         }
 
         @Nested
         @DisplayName("When property is subscribed")
-        class WhenSubscribe extends WhenSubscribeSpecification
+        class WhenSubscribe
         {
-            @Nonnull
-            @Override
-            public ReactiveProperty<Integer> getProperty()
+            @BeforeEach
+            void setInitialValue()
             {
-                return property;
+                sourceProperty.setValue(5);
+                sourceProperty.setValue(7);
+            }
+
+            @Test
+            @DisplayName("Observable should emit only last value")
+            public void testObservable()
+            {
+                property.asObservable().test()
+                        .assertValue(7);
             }
         }
     }
@@ -172,10 +165,24 @@ public interface PropertyFromPropertySpecification extends BasePropertySpecifica
         private ReactiveProperty<Integer> property;
 
         @BeforeEach
-        void createPropertyFromObservable()
+        void createPropertyFromPropertyWithValue()
         {
             sourceProperty = createProperty(5);
             property = createPropertyFrom(sourceProperty);
+        }
+
+        @Test
+        @DisplayName("IsReadOnly should be true")
+        public void testIsReadOnly()
+        {
+            assertTrue(property.isReadOnly());
+        }
+
+        @Test
+        @DisplayName("HasValue should be true")
+        public void testHasValue()
+        {
+            assertTrue(property.hasValue());
         }
 
         @Test
@@ -193,13 +200,6 @@ public interface PropertyFromPropertySpecification extends BasePropertySpecifica
                     .assertValue(5);
         }
 
-        @Test
-        @DisplayName("HasValue should be true")
-        public void testHasValue()
-        {
-            assertTrue(property.hasValue());
-        }
-
         @Nested
         @DisplayName("When source property emits different value")
         class WhenSourcePropertyEmitsDifferentValue extends WhenSourceEmitsDifferentValueSpecification
@@ -237,62 +237,46 @@ public interface PropertyFromPropertySpecification extends BasePropertySpecifica
         }
 
         @Nested
-        @DisplayName("When different value is set")
-        class WhenSetDifferentValue extends WhenSetDifferentValueSpecification
+        @DisplayName("When value is set")
+        class WhenSetValue
         {
-            @Nonnull
-            @Override
-            public ReactiveProperty<Integer> getProperty()
+            @Test
+            @DisplayName("ReadOnlyPropertyException should be thrown")
+            public void testValue()
             {
-                return property;
-            }
-        }
-
-        @Nested
-        @DisplayName("When same value is set")
-        class WhenSetSameValue extends WhenSetSameValueSpecification
-        {
-            @Nonnull
-            @Override
-            public ReactiveProperty<Integer> getProperty()
-            {
-                return property;
+                assertThrows(ReadOnlyPropertyException.class, () -> property.setValue(5));
             }
         }
 
         @Nested
         @DisplayName("When different value is updated")
-        class WhenUpdateDifferentValue extends WhenUpdateDifferentValueSpecification
+        class WhenUpdateValue
         {
-            @Nonnull
-            @Override
-            public ReactiveProperty<Integer> getProperty()
+            @Test
+            @DisplayName("ReadOnlyPropertyException should be thrown")
+            public void testValue()
             {
-                return property;
-            }
-        }
-
-        @Nested
-        @DisplayName("When same value is updated")
-        class WhenUpdateSameValue extends WhenUpdateSameValueSpecification
-        {
-            @Nonnull
-            @Override
-            public ReactiveProperty<Integer> getProperty()
-            {
-                return property;
+                assertThrows(ReadOnlyPropertyException.class, () -> property.updateValue(value -> 5));
             }
         }
 
         @Nested
         @DisplayName("When property is subscribed")
-        class WhenSubscribe extends WhenSubscribeSpecification
+        class WhenSubscribe
         {
-            @Nonnull
-            @Override
-            public ReactiveProperty<Integer> getProperty()
+            @BeforeEach
+            void setInitialValue()
             {
-                return property;
+                sourceProperty.setValue(5);
+                sourceProperty.setValue(7);
+            }
+
+            @Test
+            @DisplayName("Observable should emit only last value")
+            public void testObservable()
+            {
+                property.asObservable().test()
+                        .assertValue(7);
             }
         }
     }

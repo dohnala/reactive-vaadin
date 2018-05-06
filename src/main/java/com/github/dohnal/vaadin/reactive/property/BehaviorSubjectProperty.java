@@ -19,6 +19,7 @@ import java.util.Objects;
 import java.util.function.Function;
 
 import com.github.dohnal.vaadin.reactive.ReactiveProperty;
+import com.github.dohnal.vaadin.reactive.exceptions.ReadOnlyPropertyException;
 import io.reactivex.Observable;
 import io.reactivex.subjects.BehaviorSubject;
 
@@ -30,7 +31,9 @@ import io.reactivex.subjects.BehaviorSubject;
  */
 public final class BehaviorSubjectProperty<T> implements ReactiveProperty<T>
 {
-    private BehaviorSubject<T> subject;
+    private final BehaviorSubject<T> subject;
+
+    private final Boolean readOnly;
 
     /**
      * Creates new property with no value
@@ -38,6 +41,7 @@ public final class BehaviorSubjectProperty<T> implements ReactiveProperty<T>
     public BehaviorSubjectProperty()
     {
         this.subject = BehaviorSubject.create();
+        this.readOnly = false;
     }
 
     /**
@@ -50,6 +54,7 @@ public final class BehaviorSubjectProperty<T> implements ReactiveProperty<T>
         Objects.requireNonNull(defaultValue, "Default value cannot be null");
 
         this.subject = BehaviorSubject.createDefault(defaultValue);
+        this.readOnly = false;
     }
 
     /**
@@ -59,34 +64,24 @@ public final class BehaviorSubjectProperty<T> implements ReactiveProperty<T>
      */
     public BehaviorSubjectProperty(final @Nonnull Observable<? extends T> observable)
     {
-        this();
-
         Objects.requireNonNull(observable, "Observable cannot be null");
 
-        observable.subscribe(this::setValue);
+        this.subject = BehaviorSubject.create();
+        this.readOnly = true;
+
+        observable.subscribe(this::setValueInternal, subject::onError, subject::onComplete);
     }
 
-    /**
-     * Creates new property with another property bound to it
-     *
-     * @param anotherProperty another property
-     */
-    public BehaviorSubjectProperty(final @Nonnull ReactiveProperty<? extends T> anotherProperty)
+    @Override
+    public final boolean hasValue()
     {
-        Objects.requireNonNull(anotherProperty, "Another property cannot be null");
+        return subject.hasValue();
+    }
 
-        if (anotherProperty.hasValue())
-        {
-            Objects.requireNonNull(anotherProperty.getValue());
-
-            this.subject = BehaviorSubject.createDefault(anotherProperty.getValue());
-        }
-        else
-        {
-            this.subject = BehaviorSubject.create();
-        }
-
-        anotherProperty.asObservable().subscribe(this::setValue);
+    @Override
+    public final boolean isReadOnly()
+    {
+        return Boolean.TRUE.equals(readOnly);
     }
 
     @Nullable
@@ -101,16 +96,12 @@ public final class BehaviorSubjectProperty<T> implements ReactiveProperty<T>
     {
         Objects.requireNonNull(value, "Value cannot be null");
 
-        if (!Objects.equals(value, getValue()))
+        if (isReadOnly())
         {
-            subject.onNext(value);
+            throw new ReadOnlyPropertyException("Property is read-only");
         }
-    }
 
-    @Override
-    public boolean hasValue()
-    {
-        return subject.hasValue();
+        setValueInternal(value);
     }
 
     @Override
@@ -126,5 +117,13 @@ public final class BehaviorSubjectProperty<T> implements ReactiveProperty<T>
     public final Observable<T> asObservable()
     {
         return subject;
+    }
+
+    private void setValueInternal(final @Nonnull T value)
+    {
+        if (!Objects.equals(value, getValue()))
+        {
+            subject.onNext(value);
+        }
     }
 }

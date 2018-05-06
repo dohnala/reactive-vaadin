@@ -50,16 +50,21 @@ public interface BasePropertySpecification
     {
         protected abstract void emitValue(final @Nonnull Integer value);
 
-        @BeforeEach
-        void setInitialValue()
+        @Test
+        @DisplayName("HasValue should be true")
+        public void testHasValue()
         {
-            getProperty().setValue(5);
+            emitValue(5);
+            emitValue(7);
+
+            assertTrue(getProperty().hasValue());
         }
 
         @Test
         @DisplayName("Value should be correct")
         public void testValue()
         {
+            emitValue(5);
             emitValue(7);
 
             assertEquals(new Integer(7), getProperty().getValue());
@@ -71,20 +76,13 @@ public interface BasePropertySpecification
         {
             final TestObserver<Integer> testObserver = getProperty().asObservable().test();
 
+            emitValue(5);
+
             testObserver.assertValue(5);
 
             emitValue(7);
 
             testObserver.assertValues(5, 7);
-        }
-
-        @Test
-        @DisplayName("HasValue should be true")
-        public void testHasValue()
-        {
-            emitValue(7);
-
-            assertTrue(getProperty().hasValue());
         }
     }
 
@@ -96,16 +94,21 @@ public interface BasePropertySpecification
     {
         protected abstract void emitValue(final @Nonnull Integer value);
 
-        @BeforeEach
-        void setInitialValue()
+        @Test
+        @DisplayName("HasValue should be true")
+        public void testHasValue()
         {
-            getProperty().setValue(5);
+            emitValue(5);
+            emitValue(5);
+
+            assertTrue(getProperty().hasValue());
         }
 
         @Test
         @DisplayName("Value should be correct")
         public void testValue()
         {
+            emitValue(5);
             emitValue(5);
 
             assertEquals(new Integer(5), getProperty().getValue());
@@ -117,20 +120,13 @@ public interface BasePropertySpecification
         {
             final TestObserver<Integer> testObserver = getProperty().asObservable().test();
 
+            emitValue(5);
+
             testObserver.assertValue(5);
 
             emitValue(5);
 
             testObserver.assertValue(5);
-        }
-
-        @Test
-        @DisplayName("HasValue should be true")
-        public void testHasValue()
-        {
-            emitValue(5);
-
-            assertTrue(getProperty().hasValue());
         }
     }
 
@@ -146,6 +142,15 @@ public interface BasePropertySpecification
         }
 
         @Test
+        @DisplayName("HasValue should be true")
+        public void testHasValue()
+        {
+            getProperty().setValue(7);
+
+            assertTrue(getProperty().hasValue());
+        }
+
+        @Test
         @DisplayName("Value should be correct")
         public void testValue()
         {
@@ -165,15 +170,6 @@ public interface BasePropertySpecification
             getProperty().setValue(7);
 
             testObserver.assertValues(5, 7);
-        }
-
-        @Test
-        @DisplayName("HasValue should be true")
-        public void testHasValue()
-        {
-            getProperty().setValue(7);
-
-            assertTrue(getProperty().hasValue());
         }
     }
 
@@ -189,6 +185,15 @@ public interface BasePropertySpecification
         }
 
         @Test
+        @DisplayName("HasValue should be true")
+        public void testHasValue()
+        {
+            getProperty().setValue(5);
+
+            assertTrue(getProperty().hasValue());
+        }
+
+        @Test
         @DisplayName("Value should be correct")
         public void testValue()
         {
@@ -209,15 +214,6 @@ public interface BasePropertySpecification
 
             testObserver.assertValue(5);
         }
-
-        @Test
-        @DisplayName("HasValue should be true")
-        public void testHasValue()
-        {
-            getProperty().setValue(5);
-
-            assertTrue(getProperty().hasValue());
-        }
     }
 
     /**
@@ -229,6 +225,15 @@ public interface BasePropertySpecification
         void setInitialValue()
         {
             getProperty().setValue(5);
+        }
+
+        @Test
+        @DisplayName("HasValue should be true")
+        public void testHasValue()
+        {
+            getProperty().updateValue(value -> value + 2);
+
+            assertTrue(getProperty().hasValue());
         }
 
         @Test
@@ -252,15 +257,6 @@ public interface BasePropertySpecification
 
             testObserver.assertValues(5, 7);
         }
-
-        @Test
-        @DisplayName("HasValue should be true")
-        public void testHasValue()
-        {
-            getProperty().updateValue(value -> value + 2);
-
-            assertTrue(getProperty().hasValue());
-        }
     }
 
     /**
@@ -272,6 +268,15 @@ public interface BasePropertySpecification
         void setInitialValue()
         {
             getProperty().setValue(5);
+        }
+
+        @Test
+        @DisplayName("HasValue should be true")
+        public void testHasValue()
+        {
+            getProperty().updateValue(value -> value);
+
+            assertTrue(getProperty().hasValue());
         }
 
         @Test
@@ -294,50 +299,6 @@ public interface BasePropertySpecification
             getProperty().updateValue(value -> value);
 
             testObserver.assertValue(5);
-        }
-
-        @Test
-        @DisplayName("HasValue should be true")
-        public void testHasValue()
-        {
-            getProperty().updateValue(value -> value);
-
-            assertTrue(getProperty().hasValue());
-        }
-    }
-
-    /**
-     * Specification that tests behavior of property when it is subscribed
-     */
-    abstract class WhenSubscribeSpecification implements RequireProperty<Integer>
-    {
-        @BeforeEach
-        void setInitialValue()
-        {
-            getProperty().setValue(5);
-            getProperty().setValue(7);
-        }
-
-        @Test
-        @DisplayName("Value should be correct")
-        public void testValue()
-        {
-            assertEquals(new Integer(7), getProperty().getValue());
-        }
-
-        @Test
-        @DisplayName("Observable should emit only last value")
-        public void testObservable()
-        {
-            getProperty().asObservable().test()
-                    .assertValue(7);
-        }
-
-        @Test
-        @DisplayName("HasValue should be true")
-        public void testHasValue()
-        {
-            assertTrue(getProperty().hasValue());
         }
     }
 }
