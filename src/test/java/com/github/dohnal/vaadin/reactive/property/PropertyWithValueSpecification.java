@@ -89,6 +89,30 @@ public interface PropertyWithValueSpecification extends BasePropertySpecificatio
         }
 
         @Nested
+        @DisplayName("When different value is updated")
+        class WhenUpdateDifferentValue extends WhenUpdateDifferentValueSpecification
+        {
+            @Nonnull
+            @Override
+            public ReactiveProperty<Integer> getProperty()
+            {
+                return property;
+            }
+        }
+
+        @Nested
+        @DisplayName("When same value is updated")
+        class WhenUpdateSameValue extends WhenUpdateSameValueSpecification
+        {
+            @Nonnull
+            @Override
+            public ReactiveProperty<Integer> getProperty()
+            {
+                return property;
+            }
+        }
+
+        @Nested
         @DisplayName("When property is subscribed")
         class WhenSubscribe extends WhenSubscribeSpecification
         {
