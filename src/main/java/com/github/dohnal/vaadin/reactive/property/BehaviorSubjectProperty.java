@@ -69,7 +69,7 @@ public final class BehaviorSubjectProperty<T> implements ReactiveProperty<T>
         this.subject = BehaviorSubject.create();
         this.readOnly = true;
 
-        observable.subscribe(this::setValueInternal, subject::onError, subject::onComplete);
+        observable.subscribe(subject::onNext, subject::onError, subject::onComplete);
     }
 
     @Override
@@ -101,7 +101,7 @@ public final class BehaviorSubjectProperty<T> implements ReactiveProperty<T>
             throw new ReadOnlyPropertyException("Property is read-only");
         }
 
-        setValueInternal(value);
+        subject.onNext(value);
     }
 
     @Override
@@ -116,14 +116,6 @@ public final class BehaviorSubjectProperty<T> implements ReactiveProperty<T>
     @Override
     public final Observable<T> asObservable()
     {
-        return subject;
-    }
-
-    private void setValueInternal(final @Nonnull T value)
-    {
-        if (!Objects.equals(value, getValue()))
-        {
-            subject.onNext(value);
-        }
+        return subject.distinctUntilChanged();
     }
 }
