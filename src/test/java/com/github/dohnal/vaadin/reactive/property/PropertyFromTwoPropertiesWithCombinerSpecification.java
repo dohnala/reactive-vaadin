@@ -82,8 +82,8 @@ public interface PropertyFromTwoPropertiesWithCombinerSpecification extends Base
         }
 
         @Nested
-        @DisplayName("When source properties emits different value")
-        class WhenSourcePropertyEmitsDifferentValue
+        @DisplayName("When source properties emit different value")
+        class WhenSourcePropertiesEmitsDifferentValue
         {
             @Test
             @DisplayName("HasValue should be true")
@@ -133,8 +133,8 @@ public interface PropertyFromTwoPropertiesWithCombinerSpecification extends Base
         }
 
         @Nested
-        @DisplayName("When source property emits same value")
-        class WhenSourcePropertyEmitsSameValue
+        @DisplayName("When source properties emit same value")
+        class WhenSourcePropertiesEmitsSameValue
         {
             @Test
             @DisplayName("HasValue should be true")
@@ -205,11 +205,11 @@ public interface PropertyFromTwoPropertiesWithCombinerSpecification extends Base
         }
 
         @Nested
-        @DisplayName("When property is subscribed")
-        class WhenSubscribe
+        @DisplayName("When property is subscribed after source properties emit values")
+        class WhenSubscribeAfterSourceEmitsValues
         {
             @BeforeEach
-            void setInitialValue()
+            void emitsValues()
             {
                 first.setValue(5);
                 second.setValue(7);

@@ -87,7 +87,7 @@ public interface InvokeWithConsumerSpecification
 
                 interaction.invoke(consumer);
 
-                interactionContext = (InteractionContext)testObserver.getEvents().get(0).get(0);
+                interactionContext = (InteractionContext) testObserver.getEvents().get(0).get(0);
             }
 
             @Test()
@@ -114,7 +114,7 @@ public interface InvokeWithConsumerSpecification
 
                 interaction.invoke(consumer);
 
-                interactionContext = (InteractionContext)testObserver.getEvents().get(0).get(0);
+                interactionContext = (InteractionContext) testObserver.getEvents().get(0).get(0);
 
                 interactionContext.handle(RESULT);
             }
@@ -150,7 +150,7 @@ public interface InvokeWithConsumerSpecification
 
                 interaction.invoke(consumer);
 
-                interactionContext = (InteractionContext)testObserver.getEvents().get(0).get(0);
+                interactionContext = (InteractionContext) testObserver.getEvents().get(0).get(0);
 
                 interactionContext.handle(RESULT);
             }

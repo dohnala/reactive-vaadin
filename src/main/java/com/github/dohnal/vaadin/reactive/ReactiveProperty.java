@@ -25,7 +25,7 @@ import com.github.dohnal.vaadin.reactive.exceptions.ReadOnlyPropertyException;
  * @param <T> type of property
  * @author dohnal
  */
-public interface ReactiveProperty<T> extends ObservableProperty<T>
+public interface ReactiveProperty<T> extends ObservableProperty<T>, Suppressible, Delayable
 {
     /**
      * Returns whether this property has any value

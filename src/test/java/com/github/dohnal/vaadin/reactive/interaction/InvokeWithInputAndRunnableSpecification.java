@@ -89,7 +89,7 @@ public interface InvokeWithInputAndRunnableSpecification
 
                 interaction.invoke(INPUT, runnable);
 
-                interactionContext = (InteractionContext)testObserver.getEvents().get(0).get(0);
+                interactionContext = (InteractionContext) testObserver.getEvents().get(0).get(0);
 
                 interactionContext.handle();
             }
@@ -124,7 +124,7 @@ public interface InvokeWithInputAndRunnableSpecification
 
                 interaction.invoke(INPUT, runnable);
 
-                interactionContext = (InteractionContext)testObserver.getEvents().get(0).get(0);
+                interactionContext = (InteractionContext) testObserver.getEvents().get(0).get(0);
 
                 interactionContext.handle();
             }

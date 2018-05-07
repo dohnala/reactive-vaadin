@@ -139,11 +139,11 @@ public interface PropertyFromPropertySpecification extends BasePropertySpecifica
         }
 
         @Nested
-        @DisplayName("When property is subscribed")
-        class WhenSubscribe
+        @DisplayName("When property is subscribed after source property emits values")
+        class WhenSubscribeAfterSourceEmitsValues
         {
             @BeforeEach
-            void setInitialValue()
+            void emitsValues()
             {
                 sourceProperty.setValue(5);
                 sourceProperty.setValue(7);
@@ -157,17 +157,117 @@ public interface PropertyFromPropertySpecification extends BasePropertySpecifica
                         .assertValue(7);
             }
         }
+
+        @Nested
+        @DisplayName("When property change notifications are suppressed")
+        class WhenSuppress extends WhenSuppressWithSourceSpecification
+        {
+            @Nonnull
+            @Override
+            public ReactiveProperty<Integer> getProperty()
+            {
+                return property;
+            }
+
+            @Override
+            protected void emitValue(final @Nonnull Integer value)
+            {
+                sourceProperty.setValue(value);
+            }
+
+            @Nested
+            @DisplayName("When property is subscribed")
+            class WhenSubscribe
+            {
+                @Test
+                @DisplayName("Observable should not emit any value")
+                public void testObservable()
+                {
+                    property.asObservable().test()
+                            .assertNoValues();
+                }
+            }
+        }
+
+        @Nested
+        @DisplayName("When property change notifications are suppressed while run action")
+        class WhenSuppressAction extends WhenSuppressActionWithSourceSpecification
+        {
+            @Nonnull
+            @Override
+            public ReactiveProperty<Integer> getProperty()
+            {
+                return property;
+            }
+
+            @Override
+            protected void emitValue(final @Nonnull Integer value)
+            {
+                sourceProperty.setValue(value);
+            }
+        }
+
+        @Nested
+        @DisplayName("When property change notifications are delayed")
+        class WhenDelay extends WhenDelayWithSourceSpecification
+        {
+            @Nonnull
+            @Override
+            public ReactiveProperty<Integer> getProperty()
+            {
+                return property;
+            }
+
+            @Override
+            protected void emitValue(final @Nonnull Integer value)
+            {
+                sourceProperty.setValue(value);
+            }
+
+            @Nested
+            @DisplayName("When property is subscribed")
+            class WhenSubscribe
+            {
+                @Test
+                @DisplayName("Observable should not emit any value")
+                public void testObservable()
+                {
+                    property.asObservable().test()
+                            .assertNoValues();
+                }
+            }
+        }
+
+        @Nested
+        @DisplayName("When property change notifications are delayed while run action")
+        class WhenDelayAction extends WhenDelayActionWithSourceSpecification
+        {
+            @Nonnull
+            @Override
+            public ReactiveProperty<Integer> getProperty()
+            {
+                return property;
+            }
+
+            @Override
+            protected void emitValue(final @Nonnull Integer value)
+            {
+                sourceProperty.setValue(value);
+            }
+        }
     }
 
     abstract class WhenCreateFromPropertyWithValueSpecification implements ReactivePropertyFactory
     {
+        protected final Integer DEFAULT_VALUE = 5;
+
         private ReactiveProperty<Integer> sourceProperty;
         private ReactiveProperty<Integer> property;
 
         @BeforeEach
         void createPropertyFromPropertyWithValue()
         {
-            sourceProperty = createProperty(5);
+            sourceProperty = createProperty(DEFAULT_VALUE);
             property = createPropertyFrom(sourceProperty);
         }
 
@@ -189,7 +289,7 @@ public interface PropertyFromPropertySpecification extends BasePropertySpecifica
         @DisplayName("Value should be correct")
         public void testValue()
         {
-            assertEquals(new Integer(5), property.getValue());
+            assertEquals(DEFAULT_VALUE, property.getValue());
         }
 
         @Test
@@ -197,7 +297,7 @@ public interface PropertyFromPropertySpecification extends BasePropertySpecifica
         public void testObservable()
         {
             property.asObservable().test()
-                    .assertValue(5);
+                    .assertValue(DEFAULT_VALUE);
         }
 
         @Nested
@@ -261,11 +361,11 @@ public interface PropertyFromPropertySpecification extends BasePropertySpecifica
         }
 
         @Nested
-        @DisplayName("When property is subscribed")
-        class WhenSubscribe
+        @DisplayName("When property is subscribed after source property emits values")
+        class WhenSubscribeAfterSourceEmitsValues
         {
             @BeforeEach
-            void setInitialValue()
+            void emitsValues()
             {
                 sourceProperty.setValue(5);
                 sourceProperty.setValue(7);
@@ -277,6 +377,104 @@ public interface PropertyFromPropertySpecification extends BasePropertySpecifica
             {
                 property.asObservable().test()
                         .assertValue(7);
+            }
+        }
+
+        @Nested
+        @DisplayName("When property change notifications are suppressed")
+        class WhenSuppress extends WhenSuppressWithSourceSpecification
+        {
+            @Nonnull
+            @Override
+            public ReactiveProperty<Integer> getProperty()
+            {
+                return property;
+            }
+
+            @Override
+            protected void emitValue(final @Nonnull Integer value)
+            {
+                sourceProperty.setValue(value);
+            }
+
+            @Nested
+            @DisplayName("When property is subscribed")
+            class WhenSubscribe
+            {
+                @Test
+                @DisplayName("Observable should emit default value")
+                public void testObservable()
+                {
+                    property.asObservable().test()
+                            .assertValue(DEFAULT_VALUE);
+                }
+            }
+        }
+
+        @Nested
+        @DisplayName("When property change notifications are suppressed while run action")
+        class WhenSuppressAction extends WhenSuppressActionWithSourceSpecification
+        {
+            @Nonnull
+            @Override
+            public ReactiveProperty<Integer> getProperty()
+            {
+                return property;
+            }
+
+            @Override
+            protected void emitValue(final @Nonnull Integer value)
+            {
+                sourceProperty.setValue(value);
+            }
+        }
+
+        @Nested
+        @DisplayName("When property change notifications are delayed")
+        class WhenDelay extends WhenDelayWithSourceSpecification
+        {
+            @Nonnull
+            @Override
+            public ReactiveProperty<Integer> getProperty()
+            {
+                return property;
+            }
+
+            @Override
+            protected void emitValue(final @Nonnull Integer value)
+            {
+                sourceProperty.setValue(value);
+            }
+
+            @Nested
+            @DisplayName("When property is subscribed")
+            class WhenSubscribe
+            {
+                @Test
+                @DisplayName("Observable should emit default value")
+                public void testObservable()
+                {
+                    property.asObservable().test()
+                            .assertValue(DEFAULT_VALUE);
+                }
+            }
+        }
+
+        @Nested
+        @DisplayName("When property change notifications are delayed while run action")
+        class WhenDelayAction extends WhenDelayActionWithSourceSpecification
+        {
+            @Nonnull
+            @Override
+            public ReactiveProperty<Integer> getProperty()
+            {
+                return property;
+            }
+
+            @Override
+            protected void emitValue(final @Nonnull Integer value)
+            {
+                sourceProperty.setValue(value);
             }
         }
     }

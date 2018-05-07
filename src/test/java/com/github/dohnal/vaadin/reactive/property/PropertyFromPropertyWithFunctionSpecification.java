@@ -184,11 +184,11 @@ public interface PropertyFromPropertyWithFunctionSpecification extends BasePrope
         }
 
         @Nested
-        @DisplayName("When property is subscribed")
-        class WhenSubscribe
+        @DisplayName("When property is subscribed after source property emits values")
+        class WhenSubscribeAfterSourceEmitsValues
         {
             @BeforeEach
-            void setInitialValue()
+            void emitsValues()
             {
                 sourceProperty.setValue(5);
                 sourceProperty.setValue(7);

@@ -183,11 +183,11 @@ public interface PropertyFromObservableSpecification extends BasePropertySpecifi
         }
 
         @Nested
-        @DisplayName("When property is subscribed")
-        class WhenSubscribe
+        @DisplayName("When property is subscribed after source observable emits values")
+        class WhenSubscribeAfterSourceEmitsValues
         {
             @BeforeEach
-            void setInitialValue()
+            void emitsValues()
             {
                 testSubject.onNext(5);
                 testSubject.onNext(7);
@@ -200,6 +200,108 @@ public interface PropertyFromObservableSpecification extends BasePropertySpecifi
             {
                 property.asObservable().test()
                         .assertValue(7);
+            }
+        }
+
+        @Nested
+        @DisplayName("When property change notifications are suppressed")
+        class WhenSuppress extends WhenSuppressWithSourceSpecification
+        {
+            @Nonnull
+            @Override
+            public ReactiveProperty<Integer> getProperty()
+            {
+                return property;
+            }
+
+            @Override
+            protected void emitValue(final @Nonnull Integer value)
+            {
+                testSubject.onNext(value);
+                testScheduler.triggerActions();
+            }
+
+            @Nested
+            @DisplayName("When property is subscribed")
+            class WhenSubscribe
+            {
+                @Test
+                @DisplayName("Observable should not emit any value")
+                public void testObservable()
+                {
+                    property.asObservable().test()
+                            .assertNoValues();
+                }
+            }
+        }
+
+        @Nested
+        @DisplayName("When property change notifications are suppressed while run action")
+        class WhenSuppressAction extends WhenSuppressActionWithSourceSpecification
+        {
+            @Nonnull
+            @Override
+            public ReactiveProperty<Integer> getProperty()
+            {
+                return property;
+            }
+
+            @Override
+            protected void emitValue(final @Nonnull Integer value)
+            {
+                testSubject.onNext(value);
+                testScheduler.triggerActions();
+            }
+        }
+
+        @Nested
+        @DisplayName("When property change notifications are delayed")
+        class WhenDelay extends WhenDelayWithSourceSpecification
+        {
+            @Nonnull
+            @Override
+            public ReactiveProperty<Integer> getProperty()
+            {
+                return property;
+            }
+
+            @Override
+            protected void emitValue(final @Nonnull Integer value)
+            {
+                testSubject.onNext(value);
+                testScheduler.triggerActions();
+            }
+
+            @Nested
+            @DisplayName("When property is subscribed")
+            class WhenSubscribe
+            {
+                @Test
+                @DisplayName("Observable should not emit any value")
+                public void testObservable()
+                {
+                    property.asObservable().test()
+                            .assertNoValues();
+                }
+            }
+        }
+
+        @Nested
+        @DisplayName("When property change notifications are delayed while run action")
+        class WhenDelayAction extends WhenDelayActionWithSourceSpecification
+        {
+            @Nonnull
+            @Override
+            public ReactiveProperty<Integer> getProperty()
+            {
+                return property;
+            }
+
+            @Override
+            protected void emitValue(final @Nonnull Integer value)
+            {
+                testSubject.onNext(value);
+                testScheduler.triggerActions();
             }
         }
     }

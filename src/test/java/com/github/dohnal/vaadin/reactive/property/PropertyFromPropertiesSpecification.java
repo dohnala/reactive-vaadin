@@ -95,8 +95,8 @@ public interface PropertyFromPropertiesSpecification extends BasePropertySpecifi
         }
 
         @Nested
-        @DisplayName("When source properties emits different value")
-        class WhenSourcePropertyEmitsDifferentValue
+        @DisplayName("When source properties emit different value")
+        class WhenSourcePropertiesEmitDifferentValue
         {
             @Test
             @DisplayName("HasValue should be true")
@@ -141,8 +141,8 @@ public interface PropertyFromPropertiesSpecification extends BasePropertySpecifi
         }
 
         @Nested
-        @DisplayName("When source property emits same value")
-        class WhenSourcePropertyEmitsSameValue
+        @DisplayName("When source properties emit same value")
+        class WhenSourcePropertiesEmitSameValue
         {
             @Test
             @DisplayName("HasValue should be true")
@@ -211,11 +211,11 @@ public interface PropertyFromPropertiesSpecification extends BasePropertySpecifi
         }
 
         @Nested
-        @DisplayName("When property is subscribed")
-        class WhenSubscribe
+        @DisplayName("When property is subscribed after source properties emit values")
+        class WhenSubscribeAfterSourceEmitsValues
         {
             @BeforeEach
-            void setInitialValue()
+            void emitsValues()
             {
                 first.setValue(5);
                 second.setValue(7);

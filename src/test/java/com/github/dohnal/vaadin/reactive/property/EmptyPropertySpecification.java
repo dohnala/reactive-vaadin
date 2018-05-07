@@ -120,11 +120,11 @@ public interface EmptyPropertySpecification extends BasePropertySpecification
         }
 
         @Nested
-        @DisplayName("When property is subscribed")
-        class WhenSubscribe
+        @DisplayName("When property is subscribed after set values")
+        class WhenSubscribeAfterSetValues
         {
             @BeforeEach
-            void setInitialValue()
+            void setValues()
             {
                 property.setValue(5);
                 property.setValue(7);
@@ -136,6 +136,80 @@ public interface EmptyPropertySpecification extends BasePropertySpecification
             {
                 property.asObservable().test()
                         .assertValue(7);
+            }
+        }
+
+        @Nested
+        @DisplayName("When property change notifications are suppressed")
+        class WhenSuppress extends WhenSuppressSpecification
+        {
+            @Nonnull
+            @Override
+            public ReactiveProperty<Integer> getProperty()
+            {
+                return property;
+            }
+
+            @Nested
+            @DisplayName("When property is subscribed")
+            class WhenSubscribe
+            {
+                @Test
+                @DisplayName("Observable should not emit any value")
+                public void testObservable()
+                {
+                    property.asObservable().test()
+                            .assertNoValues();
+                }
+            }
+        }
+
+        @Nested
+        @DisplayName("When property change notifications are suppressed while run action")
+        class WhenSuppressAction extends WhenSuppressActionSpecification
+        {
+            @Nonnull
+            @Override
+            public ReactiveProperty<Integer> getProperty()
+            {
+                return property;
+            }
+        }
+
+        @Nested
+        @DisplayName("When property change notifications are delayed")
+        class WhenDelay extends WhenDelaySpecification
+        {
+            @Nonnull
+            @Override
+            public ReactiveProperty<Integer> getProperty()
+            {
+                return property;
+            }
+
+            @Nested
+            @DisplayName("When property is subscribed")
+            class WhenSubscribe
+            {
+                @Test
+                @DisplayName("Observable should not emit any value")
+                public void testObservable()
+                {
+                    property.asObservable().test()
+                            .assertNoValues();
+                }
+            }
+        }
+
+        @Nested
+        @DisplayName("When property change notifications are delayed while run action")
+        class WhenDelayAction extends WhenDelayActionSpecification
+        {
+            @Nonnull
+            @Override
+            public ReactiveProperty<Integer> getProperty()
+            {
+                return property;
             }
         }
     }

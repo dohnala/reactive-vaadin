@@ -35,12 +35,14 @@ public interface PropertyWithValueSpecification extends BasePropertySpecificatio
 {
     abstract class WhenCreateWithValueSpecification implements ReactivePropertyFactory
     {
+        protected final Integer DEFAULT_VALUE = 5;
+
         private ReactiveProperty<Integer> property;
 
         @BeforeEach
         void createFromValue()
         {
-            property = createProperty(5);
+            property = createProperty(DEFAULT_VALUE);
         }
 
         @Test
@@ -61,7 +63,7 @@ public interface PropertyWithValueSpecification extends BasePropertySpecificatio
         @DisplayName("Value should be correct")
         public void testValue()
         {
-            assertEquals(new Integer(5), property.getValue());
+            assertEquals(DEFAULT_VALUE, property.getValue());
         }
 
         @Test
@@ -69,7 +71,7 @@ public interface PropertyWithValueSpecification extends BasePropertySpecificatio
         public void testObservable()
         {
             property.asObservable().test()
-                    .assertValue(5);
+                    .assertValue(DEFAULT_VALUE);
         }
 
         @Nested
@@ -121,11 +123,11 @@ public interface PropertyWithValueSpecification extends BasePropertySpecificatio
         }
 
         @Nested
-        @DisplayName("When property is subscribed")
-        class WhenSubscribe
+        @DisplayName("When property is subscribed after set values")
+        class WhenSubscribeAfterSetValues
         {
             @BeforeEach
-            void setInitialValue()
+            void setValues()
             {
                 property.setValue(5);
                 property.setValue(7);
@@ -137,6 +139,80 @@ public interface PropertyWithValueSpecification extends BasePropertySpecificatio
             {
                 property.asObservable().test()
                         .assertValue(7);
+            }
+        }
+
+        @Nested
+        @DisplayName("When property change notifications are suppressed")
+        class WhenSuppress extends WhenSuppressSpecification
+        {
+            @Nonnull
+            @Override
+            public ReactiveProperty<Integer> getProperty()
+            {
+                return property;
+            }
+
+            @Nested
+            @DisplayName("When property is subscribed")
+            class WhenSubscribe
+            {
+                @Test
+                @DisplayName("Observable should emit default value")
+                public void testObservable()
+                {
+                    property.asObservable().test()
+                            .assertValue(DEFAULT_VALUE);
+                }
+            }
+        }
+
+        @Nested
+        @DisplayName("When property change notifications are suppressed while run action")
+        class WhenSuppressAction extends WhenSuppressActionSpecification
+        {
+            @Nonnull
+            @Override
+            public ReactiveProperty<Integer> getProperty()
+            {
+                return property;
+            }
+        }
+
+        @Nested
+        @DisplayName("When property change notifications are delayed")
+        class WhenDelay extends WhenDelaySpecification
+        {
+            @Nonnull
+            @Override
+            public ReactiveProperty<Integer> getProperty()
+            {
+                return property;
+            }
+
+            @Nested
+            @DisplayName("When property is subscribed")
+            class WhenSubscribe
+            {
+                @Test
+                @DisplayName("Observable should emit default value")
+                public void testObservable()
+                {
+                    property.asObservable().test()
+                            .assertValue(DEFAULT_VALUE);
+                }
+            }
+        }
+
+        @Nested
+        @DisplayName("When property change notifications are delayed while run action")
+        class WhenDelayAction extends WhenDelayActionSpecification
+        {
+            @Nonnull
+            @Override
+            public ReactiveProperty<Integer> getProperty()
+            {
+                return property;
             }
         }
     }
