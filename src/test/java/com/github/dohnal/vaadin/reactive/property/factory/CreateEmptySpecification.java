@@ -11,12 +11,18 @@
  * the License for the specific language governing permissions and limitations under the License.
  */
 
-package com.github.dohnal.vaadin.reactive.property;
+package com.github.dohnal.vaadin.reactive.property.factory;
 
 import javax.annotation.Nonnull;
 
 import com.github.dohnal.vaadin.reactive.ReactiveProperty;
 import com.github.dohnal.vaadin.reactive.ReactivePropertyFactory;
+import com.github.dohnal.vaadin.reactive.property.DelayActionSpecification;
+import com.github.dohnal.vaadin.reactive.property.DelaySpecification;
+import com.github.dohnal.vaadin.reactive.property.SetValueSpecification;
+import com.github.dohnal.vaadin.reactive.property.SuppressActionSpecification;
+import com.github.dohnal.vaadin.reactive.property.SuppressSpecification;
+import com.github.dohnal.vaadin.reactive.property.UpdateValueSpecification;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -30,9 +36,15 @@ import static org.junit.jupiter.api.Assertions.assertNull;
  *
  * @author dohnal
  */
-public interface EmptyPropertySpecification extends BasePropertySpecification
+public interface CreateEmptySpecification extends
+        SetValueSpecification,
+        UpdateValueSpecification,
+        SuppressSpecification,
+        SuppressActionSpecification,
+        DelaySpecification,
+        DelayActionSpecification
 {
-    abstract class WhenCreateEmptySpecification implements ReactivePropertyFactory
+    abstract class AbstractCreateEmptySpecification implements ReactivePropertyFactory
     {
         private ReactiveProperty<Integer> property;
 
@@ -67,13 +79,12 @@ public interface EmptyPropertySpecification extends BasePropertySpecification
         @DisplayName("Observable should not emit any value")
         public void testObservable()
         {
-            property.asObservable().test()
-                    .assertNoValues();
+            property.asObservable().test().assertNoValues();
         }
 
         @Nested
-        @DisplayName("When different value is set")
-        class WhenSetDifferentValue extends WhenSetDifferentValueSpecification
+        @DisplayName("Set value specification")
+        class SetValue extends AbstractSetValueSpecification
         {
             @Nonnull
             @Override
@@ -84,8 +95,8 @@ public interface EmptyPropertySpecification extends BasePropertySpecification
         }
 
         @Nested
-        @DisplayName("When same value is set")
-        class WhenSetSameValue extends WhenSetSameValueSpecification
+        @DisplayName("Update value specification")
+        class UpdateValue extends AbstractUpdateValueSpecification
         {
             @Nonnull
             @Override
@@ -96,8 +107,8 @@ public interface EmptyPropertySpecification extends BasePropertySpecification
         }
 
         @Nested
-        @DisplayName("When different value is updated")
-        class WhenUpdateDifferentValue extends WhenUpdateDifferentValueSpecification
+        @DisplayName("Suppress specification")
+        class Suppress extends AbstractSuppressSpecification
         {
             @Nonnull
             @Override
@@ -108,8 +119,8 @@ public interface EmptyPropertySpecification extends BasePropertySpecification
         }
 
         @Nested
-        @DisplayName("When same value is updated")
-        class WhenUpdateSameValue extends WhenUpdateSameValueSpecification
+        @DisplayName("Suppress action specification")
+        class SuppressAction extends AbstractSuppressActionSpecification
         {
             @Nonnull
             @Override
@@ -120,53 +131,8 @@ public interface EmptyPropertySpecification extends BasePropertySpecification
         }
 
         @Nested
-        @DisplayName("When property is subscribed after set values")
-        class WhenSubscribeAfterSetValues
-        {
-            @BeforeEach
-            void setValues()
-            {
-                property.setValue(5);
-                property.setValue(7);
-            }
-
-            @Test
-            @DisplayName("Observable should emit only last value")
-            public void testObservable()
-            {
-                property.asObservable().test()
-                        .assertValue(7);
-            }
-        }
-
-        @Nested
-        @DisplayName("When property change notifications are suppressed")
-        class WhenSuppress extends WhenSuppressSpecification
-        {
-            @Nonnull
-            @Override
-            public ReactiveProperty<Integer> getProperty()
-            {
-                return property;
-            }
-
-            @Nested
-            @DisplayName("When property is subscribed")
-            class WhenSubscribe
-            {
-                @Test
-                @DisplayName("Observable should not emit any value")
-                public void testObservable()
-                {
-                    property.asObservable().test()
-                            .assertNoValues();
-                }
-            }
-        }
-
-        @Nested
-        @DisplayName("When property change notifications are suppressed while run action")
-        class WhenSuppressAction extends WhenSuppressActionSpecification
+        @DisplayName("Delay specification")
+        class Delay extends AbstractDelaySpecification
         {
             @Nonnull
             @Override
@@ -177,33 +143,8 @@ public interface EmptyPropertySpecification extends BasePropertySpecification
         }
 
         @Nested
-        @DisplayName("When property change notifications are delayed")
-        class WhenDelay extends WhenDelaySpecification
-        {
-            @Nonnull
-            @Override
-            public ReactiveProperty<Integer> getProperty()
-            {
-                return property;
-            }
-
-            @Nested
-            @DisplayName("When property is subscribed")
-            class WhenSubscribe
-            {
-                @Test
-                @DisplayName("Observable should not emit any value")
-                public void testObservable()
-                {
-                    property.asObservable().test()
-                            .assertNoValues();
-                }
-            }
-        }
-
-        @Nested
-        @DisplayName("When property change notifications are delayed while run action")
-        class WhenDelayAction extends WhenDelayActionSpecification
+        @DisplayName("Delay action specification")
+        class DelayAction extends AbstractDelayActionSpecification
         {
             @Nonnull
             @Override

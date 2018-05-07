@@ -13,15 +13,15 @@
 
 package com.github.dohnal.vaadin.reactive;
 
-import com.github.dohnal.vaadin.reactive.property.EmptyPropertySpecification;
-import com.github.dohnal.vaadin.reactive.property.PropertyFromObservableSpecification;
-import com.github.dohnal.vaadin.reactive.property.PropertyFromPropertiesSpecification;
-import com.github.dohnal.vaadin.reactive.property.PropertyFromPropertiesWithCombinerSpecification;
-import com.github.dohnal.vaadin.reactive.property.PropertyFromPropertySpecification;
-import com.github.dohnal.vaadin.reactive.property.PropertyFromPropertyWithFunctionSpecification;
-import com.github.dohnal.vaadin.reactive.property.PropertyFromTwoPropertiesSpecification;
-import com.github.dohnal.vaadin.reactive.property.PropertyFromTwoPropertiesWithCombinerSpecification;
-import com.github.dohnal.vaadin.reactive.property.PropertyWithValueSpecification;
+import com.github.dohnal.vaadin.reactive.property.factory.CreateEmptySpecification;
+import com.github.dohnal.vaadin.reactive.property.factory.CreateFromObservableSpecification;
+import com.github.dohnal.vaadin.reactive.property.factory.CreateFromPropertiesSpecification;
+import com.github.dohnal.vaadin.reactive.property.factory.CreateFromPropertiesWithCombinerSpecification;
+import com.github.dohnal.vaadin.reactive.property.factory.CreateFromPropertySpecification;
+import com.github.dohnal.vaadin.reactive.property.factory.CreateFromPropertyWithFunctionSpecification;
+import com.github.dohnal.vaadin.reactive.property.factory.CreateFromTwoPropertiesSpecification;
+import com.github.dohnal.vaadin.reactive.property.factory.CreateFromTwoPropertiesWithCombinerSpecification;
+import com.github.dohnal.vaadin.reactive.property.factory.CreateWithValueSpecification;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 
@@ -30,17 +30,16 @@ import org.junit.jupiter.api.Nested;
  *
  * @author dohnal
  */
-@DisplayName("Reactive property specification")
 public class ReactivePropertyTest implements
-        EmptyPropertySpecification,
-        PropertyWithValueSpecification,
-        PropertyFromObservableSpecification,
-        PropertyFromPropertySpecification,
-        PropertyFromPropertyWithFunctionSpecification,
-        PropertyFromTwoPropertiesSpecification,
-        PropertyFromTwoPropertiesWithCombinerSpecification,
-        PropertyFromPropertiesSpecification,
-        PropertyFromPropertiesWithCombinerSpecification
+        CreateEmptySpecification,
+        CreateWithValueSpecification,
+        CreateFromObservableSpecification,
+        CreateFromPropertySpecification,
+        CreateFromPropertyWithFunctionSpecification,
+        CreateFromTwoPropertiesSpecification,
+        CreateFromTwoPropertiesWithCombinerSpecification,
+        CreateFromPropertiesSpecification,
+        CreateFromPropertiesWithCombinerSpecification
 {
     @Nested
     @DisplayName("When new reactive property is created")
@@ -48,50 +47,50 @@ public class ReactivePropertyTest implements
     {
         @Nested
         @DisplayName("As empty")
-        class AsEmpty extends WhenCreateEmptySpecification {}
+        class AsEmpty extends AbstractCreateEmptySpecification {}
 
         @Nested
-        @DisplayName("From default value")
-        class WithValue extends WhenCreateWithValueSpecification {}
+        @DisplayName("With default value")
+        class WithValue extends AbstractCreateWithValueSpecification {}
 
         @Nested
         @DisplayName("From observable")
-        class FromObservable extends WhenCreateFromObservableSpecification {}
+        class FromObservable extends AbstractCreateFromObservableSpecification {}
 
         @Nested
         @DisplayName("From empty property")
-        class FromEmptyProperty extends WhenCreateFromEmptyPropertySpecification {}
+        class FromEmptyProperty extends AbstractCreateFromEmptyPropertySpecification {}
 
         @Nested
         @DisplayName("From property with default value")
-        class FromPropertyWithValue extends WhenCreateFromPropertyWithValueSpecification {}
+        class FromPropertyWithValue extends AbstractCreateFromPropertyWithValueSpecification {}
 
         @Nested
         @DisplayName("From property with function")
-        class FromPropertyWithFunction extends WhenCreateFromPropertyWithFunctionSpecification {}
+        class FromPropertyWithFunction extends AbstractCreateFromPropertyWithFunctionSpecification {}
 
         @Nested
         @DisplayName("From two properties")
-        class FromTwoProperties extends WhenCreateFromTwoPropertiesSpecification {}
+        class FromTwoProperties extends AbstractCreateFromTwoPropertiesSpecification {}
 
         @Nested
         @DisplayName("From two properties with combiner")
-        class FromTwoPropertiesWithCombiner extends WhenCreateFromTwoPropertiesWithCombinerSpecification {}
+        class FromTwoPropertiesWithCombiner extends AbstractCreateFromTwoPropertiesWithCombinerSpecification {}
 
         @Nested
         @DisplayName("From no properties")
-        class FromNoProperties extends WhenCreateFromNoPropertiesSpecification {}
+        class FromNoProperties extends AbstractCreateFromNoPropertiesSpecification {}
 
         @Nested
         @DisplayName("From properties")
-        class FromProperties extends WhenCreateFromPropertiesSpecification {}
+        class FromProperties extends AbstractCreateFromPropertiesSpecification {}
 
         @Nested
         @DisplayName("From no properties with combiner")
-        class FromNoPropertiesWithCombiner extends WhenCreateFromNoPropertiesWithCombinerSpecification {}
+        class FromNoPropertiesWithCombiner extends AbstractCreateFromNoPropertiesWithCombinerSpecification {}
 
         @Nested
         @DisplayName("From properties with combiner")
-        class FromPropertiesWithCombiner extends WhenCreateFromPropertiesWithCombinerSpecification {}
+        class FromPropertiesWithCombiner extends AbstractCreateFromPropertiesWithCombinerSpecification {}
     }
 }
