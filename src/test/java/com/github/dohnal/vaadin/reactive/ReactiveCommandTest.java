@@ -13,26 +13,20 @@
 
 package com.github.dohnal.vaadin.reactive;
 
-import com.github.dohnal.vaadin.reactive.command.async.AsyncCommandFromConsumerSpecification;
-import com.github.dohnal.vaadin.reactive.command.async.AsyncCommandFromFunctionSpecification;
-import com.github.dohnal.vaadin.reactive.command.async.AsyncCommandFromRunnableSpecification;
-import com.github.dohnal.vaadin.reactive.command.async.AsyncCommandFromSupplierSpecification;
-import com.github.dohnal.vaadin.reactive.command.async.AsyncEmptyCommandSpecification;
-import com.github.dohnal.vaadin.reactive.command.composite.CompositeCommandSpecification;
-import com.github.dohnal.vaadin.reactive.command.progress.ProgressCommandFromBiConsumerSpecification;
-import com.github.dohnal.vaadin.reactive.command.progress.ProgressCommandFromBiFunctionSpecification;
-import com.github.dohnal.vaadin.reactive.command.progress.ProgressCommandFromConsumerSpecification;
-import com.github.dohnal.vaadin.reactive.command.progress.ProgressCommandFromFunctionSpecification;
-import com.github.dohnal.vaadin.reactive.command.sync.SyncCommandFromConsumerSpecification;
-import com.github.dohnal.vaadin.reactive.command.sync.SyncCommandFromFunctionSpecification;
-import com.github.dohnal.vaadin.reactive.command.sync.SyncCommandFromRunnableSpecification;
-import com.github.dohnal.vaadin.reactive.command.sync.SyncCommandFromSupplierSpecification;
-import com.github.dohnal.vaadin.reactive.command.sync.SyncEmptyCommandSpecification;
+import com.github.dohnal.vaadin.reactive.command.factory.CompositeFromCommandsSpecification;
+import com.github.dohnal.vaadin.reactive.command.factory.FromConsumerSpecification;
+import com.github.dohnal.vaadin.reactive.command.factory.FromFunctionSpecification;
+import com.github.dohnal.vaadin.reactive.command.factory.FromRunnableSpecification;
+import com.github.dohnal.vaadin.reactive.command.factory.FromSupplierSpecification;
+import com.github.dohnal.vaadin.reactive.command.factory.ProgressFromBiConsumerSpecification;
+import com.github.dohnal.vaadin.reactive.command.factory.ProgressFromBiFunctionSpecification;
+import com.github.dohnal.vaadin.reactive.command.factory.ProgressFromConsumerSpecification;
+import com.github.dohnal.vaadin.reactive.command.factory.ProgressFromFunctionSpecification;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 
 /**
- * Tests for {@link ReactiveCommand}
+ * Tests for {@link ReactiveProperty}
  *
  * @author dohnal
  */
@@ -40,236 +34,173 @@ import org.junit.jupiter.api.Nested;
 public class ReactiveCommandTest
 {
     @Nested
-    @DisplayName("When new synchronous command is created")
-    class WhenCreateSync implements
-            SyncEmptyCommandSpecification,
-            SyncCommandFromRunnableSpecification,
-            SyncCommandFromSupplierSpecification,
-            SyncCommandFromConsumerSpecification,
-            SyncCommandFromFunctionSpecification
+    @DisplayName("When new reactive command is created")
+    class WhenCreate implements
+            FromRunnableSpecification,
+            FromSupplierSpecification,
+            FromConsumerSpecification,
+            FromFunctionSpecification
     {
         @Nested
-        @DisplayName("As empty")
-        class AsEmpty extends WhenCreateEmptySpecification {}
-
-        @Nested
-        @DisplayName("As empty with CanExecute")
-        class AsEmptyWithCanExecute extends WhenCreateEmptyWithCanExecuteSpecification {}
-
-        @Nested
         @DisplayName("From runnable")
-        class FromRunnable extends WhenCreateFromRunnableSpecification {}
-
-        @Nested
-        @DisplayName("From runnable with CanExecute")
-        class FromRunnableWithCanExecute extends WhenCreateFromRunnableWithCanExecuteSpecification {}
-
-        @Nested
-        @DisplayName("From supplier")
-        class FromSupplier extends WhenCreateFromSupplierSpecification {}
-
-        @Nested
-        @DisplayName("From supplier with CanExecute")
-        class FromSupplierWithCanExecute extends WhenCreateFromSupplierWithCanExecuteSpecification {}
-
-        @Nested
-        @DisplayName("From consumer")
-        class FromConsumer extends WhenCreateFromConsumerSpecification {}
-
-        @Nested
-        @DisplayName("From consumer with CanExecute")
-        class FromConsumerWithCanExecute extends WhenCreateFromConsumerWithCanExecuteSpecification {}
-
-        @Nested
-        @DisplayName("From function")
-        class FromFunction extends WhenCreateFromFunctionSpecification {}
-
-        @Nested
-        @DisplayName("From function with CanExecute")
-        class FromFunctionWithCanExecute extends WhenCreateFromFunctionWithCanExecuteSpecification {}
-    }
-
-    @Nested
-    @DisplayName("When new asynchronous command is created")
-    class WhenCreateAsync implements
-            AsyncEmptyCommandSpecification,
-            AsyncCommandFromRunnableSpecification,
-            AsyncCommandFromSupplierSpecification,
-            AsyncCommandFromConsumerSpecification,
-            AsyncCommandFromFunctionSpecification
-    {
-        @Nested
-        @DisplayName("As empty")
-        class AsEmpty extends WhenCreateEmptySpecification {}
-
-        @Nested
-        @DisplayName("As empty with CanExecute")
-        class AsEmptyWithCanExecute extends WhenCreateEmptyWithCanExecuteSpecification {}
-
-        @Nested
-        @DisplayName("As empty with executor")
-        class AsEmptyWithExecutor extends WhenCreateEmptyWithExecutorSpecification {}
-
-        @Nested
-        @DisplayName("As empty with CanExecute and executor")
-        class AsEmptyWithCanExecuteAndExecutor extends WhenCreateEmptyWithCanExecuteAndExecutorSpecification {}
-
-        @Nested
-        @DisplayName("From runnable")
-        class FromRunnable extends WhenCreateFromRunnableSpecification {}
-
-        @Nested
-        @DisplayName("From runnable with CanExecute")
-        class FromRunnableWithCanExecute extends WhenCreateFromRunnableWithCanExecuteSpecification {}
+        class FromRunnable extends AbstractFromRunnableSpecification {}
 
         @Nested
         @DisplayName("From runnable with executor")
-        class FromRunnableWithExecutor extends WhenCreateFromRunnableWithExecutorSpecification {}
+        class FromRunnableWithExecutor extends AbstractFromRunnableWithExecutorSpecification {}
+
+        @Nested
+        @DisplayName("From runnable with CanExecute")
+        class FromRunnableWithCanExecute extends AbstractFromRunnableWithCanExecuteSpecification {}
 
         @Nested
         @DisplayName("From runnable with CanExecute and executor")
-        class FromRunnableWithCanExecuteAndExecutor extends WhenCreateFromRunnableWithCanExecuteAndExecutorSpecification {}
+        class FromRunnableWithCanExecuteAndExecutor extends AbstractFromRunnableWithCanExecuteAndExecutorSpecification {}
 
         @Nested
         @DisplayName("From supplier")
-        class FromSupplier extends WhenCreateFromSupplierSpecification {}
-
-        @Nested
-        @DisplayName("From supplier with CanExecute")
-        class FromSupplierWithCanExecute extends WhenCreateFromSupplierWithCanExecuteSpecification {}
+        class FromSupplier extends AbstractFromSupplierSpecification {}
 
         @Nested
         @DisplayName("From supplier with executor")
-        class FromSupplierWithExecutor extends WhenCreateFromSupplierWithExecutorSpecification {}
+        class FromSupplierWithExecutor extends AbstractFromSupplierWithExecutorSpecification {}
+
+        @Nested
+        @DisplayName("From supplier with CanExecute")
+        class FromSupplierWithCanExecute extends AbstractFromSupplierWithCanExecuteSpecification {}
 
         @Nested
         @DisplayName("From supplier with CanExecute and executor")
-        class FromSupplierWithCanExecuteAndExecutor extends WhenCreateFromSupplierWithCanExecuteAndExecutorSpecification {}
+        class FromSupplierWithCanExecuteAndExecutor extends AbstractFromSupplierWithCanExecuteAndExecutorSpecification {}
 
         @Nested
         @DisplayName("From consumer")
-        class FromConsumer extends WhenCreateFromConsumerSpecification {}
-
-        @Nested
-        @DisplayName("From consumer with CanExecute")
-        class FromConsumerWithCanExecute extends WhenCreateFromConsumerWithCanExecuteSpecification {}
+        class FromConsumer extends AbstractFromConsumerSpecification {}
 
         @Nested
         @DisplayName("From consumer with executor")
-        class FromConsumerWithExecutor extends WhenCreateFromConsumerWithExecutorSpecification {}
+        class FromConsumerWithExecutor extends AbstractFromConsumerWithExecutorSpecification {}
+
+        @Nested
+        @DisplayName("From consumer with CanExecute")
+        class FromConsumerWithCanExecute extends AbstractFromConsumerWithCanExecuteSpecification {}
 
         @Nested
         @DisplayName("From consumer with CanExecute and executor")
-        class FromConsumerWithCanExecuteAndExecutor extends WhenCreateFromConsumerWithCanExecuteAndExecutorSpecification {}
+        class FromConsumerWithCanExecuteAndExecutor extends AbstractFromConsumerWithCanExecuteAndExecutorSpecification {}
 
         @Nested
         @DisplayName("From function")
-        class FromFunction extends WhenCreateFromFunctionSpecification {}
-
-        @Nested
-        @DisplayName("From function with CanExecute")
-        class FromFunctionWithCanExecute extends WhenCreateFromFunctionWithCanExecuteSpecification {}
+        class FromFunction extends AbstractFromFunctionSpecification {}
 
         @Nested
         @DisplayName("From function with executor")
-        class FromFunctionWithExecutor extends WhenCreateFromFunctionWithExecutorSpecification {}
+        class FromFunctionWithExecutor extends AbstractFromFunctionWithExecutorSpecification {}
+
+        @Nested
+        @DisplayName("From function with CanExecute")
+        class FromFunctionWithCanExecute extends AbstractFromFunctionWithCanExecuteSpecification {}
 
         @Nested
         @DisplayName("From function with CanExecute and executor")
-        class FromFunctionWithCanExecuteAndExecutor extends WhenCreateFromFunctionWithCanExecuteAndExecutorSpecification {}
+        class FromFunctionWithCanExecuteAndExecutor extends AbstractFromFunctionWithCanExecuteAndExecutorSpecification {}
     }
 
     @Nested
-    @DisplayName("When new progress command is created")
+    @DisplayName("When new reactive progress command is created")
     class WhenCreateProgress implements
-            ProgressCommandFromConsumerSpecification,
-            ProgressCommandFromFunctionSpecification,
-            ProgressCommandFromBiFunctionSpecification,
-            ProgressCommandFromBiConsumerSpecification
+            ProgressFromConsumerSpecification,
+            ProgressFromFunctionSpecification,
+            ProgressFromBiConsumerSpecification,
+            ProgressFromBiFunctionSpecification
     {
         @Nested
         @DisplayName("From consumer")
-        class FromConsumer extends WhenCreateFromConsumerSpecification {}
-
-        @Nested
-        @DisplayName("From consumer with CanExecute")
-        class FromConsumerWithCanExecute extends WhenCreateFromConsumerWithCanExecuteSpecification {}
+        class FromConsumer extends AbstractProgressFromConsumerSpecification {}
 
         @Nested
         @DisplayName("From consumer with executor")
-        class FromConsumerWithExecutor extends WhenCreateFromConsumerWithExecutorSpecification {}
+        class FromConsumerWithExecutor extends AbstractProgressFromConsumerWithExecutorSpecification {}
+
+        @Nested
+        @DisplayName("From consumer with CanExecute")
+        class FromConsumerWithCanExecute extends AbstractProgressFromConsumerWithCanExecuteSpecification {}
 
         @Nested
         @DisplayName("From consumer with CanExecute and executor")
-        class FromConsumerWithCanExecuteAndExecutor extends WhenCreateFromConsumerWithCanExecuteAndExecutorSpecification {}
+        class FromConsumerWithCanExecuteAndExecutor extends AbstractProgressFromConsumerWithCanExecuteAndExecutorSpecification {}
 
         @Nested
         @DisplayName("From function")
-        class FromFunction extends WhenCreateFromFunctionSpecification {}
-
-        @Nested
-        @DisplayName("From function with CanExecute")
-        class FromFunctionWithCanExecute extends WhenCreateFromFunctionWithCanExecuteSpecification {}
+        class FromFunction extends AbstractProgressFromFunctionSpecification {}
 
         @Nested
         @DisplayName("From function with executor")
-        class FromFunctionWithExecutor extends WhenCreateFromFunctionWithExecutorSpecification {}
+        class FromFunctionWithExecutor extends AbstractProgressFromFunctionWithExecutorSpecification {}
+
+        @Nested
+        @DisplayName("From function with CanExecute")
+        class FromFunctionWithCanExecute extends AbstractProgressFromFunctionWithCanExecuteSpecification {}
 
         @Nested
         @DisplayName("From function with CanExecute and executor")
-        class FromFunctionWithCanExecuteAndExecutor extends WhenCreateFromFunctionWithCanExecuteAndExecutorSpecification {}
+        class FromFunctionWithCanExecuteAndExecutor extends AbstractProgressFromFunctionWithCanExecuteAndExecutorSpecification {}
 
         @Nested
         @DisplayName("From bi-consumer")
-        class FromBiConsumer extends WhenCreateFromBiConsumerSpecification {}
-
-        @Nested
-        @DisplayName("From bi-consumer supplier with CanExecute")
-        class FromBiConsumerWithCanExecute extends WhenCreateFromBiConsumerWithCanExecuteSpecification {}
+        class FromBiConsumer extends AbstractProgressFromBiConsumerSpecification {}
 
         @Nested
         @DisplayName("From bi-consumer with executor")
-        class FromBiConsumerWithExecutor extends WhenCreateFromBiConsumerWithExecutorSpecification {}
+        class FromBiConsumerWithExecutor extends AbstractProgressFromBiConsumerWithExecutorSpecification {}
 
         @Nested
-        @DisplayName("From bi-consumer supplier with CanExecute and executor")
-        class FromBiConsumerWithCanExecuteAndExecutor extends WhenCreateFromBiConsumerWithCanExecuteAndExecutorSpecification {}
+        @DisplayName("From bi-consumer with CanExecute")
+        class FromBiConsumerWithCanExecute extends AbstractProgressFromBiConsumerWithCanExecuteSpecification {}
+
+        @Nested
+        @DisplayName("From bi-consumer with CanExecute and executor")
+        class FromBiConsumerWithCanExecuteAndExecutor extends AbstractProgressFromBiConsumerWithCanExecuteAndExecutorSpecification {}
 
         @Nested
         @DisplayName("From bi-function")
-        class FromBiFunction extends WhenCreateFromBiFunctionSpecification {}
-
-        @Nested
-        @DisplayName("From bi-function with CanExecute")
-        class FromBiFunctionWithCanExecute extends WhenCreateFromBiFunctionWithCanExecuteSpecification {}
+        class FromBiFunction extends AbstractProgressFromBiFunctionSpecification {}
 
         @Nested
         @DisplayName("From bi-function with executor")
-        class FromBiFunctionWithExecutor extends WhenCreateFromBiFunctionWithExecutorSpecification {}
+        class FromBiFunctionWithExecutor extends AbstractProgressFromBiFunctionWithExecutorSpecification {}
+
+        @Nested
+        @DisplayName("From bi-function with CanExecute")
+        class FromBiFunctionWithCanExecute extends AbstractProgressFromBiFunctionWithCanExecuteSpecification {}
 
         @Nested
         @DisplayName("From bi-function with CanExecute and executor")
-        class FromBiFunctionWithCanExecuteAndExecutor extends WhenCreateFromBiFunctionWithCanExecuteAndExecutorSpecification {}
+        class FromBiFunctionWithCanExecuteAndExecutor extends AbstractProgressFromBiFunctionWithCanExecuteAndExecutorSpecification {}
     }
 
     @Nested
-    @DisplayName("When new composite command is created")
-    class WhenCreateComposite implements CompositeCommandSpecification
+    @DisplayName("When new reactive composite command is created")
+    class WhenCreateComposite implements CompositeFromCommandsSpecification
     {
         @Nested
-        @DisplayName("From no child commands")
-        class FromNoChildCommands extends WhenCreateFromNoCommandsSpecification {}
+        @DisplayName("From no commands")
+        class FromNoCommands extends AbstractCompositeFromNoCommandsSpecification {}
 
         @Nested
-        @DisplayName("From child commands with no input")
-        class FromChildCommandsWithNoInput extends WhenCreateFromCommandsWithNoInputSpecification {}
+        @DisplayName("From no commands with CanExecute")
+        class FromNoCommandsWithCanExecute extends AbstractCompositeFromNoCommandsWithCanExecuteSpecification {}
 
         @Nested
-        @DisplayName("From child commands with input")
-        class FromChildCommandsWithInput extends WhenCreateFromCommandsWithInputSpecification {}
+        @DisplayName("From commands with no input")
+        class FromCommandsWithNoInput extends AbstractCompositeFromCommandsWithNoInputSpecification {}
 
         @Nested
-        @DisplayName("From child commands with CanExecute")
-        class FromChildCommandsWithCanExecute extends WhenCreateFromCommandsWithCanExecuteSpecification {}
+        @DisplayName("From commands with input")
+        class FromCommandsWithInput extends AbstractCompositeFromCommandsWithInputSpecification {}
+
+        @Nested
+        @DisplayName("From commands with CanExecute")
+        class FromCommandsWithCanExecute extends AbstractCompositeFromCommandsWithCanExecuteSpecification {}
     }
 }
