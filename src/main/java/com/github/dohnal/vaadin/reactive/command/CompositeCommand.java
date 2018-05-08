@@ -47,10 +47,13 @@ public final class CompositeCommand<T, R> extends AbstractCommand<T, List<R>>
                             final @Nonnull List<ReactiveCommand<T, R>> commands)
     {
         super(Observable.combineLatest(
-                canExecute,
+                canExecute.startWith(true).distinctUntilChanged(),
                 Observable.combineLatest(
                         commands.stream()
-                                .map(ReactiveCommand::canExecute)
+                                .map(command -> command
+                                        .canExecute()
+                                        .startWith(true)
+                                        .distinctUntilChanged())
                                 .collect(Collectors.toList()),
                         values -> Arrays.stream(Arrays.copyOf(values, values.length, Boolean[].class))
                                 .allMatch(Boolean.TRUE::equals)),
