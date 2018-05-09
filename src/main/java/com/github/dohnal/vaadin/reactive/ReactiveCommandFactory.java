@@ -16,18 +16,18 @@ package com.github.dohnal.vaadin.reactive;
 import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.Executor;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import com.github.dohnal.vaadin.reactive.command.AsyncCommand;
+import com.github.dohnal.vaadin.reactive.command.Command;
 import com.github.dohnal.vaadin.reactive.command.CompositeCommand;
 import com.github.dohnal.vaadin.reactive.command.ProgressCommand;
-import com.github.dohnal.vaadin.reactive.command.SyncCommand;
+import io.reactivex.Completable;
 import io.reactivex.Observable;
+import io.reactivex.Scheduler;
 
 /**
  * Factory to create instances of {@link ReactiveCommand}
@@ -36,31 +36,6 @@ import io.reactivex.Observable;
  */
 public interface ReactiveCommandFactory
 {
-    /**
-     * Creates a new synchronous reactive command with no execution
-     *
-     * @return created reactive command
-     */
-    @Nonnull
-    default ReactiveCommand<Void, Void> createCommand()
-    {
-        return createCommand(Observable.just(true));
-    }
-
-    /**
-     * Creates a new synchronous reactive command with no execution
-     *
-     * @param canExecute observable which controls command executability
-     * @return created reactive command
-     */
-    @Nonnull
-    default ReactiveCommand<Void, Void> createCommand(final @Nonnull Observable<Boolean> canExecute)
-    {
-        Objects.requireNonNull(canExecute, "CanExecute cannot be null");
-
-        return createCommand(canExecute, () -> {});
-    }
-
     /**
      * Creates a new synchronous reactive command from given runnable
      *
@@ -78,6 +53,23 @@ public interface ReactiveCommandFactory
     /**
      * Creates a new synchronous reactive command from given runnable
      *
+     * @param execution execution which will be executed
+     * @param scheduler scheduler used to schedule execution
+     * @return created reactive command
+     */
+    @Nonnull
+    default ReactiveCommand<Void, Void> createCommand(final @Nonnull Runnable execution,
+                                                      final @Nonnull Scheduler scheduler)
+    {
+        Objects.requireNonNull(execution, "Execution cannot be null");
+        Objects.requireNonNull(scheduler, "Scheduler cannot be null");
+
+        return createCommand(Observable.just(true), execution, scheduler);
+    }
+
+    /**
+     * Creates a new synchronous reactive command from given runnable
+     *
      * @param canExecute observable which controls command executability
      * @param execution execution which will be executed
      * @return created reactive command
@@ -89,11 +81,29 @@ public interface ReactiveCommandFactory
         Objects.requireNonNull(canExecute, "CanExecute cannot be null");
         Objects.requireNonNull(execution, "Execution cannot be null");
 
-        return new SyncCommand<>(canExecute, () -> {
-            execution.run();
+        return createCommandFromObservable(canExecute, () ->
+                Completable.fromRunnable(execution).toObservable());
+    }
 
-            return null;
-        });
+    /**
+     * Creates a new synchronous reactive command from given runnable
+     *
+     * @param canExecute observable which controls command executability
+     * @param execution execution which will be executed
+     * @param scheduler scheduler used to schedule execution
+     * @return created reactive command
+     */
+    @Nonnull
+    default ReactiveCommand<Void, Void> createCommand(final @Nonnull Observable<Boolean> canExecute,
+                                                      final @Nonnull Runnable execution,
+                                                      final @Nonnull Scheduler scheduler)
+    {
+        Objects.requireNonNull(canExecute, "CanExecute cannot be null");
+        Objects.requireNonNull(execution, "Execution cannot be null");
+        Objects.requireNonNull(scheduler, "Scheduler cannot be null");
+
+        return createCommandFromObservable(canExecute, () ->
+                Completable.fromRunnable(execution).toObservable(), scheduler);
     }
 
     /**
@@ -114,6 +124,24 @@ public interface ReactiveCommandFactory
     /**
      * Creates a new synchronous reactive command from given supplier
      *
+     * @param execution execution which will be executed
+     * @param scheduler scheduler used to schedule execution
+     * @param <R> type of command result
+     * @return created reactive command
+     */
+    @Nonnull
+    default <R> ReactiveCommand<Void, R> createCommand(final @Nonnull Supplier<R> execution,
+                                                       final @Nonnull Scheduler scheduler)
+    {
+        Objects.requireNonNull(execution, "Execution cannot be null");
+        Objects.requireNonNull(scheduler, "Scheduler cannot be null");
+
+        return createCommand(Observable.just(true), execution, scheduler);
+    }
+
+    /**
+     * Creates a new synchronous reactive command from given supplier
+     *
      * @param canExecute observable which controls command executability
      * @param execution execution which will be executed
      * @param <R> type of command result
@@ -126,8 +154,29 @@ public interface ReactiveCommandFactory
         Objects.requireNonNull(canExecute, "CanExecute cannot be null");
         Objects.requireNonNull(execution, "Execution cannot be null");
 
-        return new SyncCommand<>(canExecute, () ->
-                Objects.requireNonNull(execution.get(), "Result cannot be null"));
+        return createCommandFromObservable(canExecute, () -> Observable.fromCallable(execution::get));
+    }
+
+    /**
+     * Creates a new synchronous reactive command from given supplier
+     *
+     * @param canExecute observable which controls command executability
+     * @param execution execution which will be executed
+     * @param scheduler scheduler used to schedule execution
+     * @param <R> type of command result
+     * @return created reactive command
+     */
+    @Nonnull
+    default <R> ReactiveCommand<Void, R> createCommand(final @Nonnull Observable<Boolean> canExecute,
+                                                       final @Nonnull Supplier<R> execution,
+                                                       final @Nonnull Scheduler scheduler)
+    {
+        Objects.requireNonNull(canExecute, "CanExecute cannot be null");
+        Objects.requireNonNull(execution, "Execution cannot be null");
+        Objects.requireNonNull(scheduler, "Scheduler cannot be null");
+
+        return createCommandFromObservable(canExecute, () -> Observable.fromCallable(() ->
+                Objects.requireNonNull(execution.get(), "Result cannot be null")), scheduler);
     }
 
     /**
@@ -148,6 +197,24 @@ public interface ReactiveCommandFactory
     /**
      * Creates a new synchronous reactive command from given consumer
      *
+     * @param execution execution which will be executed
+     * @param scheduler scheduler used to schedule execution
+     * @param <T> type of command input
+     * @return created reactive command
+     */
+    @Nonnull
+    default <T> ReactiveCommand<T, Void> createCommand(final @Nonnull Consumer<T> execution,
+                                                       final @Nonnull Scheduler scheduler)
+    {
+        Objects.requireNonNull(execution, "Execution cannot be null");
+        Objects.requireNonNull(scheduler, "Scheduler cannot be null");
+
+        return createCommand(Observable.just(true), execution, scheduler);
+    }
+
+    /**
+     * Creates a new synchronous reactive command from given consumer
+     *
      * @param canExecute observable which controls command executability
      * @param execution execution which will be executed
      * @param <T> type of command input
@@ -160,11 +227,36 @@ public interface ReactiveCommandFactory
         Objects.requireNonNull(canExecute, "CanExecute cannot be null");
         Objects.requireNonNull(execution, "Execution cannot be null");
 
-        return new SyncCommand<>(canExecute, input -> {
-            execution.accept(Objects.requireNonNull(input, "Input cannot be null"));
+        return createCommandFromObservable(canExecute, input -> {
+            Objects.requireNonNull(input, "Input cannot be null");
 
-            return null;
+            return Completable.fromRunnable(() -> execution.accept(input)).toObservable();
         });
+    }
+
+    /**
+     * Creates a new synchronous reactive command from given consumer
+     *
+     * @param canExecute observable which controls command executability
+     * @param execution execution which will be executed
+     * @param scheduler scheduler used to schedule execution
+     * @param <T> type of command input
+     * @return created reactive command
+     */
+    @Nonnull
+    default <T> ReactiveCommand<T, Void> createCommand(final @Nonnull Observable<Boolean> canExecute,
+                                                       final @Nonnull Consumer<T> execution,
+                                                       final @Nonnull Scheduler scheduler)
+    {
+        Objects.requireNonNull(canExecute, "CanExecute cannot be null");
+        Objects.requireNonNull(execution, "Execution cannot be null");
+        Objects.requireNonNull(scheduler, "Scheduler cannot be null");
+
+        return createCommandFromObservable(canExecute, input -> {
+            Objects.requireNonNull(input, "Input cannot be null");
+
+            return Completable.fromRunnable(() -> execution.accept(input)).toObservable();
+        }, scheduler);
     }
 
     /**
@@ -186,6 +278,25 @@ public interface ReactiveCommandFactory
     /**
      * Creates a new synchronous reactive command from given function
      *
+     * @param execution execution which will be executed
+     * @param scheduler scheduler used to schedule execution
+     * @param <T> type of command input
+     * @param <R> type of command result
+     * @return created reactive command
+     */
+    @Nonnull
+    default <T, R> ReactiveCommand<T, R> createCommand(final @Nonnull Function<T, R> execution,
+                                                       final @Nonnull Scheduler scheduler)
+    {
+        Objects.requireNonNull(execution, "Execution cannot be null");
+        Objects.requireNonNull(scheduler, "Scheduler cannot be null");
+
+        return createCommand(Observable.just(true), execution, scheduler);
+    }
+
+    /**
+     * Creates a new synchronous reactive command from given function
+     *
      * @param canExecute observable which controls command executability
      * @param execution execution which will be executed
      * @param <T> type of command input
@@ -199,373 +310,198 @@ public interface ReactiveCommandFactory
         Objects.requireNonNull(canExecute, "CanExecute cannot be null");
         Objects.requireNonNull(execution, "Execution cannot be null");
 
-        return new SyncCommand<>(canExecute, input -> {
+        return createCommandFromObservable(canExecute, input -> {
             Objects.requireNonNull(input, "Input cannot be null");
 
-            return Objects.requireNonNull(execution.apply(input), "Result cannot be null");
+            return Observable.fromCallable(() ->
+                    Objects.requireNonNull(execution.apply(input), "Result cannot be null"));
         });
     }
 
     /**
-     * Creates a new asynchronous reactive command with no execution
-     *
-     * @return created reactive command
-     */
-    @Nonnull
-    default ReactiveCommand<Void, Void> createAsyncCommand()
-    {
-        return createAsyncCommand(Observable.just(true));
-    }
-
-    /**
-     * Creates a new asynchronous reactive command with no execution
-     *
-     * @param canExecute observable which controls command executability
-     * @return created reactive command
-     */
-    @Nonnull
-    default ReactiveCommand<Void, Void> createAsyncCommand(final @Nonnull Observable<Boolean> canExecute)
-    {
-        Objects.requireNonNull(canExecute, "CanExecute cannot be null");
-
-        return new AsyncCommand<>(canExecute, AsyncSupplier.create());
-    }
-
-    /**
-     * Creates a new asynchronous reactive command with no execution
-     *
-     * @param executor executor where the execution will be executed
-     * @return created reactive command
-     */
-    @Nonnull
-    default ReactiveCommand<Void, Void> createAsyncCommand(final @Nonnull Executor executor)
-    {
-        Objects.requireNonNull(executor, "Executor cannot be null");
-
-        return createAsyncCommand(Observable.just(true), executor);
-    }
-
-    /**
-     * Creates a new asynchronous reactive command with no execution
-     *
-     * @param canExecute observable which controls command executability
-     * @param executor executor where the execution will be executed
-     * @return created reactive command
-     */
-    @Nonnull
-    default ReactiveCommand<Void, Void> createAsyncCommand(final @Nonnull Observable<Boolean> canExecute,
-                                                           final @Nonnull Executor executor)
-    {
-        Objects.requireNonNull(canExecute, "CanExecute cannot be null");
-        Objects.requireNonNull(executor, "Executor cannot be null");
-
-        return new AsyncCommand<>(canExecute, AsyncSupplier.create(executor));
-    }
-
-    /**
-     * Creates a new asynchronous reactive command from given runnable
-     *
-     * @param execution execution which will be executed
-     * @return created reactive command
-     */
-    @Nonnull
-    default ReactiveCommand<Void, Void> createAsyncCommand(final @Nonnull Runnable execution)
-    {
-        Objects.requireNonNull(execution, "Execution cannot be null");
-
-        return createAsyncCommand(Observable.just(true), execution);
-    }
-
-    /**
-     * Creates a new asynchronous reactive command from given runnable
+     * Creates a new synchronous reactive command from given function
      *
      * @param canExecute observable which controls command executability
      * @param execution execution which will be executed
-     * @return created reactive command
-     */
-    @Nonnull
-    default ReactiveCommand<Void, Void> createAsyncCommand(final @Nonnull Observable<Boolean> canExecute,
-                                                           final @Nonnull Runnable execution)
-    {
-        Objects.requireNonNull(canExecute, "CanExecute cannot be null");
-        Objects.requireNonNull(execution, "Execution cannot be null");
-
-        return new AsyncCommand<>(canExecute, AsyncSupplier.create(execution));
-    }
-
-    /**
-     * Creates a new asynchronous reactive command from given runnable
-     *
-     * @param execution execution which will be executed
-     * @param executor executor where the execution will be executed
-     * @return created reactive command
-     */
-    @Nonnull
-    default ReactiveCommand<Void, Void> createAsyncCommand(final @Nonnull Runnable execution,
-                                                           final @Nonnull Executor executor)
-    {
-        Objects.requireNonNull(execution, "Execution cannot be null");
-        Objects.requireNonNull(executor, "Executor cannot be null");
-
-        return createAsyncCommand(Observable.just(true), execution, executor);
-    }
-
-    /**
-     * Creates a new asynchronous reactive command from given runnable
-     *
-     * @param canExecute observable which controls command executability
-     * @param execution execution which will be executed
-     * @param executor executor where the execution will be executed
-     * @return created reactive command
-     */
-    @Nonnull
-    default ReactiveCommand<Void, Void> createAsyncCommand(final @Nonnull Observable<Boolean> canExecute,
-                                                           final @Nonnull Runnable execution,
-                                                           final @Nonnull Executor executor)
-    {
-        Objects.requireNonNull(canExecute, "CanExecute cannot be null");
-        Objects.requireNonNull(execution, "Execution cannot be null");
-        Objects.requireNonNull(executor, "Executor cannot be null");
-
-        return new AsyncCommand<>(canExecute, AsyncSupplier.create(execution, executor));
-    }
-
-    /**
-     * Creates a new asynchronous reactive command from given supplier
-     *
-     * @param execution execution which will be executed
-     * @param <R> type of command result
-     * @return created reactive command
-     */
-    @Nonnull
-    default <R> ReactiveCommand<Void, R> createAsyncCommand(final @Nonnull Supplier<R> execution)
-    {
-        Objects.requireNonNull(execution, "Execution cannot be null");
-
-        return createAsyncCommand(Observable.just(true), execution);
-    }
-
-    /**
-     * Creates a new asynchronous reactive command from given supplier
-     *
-     * @param canExecute observable which controls command executability
-     * @param execution execution which will be executed
-     * @param <R> type of command result
-     * @return created reactive command
-     */
-    @Nonnull
-    default <R> ReactiveCommand<Void, R> createAsyncCommand(final @Nonnull Observable<Boolean> canExecute,
-                                                            final @Nonnull Supplier<R> execution)
-    {
-        Objects.requireNonNull(canExecute, "CanExecute cannot be null");
-        Objects.requireNonNull(execution, "Execution cannot be null");
-
-        return new AsyncCommand<>(canExecute, AsyncSupplier.create(() ->
-                Objects.requireNonNull(execution.get(), "Result cannot be null")));
-    }
-
-    /**
-     * Creates a new asynchronous reactive command from given supplier
-     *
-     * @param execution execution which will be executed
-     * @param executor executor where the execution will be executed
-     * @param <R> type of command result
-     * @return created reactive command
-     */
-    @Nonnull
-    default <R> ReactiveCommand<Void, R> createAsyncCommand(final @Nonnull Supplier<R> execution,
-                                                            final @Nonnull Executor executor)
-    {
-        Objects.requireNonNull(execution, "Execution cannot be null");
-        Objects.requireNonNull(executor, "Executor cannot be null");
-
-        return createAsyncCommand(Observable.just(true), execution, executor);
-    }
-
-    /**
-     * Creates a new asynchronous reactive command from given supplier
-     *
-     * @param canExecute observable which controls command executability
-     * @param execution execution which will be executed
-     * @param executor executor where the execution will be executed
-     * @param <R> type of command result
-     * @return created reactive command
-     */
-    @Nonnull
-    default <R> ReactiveCommand<Void, R> createAsyncCommand(final @Nonnull Observable<Boolean> canExecute,
-                                                            final @Nonnull Supplier<R> execution,
-                                                            final @Nonnull Executor executor)
-    {
-        Objects.requireNonNull(canExecute, "CanExecute cannot be null");
-        Objects.requireNonNull(execution, "Execution cannot be null");
-        Objects.requireNonNull(executor, "Executor cannot be null");
-
-        return new AsyncCommand<>(canExecute, AsyncSupplier.create(() ->
-                Objects.requireNonNull(execution.get(), "Result cannot be null"), executor));
-    }
-
-    /**
-     * Creates a new asynchronous reactive command from given consumer
-     *
-     * @param execution execution which will be executed
+     * @param scheduler scheduler used to schedule execution
      * @param <T> type of command input
+     * @param <R> type of command result
      * @return created reactive command
      */
     @Nonnull
-    default <T> ReactiveCommand<T, Void> createAsyncCommand(final @Nonnull Consumer<T> execution)
-    {
-        Objects.requireNonNull(execution, "Execution cannot be null");
-
-        return createAsyncCommand(Observable.just(true), execution);
-    }
-
-    /**
-     * Creates a new asynchronous reactive command from given consumer
-     *
-     * @param canExecute observable which controls command executability
-     * @param execution execution which will be executed
-     * @param <T> type of command input
-     * @return created reactive command
-     */
-    @Nonnull
-    default <T> ReactiveCommand<T, Void> createAsyncCommand(final @Nonnull Observable<Boolean> canExecute,
-                                                            final @Nonnull Consumer<T> execution)
+    default <T, R> ReactiveCommand<T, R> createCommand(final @Nonnull Observable<Boolean> canExecute,
+                                                       final @Nonnull Function<T, R> execution,
+                                                       final @Nonnull Scheduler scheduler)
     {
         Objects.requireNonNull(canExecute, "CanExecute cannot be null");
         Objects.requireNonNull(execution, "Execution cannot be null");
+        Objects.requireNonNull(scheduler, "Scheduler cannot be null");
 
-        return new AsyncCommand<>(canExecute, AsyncFunction.create(input -> {
+        return createCommandFromObservable(canExecute, input -> {
             Objects.requireNonNull(input, "Input cannot be null");
 
-            execution.accept(input);
-        }));
+            return Observable.fromCallable(() ->
+                    Objects.requireNonNull(execution.apply(input), "Result cannot be null"));
+        }, scheduler);
     }
 
     /**
-     * Creates a new asynchronous reactive command from given consumer
+     * Creates a new synchronous reactive command from given observable
      *
      * @param execution execution which will be executed
-     * @param executor executor where the execution will be executed
-     * @param <T> type of command input
-     * @return created reactive command
-     */
-    @Nonnull
-    default <T> ReactiveCommand<T, Void> createAsyncCommand(final @Nonnull Consumer<T> execution,
-                                                            final @Nonnull Executor executor)
-    {
-        Objects.requireNonNull(execution, "Execution cannot be null");
-        Objects.requireNonNull(executor, "Executor cannot be null");
-
-        return createAsyncCommand(Observable.just(true), execution, executor);
-    }
-
-    /**
-     * Creates a new asynchronous reactive command from given consumer
-     *
-     * @param canExecute observable which controls command executability
-     * @param execution execution which will be executed
-     * @param executor executor where the execution will be executed
-     * @param <T> type of command input
-     * @return created reactive command
-     */
-    @Nonnull
-    default <T> ReactiveCommand<T, Void> createAsyncCommand(final @Nonnull Observable<Boolean> canExecute,
-                                                            final @Nonnull Consumer<T> execution,
-                                                            final @Nonnull Executor executor)
-    {
-        Objects.requireNonNull(canExecute, "CanExecute cannot be null");
-        Objects.requireNonNull(execution, "Execution cannot be null");
-        Objects.requireNonNull(executor, "Executor cannot be null");
-
-        return new AsyncCommand<>(canExecute, AsyncFunction.create(input -> {
-            Objects.requireNonNull(input, "Input cannot be null");
-
-            execution.accept(input);
-        }, executor));
-    }
-
-    /**
-     * Creates a new asynchronous reactive command from given function
-     *
-     * @param execution execution which will be executed
-     * @param <T> type of command input
      * @param <R> type of command result
      * @return created reactive command
      */
     @Nonnull
-    default <T, R> ReactiveCommand<T, R> createAsyncCommand(final @Nonnull Function<T, R> execution)
+    default <R> ReactiveCommand<Void, R> createCommandFromObservable(final @Nonnull Supplier<Observable<R>> execution)
     {
         Objects.requireNonNull(execution, "Execution cannot be null");
 
-        return createAsyncCommand(Observable.just(true), execution);
+        return createCommandFromObservable(Observable.just(true), execution);
     }
 
     /**
-     * Creates a new asynchronous reactive command from given function
+     * Creates a new synchronous reactive command from given observable
      *
-     * @param canExecute observable which controls command executability
      * @param execution execution which will be executed
-     * @param <T> type of command input
+     * @param scheduler scheduler used to schedule execution
      * @param <R> type of command result
      * @return created reactive command
      */
     @Nonnull
-    default <T, R> ReactiveCommand<T, R> createAsyncCommand(final @Nonnull Observable<Boolean> canExecute,
-                                                            final @Nonnull Function<T, R> execution)
+    default <R> ReactiveCommand<Void, R> createCommandFromObservable(final @Nonnull Supplier<Observable<R>> execution,
+                                                                     final @Nonnull Scheduler scheduler)
+    {
+        Objects.requireNonNull(execution, "Execution cannot be null");
+        Objects.requireNonNull(scheduler, "Scheduler cannot be null");
+
+        return createCommandFromObservable(Observable.just(true), execution, scheduler);
+    }
+
+    /**
+     * Creates a new synchronous reactive command from given observable
+     *
+     * @param canExecute observable which controls command executability
+     * @param execution execution which will be executed
+     * @param <R> type of command result
+     * @return created reactive command
+     */
+    @Nonnull
+    default <R> ReactiveCommand<Void, R> createCommandFromObservable(final @Nonnull Observable<Boolean> canExecute,
+                                                                     final @Nonnull Supplier<Observable<R>> execution)
     {
         Objects.requireNonNull(canExecute, "CanExecute cannot be null");
         Objects.requireNonNull(execution, "Execution cannot be null");
 
-        return new AsyncCommand<>(canExecute, AsyncFunction.create(input -> {
-            Objects.requireNonNull(input, "Input cannot be null");
-
-            return Objects.requireNonNull(execution.apply(input), "Result cannot be null");
-        }));
+        return new Command<>(canExecute, input ->
+                Objects.requireNonNull(execution.get(), "Observable cannot be null"));
     }
 
     /**
-     * Creates a new asynchronous reactive command from given function
-     *
-     * @param execution execution which will be executed
-     * @param executor executor where the execution will be executed
-     * @param <T> type of command input
-     * @param <R> type of command result
-     * @return created reactive command
-     */
-    @Nonnull
-    default <T, R> ReactiveCommand<T, R> createAsyncCommand(final @Nonnull Function<T, R> execution,
-                                                            final @Nonnull Executor executor)
-    {
-        Objects.requireNonNull(execution, "Execution cannot be null");
-        Objects.requireNonNull(executor, "Executor cannot be null");
-
-        return createAsyncCommand(Observable.just(true), execution, executor);
-    }
-
-    /**
-     * Creates a new asynchronous reactive command from given function
+     * Creates a new synchronous reactive command from given observable
      *
      * @param canExecute observable which controls command executability
      * @param execution execution which will be executed
-     * @param executor executor where the execution will be executed
+     * @param scheduler scheduler used to schedule execution
+     * @param <R> type of command result
+     * @return created reactive command
+     */
+    @Nonnull
+    default <R> ReactiveCommand<Void, R> createCommandFromObservable(final @Nonnull Observable<Boolean> canExecute,
+                                                                     final @Nonnull Supplier<Observable<R>> execution,
+                                                                     final @Nonnull Scheduler scheduler)
+    {
+        Objects.requireNonNull(canExecute, "CanExecute cannot be null");
+        Objects.requireNonNull(execution, "Execution cannot be null");
+        Objects.requireNonNull(scheduler, "Scheduler cannot be null");
+
+        return new Command<>(canExecute, input ->
+                Objects.requireNonNull(execution.get().subscribeOn(scheduler), "Observable cannot be null"));
+    }
+
+    /**
+     * Creates a new synchronous reactive command from given observable
+     *
+     * @param execution execution which will be executed
      * @param <T> type of command input
      * @param <R> type of command result
      * @return created reactive command
      */
     @Nonnull
-    default <T, R> ReactiveCommand<T, R> createAsyncCommand(final @Nonnull Observable<Boolean> canExecute,
-                                                            final @Nonnull Function<T, R> execution,
-                                                            final @Nonnull Executor executor)
+    default <T, R> ReactiveCommand<T, R> createCommandFromObservable(final @Nonnull Function<T, Observable<R>> execution)
+    {
+        Objects.requireNonNull(execution, "Execution cannot be null");
+
+        return createCommandFromObservable(Observable.just(true), execution);
+    }
+
+    /**
+     * Creates a new synchronous reactive command from given observable
+     *
+     * @param execution execution which will be executed
+     * @param scheduler scheduler used to schedule execution
+     * @param <T> type of command input
+     * @param <R> type of command result
+     * @return created reactive command
+     */
+    @Nonnull
+    default <T, R> ReactiveCommand<T, R> createCommandFromObservable(final @Nonnull Function<T, Observable<R>> execution,
+                                                                     final @Nonnull Scheduler scheduler)
+    {
+        Objects.requireNonNull(execution, "Execution cannot be null");
+        Objects.requireNonNull(scheduler, "Scheduler cannot be null");
+
+        return createCommandFromObservable(Observable.just(true), execution, scheduler);
+    }
+
+    /**
+     * Creates a new synchronous reactive command from given observable
+     *
+     * @param canExecute observable which controls command executability
+     * @param execution execution which will be executed
+     * @param <T> type of command input
+     * @param <R> type of command result
+     * @return created reactive command
+     */
+    @Nonnull
+    default <T, R> ReactiveCommand<T, R> createCommandFromObservable(final @Nonnull Observable<Boolean> canExecute,
+                                                                     final @Nonnull Function<T, Observable<R>> execution)
     {
         Objects.requireNonNull(canExecute, "CanExecute cannot be null");
         Objects.requireNonNull(execution, "Execution cannot be null");
-        Objects.requireNonNull(executor, "Executor cannot be null");
 
-        return new AsyncCommand<>(canExecute, AsyncFunction.create(input -> {
+        return new Command<>(canExecute, input -> {
             Objects.requireNonNull(input, "Input cannot be null");
 
-            return Objects.requireNonNull(execution.apply(input), "Result cannot be null");
-        }, executor));
+            return Objects.requireNonNull(execution.apply(input), "Observable cannot be null");
+        });
+    }
+
+    /**
+     * Creates a new synchronous reactive command from given observable
+     *
+     * @param canExecute observable which controls command executability
+     * @param execution execution which will be executed
+     * @param scheduler scheduler used to schedule execution
+     * @param <T> type of command input
+     * @param <R> type of command result
+     * @return created reactive command
+     */
+    @Nonnull
+    default <T, R> ReactiveCommand<T, R> createCommandFromObservable(final @Nonnull Observable<Boolean> canExecute,
+                                                                     final @Nonnull Function<T, Observable<R>> execution,
+                                                                     final @Nonnull Scheduler scheduler)
+    {
+        Objects.requireNonNull(canExecute, "CanExecute cannot be null");
+        Objects.requireNonNull(execution, "Execution cannot be null");
+        Objects.requireNonNull(scheduler, "Scheduler cannot be null");
+
+        return new Command<>(canExecute, input -> {
+            Objects.requireNonNull(input, "Input cannot be null");
+
+            return Objects.requireNonNull(execution.apply(input).subscribeOn(scheduler),
+                    "Observable cannot be null");
+        });
     }
 
     /**
@@ -585,6 +521,23 @@ public interface ReactiveCommandFactory
     /**
      * Creates a new asynchronous progress reactive command from given consumer
      *
+     * @param execution execution which will be executed
+     * @param scheduler scheduler used to schedule execution
+     * @return created reactive command
+     */
+    @Nonnull
+    default ReactiveCommand<Void, Void> createProgressCommand(final @Nonnull Consumer<ProgressContext> execution,
+                                                              final @Nonnull Scheduler scheduler)
+    {
+        Objects.requireNonNull(execution, "Execution cannot be null");
+        Objects.requireNonNull(scheduler, "Scheduler cannot be null");
+
+        return createProgressCommand(Observable.just(true), execution, scheduler);
+    }
+
+    /**
+     * Creates a new asynchronous progress reactive command from given consumer
+     *
      * @param canExecute observable which controls command executability
      * @param execution execution which will be executed
      * @return created reactive command
@@ -596,28 +549,11 @@ public interface ReactiveCommandFactory
         Objects.requireNonNull(canExecute, "CanExecute cannot be null");
         Objects.requireNonNull(execution, "Execution cannot be null");
 
-        return new ProgressCommand<>(canExecute, AsyncProgressSupplier.create(progressContext -> {
+        return createProgressCommandFromObservable(canExecute, progressContext -> {
             Objects.requireNonNull(progressContext, "Progress context cannot be null");
 
-            execution.accept(progressContext);
-        }));
-    }
-
-    /**
-     * Creates a new asynchronous progress reactive command from given consumer
-     *
-     * @param execution execution which will be executed
-     * @param executor executor where the execution will be executed
-     * @return created reactive command
-     */
-    @Nonnull
-    default ReactiveCommand<Void, Void> createProgressCommand(final @Nonnull Consumer<ProgressContext> execution,
-                                                              final @Nonnull Executor executor)
-    {
-        Objects.requireNonNull(execution, "Execution cannot be null");
-        Objects.requireNonNull(executor, "Executor cannot be null");
-
-        return createProgressCommand(Observable.just(true), execution, executor);
+            return Completable.fromRunnable(() -> execution.accept(progressContext)).toObservable();
+        });
     }
 
     /**
@@ -625,23 +561,23 @@ public interface ReactiveCommandFactory
      *
      * @param canExecute observable which controls command executability
      * @param execution execution which will be executed
-     * @param executor executor where the execution will be executed
+     * @param scheduler scheduler used to schedule execution
      * @return created reactive command
      */
     @Nonnull
     default ReactiveCommand<Void, Void> createProgressCommand(final @Nonnull Observable<Boolean> canExecute,
                                                               final @Nonnull Consumer<ProgressContext> execution,
-                                                              final @Nonnull Executor executor)
+                                                              final @Nonnull Scheduler scheduler)
     {
         Objects.requireNonNull(canExecute, "CanExecute cannot be null");
         Objects.requireNonNull(execution, "Execution cannot be null");
-        Objects.requireNonNull(executor, "Executor cannot be null");
+        Objects.requireNonNull(scheduler, "Scheduler cannot be null");
 
-        return new ProgressCommand<>(canExecute, AsyncProgressSupplier.create(progressContext -> {
+        return createProgressCommandFromObservable(canExecute, progressContext -> {
             Objects.requireNonNull(progressContext, "Progress context cannot be null");
 
-            execution.accept(progressContext);
-        }, executor));
+            return Completable.fromRunnable(() -> execution.accept(progressContext)).toObservable();
+        }, scheduler);
     }
 
     /**
@@ -662,6 +598,24 @@ public interface ReactiveCommandFactory
     /**
      * Creates a new asynchronous progress reactive command from given function
      *
+     * @param execution execution which will be executed
+     * @param scheduler scheduler used to schedule execution
+     * @param <R> type of command result
+     * @return created reactive command
+     */
+    @Nonnull
+    default <R> ReactiveCommand<Void, R> createProgressCommand(final @Nonnull Function<ProgressContext, R> execution,
+                                                               final @Nonnull Scheduler scheduler)
+    {
+        Objects.requireNonNull(execution, "Execution cannot be null");
+        Objects.requireNonNull(scheduler, "Scheduler cannot be null");
+
+        return createProgressCommand(Observable.just(true), execution, scheduler);
+    }
+
+    /**
+     * Creates a new asynchronous progress reactive command from given function
+     *
      * @param canExecute observable which controls command executability
      * @param execution execution which will be executed
      * @param <R> type of command result
@@ -674,29 +628,12 @@ public interface ReactiveCommandFactory
         Objects.requireNonNull(canExecute, "CanExecute cannot be null");
         Objects.requireNonNull(execution, "Execution cannot be null");
 
-        return new ProgressCommand<>(canExecute, AsyncProgressSupplier.create(progressContext -> {
+        return createProgressCommandFromObservable(canExecute, progressContext -> {
             Objects.requireNonNull(progressContext, "Progress context cannot be null");
 
-            return Objects.requireNonNull(execution.apply(progressContext), "Result cannot be null");
-        }));
-    }
-
-    /**
-     * Creates a new asynchronous progress reactive command from given function
-     *
-     * @param execution execution which will be executed
-     * @param executor executor where the execution will be executed
-     * @param <R> type of command result
-     * @return created reactive command
-     */
-    @Nonnull
-    default <R> ReactiveCommand<Void, R> createProgressCommand(final @Nonnull Function<ProgressContext, R> execution,
-                                                               final @Nonnull Executor executor)
-    {
-        Objects.requireNonNull(execution, "Execution cannot be null");
-        Objects.requireNonNull(executor, "Executor cannot be null");
-
-        return createProgressCommand(Observable.just(true), execution, executor);
+            return Observable.fromCallable(() ->
+                    Objects.requireNonNull(execution.apply(progressContext), "Result cannot be null"));
+        });
     }
 
     /**
@@ -704,24 +641,25 @@ public interface ReactiveCommandFactory
      *
      * @param canExecute observable which controls command executability
      * @param execution execution which will be executed
-     * @param executor executor where the execution will be executed
+     * @param scheduler scheduler used to schedule execution
      * @param <R> type of command result
      * @return created reactive command
      */
     @Nonnull
     default <R> ReactiveCommand<Void, R> createProgressCommand(final @Nonnull Observable<Boolean> canExecute,
                                                                final @Nonnull Function<ProgressContext, R> execution,
-                                                               final @Nonnull Executor executor)
+                                                               final @Nonnull Scheduler scheduler)
     {
         Objects.requireNonNull(canExecute, "CanExecute cannot be null");
         Objects.requireNonNull(execution, "Execution cannot be null");
-        Objects.requireNonNull(executor, "Executor cannot be null");
+        Objects.requireNonNull(scheduler, "Scheduler cannot be null");
 
-        return new ProgressCommand<>(canExecute, AsyncProgressSupplier.create(progressContext -> {
+        return createProgressCommandFromObservable(canExecute, progressContext -> {
             Objects.requireNonNull(progressContext, "Progress context cannot be null");
 
-            return Objects.requireNonNull(execution.apply(progressContext), "Result cannot be null");
-        }, executor));
+            return Observable.fromCallable(() ->
+                    Objects.requireNonNull(execution.apply(progressContext), "Result cannot be null"));
+        }, scheduler);
     }
 
     /**
@@ -742,6 +680,24 @@ public interface ReactiveCommandFactory
     /**
      * Creates a new asynchronous progress reactive command from given consumer
      *
+     * @param execution execution which will be executed
+     * @param scheduler scheduler used to schedule execution
+     * @param <T> type of command input
+     * @return created reactive command
+     */
+    @Nonnull
+    default <T> ReactiveCommand<T, Void> createProgressCommand(final @Nonnull BiConsumer<ProgressContext, T> execution,
+                                                               final @Nonnull Scheduler scheduler)
+    {
+        Objects.requireNonNull(execution, "Execution cannot be null");
+        Objects.requireNonNull(scheduler, "Scheduler cannot be null");
+
+        return createProgressCommand(Observable.just(true), execution, scheduler);
+    }
+
+    /**
+     * Creates a new asynchronous progress reactive command from given consumer
+     *
      * @param canExecute observable which controls command executability
      * @param execution execution which will be executed
      * @param <T> type of command input
@@ -754,30 +710,12 @@ public interface ReactiveCommandFactory
         Objects.requireNonNull(canExecute, "CanExecute cannot be null");
         Objects.requireNonNull(execution, "Execution cannot be null");
 
-        return new ProgressCommand<>(canExecute, AsyncProgressFunction.create((progressContext, input) -> {
+        return createProgressCommandFromObservable(canExecute, (progressContext, input) -> {
             Objects.requireNonNull(progressContext, "Progress context cannot be null");
-            Objects.requireNonNull(input, "Input cannot be null");
+            Objects.requireNonNull(input, "Input context cannot be null");
 
-            execution.accept(progressContext, input);
-        }));
-    }
-
-    /**
-     * Creates a new asynchronous progress reactive command from given consumer
-     *
-     * @param execution execution which will be executed
-     * @param executor executor where the execution will be executed
-     * @param <T> type of command input
-     * @return created reactive command
-     */
-    @Nonnull
-    default <T> ReactiveCommand<T, Void> createProgressCommand(final @Nonnull BiConsumer<ProgressContext, T> execution,
-                                                               final @Nonnull Executor executor)
-    {
-        Objects.requireNonNull(execution, "Execution cannot be null");
-        Objects.requireNonNull(executor, "Executor cannot be null");
-
-        return createProgressCommand(Observable.just(true), execution, executor);
+            return Completable.fromRunnable(() -> execution.accept(progressContext, input)).toObservable();
+        });
     }
 
     /**
@@ -785,25 +723,25 @@ public interface ReactiveCommandFactory
      *
      * @param canExecute observable which controls command executability
      * @param execution execution which will be executed
-     * @param executor executor where the execution will be executed
+     * @param scheduler scheduler used to schedule execution
      * @param <T> type of command input
      * @return created reactive command
      */
     @Nonnull
     default <T> ReactiveCommand<T, Void> createProgressCommand(final @Nonnull Observable<Boolean> canExecute,
                                                                final @Nonnull BiConsumer<ProgressContext, T> execution,
-                                                               final @Nonnull Executor executor)
+                                                               final @Nonnull Scheduler scheduler)
     {
         Objects.requireNonNull(canExecute, "CanExecute cannot be null");
         Objects.requireNonNull(execution, "Execution cannot be null");
-        Objects.requireNonNull(executor, "Executor cannot be null");
+        Objects.requireNonNull(scheduler, "Scheduler cannot be null");
 
-        return new ProgressCommand<>(canExecute, AsyncProgressFunction.create((progressContext, input) -> {
+        return createProgressCommandFromObservable(canExecute, (progressContext, input) -> {
             Objects.requireNonNull(progressContext, "Progress context cannot be null");
-            Objects.requireNonNull(input, "Input cannot be null");
+            Objects.requireNonNull(input, "Input context cannot be null");
 
-            execution.accept(progressContext, input);
-        }, executor));
+            return Completable.fromRunnable(() -> execution.accept(progressContext, input)).toObservable();
+        }, scheduler);
     }
 
     /**
@@ -825,6 +763,25 @@ public interface ReactiveCommandFactory
     /**
      * Creates a new asynchronous progress reactive command from given function
      *
+     * @param execution execution which will be executed
+     * @param scheduler scheduler used to schedule execution
+     * @param <T> type of command input
+     * @param <R> type of command result
+     * @return created reactive command
+     */
+    @Nonnull
+    default <T, R> ReactiveCommand<T, R> createProgressCommand(final @Nonnull BiFunction<ProgressContext, T, R> execution,
+                                                               final @Nonnull Scheduler scheduler)
+    {
+        Objects.requireNonNull(execution, "Execution cannot be null");
+        Objects.requireNonNull(scheduler, "Scheduler cannot be null");
+
+        return createProgressCommand(Observable.just(true), execution, scheduler);
+    }
+
+    /**
+     * Creates a new asynchronous progress reactive command from given function
+     *
      * @param canExecute observable which controls command executability
      * @param execution execution which will be executed
      * @param <T> type of command input
@@ -838,31 +795,13 @@ public interface ReactiveCommandFactory
         Objects.requireNonNull(canExecute, "CanExecute cannot be null");
         Objects.requireNonNull(execution, "Execution cannot be null");
 
-        return new ProgressCommand<>(canExecute, AsyncProgressFunction.create((progressContext, input) -> {
+        return createProgressCommandFromObservable(canExecute, (progressContext, input) -> {
             Objects.requireNonNull(progressContext, "Progress context cannot be null");
-            Objects.requireNonNull(input, "Input cannot be null");
+            Objects.requireNonNull(input, "Input context cannot be null");
 
-            return Objects.requireNonNull(execution.apply(progressContext, input), "Result cannot be null");
-        }));
-    }
-
-    /**
-     * Creates a new asynchronous progress reactive command from given function
-     *
-     * @param execution execution which will be executed
-     * @param executor executor where the execution will be executed
-     * @param <T> type of command input
-     * @param <R> type of command result
-     * @return created reactive command
-     */
-    @Nonnull
-    default <T, R> ReactiveCommand<T, R> createProgressCommand(final @Nonnull BiFunction<ProgressContext, T, R> execution,
-                                                               final @Nonnull Executor executor)
-    {
-        Objects.requireNonNull(execution, "Execution cannot be null");
-        Objects.requireNonNull(executor, "Executor cannot be null");
-
-        return createProgressCommand(Observable.just(true), execution, executor);
+            return Observable.fromCallable(() ->
+                    Objects.requireNonNull(execution.apply(progressContext, input), "Result cannot be null"));
+        });
     }
 
     /**
@@ -870,7 +809,7 @@ public interface ReactiveCommandFactory
      *
      * @param canExecute observable which controls command executability
      * @param execution execution which will be executed
-     * @param executor executor where the execution will be executed
+     * @param scheduler scheduler used to schedule execution
      * @param <T> type of command input
      * @param <R> type of command result
      * @return created reactive command
@@ -878,18 +817,196 @@ public interface ReactiveCommandFactory
     @Nonnull
     default <T, R> ReactiveCommand<T, R> createProgressCommand(final @Nonnull Observable<Boolean> canExecute,
                                                                final @Nonnull BiFunction<ProgressContext, T, R> execution,
-                                                               final @Nonnull Executor executor)
+                                                               final @Nonnull Scheduler scheduler)
     {
         Objects.requireNonNull(canExecute, "CanExecute cannot be null");
         Objects.requireNonNull(execution, "Execution cannot be null");
-        Objects.requireNonNull(executor, "Executor cannot be null");
+        Objects.requireNonNull(scheduler, "Scheduler cannot be null");
 
-        return new ProgressCommand<>(canExecute, AsyncProgressFunction.create((progressContext, input) -> {
+        return createProgressCommandFromObservable(canExecute, (progressContext, input) -> {
             Objects.requireNonNull(progressContext, "Progress context cannot be null");
-            Objects.requireNonNull(input, "Input cannot be null");
+            Objects.requireNonNull(input, "Input context cannot be null");
 
-            return Objects.requireNonNull(execution.apply(progressContext, input), "Result cannot be null");
-        }, executor));
+            return Observable.fromCallable(() ->
+                    Objects.requireNonNull(execution.apply(progressContext, input), "Result cannot be null"));
+        }, scheduler);
+    }
+
+    /**
+     * Creates a new asynchronous progress reactive command from given observable
+     *
+     * @param execution execution which will be executed
+     * @param <R> type of command result
+     * @return created reactive command
+     */
+    @Nonnull
+    default <R> ReactiveCommand<Void, R> createProgressCommandFromObservable(
+            final @Nonnull Function<ProgressContext, Observable<R>> execution)
+    {
+        Objects.requireNonNull(execution, "Execution cannot be null");
+
+        return createProgressCommandFromObservable(Observable.just(true), execution);
+    }
+
+    /**
+     * Creates a new asynchronous progress reactive command from given observable
+     *
+     * @param execution execution which will be executed
+     * @param scheduler scheduler used to schedule execution
+     * @param <R> type of command result
+     * @return created reactive command
+     */
+    @Nonnull
+    default <R> ReactiveCommand<Void, R> createProgressCommandFromObservable(
+            final @Nonnull Function<ProgressContext, Observable<R>> execution,
+            final @Nonnull Scheduler scheduler)
+    {
+        Objects.requireNonNull(execution, "Execution cannot be null");
+        Objects.requireNonNull(scheduler, "Scheduler cannot be null");
+
+        return createProgressCommandFromObservable(Observable.just(true), execution, scheduler);
+    }
+
+    /**
+     * Creates a new asynchronous progress reactive command from given observable
+     *
+     * @param canExecute observable which controls command executability
+     * @param execution execution which will be executed
+     * @param <R> type of command result
+     * @return created reactive command
+     */
+    @Nonnull
+    default <R> ReactiveCommand<Void, R> createProgressCommandFromObservable(
+            final @Nonnull Observable<Boolean> canExecute,
+            final @Nonnull Function<ProgressContext, Observable<R>> execution)
+    {
+        Objects.requireNonNull(canExecute, "CanExecute cannot be null");
+        Objects.requireNonNull(execution, "Execution cannot be null");
+
+        return new ProgressCommand<>(canExecute, ((progressContext, input) -> {
+            Objects.requireNonNull(progressContext, "Progress context cannot be null");
+
+            return Objects.requireNonNull(execution.apply(progressContext), "Observable cannot be null");
+        }));
+    }
+
+    /**
+     * Creates a new asynchronous progress reactive command from given observable
+     *
+     * @param canExecute observable which controls command executability
+     * @param execution execution which will be executed
+     * @param scheduler scheduler used to schedule execution
+     * @param <R> type of command result
+     * @return created reactive command
+     */
+    @Nonnull
+    default <R> ReactiveCommand<Void, R> createProgressCommandFromObservable(
+            final @Nonnull Observable<Boolean> canExecute,
+            final @Nonnull Function<ProgressContext, Observable<R>> execution,
+            final @Nonnull Scheduler scheduler)
+    {
+        Objects.requireNonNull(canExecute, "CanExecute cannot be null");
+        Objects.requireNonNull(execution, "Execution cannot be null");
+        Objects.requireNonNull(scheduler, "Scheduler cannot be null");
+
+        return new ProgressCommand<>(canExecute, ((progressContext, input) -> {
+            Objects.requireNonNull(progressContext, "Progress context cannot be null");
+
+            return Objects.requireNonNull(execution.apply(progressContext).subscribeOn(scheduler),
+                    "Observable cannot be null");
+        }));
+    }
+
+    /**
+     * Creates a new asynchronous progress reactive command from given observable
+     *
+     * @param execution execution which will be executed
+     * @param <T> type of command input
+     * @param <R> type of command result
+     * @return created reactive command
+     */
+    @Nonnull
+    default <T, R> ReactiveCommand<T, R> createProgressCommandFromObservable(
+            final @Nonnull BiFunction<ProgressContext, T, Observable<R>> execution)
+    {
+        Objects.requireNonNull(execution, "Execution cannot be null");
+
+        return createProgressCommandFromObservable(Observable.just(true), execution);
+    }
+
+    /**
+     * Creates a new asynchronous progress reactive command from given observable
+     *
+     * @param execution execution which will be executed
+     * @param scheduler scheduler used to schedule execution
+     * @param <T> type of command input
+     * @param <R> type of command result
+     * @return created reactive command
+     */
+    @Nonnull
+    default <T, R> ReactiveCommand<T, R> createProgressCommandFromObservable(
+            final @Nonnull BiFunction<ProgressContext, T, Observable<R>> execution,
+            final @Nonnull Scheduler scheduler)
+    {
+        Objects.requireNonNull(execution, "Execution cannot be null");
+        Objects.requireNonNull(scheduler, "Scheduler cannot be null");
+
+        return createProgressCommandFromObservable(Observable.just(true), execution, scheduler);
+    }
+
+    /**
+     * Creates a new asynchronous progress reactive command from given observable
+     *
+     * @param canExecute observable which controls command executability
+     * @param execution execution which will be executed
+     * @param <T> type of command input
+     * @param <R> type of command result
+     * @return created reactive command
+     */
+    @Nonnull
+    default <T, R> ReactiveCommand<T, R> createProgressCommandFromObservable(
+            final @Nonnull Observable<Boolean> canExecute,
+            final @Nonnull BiFunction<ProgressContext, T, Observable<R>> execution)
+    {
+        Objects.requireNonNull(canExecute, "CanExecute cannot be null");
+        Objects.requireNonNull(execution, "Execution cannot be null");
+
+        return new ProgressCommand<>(canExecute, ((progressContext, input) -> {
+            Objects.requireNonNull(progressContext, "Progress context cannot be null");
+            Objects.requireNonNull(input, "Input context cannot be null");
+
+            return Objects.requireNonNull(execution.apply(progressContext, input),
+                    "Observable cannot be null");
+        }));
+    }
+
+    /**
+     * Creates a new asynchronous progress reactive command from given observable
+     *
+     * @param canExecute observable which controls command executability
+     * @param execution execution which will be executed
+     * @param scheduler scheduler used to schedule execution
+     * @param <T> type of command input
+     * @param <R> type of command result
+     * @return created reactive command
+     */
+    @Nonnull
+    default <T, R> ReactiveCommand<T, R> createProgressCommandFromObservable(
+            final @Nonnull Observable<Boolean> canExecute,
+            final @Nonnull BiFunction<ProgressContext, T, Observable<R>> execution,
+            final @Nonnull Scheduler scheduler)
+    {
+        Objects.requireNonNull(canExecute, "CanExecute cannot be null");
+        Objects.requireNonNull(execution, "Execution cannot be null");
+        Objects.requireNonNull(scheduler, "Scheduler cannot be null");
+
+        return new ProgressCommand<>(canExecute, ((progressContext, input) -> {
+            Objects.requireNonNull(progressContext, "Progress context cannot be null");
+            Objects.requireNonNull(input, "Input context cannot be null");
+
+            return Objects.requireNonNull(execution.apply(progressContext, input).subscribeOn(scheduler),
+                    "Observable cannot be null");
+        }));
     }
 
     /**

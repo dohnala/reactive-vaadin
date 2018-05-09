@@ -15,7 +15,6 @@ package com.github.dohnal.vaadin.reactive.command.factory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.concurrent.Executor;
 import java.util.function.Function;
 
 import com.github.dohnal.vaadin.reactive.ProgressContext;
@@ -25,6 +24,8 @@ import com.github.dohnal.vaadin.reactive.command.CanExecuteEmitsValueSpecificati
 import com.github.dohnal.vaadin.reactive.command.CreateSpecification;
 import com.github.dohnal.vaadin.reactive.command.ExecuteSpecification;
 import io.reactivex.Observable;
+import io.reactivex.Scheduler;
+import io.reactivex.schedulers.Schedulers;
 import io.reactivex.schedulers.TestScheduler;
 import io.reactivex.subjects.PublishSubject;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,9 +37,9 @@ import org.mockito.Mockito;
 /**
  * Tests for {@link ReactiveCommand} created by
  * {@link ReactiveCommandFactory#createProgressCommand(Function)}
- * {@link ReactiveCommandFactory#createProgressCommand(Function, Executor)}
+ * {@link ReactiveCommandFactory#createProgressCommand(Function, Scheduler)}
  * {@link ReactiveCommandFactory#createProgressCommand(Observable, Function)}
- * {@link ReactiveCommandFactory#createProgressCommand(Observable, Function, Executor)}
+ * {@link ReactiveCommandFactory#createProgressCommand(Observable, Function, Scheduler)}
  *
  * @author dohnal
  */
@@ -104,7 +105,7 @@ public interface ProgressFromFunctionSpecification extends
                     return RESULT;
                 }).when(execution).apply(Mockito.any(ProgressContext.class));
 
-                command.execute().blockingAwait();
+                command.execute();
             }
 
             @Nonnull
@@ -126,7 +127,7 @@ public interface ProgressFromFunctionSpecification extends
                     throw ERROR;
                 }).when(execution).apply(Mockito.any(ProgressContext.class));
 
-                command.execute().blockingAwait();
+                command.execute();
             }
 
             @Nonnull
@@ -157,7 +158,7 @@ public interface ProgressFromFunctionSpecification extends
         }
     }
 
-    abstract class AbstractProgressFromFunctionWithExecutorSpecification extends AbstractProgressFromFunctionSpecification
+    abstract class AbstractProgressFromFunctionWithSchedulerSpecification extends AbstractProgressFromFunctionSpecification
     {
         @Override
         @BeforeEach
@@ -165,7 +166,7 @@ public interface ProgressFromFunctionSpecification extends
         void create()
         {
             execution = Mockito.mock(Function.class);
-            command = createProgressCommand(execution, new TestExecutor());
+            command = createProgressCommand(execution, Schedulers.from(Runnable::run));
         }
     }
 
@@ -230,12 +231,12 @@ public interface ProgressFromFunctionSpecification extends
                     return RESULT;
                 }).when(execution).apply(Mockito.any(ProgressContext.class));
 
-                command.execute().blockingAwait();
+                command.execute();
             }
         }
     }
 
-    abstract class AbstractProgressFromFunctionWithCanExecuteAndExecutorSpecification
+    abstract class AbstractProgressFromFunctionWithCanExecuteAndSchedulerSpecification
             extends AbstractProgressFromFunctionWithCanExecuteSpecification
     {
         @BeforeEach
@@ -246,7 +247,7 @@ public interface ProgressFromFunctionSpecification extends
             testScheduler = new TestScheduler();
             testSubject = PublishSubject.create();
             testSubject.observeOn(testScheduler);
-            command = createProgressCommand(testSubject, execution, new TestExecutor());
+            command = createProgressCommand(testSubject, execution, Schedulers.from(Runnable::run));
         }
     }
 }

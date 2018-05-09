@@ -15,7 +15,6 @@ package com.github.dohnal.vaadin.reactive.command.factory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.concurrent.Executor;
 import java.util.function.Function;
 
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
@@ -24,6 +23,8 @@ import com.github.dohnal.vaadin.reactive.command.CanExecuteEmitsValueSpecificati
 import com.github.dohnal.vaadin.reactive.command.CreateSpecification;
 import com.github.dohnal.vaadin.reactive.command.ExecuteSpecification;
 import io.reactivex.Observable;
+import io.reactivex.Scheduler;
+import io.reactivex.schedulers.Schedulers;
 import io.reactivex.schedulers.TestScheduler;
 import io.reactivex.subjects.PublishSubject;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,8 +39,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  * Specification for {@link ReactiveCommand} created by
  * {@link ReactiveCommandFactory#createCommand(Function)}
  * {@link ReactiveCommandFactory#createCommand(Observable, Function)}
- * {@link ReactiveCommandFactory#createAsyncCommand(Function, Executor)}
- * {@link ReactiveCommandFactory#createAsyncCommand(Observable, Function, Executor)}
+ * {@link ReactiveCommandFactory#createCommand(Function, Scheduler)}
+ * {@link ReactiveCommandFactory#createCommand(Observable, Function, Scheduler)}
  *
  * @author dohnal
  */
@@ -81,10 +82,10 @@ public interface FromFunctionSpecification extends
         class ExecuteWithNoInput
         {
             @Test
-            @DisplayName("IllegalArgumentException should be thrown")
+            @DisplayName("NullPointerException should be thrown")
             public void testExecute()
             {
-                assertThrows(IllegalArgumentException.class, () -> command.execute());
+                assertThrows(NullPointerException.class, () -> command.execute());
             }
         }
 
@@ -139,7 +140,7 @@ public interface FromFunctionSpecification extends
         }
     }
 
-    abstract class AbstractFromFunctionWithExecutorSpecification extends AbstractFromFunctionSpecification
+    abstract class AbstractFromFunctionWithSchedulerSpecification extends AbstractFromFunctionSpecification
     {
         @Override
         @BeforeEach
@@ -147,7 +148,7 @@ public interface FromFunctionSpecification extends
         void create()
         {
             execution = Mockito.mock(Function.class);
-            command = createAsyncCommand(execution, new TestExecutor());
+            command = createCommand(execution, Schedulers.from(Runnable::run));
         }
     }
 
@@ -207,7 +208,7 @@ public interface FromFunctionSpecification extends
         }
     }
 
-    abstract class AbstractFromFunctionWithCanExecuteAndExecutorSpecification
+    abstract class AbstractFromFunctionWithCanExecuteAndSchedulerSpecification
             extends AbstractFromFunctionWithCanExecuteSpecification
     {
         @BeforeEach
@@ -218,7 +219,7 @@ public interface FromFunctionSpecification extends
             testScheduler = new TestScheduler();
             testSubject = PublishSubject.create();
             testSubject.observeOn(testScheduler);
-            command = createAsyncCommand(testSubject, execution, new TestExecutor());
+            command = createCommand(testSubject, execution, Schedulers.from(Runnable::run));
         }
     }
 }

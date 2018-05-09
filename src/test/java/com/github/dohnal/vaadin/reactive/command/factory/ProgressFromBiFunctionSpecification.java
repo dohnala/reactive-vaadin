@@ -15,7 +15,6 @@ package com.github.dohnal.vaadin.reactive.command.factory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.concurrent.Executor;
 import java.util.function.BiFunction;
 
 import com.github.dohnal.vaadin.reactive.ProgressContext;
@@ -25,6 +24,8 @@ import com.github.dohnal.vaadin.reactive.command.CanExecuteEmitsValueSpecificati
 import com.github.dohnal.vaadin.reactive.command.CreateSpecification;
 import com.github.dohnal.vaadin.reactive.command.ExecuteSpecification;
 import io.reactivex.Observable;
+import io.reactivex.Scheduler;
+import io.reactivex.schedulers.Schedulers;
 import io.reactivex.schedulers.TestScheduler;
 import io.reactivex.subjects.PublishSubject;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,9 +39,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 /**
  * Tests for {@link ReactiveCommand} created by
  * {@link ReactiveCommandFactory#createProgressCommand(BiFunction)}
- * {@link ReactiveCommandFactory#createProgressCommand(BiFunction, Executor)}
+ * {@link ReactiveCommandFactory#createProgressCommand(BiFunction, Scheduler)}
  * {@link ReactiveCommandFactory#createProgressCommand(Observable, BiFunction)}
- * {@link ReactiveCommandFactory#createProgressCommand(Observable, BiFunction, Executor)}
+ * {@link ReactiveCommandFactory#createProgressCommand(Observable, BiFunction, Scheduler)}
  *
  * @author dohnal
  */
@@ -82,10 +83,10 @@ public interface ProgressFromBiFunctionSpecification extends
         class ExecuteWithNoInput
         {
             @Test
-            @DisplayName("IllegalArgumentException should be thrown")
+            @DisplayName("NullPointerException should be thrown")
             public void testExecute()
             {
-                assertThrows(IllegalArgumentException.class, () -> command.execute());
+                assertThrows(NullPointerException.class, () -> command.execute());
             }
         }
 
@@ -119,7 +120,7 @@ public interface ProgressFromBiFunctionSpecification extends
                     return RESULT;
                 }).when(execution).apply(Mockito.any(ProgressContext.class), Mockito.eq(INPUT));
 
-                command.execute(INPUT).blockingAwait();
+                command.execute(INPUT);
             }
 
             @Nonnull
@@ -141,7 +142,7 @@ public interface ProgressFromBiFunctionSpecification extends
                     throw ERROR;
                 }).when(execution).apply(Mockito.any(ProgressContext.class), Mockito.eq(INPUT));
 
-                command.execute(INPUT).blockingAwait();
+                command.execute(INPUT);
             }
 
             @Nonnull
@@ -172,7 +173,7 @@ public interface ProgressFromBiFunctionSpecification extends
         }
     }
 
-    abstract class AbstractProgressFromBiFunctionWithExecutorSpecification extends AbstractProgressFromBiFunctionSpecification
+    abstract class AbstractProgressFromBiFunctionWithSchedulerSpecification extends AbstractProgressFromBiFunctionSpecification
     {
         @Override
         @BeforeEach
@@ -180,7 +181,7 @@ public interface ProgressFromBiFunctionSpecification extends
         void create()
         {
             execution = Mockito.mock(BiFunction.class);
-            command = createProgressCommand(execution, new TestExecutor());
+            command = createProgressCommand(execution, Schedulers.from(Runnable::run));
         }
     }
 
@@ -246,12 +247,12 @@ public interface ProgressFromBiFunctionSpecification extends
                     return RESULT;
                 }).when(execution).apply(Mockito.any(ProgressContext.class), Mockito.eq(INPUT));
 
-                command.execute(INPUT).blockingAwait();
+                command.execute(INPUT);
             }
         }
     }
 
-    abstract class AbstractProgressFromBiFunctionWithCanExecuteAndExecutorSpecification
+    abstract class AbstractProgressFromBiFunctionWithCanExecuteAndSchedulerSpecification
             extends AbstractProgressFromBiFunctionWithCanExecuteSpecification
     {
         @BeforeEach
@@ -262,7 +263,7 @@ public interface ProgressFromBiFunctionSpecification extends
             testScheduler = new TestScheduler();
             testSubject = PublishSubject.create();
             testSubject.observeOn(testScheduler);
-            command = createProgressCommand(testSubject, execution, new TestExecutor());
+            command = createProgressCommand(testSubject, execution, Schedulers.from(Runnable::run));
         }
     }
 }

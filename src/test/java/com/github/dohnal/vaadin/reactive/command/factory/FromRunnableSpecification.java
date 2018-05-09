@@ -15,7 +15,6 @@ package com.github.dohnal.vaadin.reactive.command.factory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.concurrent.Executor;
 
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
 import com.github.dohnal.vaadin.reactive.ReactiveCommandFactory;
@@ -23,6 +22,8 @@ import com.github.dohnal.vaadin.reactive.command.CanExecuteEmitsValueSpecificati
 import com.github.dohnal.vaadin.reactive.command.CreateSpecification;
 import com.github.dohnal.vaadin.reactive.command.ExecuteSpecification;
 import io.reactivex.Observable;
+import io.reactivex.Scheduler;
+import io.reactivex.schedulers.Schedulers;
 import io.reactivex.schedulers.TestScheduler;
 import io.reactivex.subjects.PublishSubject;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,8 +36,8 @@ import org.mockito.Mockito;
  * Specification for {@link ReactiveCommand} created by
  * {@link ReactiveCommandFactory#createCommand(Runnable)}
  * {@link ReactiveCommandFactory#createCommand(Observable, Runnable)}
- * {@link ReactiveCommandFactory#createAsyncCommand(Runnable, Executor)}
- * {@link ReactiveCommandFactory#createAsyncCommand(Observable, Runnable, Executor)}
+ * {@link ReactiveCommandFactory#createCommand(Runnable, Scheduler)}
+ * {@link ReactiveCommandFactory#createCommand(Observable, Runnable, Scheduler)}
  *
  * @author dohnal
  */
@@ -121,14 +122,14 @@ public interface FromRunnableSpecification extends
         }
     }
 
-    abstract class AbstractFromRunnableWithExecutorSpecification extends AbstractFromRunnableSpecification
+    abstract class AbstractFromRunnableWithSchedulerSpecification extends AbstractFromRunnableSpecification
     {
         @Override
         @BeforeEach
         void create()
         {
             execution = Mockito.mock(Runnable.class);
-            command = createAsyncCommand(execution, new TestExecutor());
+            command = createCommand(execution, Schedulers.from(Runnable::run));
         }
     }
 
@@ -184,7 +185,7 @@ public interface FromRunnableSpecification extends
         }
     }
 
-    abstract class AbstractFromRunnableWithCanExecuteAndExecutorSpecification
+    abstract class AbstractFromRunnableWithCanExecuteAndSchedulerSpecification
             extends AbstractFromRunnableWithCanExecuteSpecification
     {
         @BeforeEach
@@ -194,7 +195,7 @@ public interface FromRunnableSpecification extends
             testScheduler = new TestScheduler();
             testSubject = PublishSubject.create();
             testSubject.observeOn(testScheduler);
-            command = createAsyncCommand(testSubject, execution, new TestExecutor());
+            command = createCommand(testSubject, execution, Schedulers.from(Runnable::run));
         }
     }
 }

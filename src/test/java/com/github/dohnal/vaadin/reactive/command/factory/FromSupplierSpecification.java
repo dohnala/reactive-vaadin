@@ -15,7 +15,6 @@ package com.github.dohnal.vaadin.reactive.command.factory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.concurrent.Executor;
 import java.util.function.Supplier;
 
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
@@ -24,6 +23,8 @@ import com.github.dohnal.vaadin.reactive.command.CanExecuteEmitsValueSpecificati
 import com.github.dohnal.vaadin.reactive.command.CreateSpecification;
 import com.github.dohnal.vaadin.reactive.command.ExecuteSpecification;
 import io.reactivex.Observable;
+import io.reactivex.Scheduler;
+import io.reactivex.schedulers.Schedulers;
 import io.reactivex.schedulers.TestScheduler;
 import io.reactivex.subjects.PublishSubject;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,8 +37,8 @@ import org.mockito.Mockito;
  * Specification for {@link ReactiveCommand} created by
  * {@link ReactiveCommandFactory#createCommand(Supplier)}
  * {@link ReactiveCommandFactory#createCommand(Observable, Supplier)}
- * {@link ReactiveCommandFactory#createAsyncCommand(Supplier, Executor)}
- * {@link ReactiveCommandFactory#createAsyncCommand(Observable, Supplier, Executor)}
+ * {@link ReactiveCommandFactory#createCommand(Supplier, Scheduler)}
+ * {@link ReactiveCommandFactory#createCommand(Observable, Supplier, Scheduler)}
  *
  * @author dohnal
  */
@@ -124,7 +125,7 @@ public interface FromSupplierSpecification extends
         }
     }
 
-    abstract class AbstractFromSupplierWithExecutorSpecification extends AbstractFromSupplierSpecification
+    abstract class AbstractFromSupplierWithSchedulerSpecification extends AbstractFromSupplierSpecification
     {
         @Override
         @BeforeEach
@@ -132,7 +133,7 @@ public interface FromSupplierSpecification extends
         void create()
         {
             execution = Mockito.mock(Supplier.class);
-            command = createAsyncCommand(execution, new TestExecutor());
+            command = createCommand(execution, Schedulers.from(Runnable::run));
         }
     }
 
@@ -191,7 +192,7 @@ public interface FromSupplierSpecification extends
         }
     }
 
-    abstract class AbstractFromSupplierWithCanExecuteAndExecutorSpecification
+    abstract class AbstractFromSupplierWithCanExecuteAndSchedulerSpecification
             extends AbstractFromSupplierWithCanExecuteSpecification
     {
         @BeforeEach
@@ -202,7 +203,7 @@ public interface FromSupplierSpecification extends
             testScheduler = new TestScheduler();
             testSubject = PublishSubject.create();
             testSubject.observeOn(testScheduler);
-            command = createAsyncCommand(testSubject, execution, new TestExecutor());
+            command = createCommand(testSubject, execution, Schedulers.from(Runnable::run));
         }
     }
 }

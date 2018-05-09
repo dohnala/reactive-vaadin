@@ -243,10 +243,10 @@ public interface CompositeFromCommandsSpecification extends
         class ExecuteWithNoInput
         {
             @Test
-            @DisplayName("IllegalArgumentException should be thrown")
+            @DisplayName("NullPointerException should be thrown")
             public void testExecute()
             {
-                assertThrows(IllegalArgumentException.class, () -> command.execute());
+                assertThrows(NullPointerException.class, () -> command.execute());
             }
         }
 

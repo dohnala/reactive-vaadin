@@ -15,7 +15,6 @@ package com.github.dohnal.vaadin.reactive.command.factory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.concurrent.Executor;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 
@@ -26,6 +25,8 @@ import com.github.dohnal.vaadin.reactive.command.CanExecuteEmitsValueSpecificati
 import com.github.dohnal.vaadin.reactive.command.CreateSpecification;
 import com.github.dohnal.vaadin.reactive.command.ExecuteSpecification;
 import io.reactivex.Observable;
+import io.reactivex.Scheduler;
+import io.reactivex.schedulers.Schedulers;
 import io.reactivex.schedulers.TestScheduler;
 import io.reactivex.subjects.PublishSubject;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,9 +40,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 /**
  * Tests for {@link ReactiveCommand} created by
  * {@link ReactiveCommandFactory#createProgressCommand(BiConsumer)}
- * {@link ReactiveCommandFactory#createProgressCommand(BiFunction, Executor)}
+ * {@link ReactiveCommandFactory#createProgressCommand(BiFunction, Scheduler)}
  * {@link ReactiveCommandFactory#createProgressCommand(Observable, BiConsumer)}
- * {@link ReactiveCommandFactory#createProgressCommand(Observable, BiFunction, Executor)}
+ * {@link ReactiveCommandFactory#createProgressCommand(Observable, BiFunction, Scheduler)}
  *
  * @author dohnal
  */
@@ -83,10 +84,10 @@ public interface ProgressFromBiConsumerSpecification extends
         class ExecuteWithNoInput
         {
             @Test
-            @DisplayName("IllegalArgumentException should be thrown")
+            @DisplayName("NullPointerException should be thrown")
             public void testExecute()
             {
-                assertThrows(IllegalArgumentException.class, () -> command.execute());
+                assertThrows(NullPointerException.class, () -> command.execute());
             }
         }
 
@@ -119,7 +120,7 @@ public interface ProgressFromBiConsumerSpecification extends
                     return null;
                 }).when(execution).accept(Mockito.any(ProgressContext.class), Mockito.eq(INPUT));
 
-                command.execute(INPUT).blockingAwait();
+                command.execute(INPUT);
             }
 
             @Nonnull
@@ -141,7 +142,7 @@ public interface ProgressFromBiConsumerSpecification extends
                     throw ERROR;
                 }).when(execution).accept(Mockito.any(ProgressContext.class), Mockito.eq(INPUT));
 
-                command.execute(INPUT).blockingAwait();
+                command.execute(INPUT);
             }
 
             @Nonnull
@@ -172,7 +173,7 @@ public interface ProgressFromBiConsumerSpecification extends
         }
     }
 
-    abstract class AbstractProgressFromBiConsumerWithExecutorSpecification extends AbstractProgressFromBiConsumerSpecification
+    abstract class AbstractProgressFromBiConsumerWithSchedulerSpecification extends AbstractProgressFromBiConsumerSpecification
     {
         @Override
         @BeforeEach
@@ -180,7 +181,7 @@ public interface ProgressFromBiConsumerSpecification extends
         void create()
         {
             execution = Mockito.mock(BiConsumer.class);
-            command = createProgressCommand(execution, new TestExecutor());
+            command = createProgressCommand(execution, Schedulers.from(Runnable::run));
         }
     }
 
@@ -245,12 +246,12 @@ public interface ProgressFromBiConsumerSpecification extends
                     return null;
                 }).when(execution).accept(Mockito.any(ProgressContext.class), Mockito.eq(INPUT));
 
-                command.execute(INPUT).blockingAwait();
+                command.execute(INPUT);
             }
         }
     }
 
-    abstract class AbstractProgressFromBiConsumerWithCanExecuteAndExecutorSpecification
+    abstract class AbstractProgressFromBiConsumerWithCanExecuteAndSchedulerSpecification
             extends AbstractProgressFromBiConsumerWithCanExecuteSpecification
     {
         @BeforeEach
@@ -261,7 +262,7 @@ public interface ProgressFromBiConsumerSpecification extends
             testScheduler = new TestScheduler();
             testSubject = PublishSubject.create();
             testSubject.observeOn(testScheduler);
-            command = createProgressCommand(testSubject, execution, new TestExecutor());
+            command = createProgressCommand(testSubject, execution, Schedulers.from(Runnable::run));
         }
     }
 }

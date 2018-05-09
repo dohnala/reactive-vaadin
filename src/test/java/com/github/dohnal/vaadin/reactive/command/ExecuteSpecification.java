@@ -30,7 +30,7 @@ import org.junit.jupiter.api.Test;
  *
  * @author dohnal
  */
-public interface ExecuteSpecification
+public interface ExecuteSpecification extends BaseCommandSpecification
 {
     /**
      * Specification that tests behavior of command during execution

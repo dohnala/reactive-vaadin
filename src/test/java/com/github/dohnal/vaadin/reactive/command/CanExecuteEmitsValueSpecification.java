@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test;
 /**
  * @author dohnal
  */
-public interface CanExecuteEmitsValueSpecification
+public interface CanExecuteEmitsValueSpecification extends BaseCommandSpecification
 {
     /**
      * Specification that tests behavior of command after it is created with custom CanExecute

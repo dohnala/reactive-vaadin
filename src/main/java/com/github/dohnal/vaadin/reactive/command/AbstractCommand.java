@@ -20,7 +20,6 @@ import java.util.Objects;
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
 import com.github.dohnal.vaadin.reactive.ReactiveProperty;
 import com.github.dohnal.vaadin.reactive.ReactivePropertyFactory;
-import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.subjects.PublishSubject;
 
@@ -75,7 +74,7 @@ public abstract class AbstractCommand<T, R> implements ReactiveCommand<T, R>, Re
     /**
      * Internally executes this command
      */
-    protected abstract Completable executeInternal(final @Nullable T input);
+    protected abstract void executeInternal(final @Nullable T input);
 
     @Nonnull
     @Override
@@ -129,27 +128,23 @@ public abstract class AbstractCommand<T, R> implements ReactiveCommand<T, R>, Re
     }
 
     @Override
-    public final Completable execute()
+    public final void execute()
     {
         if (Boolean.TRUE.equals(canExecute.getValue()))
         {
-            return executeInternal(null);
+            executeInternal(null);
         }
-
-        return Completable.complete();
     }
 
     @Override
-    public final Completable execute(final @Nonnull T input)
+    public final void execute(final @Nonnull T input)
     {
         Objects.requireNonNull(input, "Input cannot be null");
 
         if (Boolean.TRUE.equals(canExecute.getValue()))
         {
-            return executeInternal(input);
+            executeInternal(input);
         }
-
-        return Completable.complete();
     }
 
     /**
@@ -165,28 +160,10 @@ public abstract class AbstractCommand<T, R> implements ReactiveCommand<T, R>, Re
      * Handles result of command execution
      *
      * @param result result
-     * @param error error
      */
-    protected final void handleResult(final @Nullable R result, final @Nullable Throwable error)
+    protected final void handleResult(final @Nonnull R result)
     {
-        if (error == null)
-        {
-            if (result != null)
-            {
-                this.result.onNext(result);
-            }
-        }
-        else
-        {
-            if (this.error.hasObservers())
-            {
-                this.error.onNext(error);
-            }
-            else
-            {
-                handleError(error);
-            }
-        }
+        this.result.onNext(result);
     }
 
     /**
@@ -194,11 +171,19 @@ public abstract class AbstractCommand<T, R> implements ReactiveCommand<T, R>, Re
      *
      * @param throwable error
      */
-    protected void handleError(final @Nonnull Throwable throwable)
+    protected final void handleError(final @Nonnull Throwable throwable)
     {
         Objects.requireNonNull(throwable, "Throwable cannot be null");
 
-        // TODO: log
+        if (this.error.hasObservers())
+        {
+            this.error.onNext(throwable);
+        }
+        else
+        {
+            // TODO: log
+            // TODO: handle unhandled error
+        }
     }
 
     /**

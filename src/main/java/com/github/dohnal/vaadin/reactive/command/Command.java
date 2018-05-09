@@ -16,31 +16,25 @@ package com.github.dohnal.vaadin.reactive.command;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Objects;
-import java.util.function.BiFunction;
+import java.util.function.Function;
 
-import com.github.dohnal.vaadin.reactive.ProgressContext;
-import com.github.dohnal.vaadin.reactive.ReactiveCommand;
 import io.reactivex.Observable;
 
 /**
- * Asynchronous implementation of {@link ReactiveCommand} with support of controlling progress
- *
- * @param <T> type of command input parameter
- * @param <R> type of command result
  * @author dohnal
  */
-public final class ProgressCommand<T, R> extends AbstractCommand<T, R>
+public final class Command<T, R> extends AbstractCommand<T, R>
 {
-    private final BiFunction<ProgressContext, T, Observable<R>> execution;
+    private final Function<T, Observable<R>> execution;
 
     /**
-     * Creates new progress reactive command with given execution
+     * Creates new reactive command with given observable
      *
      * @param canExecute observable which controls command executability
      * @param execution execution
      */
-    public ProgressCommand(final @Nonnull Observable<Boolean> canExecute,
-                           final @Nonnull BiFunction<ProgressContext, T, Observable<R>> execution)
+    public Command(final @Nonnull Observable<Boolean> canExecute,
+                   final @Nonnull Function<T, Observable<R>> execution)
     {
         super(canExecute);
 
@@ -55,7 +49,7 @@ public final class ProgressCommand<T, R> extends AbstractCommand<T, R>
     {
         handleStart();
 
-        execution.apply(new ReactiveProgressContext(progress), input)
+        execution.apply(input)
                 .doFinally(this::handleComplete)
                 .subscribe(this::handleResult, this::handleError);
     }

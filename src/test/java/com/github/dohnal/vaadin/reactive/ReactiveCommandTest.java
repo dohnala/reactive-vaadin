@@ -46,64 +46,64 @@ public class ReactiveCommandTest
         class FromRunnable extends AbstractFromRunnableSpecification {}
 
         @Nested
-        @DisplayName("From runnable with executor")
-        class FromRunnableWithExecutor extends AbstractFromRunnableWithExecutorSpecification {}
+        @DisplayName("From runnable with scheduler")
+        class FromRunnableWithScheduler extends AbstractFromRunnableWithSchedulerSpecification {}
 
         @Nested
         @DisplayName("From runnable with CanExecute")
         class FromRunnableWithCanExecute extends AbstractFromRunnableWithCanExecuteSpecification {}
 
         @Nested
-        @DisplayName("From runnable with CanExecute and executor")
-        class FromRunnableWithCanExecuteAndExecutor extends AbstractFromRunnableWithCanExecuteAndExecutorSpecification {}
+        @DisplayName("From runnable with CanExecute and scheduler")
+        class FromRunnableWithCanExecuteAndScheduler extends AbstractFromRunnableWithCanExecuteAndSchedulerSpecification {}
 
         @Nested
         @DisplayName("From supplier")
         class FromSupplier extends AbstractFromSupplierSpecification {}
 
         @Nested
-        @DisplayName("From supplier with executor")
-        class FromSupplierWithExecutor extends AbstractFromSupplierWithExecutorSpecification {}
+        @DisplayName("From supplier with scheduler")
+        class FromSupplierWithScheduler extends AbstractFromSupplierWithSchedulerSpecification {}
 
         @Nested
         @DisplayName("From supplier with CanExecute")
         class FromSupplierWithCanExecute extends AbstractFromSupplierWithCanExecuteSpecification {}
 
         @Nested
-        @DisplayName("From supplier with CanExecute and executor")
-        class FromSupplierWithCanExecuteAndExecutor extends AbstractFromSupplierWithCanExecuteAndExecutorSpecification {}
+        @DisplayName("From supplier with CanExecute and scheduler")
+        class FromSupplierWithCanExecuteAndScheduler extends AbstractFromSupplierWithCanExecuteAndSchedulerSpecification {}
 
         @Nested
         @DisplayName("From consumer")
         class FromConsumer extends AbstractFromConsumerSpecification {}
 
         @Nested
-        @DisplayName("From consumer with executor")
-        class FromConsumerWithExecutor extends AbstractFromConsumerWithExecutorSpecification {}
+        @DisplayName("From consumer with scheduler")
+        class FromConsumerWithScheduler extends AbstractFromConsumerWithSchedulerSpecification {}
 
         @Nested
         @DisplayName("From consumer with CanExecute")
         class FromConsumerWithCanExecute extends AbstractFromConsumerWithCanExecuteSpecification {}
 
         @Nested
-        @DisplayName("From consumer with CanExecute and executor")
-        class FromConsumerWithCanExecuteAndExecutor extends AbstractFromConsumerWithCanExecuteAndExecutorSpecification {}
+        @DisplayName("From consumer with CanExecute and scheduler")
+        class FromConsumerWithCanExecuteAndScheduler extends AbstractFromConsumerWithCanExecuteAndSchedulerSpecification {}
 
         @Nested
         @DisplayName("From function")
         class FromFunction extends AbstractFromFunctionSpecification {}
 
         @Nested
-        @DisplayName("From function with executor")
-        class FromFunctionWithExecutor extends AbstractFromFunctionWithExecutorSpecification {}
+        @DisplayName("From function with scheduler")
+        class FromFunctionWithScheduler extends AbstractFromFunctionWithSchedulerSpecification {}
 
         @Nested
         @DisplayName("From function with CanExecute")
         class FromFunctionWithCanExecute extends AbstractFromFunctionWithCanExecuteSpecification {}
 
         @Nested
-        @DisplayName("From function with CanExecute and executor")
-        class FromFunctionWithCanExecuteAndExecutor extends AbstractFromFunctionWithCanExecuteAndExecutorSpecification {}
+        @DisplayName("From function with CanExecute and scheduler")
+        class FromFunctionWithCanExecuteAndScheduler extends AbstractFromFunctionWithCanExecuteAndSchedulerSpecification {}
     }
 
     @Nested
@@ -119,64 +119,64 @@ public class ReactiveCommandTest
         class FromConsumer extends AbstractProgressFromConsumerSpecification {}
 
         @Nested
-        @DisplayName("From consumer with executor")
-        class FromConsumerWithExecutor extends AbstractProgressFromConsumerWithExecutorSpecification {}
+        @DisplayName("From consumer with scheduler")
+        class FromConsumerWithScheduler extends AbstractProgressFromConsumerWithSchedulerSpecification {}
 
         @Nested
         @DisplayName("From consumer with CanExecute")
         class FromConsumerWithCanExecute extends AbstractProgressFromConsumerWithCanExecuteSpecification {}
 
         @Nested
-        @DisplayName("From consumer with CanExecute and executor")
-        class FromConsumerWithCanExecuteAndExecutor extends AbstractProgressFromConsumerWithCanExecuteAndExecutorSpecification {}
+        @DisplayName("From consumer with CanExecute and scheduler")
+        class FromConsumerWithCanExecuteAndScheduler extends AbstractProgressFromConsumerWithCanExecuteAndSchedulerSpecification {}
 
         @Nested
         @DisplayName("From function")
         class FromFunction extends AbstractProgressFromFunctionSpecification {}
 
         @Nested
-        @DisplayName("From function with executor")
-        class FromFunctionWithExecutor extends AbstractProgressFromFunctionWithExecutorSpecification {}
+        @DisplayName("From function with scheduler")
+        class FromFunctionWithScheduler extends AbstractProgressFromFunctionWithSchedulerSpecification {}
 
         @Nested
         @DisplayName("From function with CanExecute")
         class FromFunctionWithCanExecute extends AbstractProgressFromFunctionWithCanExecuteSpecification {}
 
         @Nested
-        @DisplayName("From function with CanExecute and executor")
-        class FromFunctionWithCanExecuteAndExecutor extends AbstractProgressFromFunctionWithCanExecuteAndExecutorSpecification {}
+        @DisplayName("From function with CanExecute and scheduler")
+        class FromFunctionWithCanExecuteAndScheduler extends AbstractProgressFromFunctionWithCanExecuteAndSchedulerSpecification {}
 
         @Nested
         @DisplayName("From bi-consumer")
         class FromBiConsumer extends AbstractProgressFromBiConsumerSpecification {}
 
         @Nested
-        @DisplayName("From bi-consumer with executor")
-        class FromBiConsumerWithExecutor extends AbstractProgressFromBiConsumerWithExecutorSpecification {}
+        @DisplayName("From bi-consumer with scheduler")
+        class FromBiConsumerWithScheduler extends AbstractProgressFromBiConsumerWithSchedulerSpecification {}
 
         @Nested
         @DisplayName("From bi-consumer with CanExecute")
         class FromBiConsumerWithCanExecute extends AbstractProgressFromBiConsumerWithCanExecuteSpecification {}
 
         @Nested
-        @DisplayName("From bi-consumer with CanExecute and executor")
-        class FromBiConsumerWithCanExecuteAndExecutor extends AbstractProgressFromBiConsumerWithCanExecuteAndExecutorSpecification {}
+        @DisplayName("From bi-consumer with CanExecute and scheduler")
+        class FromBiConsumerWithCanExecuteAndScheduler extends AbstractProgressFromBiConsumerWithCanExecuteAndSchedulerSpecification {}
 
         @Nested
         @DisplayName("From bi-function")
         class FromBiFunction extends AbstractProgressFromBiFunctionSpecification {}
 
         @Nested
-        @DisplayName("From bi-function with executor")
-        class FromBiFunctionWithExecutor extends AbstractProgressFromBiFunctionWithExecutorSpecification {}
+        @DisplayName("From bi-function with scheduler")
+        class FromBiFunctionWithScheduler extends AbstractProgressFromBiFunctionWithSchedulerSpecification {}
 
         @Nested
         @DisplayName("From bi-function with CanExecute")
         class FromBiFunctionWithCanExecute extends AbstractProgressFromBiFunctionWithCanExecuteSpecification {}
 
         @Nested
-        @DisplayName("From bi-function with CanExecute and executor")
-        class FromBiFunctionWithCanExecuteAndExecutor extends AbstractProgressFromBiFunctionWithCanExecuteAndExecutorSpecification {}
+        @DisplayName("From bi-function with CanExecute and scheduler")
+        class FromBiFunctionWithCanExecuteAndScheduler extends AbstractProgressFromBiFunctionWithCanExecuteAndSchedulerSpecification {}
     }
 
     @Nested

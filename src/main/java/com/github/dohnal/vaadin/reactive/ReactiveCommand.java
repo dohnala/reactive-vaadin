@@ -15,7 +15,6 @@ package com.github.dohnal.vaadin.reactive;
 
 import javax.annotation.Nonnull;
 
-import io.reactivex.Completable;
 import io.reactivex.Observable;
 
 /**
@@ -87,16 +86,14 @@ public interface ReactiveCommand<T, R>
     /**
      * Executes this command with no input
      *
-     * @return completable to notify when an execution is completed
-     * @throws IllegalArgumentException if this command requires input
+     * @throws NullPointerException if this command requires input
      */
-    Completable execute();
+    void execute();
 
     /**
      * Executes this command with given input
      *
      * @param input command input
-     * @return completable to notify when an execution is completed
      */
-    Completable execute(final @Nonnull T input);
+    void execute(final @Nonnull T input);
 }

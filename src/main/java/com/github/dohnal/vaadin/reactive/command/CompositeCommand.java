@@ -22,7 +22,6 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
-import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 
@@ -72,7 +71,7 @@ public final class CompositeCommand<T, R> extends AbstractCommand<T, List<R>>
 
     @Override
     @SuppressWarnings("unchecked")
-    protected final Completable executeInternal(final @Nullable T input)
+    protected final void executeInternal(final @Nullable T input)
     {
         handleStart();
 
@@ -128,8 +127,6 @@ public final class CompositeCommand<T, R> extends AbstractCommand<T, List<R>>
         {
             commands.forEach(command -> command.execute(input));
         }
-
-        return Completable.fromObservable(execution);
     }
 
     @Nonnull

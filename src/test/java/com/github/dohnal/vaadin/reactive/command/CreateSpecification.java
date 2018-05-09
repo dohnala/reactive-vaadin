@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Test;
 /**
  * @author dohnal
  */
-public interface CreateSpecification
+public interface CreateSpecification extends BaseCommandSpecification
 {
     /**
      * Specification that tests behavior of command after it is created

@@ -15,7 +15,6 @@ package com.github.dohnal.vaadin.reactive.command.factory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 import com.github.dohnal.vaadin.reactive.ProgressContext;
@@ -25,6 +24,8 @@ import com.github.dohnal.vaadin.reactive.command.CanExecuteEmitsValueSpecificati
 import com.github.dohnal.vaadin.reactive.command.CreateSpecification;
 import com.github.dohnal.vaadin.reactive.command.ExecuteSpecification;
 import io.reactivex.Observable;
+import io.reactivex.Scheduler;
+import io.reactivex.schedulers.Schedulers;
 import io.reactivex.schedulers.TestScheduler;
 import io.reactivex.subjects.PublishSubject;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,9 +37,9 @@ import org.mockito.Mockito;
 /**
  * Tests for {@link ReactiveCommand} created by
  * {@link ReactiveCommandFactory#createProgressCommand(Consumer)}
- * {@link ReactiveCommandFactory#createProgressCommand(Consumer, Executor)}
+ * {@link ReactiveCommandFactory#createProgressCommand(Consumer, Scheduler)}
  * {@link ReactiveCommandFactory#createProgressCommand(Observable, Consumer)}
- * {@link ReactiveCommandFactory#createProgressCommand(Observable, Consumer, Executor)}
+ * {@link ReactiveCommandFactory#createProgressCommand(Observable, Consumer, Scheduler)}
  *
  * @author dohnal
  */
@@ -103,7 +104,7 @@ public interface ProgressFromConsumerSpecification extends
                     return null;
                 }).when(execution).accept(Mockito.any(ProgressContext.class));
 
-                command.execute().blockingAwait();
+                command.execute();
             }
 
             @Nonnull
@@ -125,7 +126,7 @@ public interface ProgressFromConsumerSpecification extends
                     throw ERROR;
                 }).when(execution).accept(Mockito.any(ProgressContext.class));
 
-                command.execute().blockingAwait();
+                command.execute();
             }
 
             @Nonnull
@@ -156,7 +157,7 @@ public interface ProgressFromConsumerSpecification extends
         }
     }
 
-    abstract class AbstractProgressFromConsumerWithExecutorSpecification extends AbstractProgressFromConsumerSpecification
+    abstract class AbstractProgressFromConsumerWithSchedulerSpecification extends AbstractProgressFromConsumerSpecification
     {
         @Override
         @BeforeEach
@@ -164,7 +165,7 @@ public interface ProgressFromConsumerSpecification extends
         void create()
         {
             execution = Mockito.mock(Consumer.class);
-            command = createProgressCommand(execution, new TestExecutor());
+            command = createProgressCommand(execution, Schedulers.from(Runnable::run));
         }
     }
 
@@ -227,12 +228,12 @@ public interface ProgressFromConsumerSpecification extends
                     return null;
                 }).when(execution).accept(Mockito.any(ProgressContext.class));
 
-                command.execute().blockingAwait();
+                command.execute();
             }
         }
     }
 
-    abstract class AbstractProgressFromConsumerWithCanExecuteAndExecutorSpecification
+    abstract class AbstractProgressFromConsumerWithCanExecuteAndSchedulerSpecification
             extends AbstractProgressFromConsumerWithCanExecuteSpecification
     {
         @BeforeEach
@@ -243,7 +244,7 @@ public interface ProgressFromConsumerSpecification extends
             testScheduler = new TestScheduler();
             testSubject = PublishSubject.create();
             testSubject.observeOn(testScheduler);
-            command = createProgressCommand(testSubject, execution, new TestExecutor());
+            command = createProgressCommand(testSubject, execution, Schedulers.from(Runnable::run));
         }
     }
 }

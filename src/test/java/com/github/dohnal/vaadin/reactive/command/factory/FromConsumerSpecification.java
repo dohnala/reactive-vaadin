@@ -15,7 +15,6 @@ package com.github.dohnal.vaadin.reactive.command.factory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
@@ -24,6 +23,8 @@ import com.github.dohnal.vaadin.reactive.command.CanExecuteEmitsValueSpecificati
 import com.github.dohnal.vaadin.reactive.command.CreateSpecification;
 import com.github.dohnal.vaadin.reactive.command.ExecuteSpecification;
 import io.reactivex.Observable;
+import io.reactivex.Scheduler;
+import io.reactivex.schedulers.Schedulers;
 import io.reactivex.schedulers.TestScheduler;
 import io.reactivex.subjects.PublishSubject;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,8 +39,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  * Specification for {@link ReactiveCommand} created by
  * {@link ReactiveCommandFactory#createCommand(Consumer)}
  * {@link ReactiveCommandFactory#createCommand(Observable, Consumer)}
- * {@link ReactiveCommandFactory#createAsyncCommand(Consumer, Executor)}
- * {@link ReactiveCommandFactory#createAsyncCommand(Observable, Consumer, Executor)}
+ * {@link ReactiveCommandFactory#createCommand(Consumer, Scheduler)}
+ * {@link ReactiveCommandFactory#createCommand(Observable, Consumer, Scheduler)}
  *
  * @author dohnal
  */
@@ -81,10 +82,10 @@ public interface FromConsumerSpecification extends
         class ExecuteWithNoInput
         {
             @Test
-            @DisplayName("IllegalArgumentException should be thrown")
+            @DisplayName("NullPointerException should be thrown")
             public void testExecute()
             {
-                assertThrows(IllegalArgumentException.class, () -> command.execute());
+                assertThrows(NullPointerException.class, () -> command.execute());
             }
         }
 
@@ -138,7 +139,7 @@ public interface FromConsumerSpecification extends
         }
     }
 
-    abstract class AbstractFromConsumerWithExecutorSpecification extends AbstractFromConsumerSpecification
+    abstract class AbstractFromConsumerWithSchedulerSpecification extends AbstractFromConsumerSpecification
     {
         @Override
         @BeforeEach
@@ -146,7 +147,7 @@ public interface FromConsumerSpecification extends
         void create()
         {
             execution = Mockito.mock(Consumer.class);
-            command = createAsyncCommand(execution, new TestExecutor());
+            command = createCommand(execution, Schedulers.from(Runnable::run));
         }
     }
 
@@ -205,7 +206,7 @@ public interface FromConsumerSpecification extends
         }
     }
 
-    abstract class AbstractFromConsumerWithCanExecuteAndExecutorSpecification
+    abstract class AbstractFromConsumerWithCanExecuteAndSchedulerSpecification
             extends AbstractFromConsumerWithCanExecuteSpecification
     {
         @BeforeEach
@@ -216,7 +217,7 @@ public interface FromConsumerSpecification extends
             testScheduler = new TestScheduler();
             testSubject = PublishSubject.create();
             testSubject.observeOn(testScheduler);
-            command = createAsyncCommand(testSubject, execution, new TestExecutor());
+            command = createCommand(testSubject, execution, Schedulers.from(Runnable::run));
         }
     }
 }

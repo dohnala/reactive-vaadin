@@ -18,14 +18,22 @@ import javax.annotation.Nonnull;
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
 
 /**
- * Base interface for tests which needs command
+ * Base interface for all command specifications
  *
- * @param <T> type of command input
- * @param <R> type of command result
  * @author dohnal
  */
-interface RequireCommand<T, R>
+public interface BaseCommandSpecification
 {
-    @Nonnull
-    ReactiveCommand<T, R> getCommand();
+    /**
+     * Base interface for tests which needs command
+     *
+     * @param <T> type of command input
+     * @param <R> type of command result
+     * @author dohnal
+     */
+    interface RequireCommand<T, R>
+    {
+        @Nonnull
+        ReactiveCommand<T, R> getCommand();
+    }
 }
