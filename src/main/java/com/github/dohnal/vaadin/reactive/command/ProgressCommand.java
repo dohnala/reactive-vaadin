@@ -53,9 +53,8 @@ public final class ProgressCommand<T, R> extends AbstractCommand<T, R>
     @Override
     protected void executeInternal(final @Nullable T input)
     {
-        handleStart();
-
         execution.apply(new ReactiveProgressContext(progress), input)
+                .doOnSubscribe(disposable -> handleStart())
                 .doFinally(this::handleComplete)
                 .subscribe(this::handleResult, this::handleError);
     }
