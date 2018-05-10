@@ -16,12 +16,16 @@ package com.github.dohnal.vaadin.reactive;
 import com.github.dohnal.vaadin.reactive.command.factory.CompositeFromCommandsSpecification;
 import com.github.dohnal.vaadin.reactive.command.factory.FromConsumerSpecification;
 import com.github.dohnal.vaadin.reactive.command.factory.FromFunctionSpecification;
+import com.github.dohnal.vaadin.reactive.command.factory.FromObservableFunctionSpecification;
+import com.github.dohnal.vaadin.reactive.command.factory.FromObservableSupplierSpecification;
 import com.github.dohnal.vaadin.reactive.command.factory.FromRunnableSpecification;
 import com.github.dohnal.vaadin.reactive.command.factory.FromSupplierSpecification;
 import com.github.dohnal.vaadin.reactive.command.factory.ProgressFromBiConsumerSpecification;
 import com.github.dohnal.vaadin.reactive.command.factory.ProgressFromBiFunctionSpecification;
 import com.github.dohnal.vaadin.reactive.command.factory.ProgressFromConsumerSpecification;
 import com.github.dohnal.vaadin.reactive.command.factory.ProgressFromFunctionSpecification;
+import com.github.dohnal.vaadin.reactive.command.factory.ProgressFromObservableBiFunctionSpecification;
+import com.github.dohnal.vaadin.reactive.command.factory.ProgressFromObservableFunctionSpecification;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 
@@ -39,7 +43,9 @@ public class ReactiveCommandTest
             FromRunnableSpecification,
             FromSupplierSpecification,
             FromConsumerSpecification,
-            FromFunctionSpecification
+            FromFunctionSpecification,
+            FromObservableSupplierSpecification,
+            FromObservableFunctionSpecification
     {
         @Nested
         @DisplayName("From runnable")
@@ -104,6 +110,38 @@ public class ReactiveCommandTest
         @Nested
         @DisplayName("From function with CanExecute and scheduler")
         class FromFunctionWithCanExecuteAndScheduler extends AbstractFromFunctionWithCanExecuteAndSchedulerSpecification {}
+
+        @Nested
+        @DisplayName("From observable supplier")
+        class FromObservableSupplier extends AbstractFromObservableSupplierSpecification {}
+
+        @Nested
+        @DisplayName("From observable supplier with scheduler")
+        class FromObservableSupplierWithScheduler extends AbstractFromObservableSupplierWithSchedulerSpecification {}
+
+        @Nested
+        @DisplayName("From observable supplier with CanExecute")
+        class FromObservableSupplierWithCanExecute extends AbstractFromObservableSupplierWithCanExecuteSpecification {}
+
+        @Nested
+        @DisplayName("From observable supplier with CanExecute and scheduler")
+        class FromObservableSupplierWithCanExecuteAndScheduler extends AbstractFromObservableSupplierWithCanExecuteAndSchedulerSpecification {}
+
+        @Nested
+        @DisplayName("From observable function")
+        class FromObservableFunction extends AbstractFromObservableFunctionSpecification {}
+
+        @Nested
+        @DisplayName("From observable function with scheduler")
+        class FromObservableFunctionWithScheduler extends AbstractFromObservableFunctionWithSchedulerSpecification {}
+
+        @Nested
+        @DisplayName("From observable function with CanExecute")
+        class FromObservableFunctionWithCanExecute extends AbstractFromObservableFunctionWithCanExecuteSpecification {}
+
+        @Nested
+        @DisplayName("From observable function with CanExecute and scheduler")
+        class FromObservableFunctionWithCanExecuteAndScheduler extends AbstractFromObservableFunctionWithCanExecuteAndSchedulerSpecification {}
     }
 
     @Nested
@@ -112,7 +150,9 @@ public class ReactiveCommandTest
             ProgressFromConsumerSpecification,
             ProgressFromFunctionSpecification,
             ProgressFromBiConsumerSpecification,
-            ProgressFromBiFunctionSpecification
+            ProgressFromBiFunctionSpecification,
+            ProgressFromObservableFunctionSpecification,
+            ProgressFromObservableBiFunctionSpecification
     {
         @Nested
         @DisplayName("From consumer")
@@ -177,6 +217,38 @@ public class ReactiveCommandTest
         @Nested
         @DisplayName("From bi-function with CanExecute and scheduler")
         class FromBiFunctionWithCanExecuteAndScheduler extends AbstractProgressFromBiFunctionWithCanExecuteAndSchedulerSpecification {}
+
+        @Nested
+        @DisplayName("From observable function")
+        class FromObservableFunction extends AbstractProgressFromObservableFunctionSpecification {}
+
+        @Nested
+        @DisplayName("From observable function with scheduler")
+        class FromObservableFunctionWithScheduler extends AbstractProgressFromObservableFunctionWithSchedulerSpecification {}
+
+        @Nested
+        @DisplayName("From observable function with CanExecute")
+        class FromObservableFunctionWithCanExecute extends AbstractProgressFromObservableFunctionWithCanExecuteSpecification {}
+
+        @Nested
+        @DisplayName("From observable function with CanExecute and scheduler")
+        class FromObservableFunctionWithCanExecuteAndScheduler extends AbstractProgressFromObservableFunctionWithCanExecuteAndSchedulerSpecification {}
+
+        @Nested
+        @DisplayName("From observable bi-function")
+        class FromObservableBiFunction extends AbstractProgressFromObservableBiFunctionSpecification {}
+
+        @Nested
+        @DisplayName("From observable bi-function with scheduler")
+        class FromObservableBiFunctionWithScheduler extends AbstractProgressFromObservableBiFunctionWithSchedulerSpecification {}
+
+        @Nested
+        @DisplayName("From observable bi-function with CanExecute")
+        class FromObservableBiFunctionWithCanExecute extends AbstractProgressFromObservableBiFunctionWithCanExecuteSpecification {}
+
+        @Nested
+        @DisplayName("From observable bi-function with CanExecute and scheduler")
+        class FromObservableBiFunctionWithCanExecuteAndScheduler extends AbstractProgressFromObservableBiFunctionWithCanExecuteAndSchedulerSpecification {}
     }
 
     @Nested
