@@ -42,14 +42,14 @@ public interface CompositeExecutionSpecification extends ExecuteSpecification
      */
     abstract class AbstractCompositeExecuteSpecification<T, R> extends AbstractExecuteSpecification<T, R>
     {
-        protected abstract void executeChild();
-
-        protected abstract void executeChildWithError();
-
-        protected abstract void executeWithMultipleErrors();
+        @Nonnull
+        protected abstract Observable<?> executeChild();
 
         @Nonnull
-        protected abstract Throwable[] getErrors();
+        protected abstract Observable<?> executeChildWithError();
+
+        @Nonnull
+        protected abstract Observable<R> executeWithMultipleErrors();
 
         @Nonnull
         @Override
@@ -73,10 +73,11 @@ public interface CompositeExecutionSpecification extends ExecuteSpecification
             @DisplayName("When child command is executed")
             class WhenExecuteChild extends AbstractExecuteChildBeforeExecuteSpecification<T, R>
             {
+                @Nonnull
                 @Override
-                protected void executeChild()
+                protected Observable<?> executeChild()
                 {
-                    AbstractCompositeExecuteSpecification.this.executeChild();
+                    return AbstractCompositeExecuteSpecification.this.executeChild();
                 }
 
                 @Nonnull
@@ -91,10 +92,11 @@ public interface CompositeExecutionSpecification extends ExecuteSpecification
             @DisplayName("When child command is executed with error")
             class WhenExecuteChildWithError extends AbstractExecuteChildBeforeExecuteSpecification<T, R>
             {
+                @Nonnull
                 @Override
-                protected void executeChild()
+                protected Observable<?> executeChild()
                 {
-                    AbstractCompositeExecuteSpecification.this.executeChildWithError();
+                    return AbstractCompositeExecuteSpecification.this.executeChildWithError();
                 }
 
                 @Nonnull
@@ -108,7 +110,7 @@ public interface CompositeExecutionSpecification extends ExecuteSpecification
 
         @Nested
         @DisplayName("When command is executed with multiple errors")
-        class WhenExecuteWithMultipleError
+        class WhenExecuteWithMultipleErrors
         {
             @BeforeEach
             void before()
@@ -122,20 +124,20 @@ public interface CompositeExecutionSpecification extends ExecuteSpecification
             {
                 final TestObserver<R> testObserver = getCommand().getResult().test();
 
-                executeWithMultipleErrors();
+                executeWithMultipleErrors().subscribe();
 
                 testObserver.assertNoValues();
             }
 
             @Test
-            @DisplayName("Error observable should emit correct errors")
+            @DisplayName("Error observable should emit first error")
             public void testError()
             {
                 final TestObserver<Throwable> testObserver = getCommand().getError().test();
 
-                executeWithMultipleErrors();
+                executeWithMultipleErrors().subscribe();
 
-                testObserver.assertValues(getErrors());
+                testObserver.assertValue(getError());
             }
 
             @Test
@@ -146,7 +148,7 @@ public interface CompositeExecutionSpecification extends ExecuteSpecification
 
                 testObserver.assertValue(true);
 
-                executeWithMultipleErrors();
+                executeWithMultipleErrors().subscribe();
 
                 testObserver.assertValues(true, false, true);
             }
@@ -159,7 +161,7 @@ public interface CompositeExecutionSpecification extends ExecuteSpecification
 
                 testObserver.assertValue(false);
 
-                executeWithMultipleErrors();
+                executeWithMultipleErrors().subscribe();
 
                 testObserver.assertValues(false, true, false);
             }
@@ -172,7 +174,7 @@ public interface CompositeExecutionSpecification extends ExecuteSpecification
 
                 testObserver.assertValue(0);
 
-                executeWithMultipleErrors();
+                executeWithMultipleErrors().subscribe();
 
                 testObserver.assertValues(0, 1);
             }
@@ -185,7 +187,7 @@ public interface CompositeExecutionSpecification extends ExecuteSpecification
 
                 testObserver.assertValue(false);
 
-                executeWithMultipleErrors();
+                executeWithMultipleErrors().subscribe();
 
                 testObserver.assertValues(false, true);
             }
@@ -198,18 +200,18 @@ public interface CompositeExecutionSpecification extends ExecuteSpecification
 
                 testObserver.assertValue(0.0f);
 
-                executeWithMultipleErrors();
+                executeWithMultipleErrors().subscribe();
 
                 testObserver.assertValues(getErrorProgress());
             }
 
             @Test
-            @DisplayName("Execution should be run")
+            @DisplayName("Only first command should be run")
             public void testExecution()
             {
-                executeWithMultipleErrors();
+                executeWithMultipleErrors().subscribe();
 
-                verifyExecution();
+                verifyErrorExecution();
             }
 
             @Nested
@@ -219,7 +221,7 @@ public interface CompositeExecutionSpecification extends ExecuteSpecification
                 @BeforeEach
                 void before()
                 {
-                    executeWithMultipleErrors();
+                    executeWithMultipleErrors().subscribe();
                 }
 
                 @Nested
@@ -238,10 +240,11 @@ public interface CompositeExecutionSpecification extends ExecuteSpecification
                 @DisplayName("When child command is executed")
                 class WhenExecuteChild extends AbstractExecuteChildAfterExecuteSpecification<T, R>
                 {
+                    @Nonnull
                     @Override
-                    protected void executeChild()
+                    protected Observable<?> executeChild()
                     {
-                        AbstractCompositeExecuteSpecification.this.executeChild();
+                       return AbstractCompositeExecuteSpecification.this.executeChild();
                     }
 
                     @Nonnull
@@ -256,10 +259,11 @@ public interface CompositeExecutionSpecification extends ExecuteSpecification
                 @DisplayName("When child command is executed with error")
                 class WhenExecuteChildWithError extends AbstractExecuteChildAfterExecuteSpecification<T, R>
                 {
+                    @Nonnull
                     @Override
-                    protected void executeChild()
+                    protected Observable<?> executeChild()
                     {
-                        AbstractCompositeExecuteSpecification.this.executeChildWithError();
+                        return AbstractCompositeExecuteSpecification.this.executeChildWithError();
                     }
 
                     @Nonnull
@@ -282,7 +286,8 @@ public interface CompositeExecutionSpecification extends ExecuteSpecification
      */
     abstract class AbstractExecuteChildBeforeExecuteSpecification<T, R> implements RequireCommand<T, R>
     {
-        protected abstract void executeChild();
+        @Nonnull
+        protected abstract Observable<?> executeChild();
 
         @Test
         @DisplayName("Result observable should not emit any value")
@@ -290,7 +295,7 @@ public interface CompositeExecutionSpecification extends ExecuteSpecification
         {
             final TestObserver<R> testObserver = getCommand().getResult().test();
 
-            executeChild();
+            executeChild().subscribe();
 
             testObserver.assertNoValues();
         }
@@ -301,7 +306,7 @@ public interface CompositeExecutionSpecification extends ExecuteSpecification
         {
             final TestObserver<Throwable> testObserver = getCommand().getError().test();
 
-            executeChild();
+            executeChild().subscribe();
 
             testObserver.assertNoValues();
         }
@@ -314,7 +319,7 @@ public interface CompositeExecutionSpecification extends ExecuteSpecification
 
             testObserver.assertValue(true);
 
-            executeChild();
+            executeChild().subscribe();
 
             testObserver.assertValues(true, false, true);
         }
@@ -327,7 +332,7 @@ public interface CompositeExecutionSpecification extends ExecuteSpecification
 
             testObserver.assertValue(false);
 
-            executeChild();
+            executeChild().subscribe();
 
             testObserver.assertValue(false);
         }
@@ -340,7 +345,7 @@ public interface CompositeExecutionSpecification extends ExecuteSpecification
 
             testObserver.assertValue(0);
 
-            executeChild();
+            executeChild().subscribe();
 
             testObserver.assertValue(0);
         }
@@ -353,7 +358,7 @@ public interface CompositeExecutionSpecification extends ExecuteSpecification
 
             testObserver.assertValue(false);
 
-            executeChild();
+            executeChild().subscribe();
 
             testObserver.assertValue(false);
         }
@@ -366,7 +371,7 @@ public interface CompositeExecutionSpecification extends ExecuteSpecification
 
             testObserver.assertValue(0.0f);
 
-            executeChild();
+            executeChild().subscribe();
 
             testObserver.assertValue(0.0f);
         }
@@ -381,7 +386,8 @@ public interface CompositeExecutionSpecification extends ExecuteSpecification
      */
     abstract class AbstractExecuteChildAfterExecuteSpecification<T, R> implements RequireCommand<T, R>
     {
-        protected abstract void executeChild();
+        @Nonnull
+        protected abstract Observable<?> executeChild();
 
         @Test
         @DisplayName("Result observable should not emit any value")
@@ -389,7 +395,7 @@ public interface CompositeExecutionSpecification extends ExecuteSpecification
         {
             final TestObserver<R> testObserver = getCommand().getResult().test();
 
-            executeChild();
+            executeChild().subscribe();
 
             testObserver.assertNoValues();
         }
@@ -400,7 +406,7 @@ public interface CompositeExecutionSpecification extends ExecuteSpecification
         {
             final TestObserver<Throwable> testObserver = getCommand().getError().test();
 
-            executeChild();
+            executeChild().subscribe();
 
             testObserver.assertNoValues();
         }
@@ -413,7 +419,7 @@ public interface CompositeExecutionSpecification extends ExecuteSpecification
 
             testObserver.assertValue(true);
 
-            executeChild();
+            executeChild().subscribe();
 
             testObserver.assertValues(true, false, true);
         }
@@ -426,7 +432,7 @@ public interface CompositeExecutionSpecification extends ExecuteSpecification
 
             testObserver.assertValue(false);
 
-            executeChild();
+            executeChild().subscribe();
 
             testObserver.assertValue(false);
         }
@@ -439,7 +445,7 @@ public interface CompositeExecutionSpecification extends ExecuteSpecification
 
             testObserver.assertValue(1);
 
-            executeChild();
+            executeChild().subscribe();
 
             testObserver.assertValue(1);
         }
@@ -452,7 +458,7 @@ public interface CompositeExecutionSpecification extends ExecuteSpecification
 
             testObserver.assertValue(true);
 
-            executeChild();
+            executeChild().subscribe();
 
             testObserver.assertValue(true);
         }
@@ -465,7 +471,7 @@ public interface CompositeExecutionSpecification extends ExecuteSpecification
 
             testObserver.assertValue(1.0f);
 
-            executeChild();
+            executeChild().subscribe();
 
             testObserver.assertValue(1.0f);
         }

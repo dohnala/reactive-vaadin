@@ -13,6 +13,9 @@
 
 package com.github.dohnal.vaadin.reactive.command;
 
+import javax.annotation.Nonnull;
+
+import io.reactivex.Observable;
 import io.reactivex.observers.TestObserver;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -33,7 +36,8 @@ public interface CompositeCanExecuteEmitsValueSpecification extends CanExecuteEm
     abstract class AbstractCompositeCanExecuteEmitsValueSpecification<T, R> extends
             AbstractCanExecuteEmitsValueSpecification<T, R>
     {
-        protected abstract void executeChild();
+        @Nonnull
+        protected abstract Observable<?> executeChild();
 
         @Nested
         @DisplayName("When child command is executed")
@@ -47,7 +51,7 @@ public interface CompositeCanExecuteEmitsValueSpecification extends CanExecuteEm
 
                 testObserver.assertValue(true);
 
-                executeChild();
+                executeChild().subscribe();
 
                 testObserver.assertValues(true, false, true);
             }

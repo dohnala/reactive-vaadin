@@ -15,11 +15,11 @@ package com.github.dohnal.vaadin.reactive;
 
 import java.util.function.Consumer;
 
+import io.reactivex.observers.TestObserver;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 /**
  * Tests for {@link Actions}
@@ -31,16 +31,18 @@ public class ActionsTest implements Actions
 {
     @Nested
     @DisplayName("When execute action is created")
-    class WhenCreateExecute
+    class WhenCreateExecute implements ReactiveCommandFactory
     {
-        private ReactiveCommand<Void, Void> command;
+        private final Integer RESULT = 7;
+
+        private ReactiveCommand<Void, Integer> command;
         private Runnable action;
 
         @BeforeEach
         @SuppressWarnings("unchecked")
         protected void create()
         {
-            command = Mockito.mock(ReactiveCommand.class);
+            command = createCommand(() -> RESULT);
             action = execute(command);
         }
 
@@ -48,42 +50,41 @@ public class ActionsTest implements Actions
         @DisplayName("Command should not be executed")
         public void testExecution()
         {
-            Mockito.verify(command, Mockito.never()).execute(Mockito.any());
+            command.getResult().test().assertNoValues();
         }
 
         @Nested
         @DisplayName("When action is called")
         class WhenCall
         {
-            @BeforeEach
-            protected void call()
-            {
-                action.run();
-            }
-
             @Test
-            @DisplayName("Command should be executed with null input")
+            @DisplayName("Command should be executed")
             public void testExecution()
             {
-                Mockito.verify(command).execute();
+                final TestObserver<Integer> testObserver = command.getResult().test();
+
+                action.run();
+
+                testObserver.assertValue(RESULT);
             }
         }
     }
 
     @Nested
     @DisplayName("When execute with input action is created with custom input")
-    class WhenCreateExecuteWithCustomInput
+    class WhenCreateExecuteWithCustomInput implements ReactiveCommandFactory
     {
-        protected final Integer INPUT = 7;
+        protected final Integer INPUT = 5;
+        private final Integer RESULT = 7;
 
-        private ReactiveCommand<Integer, Void> command;
+        private ReactiveCommand<Integer, Integer> command;
         private Runnable action;
 
         @BeforeEach
         @SuppressWarnings("unchecked")
         protected void create()
         {
-            command = Mockito.mock(ReactiveCommand.class);
+            command = createCommand(input -> input + 2);
             action = executeWithInput(command, INPUT);
         }
 
@@ -91,40 +92,41 @@ public class ActionsTest implements Actions
         @DisplayName("Command should not be executed")
         public void testExecution()
         {
-            Mockito.verify(command, Mockito.never()).execute(Mockito.any());
+            command.getResult().test().assertNoValues();
         }
 
         @Nested
         @DisplayName("When action is called")
         class WhenCall
         {
-            @BeforeEach
-            protected void call()
-            {
-                action.run();
-            }
-
             @Test
             @DisplayName("Command should be executed with custom input")
             public void testExecution()
             {
-                Mockito.verify(command).execute(INPUT);
+                final TestObserver<Integer> testObserver = command.getResult().test();
+
+                action.run();
+
+                testObserver.assertValue(RESULT);
             }
         }
     }
 
     @Nested
     @DisplayName("When execute with input action is created")
-    class WhenCreateExecuteWithInput
+    class WhenCreateExecuteWithInput implements ReactiveCommandFactory
     {
-        private ReactiveCommand<Integer, Void> command;
+        protected final Integer INPUT = 5;
+        private final Integer RESULT = 7;
+
+        private ReactiveCommand<Integer, Integer> command;
         private Consumer<Integer> action;
 
         @BeforeEach
         @SuppressWarnings("unchecked")
         protected void create()
         {
-            command = Mockito.mock(ReactiveCommand.class);
+            command = createCommand(input -> input + 2);
             action = executeWithInput(command);
         }
 
@@ -132,26 +134,23 @@ public class ActionsTest implements Actions
         @DisplayName("Command should not be executed")
         public void testExecution()
         {
-            Mockito.verify(command, Mockito.never()).execute(Mockito.any());
+            command.getResult().test().assertNoValues();
         }
 
         @Nested
         @DisplayName("When action is called")
         class WhenCall
         {
-            protected final Integer INPUT = 5;
-
-            @BeforeEach
-            protected void call()
-            {
-                action.accept(INPUT);
-            }
 
             @Test
             @DisplayName("Command should be executed with action input")
             public void testExecution()
             {
-                Mockito.verify(command).execute(INPUT);
+                final TestObserver<Integer> testObserver = command.getResult().test();
+
+                action.accept(INPUT);
+
+                testObserver.assertValue(RESULT);
             }
         }
     }

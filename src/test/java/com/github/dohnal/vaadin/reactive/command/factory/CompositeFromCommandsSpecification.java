@@ -27,6 +27,7 @@ import com.github.dohnal.vaadin.reactive.command.CompositeCanExecuteEmitsValueSp
 import com.github.dohnal.vaadin.reactive.command.CompositeExecutionSpecification;
 import com.github.dohnal.vaadin.reactive.command.CreateSpecification;
 import io.reactivex.Observable;
+import io.reactivex.observers.TestObserver;
 import io.reactivex.schedulers.TestScheduler;
 import io.reactivex.subjects.PublishSubject;
 import org.junit.jupiter.api.BeforeEach;
@@ -126,47 +127,58 @@ public interface CompositeFromCommandsSpecification extends
                 return command;
             }
 
+            @Nonnull
             @Override
-            protected void execute()
+            protected Observable<List<Integer>> execute()
             {
                 Mockito.when(executionA.get()).thenReturn(RESULT_A);
                 Mockito.when(executionB.get()).thenReturn(RESULT_B);
-                command.execute();
+
+                return command.execute();
             }
 
+            @Nonnull
             @Override
-            protected void executeWithError()
+            protected Observable<List<Integer>> executeWithError()
             {
                 Mockito.when(executionA.get()).thenThrow(ERROR_A);
                 Mockito.when(executionB.get()).thenReturn(RESULT_B);
-                command.execute();
+
+                return command.execute();
             }
 
+            @Nonnull
             @Override
-            protected void executeWithMultipleErrors()
+            protected Observable<List<Integer>> executeWithMultipleErrors()
             {
                 Mockito.when(executionA.get()).thenThrow(ERROR_A);
                 Mockito.when(executionB.get()).thenThrow(ERROR_B);
-                command.execute();
+
+                return command.execute();
             }
 
+            @Nonnull
             @Override
             @SuppressWarnings("unchecked")
-            protected void executeChild()
+            protected Observable<Integer> executeChild()
             {
                 Mockito.reset(executionA);
                 Mockito.when(executionA.get()).thenReturn(RESULT_A);
-                commandA.execute();
+
+                return commandA.execute();
             }
 
+            @Nonnull
             @Override
             @SuppressWarnings("unchecked")
-            protected void executeChildWithError()
+            protected Observable<Integer> executeChildWithError()
             {
                 Mockito.reset(executionA);
                 Mockito.when(executionA.get()).thenThrow(ERROR_A);
+
                 commandA.getError().test();
-                commandA.execute();
+
+                return commandA.execute();
             }
 
             @Nullable
@@ -183,18 +195,18 @@ public interface CompositeFromCommandsSpecification extends
                 return ERROR_A;
             }
 
-            @Nonnull
-            @Override
-            protected Throwable[] getErrors()
-            {
-                return new Throwable[]{ERROR_A, ERROR_B};
-            }
-
             @Override
             protected void verifyExecution()
             {
                 Mockito.verify(executionA).get();
                 Mockito.verify(executionB).get();
+            }
+
+            @Override
+            protected void verifyErrorExecution()
+            {
+                Mockito.verify(executionA).get();
+                Mockito.verify(executionB, Mockito.never()).get();
             }
         }
     }
@@ -243,10 +255,14 @@ public interface CompositeFromCommandsSpecification extends
         class ExecuteWithNoInput
         {
             @Test
-            @DisplayName("NullPointerException should be thrown")
+            @DisplayName("Error observable shout emit NullPointerException")
             public void testExecute()
             {
-                assertThrows(NullPointerException.class, () -> command.execute());
+                final TestObserver<Throwable> testObserver = command.getError().test();
+
+                command.execute().subscribe();
+
+                testObserver.assertValue(error -> error.getClass().equals(NullPointerException.class));
             }
         }
 
@@ -268,47 +284,58 @@ public interface CompositeFromCommandsSpecification extends
                 return command;
             }
 
+            @Nonnull
             @Override
-            protected void execute()
+            protected Observable<List<Integer>> execute()
             {
                 Mockito.when(executionA.apply(INPUT)).thenReturn(RESULT_A);
                 Mockito.when(executionB.apply(INPUT)).thenReturn(RESULT_B);
-                command.execute(INPUT);
+
+                return command.execute(INPUT);
             }
 
+            @Nonnull
             @Override
-            protected void executeWithError()
+            protected Observable<List<Integer>> executeWithError()
             {
                 Mockito.when(executionA.apply(INPUT)).thenThrow(ERROR_A);
                 Mockito.when(executionB.apply(INPUT)).thenReturn(RESULT_B);
-                command.execute(INPUT);
+
+                return command.execute(INPUT);
             }
 
+            @Nonnull
             @Override
-            protected void executeWithMultipleErrors()
+            protected Observable<List<Integer>> executeWithMultipleErrors()
             {
                 Mockito.when(executionA.apply(INPUT)).thenThrow(ERROR_A);
                 Mockito.when(executionB.apply(INPUT)).thenThrow(ERROR_B);
-                command.execute(INPUT);
+
+                return command.execute(INPUT);
             }
 
+            @Nonnull
             @Override
             @SuppressWarnings("unchecked")
-            protected void executeChild()
+            protected Observable<Integer> executeChild()
             {
                 Mockito.reset(executionA);
                 Mockito.when(executionA.apply(INPUT)).thenReturn(RESULT_A);
-                commandA.execute(INPUT);
+
+                return commandA.execute(INPUT);
             }
 
+            @Nonnull
             @Override
             @SuppressWarnings("unchecked")
-            protected void executeChildWithError()
+            protected Observable<Integer> executeChildWithError()
             {
                 Mockito.reset(executionA);
                 Mockito.when(executionA.apply(INPUT)).thenThrow(ERROR_A);
+
                 commandA.getError().test();
-                commandA.execute(INPUT);
+
+                return commandA.execute(INPUT);
             }
 
             @Nullable
@@ -325,18 +352,18 @@ public interface CompositeFromCommandsSpecification extends
                 return ERROR_A;
             }
 
-            @Nonnull
-            @Override
-            protected Throwable[] getErrors()
-            {
-                return new Throwable[]{ERROR_A, ERROR_B};
-            }
-
             @Override
             protected void verifyExecution()
             {
                 Mockito.verify(executionA).apply(INPUT);
                 Mockito.verify(executionB).apply(INPUT);
+            }
+
+            @Override
+            protected void verifyErrorExecution()
+            {
+                Mockito.verify(executionA).apply(INPUT);
+                Mockito.verify(executionB, Mockito.never()).apply(INPUT);
             }
         }
     }
@@ -399,19 +426,23 @@ public interface CompositeFromCommandsSpecification extends
                 testScheduler.triggerActions();
             }
 
+            @Nonnull
             @Override
-            protected void execute()
+            protected Observable<List<Integer>> execute()
             {
                 Mockito.when(executionA.get()).thenReturn(RESULT_A);
                 Mockito.when(executionB.get()).thenReturn(RESULT_B);
-                command.execute();
+
+                return command.execute();
             }
 
+            @Nonnull
             @Override
-            protected void executeChild()
+            protected Observable<Integer> executeChild()
             {
                 Mockito.when(executionA.get()).thenReturn(RESULT_A);
-                commandA.execute();
+
+                return commandA.execute();
             }
         }
     }

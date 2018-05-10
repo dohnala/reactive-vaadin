@@ -89,18 +89,22 @@ public interface FromObservableSupplierSpecification extends
                 return command;
             }
 
+            @Nonnull
             @Override
-            protected void execute()
+            protected Observable<Integer> execute()
             {
                 Mockito.when(execution.get()).thenReturn(Observable.just(RESULT));
-                command.execute();
+
+                return command.execute();
             }
 
+            @Nonnull
             @Override
-            protected void executeWithError()
+            protected Observable<Integer> executeWithError()
             {
                 Mockito.when(execution.get()).thenReturn(Observable.error(ERROR));
-                command.execute();
+
+                return command.execute();
             }
 
             @Nullable
@@ -183,11 +187,13 @@ public interface FromObservableSupplierSpecification extends
                 testScheduler.triggerActions();
             }
 
+            @Nonnull
             @Override
-            protected void execute()
+            protected Observable<Integer> execute()
             {
                 Mockito.when(execution.get()).thenReturn(Observable.just(RESULT));
-                command.execute();
+
+                return command.execute();
             }
         }
     }

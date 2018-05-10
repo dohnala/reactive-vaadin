@@ -14,8 +14,8 @@
 package com.github.dohnal.vaadin.reactive.command;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 
 import io.reactivex.Observable;
@@ -36,20 +36,37 @@ public final class Command<T, R> extends AbstractCommand<T, R>
     public Command(final @Nonnull Observable<Boolean> canExecute,
                    final @Nonnull Function<T, Observable<R>> execution)
     {
-        super(canExecute);
+        this(canExecute, Observable.empty(), execution);
+    }
 
-        Objects.requireNonNull(canExecute, "CanExecute cannot be null");
+    /**
+     * Creates new reactive command with given observable
+     *
+     * @param canExecute observable which controls command executability
+     * @param customProgress observable which controls command progress
+     * @param execution execution
+     */
+    Command(final @Nonnull Observable<Boolean> canExecute,
+            final @Nonnull Observable<Float> customProgress,
+            final @Nonnull Function<T, Observable<R>> execution)
+    {
+        super(canExecute, customProgress);
+
         Objects.requireNonNull(execution, "Execution cannot be null");
 
         this.execution = execution;
     }
 
+    @Nonnull
     @Override
-    protected void executeInternal(final @Nullable T input)
+    protected Observable<R> executeInternal(final @Nonnull Optional<T> input)
     {
-        execution.apply(input)
-                .doOnSubscribe(disposable -> handleStart())
-                .doFinally(this::handleComplete)
-                .subscribe(this::handleResult, this::handleError);
+        return Observable.just(input)
+                .filter(value -> Boolean.TRUE.equals(isExecuting.getValue()))
+                .flatMap(value -> execution.apply(value.orElse(null)))
+                .onErrorResumeNext(this::handleError)
+                .doOnSubscribe(this::handleStart)
+                .doOnNext(this::handleResult)
+                .doFinally(this::handleComplete);
     }
 }

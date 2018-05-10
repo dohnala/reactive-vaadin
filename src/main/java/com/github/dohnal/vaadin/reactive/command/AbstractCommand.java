@@ -14,13 +14,15 @@
 package com.github.dohnal.vaadin.reactive.command;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.Objects;
+import java.util.Optional;
 
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
 import com.github.dohnal.vaadin.reactive.ReactiveProperty;
 import com.github.dohnal.vaadin.reactive.ReactivePropertyFactory;
 import io.reactivex.Observable;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.disposables.SerialDisposable;
 import io.reactivex.subjects.PublishSubject;
 
 /**
@@ -44,14 +46,20 @@ public abstract class AbstractCommand<T, R> implements ReactiveCommand<T, R>, Re
 
     protected final ReactiveProperty<Float> progress;
 
+    protected final Observable<Float> customProgress;
+
+    protected SerialDisposable progressDisposable;
+
     /**
      * Creates new command reactive command
      *
      * @param canExecute observable which controls command executability
      */
-    public AbstractCommand(final @Nonnull Observable<Boolean> canExecute)
+    public AbstractCommand(final @Nonnull Observable<Boolean> canExecute,
+                           final @Nonnull Observable<Float> customProgress)
     {
         Objects.requireNonNull(canExecute, "CanExecute cannot be null");
+        Objects.requireNonNull(customProgress, "Custom progress cannot be null");
 
         this.result = PublishSubject.create();
         this.error = PublishSubject.create();
@@ -68,13 +76,20 @@ public abstract class AbstractCommand<T, R> implements ReactiveCommand<T, R>, Re
                         canExecute.startWith(true),
                         (x, y) -> x && y));
 
+        this.customProgress = customProgress;
+
         this.progress = createProperty(0.0f);
+
+        this.progressDisposable = new SerialDisposable();
     }
 
     /**
      * Internally executes this command
+     *
+     * @return execution pipeline which will be executed after its subscribed
      */
-    protected abstract void executeInternal(final @Nullable T input);
+    @Nonnull
+    protected abstract Observable<R> executeInternal(final @Nonnull Optional<T> input);
 
     @Nonnull
     @Override
@@ -127,33 +142,41 @@ public abstract class AbstractCommand<T, R> implements ReactiveCommand<T, R>, Re
         return progress.asObservable();
     }
 
+    @Nonnull
     @Override
-    public final void execute()
+    public final Observable<R> execute()
     {
-        if (Boolean.TRUE.equals(canExecute.getValue()))
-        {
-            executeInternal(null);
-        }
+        return executeInternal(Optional.empty());
     }
 
+    @Nonnull
     @Override
-    public final void execute(final @Nonnull T input)
+    public final Observable<R> execute(final @Nonnull T input)
     {
         Objects.requireNonNull(input, "Input cannot be null");
 
-        if (Boolean.TRUE.equals(canExecute.getValue()))
-        {
-            executeInternal(input);
-        }
+        return executeInternal(Optional.of(input));
     }
 
     /**
      * Handles start of command execution
+     *
+     * @param disposable disposable used to dispose command execution
      */
-    protected final void handleStart()
+    protected final void handleStart(final @Nonnull Disposable disposable)
     {
-        this.progress.setValue(0.0f);
-        this.isExecuting.setValue(true);
+        if (Boolean.TRUE.equals(canExecute.getValue()))
+        {
+            progress.setValue(0.0f);
+            isExecuting.setValue(true);
+
+            progressDisposable.set(customProgress.subscribe(progress::setValue));
+
+        }
+        else if (!disposable.isDisposed())
+        {
+            disposable.dispose();
+        }
     }
 
     /**
@@ -167,22 +190,23 @@ public abstract class AbstractCommand<T, R> implements ReactiveCommand<T, R>, Re
     }
 
     /**
-     * Handle unhandled error produced during command execution
+     * Handle error produced during command execution
      *
      * @param throwable error
      */
-    protected final void handleError(final @Nonnull Throwable throwable)
+    protected final Observable<? extends R> handleError(final @Nonnull Throwable throwable)
     {
         Objects.requireNonNull(throwable, "Throwable cannot be null");
 
         if (this.error.hasObservers())
         {
-            this.error.onNext(throwable);
+            error.onNext(throwable);
+
+            return Observable.empty();
         }
         else
         {
-            // TODO: log
-            // TODO: handle unhandled error
+            return Observable.error(throwable);
         }
     }
 
@@ -191,6 +215,8 @@ public abstract class AbstractCommand<T, R> implements ReactiveCommand<T, R>, Re
      */
     protected final void handleComplete()
     {
+        Optional.ofNullable(progressDisposable.get()).ifPresent(Disposable::dispose);
+
         this.progress.setValue(1.0f);
         this.isExecuting.setValue(false);
         this.executionCount.updateValue(count -> count + 1);

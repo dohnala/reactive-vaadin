@@ -19,11 +19,12 @@ import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
 import io.reactivex.Observable;
-import io.reactivex.disposables.Disposable;
 
 /**
  * Composite implementation of {@link ReactiveCommand}
@@ -32,9 +33,11 @@ import io.reactivex.disposables.Disposable;
  * @param <R> type of command result
  * @author dohnal
  */
-public final class CompositeCommand<T, R> extends AbstractCommand<T, List<R>>
+public final class CompositeCommand<T, R> implements ReactiveCommand<T, List<R>>
 {
     private final List<ReactiveCommand<T, R>> commands;
+
+    private final ReactiveCommand<T, List<R>> compositeCommand;
 
     /**
      * Creates new composite reactive command from given child commands
@@ -42,10 +45,21 @@ public final class CompositeCommand<T, R> extends AbstractCommand<T, List<R>>
      * @param canExecute observable which controls command executability
      * @param commands child commands this command is composed from
      */
+    @SuppressWarnings("unchecked")
     public CompositeCommand(final @Nonnull Observable<Boolean> canExecute,
                             final @Nonnull List<ReactiveCommand<T, R>> commands)
     {
-        super(Observable.combineLatest(
+        Objects.requireNonNull(canExecute, "CanExecute cannot be null");
+        Objects.requireNonNull(commands, "Commands cannot be null");
+
+        if (commands.size() == 0)
+        {
+            throw new IllegalArgumentException("At least one command is required");
+        }
+
+        this.commands = commands;
+
+        final Observable<Boolean> compositeCanExecute = Observable.combineLatest(
                 canExecute.startWith(true).distinctUntilChanged(),
                 Observable.combineLatest(
                         commands.stream()
@@ -56,42 +70,9 @@ public final class CompositeCommand<T, R> extends AbstractCommand<T, List<R>>
                                 .collect(Collectors.toList()),
                         values -> Arrays.stream(Arrays.copyOf(values, values.length, Boolean[].class))
                                 .allMatch(Boolean.TRUE::equals)),
-                (x, y) -> x && y));
+                (x, y) -> x && y);
 
-        Objects.requireNonNull(canExecute, "CanExecute cannot be null");
-        Objects.requireNonNull(commands, "Commands cannot be null");
-
-        if (commands.size() == 0)
-        {
-            throw new IllegalArgumentException("At least one command is required");
-        }
-
-        this.commands = commands;
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    protected final void executeInternal(final @Nullable T input)
-    {
-        handleStart();
-
-        // Zip child results and subscribe them to result subject
-        final Disposable resultSubscription = Observable
-                .zip(commands.stream()
-                                .map(command -> command.getResult().take(1))
-                                .collect(Collectors.toList()),
-                        results -> Arrays.asList((R[]) results))
-                .subscribe(result::onNext);
-
-        // Merge child errors and subscribe them to error subject
-        final Disposable errorSubscription = Observable
-                .merge(commands.stream()
-                        .map(command -> command.getError().take(1))
-                        .collect(Collectors.toList()))
-                .subscribe(error::onNext);
-
-        // Compute progress from child commands and subscribe them to progress property
-        final Disposable progressSubscription = Observable
+        final Observable<Float> compositeProgress = Observable
                 .combineLatest(commands.stream()
                                 .map(command -> command.getProgress()
                                         .withLatestFrom(command.isExecuting().take(3), AbstractMap.SimpleImmutableEntry::new)
@@ -99,34 +80,95 @@ public final class CompositeCommand<T, R> extends AbstractCommand<T, List<R>>
                                         .map(AbstractMap.SimpleImmutableEntry::getKey)
                                         .startWith(0.0f))
                                 .collect(Collectors.toList()),
-                        values -> computeProgress(Arrays.copyOf(values, values.length, Float[].class)))
-                .subscribe(progress::setValue);
+                        values -> computeProgress(Arrays.copyOf(values, values.length, Float[].class)));
 
-        final Observable<?> execution = Observable.zip(commands.stream()
-                .map(command -> command.isExecuting()
-                        .filter(Boolean.FALSE::equals)
-                        .skip(1)
-                        .take(1))
-                .collect(Collectors.toList()), values -> values);
+        final Function<T, Observable<List<R>>> compositeExecution = input -> Observable
+                .concat(getChildExecutions(input))
+                .map(Arrays::asList)
+                .reduce((x, y) -> Stream.concat(x.stream(), y.stream()).collect(Collectors.toList()))
+                .toObservable();
 
-        // After all child commands finished execution, handle complete
-        final Disposable isExecutingSubscription = execution
-                .subscribe(values -> {}, error -> {}, () -> {
-                    resultSubscription.dispose();
-                    errorSubscription.dispose();
-                    progressSubscription.dispose();
+        this.compositeCommand = new Command<>(compositeCanExecute, compositeProgress, compositeExecution);
+    }
 
-                    this.handleComplete();
-                });
-
-        if (input == null)
+    @Nonnull
+    private List<Observable<R>> getChildExecutions(final @Nullable T input)
+    {
+        if (input != null)
         {
-            commands.forEach(ReactiveCommand::execute);
+            return commands.stream()
+                    .map(command -> command.execute(input))
+                    .collect(Collectors.toList());
         }
-        else
-        {
-            commands.forEach(command -> command.execute(input));
-        }
+
+        return commands.stream()
+                .map(ReactiveCommand::execute)
+                .collect(Collectors.toList());
+    }
+
+    @Nonnull
+    @Override
+    public Observable<List<R>> getResult()
+    {
+        return compositeCommand.getResult();
+    }
+
+    @Nonnull
+    @Override
+    public Observable<Throwable> getError()
+    {
+        return compositeCommand.getError();
+    }
+
+    @Nonnull
+    @Override
+    public Observable<Boolean> isExecuting()
+    {
+        return compositeCommand.isExecuting();
+    }
+
+    @Nonnull
+    @Override
+    public Observable<Integer> getExecutionCount()
+    {
+        return compositeCommand.getExecutionCount();
+    }
+
+    @Nonnull
+    @Override
+    public Observable<Boolean> hasBeenExecuted()
+    {
+        return compositeCommand.hasBeenExecuted();
+    }
+
+    @Nonnull
+    @Override
+    public Observable<Boolean> canExecute()
+    {
+        return compositeCommand.canExecute();
+    }
+
+    @Nonnull
+    @Override
+    public Observable<Float> getProgress()
+    {
+        return compositeCommand.getProgress();
+    }
+
+    @Nonnull
+    @Override
+    public Observable<List<R>> execute()
+    {
+        return compositeCommand.execute();
+    }
+
+    @Nonnull
+    @Override
+    public Observable<List<R>> execute(final @Nonnull T input)
+    {
+        Objects.requireNonNull(input, "Input cannot be null");
+
+        return compositeCommand.execute(input);
     }
 
     @Nonnull

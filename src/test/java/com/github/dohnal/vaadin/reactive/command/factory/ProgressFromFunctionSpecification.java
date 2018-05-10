@@ -90,8 +90,9 @@ public interface ProgressFromFunctionSpecification extends
                 return command;
             }
 
+            @Nonnull
             @Override
-            protected void execute()
+            protected Observable<Integer> execute()
             {
                 Mockito.doAnswer(invocation -> {
                     final ProgressContext progressContext = invocation.getArgument(0);
@@ -105,7 +106,7 @@ public interface ProgressFromFunctionSpecification extends
                     return RESULT;
                 }).when(execution).apply(Mockito.any(ProgressContext.class));
 
-                command.execute();
+                return command.execute();
             }
 
             @Nonnull
@@ -114,8 +115,9 @@ public interface ProgressFromFunctionSpecification extends
                 return new Float[]{0.0f, 0.25f, 0.5f, 0.75f, 1.0f};
             }
 
+            @Nonnull
             @Override
-            protected void executeWithError()
+            protected Observable<Integer> executeWithError()
             {
                 Mockito.doAnswer(invocation -> {
                     final ProgressContext progressContext = invocation.getArgument(0);
@@ -127,7 +129,7 @@ public interface ProgressFromFunctionSpecification extends
                     throw ERROR;
                 }).when(execution).apply(Mockito.any(ProgressContext.class));
 
-                command.execute();
+                return command.execute();
             }
 
             @Nonnull
@@ -216,8 +218,9 @@ public interface ProgressFromFunctionSpecification extends
                 testScheduler.triggerActions();
             }
 
+            @Nonnull
             @Override
-            protected void execute()
+            protected Observable<Integer> execute()
             {
                 Mockito.doAnswer(invocation -> {
                     final ProgressContext progressContext = invocation.getArgument(0);
@@ -231,7 +234,7 @@ public interface ProgressFromFunctionSpecification extends
                     return RESULT;
                 }).when(execution).apply(Mockito.any(ProgressContext.class));
 
-                command.execute();
+                return command.execute();
             }
         }
     }

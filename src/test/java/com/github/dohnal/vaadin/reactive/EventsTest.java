@@ -161,7 +161,7 @@ public class EventsTest implements Events
             {
                 final TestObserver<Integer> testObserver = event.test();
 
-                command.execute(5);
+                command.execute(5).subscribe();
 
                 testObserver.assertValue(6);
             }
@@ -204,7 +204,7 @@ public class EventsTest implements Events
             {
                 final TestObserver<Throwable> testObserver = event.test();
 
-                command.execute();
+                command.execute().subscribe();
 
                 testObserver.assertValue(ERROR);
             }
@@ -234,8 +234,7 @@ public class EventsTest implements Events
             @DisplayName("Event should not emit any value")
             public void testEvent()
             {
-                event.test()
-                        .assertNoValues();
+                event.test().assertNoValues();
             }
 
             @Nested
@@ -248,7 +247,7 @@ public class EventsTest implements Events
                 {
                     final TestObserver<Integer> testObserver = event.test();
 
-                    command.execute(5);
+                    command.execute(5).subscribe();
 
                     testObserver.assertValue(1);
                 }
@@ -278,8 +277,7 @@ public class EventsTest implements Events
             @DisplayName("Event should not emit any value")
             public void testEvent()
             {
-                event.test()
-                        .assertNoValues();
+                event.test().assertNoValues();
             }
 
             @Nested
@@ -294,7 +292,7 @@ public class EventsTest implements Events
 
                     final TestObserver<Integer> testObserver = event.test();
 
-                    command.execute();
+                    command.execute().subscribe();
 
                     testObserver.assertValue(1);
                 }

@@ -86,18 +86,22 @@ public interface FromRunnableSpecification extends
                 return command;
             }
 
+            @Nonnull
             @Override
-            protected void execute()
+            protected Observable<Void> execute()
             {
                 Mockito.doNothing().when(execution).run();
-                command.execute();
+
+                return command.execute();
             }
 
+            @Nonnull
             @Override
-            protected void executeWithError()
+            protected Observable<Void> executeWithError()
             {
                 Mockito.doThrow(ERROR).when(execution).run();
-                command.execute();
+
+                return command.execute();
             }
 
             @Nullable
@@ -176,11 +180,13 @@ public interface FromRunnableSpecification extends
                 testScheduler.triggerActions();
             }
 
+            @Nonnull
             @Override
-            protected void execute()
+            protected Observable<Void> execute()
             {
                 Mockito.doNothing().when(execution).run();
-                command.execute();
+
+                return command.execute();
             }
         }
     }

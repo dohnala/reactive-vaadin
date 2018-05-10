@@ -24,6 +24,7 @@ import com.github.dohnal.vaadin.reactive.command.CreateSpecification;
 import com.github.dohnal.vaadin.reactive.command.ExecuteSpecification;
 import io.reactivex.Observable;
 import io.reactivex.Scheduler;
+import io.reactivex.observers.TestObserver;
 import io.reactivex.schedulers.Schedulers;
 import io.reactivex.schedulers.TestScheduler;
 import io.reactivex.subjects.PublishSubject;
@@ -32,8 +33,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Specification for {@link ReactiveCommand} created by
@@ -82,10 +81,14 @@ public interface FromObservableFunctionSpecification extends
         class ExecuteWithNoInput
         {
             @Test
-            @DisplayName("NullPointerException should be thrown")
+            @DisplayName("Error observable shout emit NullPointerException")
             public void testExecute()
             {
-                assertThrows(NullPointerException.class, () -> command.execute());
+                final TestObserver<Throwable> testObserver = command.getError().test();
+
+                command.execute().subscribe();
+
+                testObserver.assertValue(error -> error.getClass().equals(NullPointerException.class));
             }
         }
 
@@ -104,18 +107,22 @@ public interface FromObservableFunctionSpecification extends
                 return command;
             }
 
+            @Nonnull
             @Override
-            protected void execute()
+            protected Observable<Integer> execute()
             {
                 Mockito.when(execution.apply(INPUT)).thenReturn(Observable.just(RESULT));
-                command.execute(INPUT);
+
+                return command.execute(INPUT);
             }
 
+            @Nonnull
             @Override
-            protected void executeWithError()
+            protected Observable<Integer> executeWithError()
             {
                 Mockito.when(execution.apply(INPUT)).thenReturn(Observable.error(ERROR));
-                command.execute(INPUT);
+
+                return command.execute(INPUT);
             }
 
             @Nullable
@@ -199,11 +206,13 @@ public interface FromObservableFunctionSpecification extends
                 testScheduler.triggerActions();
             }
 
+            @Nonnull
             @Override
-            protected void execute()
+            protected Observable<Integer> execute()
             {
                 Mockito.when(execution.apply(INPUT)).thenReturn(Observable.just(RESULT));
-                command.execute(INPUT);
+
+                return command.execute(INPUT);
             }
         }
     }

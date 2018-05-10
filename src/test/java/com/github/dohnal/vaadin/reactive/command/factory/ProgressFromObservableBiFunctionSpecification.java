@@ -25,6 +25,7 @@ import com.github.dohnal.vaadin.reactive.command.CreateSpecification;
 import com.github.dohnal.vaadin.reactive.command.ExecuteSpecification;
 import io.reactivex.Observable;
 import io.reactivex.Scheduler;
+import io.reactivex.observers.TestObserver;
 import io.reactivex.schedulers.Schedulers;
 import io.reactivex.schedulers.TestScheduler;
 import io.reactivex.subjects.PublishSubject;
@@ -33,8 +34,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Tests for {@link ReactiveCommand} created by
@@ -83,10 +82,14 @@ public interface ProgressFromObservableBiFunctionSpecification extends
         class ExecuteWithNoInput
         {
             @Test
-            @DisplayName("NullPointerException should be thrown")
+            @DisplayName("Error observable shout emit NullPointerException")
             public void testExecute()
             {
-                assertThrows(NullPointerException.class, () -> command.execute());
+                final TestObserver<Throwable> testObserver = command.getError().test();
+
+                command.execute().subscribe();
+
+                testObserver.assertValue(error -> error.getClass().equals(NullPointerException.class));
             }
         }
 
@@ -105,8 +108,9 @@ public interface ProgressFromObservableBiFunctionSpecification extends
                 return command;
             }
 
+            @Nonnull
             @Override
-            protected void execute()
+            protected Observable<Integer> execute()
             {
                 Mockito.doAnswer(invocation -> {
                     final ProgressContext progressContext = invocation.getArgument(0);
@@ -118,7 +122,7 @@ public interface ProgressFromObservableBiFunctionSpecification extends
                             .concatWith(Observable.just(RESULT));
                 }).when(execution).apply(Mockito.any(ProgressContext.class), Mockito.eq(INPUT));
 
-                command.execute(INPUT);
+                return command.execute(INPUT);
             }
 
             @Nonnull
@@ -127,8 +131,9 @@ public interface ProgressFromObservableBiFunctionSpecification extends
                 return new Float[]{0.0f, 0.25f, 0.5f, 0.75f, 1.0f};
             }
 
+            @Nonnull
             @Override
-            protected void executeWithError()
+            protected Observable<Integer> executeWithError()
             {
                 Mockito.doAnswer(invocation -> {
                     final ProgressContext progressContext = invocation.getArgument(0);
@@ -140,7 +145,7 @@ public interface ProgressFromObservableBiFunctionSpecification extends
                             .concatWith(Observable.error(ERROR));
                 }).when(execution).apply(Mockito.any(ProgressContext.class), Mockito.eq(INPUT));
 
-                command.execute(INPUT);
+                return command.execute(INPUT);
             }
 
             @Nonnull
@@ -231,8 +236,9 @@ public interface ProgressFromObservableBiFunctionSpecification extends
                 testScheduler.triggerActions();
             }
 
+            @Nonnull
             @Override
-            protected void execute()
+            protected Observable<Integer> execute()
             {
                 Mockito.doAnswer(invocation -> {
                     final ProgressContext progressContext = invocation.getArgument(0);
@@ -244,7 +250,7 @@ public interface ProgressFromObservableBiFunctionSpecification extends
                             .concatWith(Observable.just(RESULT));
                 }).when(execution).apply(Mockito.any(ProgressContext.class), Mockito.eq(INPUT));
 
-                command.execute(INPUT);
+                return command.execute(INPUT);
             }
         }
     }

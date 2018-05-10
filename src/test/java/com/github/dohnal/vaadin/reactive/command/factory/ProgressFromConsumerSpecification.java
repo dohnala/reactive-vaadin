@@ -89,8 +89,9 @@ public interface ProgressFromConsumerSpecification extends
                 return command;
             }
 
+            @Nonnull
             @Override
-            protected void execute()
+            protected Observable<Void> execute()
             {
                 Mockito.doAnswer(invocation -> {
                     final ProgressContext progressContext = invocation.getArgument(0);
@@ -104,7 +105,7 @@ public interface ProgressFromConsumerSpecification extends
                     return null;
                 }).when(execution).accept(Mockito.any(ProgressContext.class));
 
-                command.execute();
+                return command.execute();
             }
 
             @Nonnull
@@ -113,8 +114,9 @@ public interface ProgressFromConsumerSpecification extends
                 return new Float[]{0.0f, 0.25f, 0.5f, 0.75f, 1.0f};
             }
 
+            @Nonnull
             @Override
-            protected void executeWithError()
+            protected Observable<Void> executeWithError()
             {
                 Mockito.doAnswer(invocation -> {
                     final ProgressContext progressContext = invocation.getArgument(0);
@@ -126,7 +128,7 @@ public interface ProgressFromConsumerSpecification extends
                     throw ERROR;
                 }).when(execution).accept(Mockito.any(ProgressContext.class));
 
-                command.execute();
+                return command.execute();
             }
 
             @Nonnull
@@ -213,8 +215,9 @@ public interface ProgressFromConsumerSpecification extends
                 testScheduler.triggerActions();
             }
 
+            @Nonnull
             @Override
-            protected void execute()
+            protected Observable<Void> execute()
             {
                 Mockito.doAnswer(invocation -> {
                     final ProgressContext progressContext = invocation.getArgument(0);
@@ -228,7 +231,7 @@ public interface ProgressFromConsumerSpecification extends
                     return null;
                 }).when(execution).accept(Mockito.any(ProgressContext.class));
 
-                command.execute();
+                return command.execute();
             }
         }
     }

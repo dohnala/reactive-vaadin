@@ -15,6 +15,7 @@ package com.github.dohnal.vaadin.reactive.command;
 
 import javax.annotation.Nonnull;
 
+import io.reactivex.Observable;
 import io.reactivex.observers.TestObserver;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -37,7 +38,8 @@ public interface CanExecuteEmitsValueSpecification extends BaseCommandSpecificat
     {
         protected abstract void emitValue(final @Nonnull Boolean value);
 
-        protected abstract void execute();
+        @Nonnull
+        protected abstract Observable<R> execute();
 
         @Nested
         @DisplayName("When CanExecute observable emits same value")
@@ -130,7 +132,7 @@ public interface CanExecuteEmitsValueSpecification extends BaseCommandSpecificat
                     {
                         final TestObserver<R> testObserver = getCommand().getResult().test();
 
-                        execute();
+                        execute().subscribe();
 
                         testObserver.assertNoValues();
                     }
@@ -141,7 +143,7 @@ public interface CanExecuteEmitsValueSpecification extends BaseCommandSpecificat
                     {
                         final TestObserver<Throwable> testObserver = getCommand().getError().test();
 
-                        execute();
+                        execute().subscribe();
 
                         testObserver.assertNoValues();
                     }
@@ -154,7 +156,7 @@ public interface CanExecuteEmitsValueSpecification extends BaseCommandSpecificat
 
                         testObserver.assertValue(false);
 
-                        execute();
+                        execute().subscribe();
 
                         testObserver.assertValue(false);
                     }
@@ -167,7 +169,7 @@ public interface CanExecuteEmitsValueSpecification extends BaseCommandSpecificat
 
                         testObserver.assertValue(false);
 
-                        execute();
+                        execute().subscribe();
 
                         testObserver.assertValue(false);
                     }
@@ -180,7 +182,7 @@ public interface CanExecuteEmitsValueSpecification extends BaseCommandSpecificat
 
                         testObserver.assertValue(0);
 
-                        execute();
+                        execute().subscribe();
 
                         testObserver.assertValue(0);
                     }
@@ -193,7 +195,7 @@ public interface CanExecuteEmitsValueSpecification extends BaseCommandSpecificat
 
                         testObserver.assertValue(false);
 
-                        execute();
+                        execute().subscribe();
 
                         testObserver.assertValue(false);
                     }
@@ -206,7 +208,7 @@ public interface CanExecuteEmitsValueSpecification extends BaseCommandSpecificat
 
                         testObserver.assertValue(0.0f);
 
-                        execute();
+                        execute().subscribe();
 
                         testObserver.assertValue(0.0f);
                     }

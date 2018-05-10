@@ -14,8 +14,8 @@
 package com.github.dohnal.vaadin.reactive.command;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.BiFunction;
 
 import com.github.dohnal.vaadin.reactive.ProgressContext;
@@ -42,7 +42,7 @@ public final class ProgressCommand<T, R> extends AbstractCommand<T, R>
     public ProgressCommand(final @Nonnull Observable<Boolean> canExecute,
                            final @Nonnull BiFunction<ProgressContext, T, Observable<R>> execution)
     {
-        super(canExecute);
+        super(canExecute, Observable.empty());
 
         Objects.requireNonNull(canExecute, "CanExecute cannot be null");
         Objects.requireNonNull(execution, "Execution cannot be null");
@@ -50,12 +50,16 @@ public final class ProgressCommand<T, R> extends AbstractCommand<T, R>
         this.execution = execution;
     }
 
+    @Nonnull
     @Override
-    protected void executeInternal(final @Nullable T input)
+    protected Observable<R> executeInternal(final @Nonnull Optional<T> input)
     {
-        execution.apply(new ReactiveProgressContext(progress), input)
-                .doOnSubscribe(disposable -> handleStart())
-                .doFinally(this::handleComplete)
-                .subscribe(this::handleResult, this::handleError);
+        return Observable.just(input)
+                .filter(value -> Boolean.TRUE.equals(isExecuting.getValue()))
+                .flatMap(value -> execution.apply(new ReactiveProgressContext(progress), value.orElse(null)))
+                .onErrorResumeNext(this::handleError)
+                .doOnSubscribe(this::handleStart)
+                .doOnNext(this::handleResult)
+                .doFinally(this::handleComplete);
     }
 }

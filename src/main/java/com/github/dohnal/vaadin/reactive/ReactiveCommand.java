@@ -86,14 +86,18 @@ public interface ReactiveCommand<T, R>
     /**
      * Executes this command with no input
      *
+     * @return execution pipeline which will be executed after its subscribed
      * @throws NullPointerException if this command requires input
      */
-    void execute();
+    @Nonnull
+    Observable<R> execute();
 
     /**
      * Executes this command with given input
      *
      * @param input command input
+     * @return execution pipeline which will be executed after its subscribed
      */
-    void execute(final @Nonnull T input);
+    @Nonnull
+    Observable<R> execute(final @Nonnull T input);
 }

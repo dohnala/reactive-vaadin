@@ -17,6 +17,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
+import io.reactivex.Observable;
 import io.reactivex.observers.TestObserver;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -40,9 +41,11 @@ public interface ExecuteSpecification extends BaseCommandSpecification
      */
     abstract class AbstractExecuteSpecification<T, R> implements RequireCommand<T, R>
     {
-        protected abstract void execute();
+        @Nonnull
+        protected abstract Observable<R> execute();
 
-        protected abstract void executeWithError();
+        @Nonnull
+        protected abstract Observable<R> executeWithError();
 
         @Nullable
         protected abstract R getResult();
@@ -51,6 +54,11 @@ public interface ExecuteSpecification extends BaseCommandSpecification
         protected abstract Throwable getError();
 
         protected abstract void verifyExecution();
+
+        protected void verifyErrorExecution()
+        {
+            verifyExecution();
+        }
 
         @Nonnull
         protected Float[] getProgress()
@@ -74,7 +82,7 @@ public interface ExecuteSpecification extends BaseCommandSpecification
             {
                 final TestObserver<R> testObserver = getCommand().getResult().test();
 
-                execute();
+                execute().subscribe();
 
                 if (getResult() == null)
                 {
@@ -92,7 +100,7 @@ public interface ExecuteSpecification extends BaseCommandSpecification
             {
                 final TestObserver<Throwable> testObserver = getCommand().getError().test();
 
-                execute();
+                execute().subscribe();
 
                 testObserver.assertNoValues();
             }
@@ -105,7 +113,7 @@ public interface ExecuteSpecification extends BaseCommandSpecification
 
                 testObserver.assertValue(true);
 
-                execute();
+                execute().subscribe();
 
                 testObserver.assertValues(true, false, true);
             }
@@ -118,7 +126,7 @@ public interface ExecuteSpecification extends BaseCommandSpecification
 
                 testObserver.assertValue(false);
 
-                execute();
+                execute().subscribe();
 
                 testObserver.assertValues(false, true, false);
             }
@@ -131,7 +139,7 @@ public interface ExecuteSpecification extends BaseCommandSpecification
 
                 testObserver.assertValue(0);
 
-                execute();
+                execute().subscribe();
 
                 testObserver.assertValues(0, 1);
             }
@@ -144,7 +152,7 @@ public interface ExecuteSpecification extends BaseCommandSpecification
 
                 testObserver.assertValue(false);
 
-                execute();
+                execute().subscribe();
 
                 testObserver.assertValues(false, true);
             }
@@ -157,7 +165,7 @@ public interface ExecuteSpecification extends BaseCommandSpecification
 
                 testObserver.assertValue(0.0f);
 
-                execute();
+                execute().subscribe();
 
                 testObserver.assertValues(getProgress());
             }
@@ -166,7 +174,7 @@ public interface ExecuteSpecification extends BaseCommandSpecification
             @DisplayName("Execution should be run")
             public void testExecution()
             {
-                execute();
+                execute().subscribe();
 
                 verifyExecution();
             }
@@ -178,7 +186,7 @@ public interface ExecuteSpecification extends BaseCommandSpecification
                 @BeforeEach
                 void before()
                 {
-                    execute();
+                    execute().subscribe();
                 }
 
                 @Nested
@@ -211,7 +219,7 @@ public interface ExecuteSpecification extends BaseCommandSpecification
             {
                 final TestObserver<R> testObserver = getCommand().getResult().test();
 
-                executeWithError();
+                executeWithError().subscribe();
 
                 testObserver.assertNoValues();
             }
@@ -222,7 +230,7 @@ public interface ExecuteSpecification extends BaseCommandSpecification
             {
                 final TestObserver<Throwable> testObserver = getCommand().getError().test();
 
-                executeWithError();
+                executeWithError().subscribe();
 
                 testObserver.assertValue(getError());
             }
@@ -235,7 +243,7 @@ public interface ExecuteSpecification extends BaseCommandSpecification
 
                 testObserver.assertValue(true);
 
-                executeWithError();
+                executeWithError().subscribe();
 
                 testObserver.assertValues(true, false, true);
             }
@@ -248,7 +256,7 @@ public interface ExecuteSpecification extends BaseCommandSpecification
 
                 testObserver.assertValue(false);
 
-                executeWithError();
+                executeWithError().subscribe();
 
                 testObserver.assertValues(false, true, false);
             }
@@ -261,7 +269,7 @@ public interface ExecuteSpecification extends BaseCommandSpecification
 
                 testObserver.assertValue(0);
 
-                executeWithError();
+                executeWithError().subscribe();
 
                 testObserver.assertValues(0, 1);
             }
@@ -274,7 +282,7 @@ public interface ExecuteSpecification extends BaseCommandSpecification
 
                 testObserver.assertValue(false);
 
-                executeWithError();
+                executeWithError().subscribe();
 
                 testObserver.assertValues(false, true);
             }
@@ -287,7 +295,7 @@ public interface ExecuteSpecification extends BaseCommandSpecification
 
                 testObserver.assertValue(0.0f);
 
-                executeWithError();
+                executeWithError().subscribe();
 
                 testObserver.assertValues(getErrorProgress());
             }
@@ -296,9 +304,9 @@ public interface ExecuteSpecification extends BaseCommandSpecification
             @DisplayName("Execution should be run")
             public void testExecution()
             {
-                executeWithError();
+                executeWithError().subscribe();
 
-                verifyExecution();
+                verifyErrorExecution();
             }
 
             @Nested
@@ -308,7 +316,7 @@ public interface ExecuteSpecification extends BaseCommandSpecification
                 @BeforeEach
                 void before()
                 {
-                    executeWithError();
+                    executeWithError().subscribe();
                 }
 
                 @Nested

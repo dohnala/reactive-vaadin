@@ -35,7 +35,7 @@ public interface Actions
     {
         Objects.requireNonNull(command, "Command cannot be null");
 
-        return command::execute;
+        return () -> command.execute().ignoreElements().subscribe();
     }
 
     /**
@@ -53,7 +53,7 @@ public interface Actions
         Objects.requireNonNull(command, "Command cannot be null");
         Objects.requireNonNull(input, "Input cannot be null");
 
-        return () -> command.execute(input);
+        return () -> command.execute(input).ignoreElements().subscribe();
     }
 
     /**
@@ -69,6 +69,6 @@ public interface Actions
     {
         Objects.requireNonNull(command, "Command cannot be null");
 
-        return command::execute;
+        return input -> command.execute(input).ignoreElements().subscribe();
     }
 }
