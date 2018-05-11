@@ -119,9 +119,22 @@ public interface FromRunnableSpecification extends
             }
 
             @Override
+            @SuppressWarnings("unchecked")
+            protected void clearExecution()
+            {
+                Mockito.clearInvocations(execution);
+            }
+
+            @Override
             protected void verifyExecution()
             {
                 Mockito.verify(execution).run();
+            }
+
+            @Override
+            protected void verifyNoExecution()
+            {
+                Mockito.verifyNoMoreInteractions(execution);
             }
         }
     }

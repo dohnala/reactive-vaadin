@@ -77,6 +77,6 @@ public final class Command<T, R> extends AbstractCommand<T, R>
                         .doFinally(this::handleComplete))
                 .onErrorResumeNext(this::handleError)
                 .replay()
-                .refCount();
+                .autoConnect();
     }
 }

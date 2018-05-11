@@ -139,9 +139,22 @@ public interface FromConsumerSpecification extends
             }
 
             @Override
+            @SuppressWarnings("unchecked")
+            protected void clearExecution()
+            {
+                Mockito.clearInvocations(execution);
+            }
+
+            @Override
             protected void verifyExecution()
             {
                 Mockito.verify(execution).accept(INPUT);
+            }
+
+            @Override
+            protected void verifyNoExecution()
+            {
+                Mockito.verify(execution, Mockito.never()).accept(Mockito.any());
             }
         }
     }

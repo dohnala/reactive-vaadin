@@ -213,10 +213,24 @@ public interface CompositeFromCommandsSpecification extends
             }
 
             @Override
+            @SuppressWarnings("unchecked")
+            protected void clearExecution()
+            {
+                Mockito.clearInvocations(executionA, executionB);
+            }
+
+            @Override
             protected void verifyExecution()
             {
                 Mockito.verify(executionA).get();
                 Mockito.verify(executionB).get();
+            }
+
+            @Override
+            protected void verifyNoExecution()
+            {
+                Mockito.verify(executionA, Mockito.never()).get();
+                Mockito.verify(executionB, Mockito.never()).get();
             }
 
             @Override
@@ -375,10 +389,24 @@ public interface CompositeFromCommandsSpecification extends
             }
 
             @Override
+            @SuppressWarnings("unchecked")
+            protected void clearExecution()
+            {
+                Mockito.clearInvocations(executionA, executionB);
+            }
+
+            @Override
             protected void verifyExecution()
             {
                 Mockito.verify(executionA).accept(INPUT);
                 Mockito.verify(executionB).accept(INPUT);
+            }
+
+            @Override
+            protected void verifyNoExecution()
+            {
+                Mockito.verify(executionA, Mockito.never()).accept(Mockito.any());
+                Mockito.verify(executionB, Mockito.never()).accept(Mockito.any());
             }
 
             @Override

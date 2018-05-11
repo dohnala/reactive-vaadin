@@ -150,9 +150,22 @@ public interface ProgressFromConsumerSpecification extends
             }
 
             @Override
+            @SuppressWarnings("unchecked")
+            protected void clearExecution()
+            {
+                Mockito.clearInvocations(execution);
+            }
+
+            @Override
             protected void verifyExecution()
             {
                 Mockito.verify(execution).accept(Mockito.any(ProgressContext.class));
+            }
+
+            @Override
+            protected void verifyNoExecution()
+            {
+                Mockito.verify(execution, Mockito.never()).accept(Mockito.any());
             }
         }
     }

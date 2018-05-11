@@ -53,7 +53,11 @@ public interface ExecuteSpecification extends BaseCommandSpecification
         @Nullable
         protected abstract Throwable getError();
 
+        protected abstract void clearExecution();
+
         protected abstract void verifyExecution();
+
+        protected abstract void verifyNoExecution();
 
         protected void verifyErrorExecution()
         {
@@ -183,10 +187,14 @@ public interface ExecuteSpecification extends BaseCommandSpecification
             @DisplayName("After command is executed")
             class AfterExecute
             {
+                private Observable<R> execution;
+
                 @BeforeEach
                 void before()
                 {
-                    execute().subscribe();
+                    execution = execute();
+
+                    execution.subscribe();
                 }
 
                 @Nested
@@ -198,6 +206,125 @@ public interface ExecuteSpecification extends BaseCommandSpecification
                     public ReactiveCommand<T, R> getCommand()
                     {
                         return AbstractExecuteSpecification.this.getCommand();
+                    }
+                }
+
+                @Nested
+                @DisplayName("When command execution is executed again")
+                class WhenExecuteAgain
+                {
+                    @Test
+                    @DisplayName("Execution should emit correct result")
+                    public void testExecutionResult()
+                    {
+                        final TestObserver<R> testObserver = execution.test();
+
+                        if (getResult() == null)
+                        {
+                            testObserver.assertNoValues();
+                        }
+                        else
+                        {
+                            testObserver.assertValue(getResult());
+                        }
+                    }
+
+                    @Test
+                    @DisplayName("Result observable should not emit any value")
+                    public void testResult()
+                    {
+                        final TestObserver<R> testObserver = getCommand().getResult().test();
+
+                        execution.subscribe();
+
+                        testObserver.assertNoValues();
+                    }
+
+                    @Test
+                    @DisplayName("Error observable should not emit any value")
+                    public void testError()
+                    {
+                        final TestObserver<Throwable> testObserver = getCommand().getError().test();
+
+                        execution.subscribe();
+
+                        testObserver.assertNoValues();
+                    }
+
+                    @Test
+                    @DisplayName("CanExecute observable should not emit any value")
+                    public void testCanExecute()
+                    {
+                        final TestObserver<Boolean> testObserver = getCommand().canExecute().test();
+
+                        testObserver.assertValue(true);
+
+                        execution.subscribe();
+
+                        testObserver.assertValue(true);
+                    }
+
+                    @Test
+                    @DisplayName("IsExecuting observable should not emit any value")
+                    public void testIsExecuting()
+                    {
+                        final TestObserver<Boolean> testObserver = getCommand().isExecuting().test();
+
+                        testObserver.assertValue(false);
+
+                        execution.subscribe();
+
+                        testObserver.assertValues(false);
+                    }
+
+                    @Test
+                    @DisplayName("ExecutionCount observable should not emit any value")
+                    public void testExecutionCount()
+                    {
+                        final TestObserver<Integer> testObserver = getCommand().getExecutionCount().test();
+
+                        testObserver.assertValue(1);
+
+                        execution.subscribe();
+
+                        testObserver.assertValues(1);
+                    }
+
+                    @Test
+                    @DisplayName("HasBeenExecuted observable should not emit any value")
+                    public void testHasBeenExecuted()
+                    {
+                        final TestObserver<Boolean> testObserver = getCommand().hasBeenExecuted().test();
+
+                        testObserver.assertValue(true);
+
+                        execution.subscribe();
+
+                        testObserver.assertValues(true);
+                    }
+
+                    @Test
+                    @DisplayName("Progress observable should not emit any value")
+                    public void testProgress()
+                    {
+                        final TestObserver<Float> testObserver = getCommand().getProgress().test();
+
+                        testObserver.assertValue(1.0f);
+
+                        execution.subscribe();
+
+                        testObserver.assertValue(1.0f);
+                    }
+
+                    @Test
+                    @DisplayName("Execution should not be run")
+                    public void testExecution()
+                    {
+                        clearExecution();
+
+                        execution.subscribe();
+
+                        verifyNoExecution();
                     }
                 }
             }
@@ -313,10 +440,14 @@ public interface ExecuteSpecification extends BaseCommandSpecification
             @DisplayName("After command is executed with error")
             class AfterExecute
             {
+                private Observable<R> execution;
+
                 @BeforeEach
                 void before()
                 {
-                    executeWithError().subscribe();
+                    execution = executeWithError();
+
+                    execution.subscribe();
                 }
 
                 @Nested
@@ -329,6 +460,119 @@ public interface ExecuteSpecification extends BaseCommandSpecification
                     {
                         return AbstractExecuteSpecification.this.getCommand();
                     }
+                }
+
+                @Nested
+                @DisplayName("When command execution is executed again")
+                class WhenExecuteAgain
+                {
+                    @Test
+                    @DisplayName("Execution should not emit any value")
+                    public void testExecutionResult()
+                    {
+                        final TestObserver<R> testObserver = execution.test();
+
+                        testObserver.assertNoValues();
+                    }
+
+                    @Test
+                    @DisplayName("Result observable should not emit any value")
+                    public void testResult()
+                    {
+                        final TestObserver<R> testObserver = getCommand().getResult().test();
+
+                        execution.subscribe();
+
+                        testObserver.assertNoValues();
+                    }
+
+                    @Test
+                    @DisplayName("Error observable should not emit any value")
+                    public void testError()
+                    {
+                        final TestObserver<Throwable> testObserver = getCommand().getError().test();
+
+                        execution.subscribe();
+
+                        testObserver.assertNoValues();
+                    }
+
+                    @Test
+                    @DisplayName("CanExecute observable should not emit any value")
+                    public void testCanExecute()
+                    {
+                        final TestObserver<Boolean> testObserver = getCommand().canExecute().test();
+
+                        testObserver.assertValue(true);
+
+                        execution.subscribe();
+
+                        testObserver.assertValue(true);
+                    }
+
+                    @Test
+                    @DisplayName("IsExecuting observable should not emit any value")
+                    public void testIsExecuting()
+                    {
+                        final TestObserver<Boolean> testObserver = getCommand().isExecuting().test();
+
+                        testObserver.assertValue(false);
+
+                        execution.subscribe();
+
+                        testObserver.assertValues(false);
+                    }
+
+                    @Test
+                    @DisplayName("ExecutionCount observable should not emit any value")
+                    public void testExecutionCount()
+                    {
+                        final TestObserver<Integer> testObserver = getCommand().getExecutionCount().test();
+
+                        testObserver.assertValue(1);
+
+                        execution.subscribe();
+
+                        testObserver.assertValues(1);
+                    }
+
+                    @Test
+                    @DisplayName("HasBeenExecuted observable should not emit any value")
+                    public void testHasBeenExecuted()
+                    {
+                        final TestObserver<Boolean> testObserver = getCommand().hasBeenExecuted().test();
+
+                        testObserver.assertValue(true);
+
+                        execution.subscribe();
+
+                        testObserver.assertValues(true);
+                    }
+
+                    @Test
+                    @DisplayName("Progress observable should not emit any value")
+                    public void testProgress()
+                    {
+                        final TestObserver<Float> testObserver = getCommand().getProgress().test();
+
+                        testObserver.assertValue(1.0f);
+
+                        execution.subscribe();
+
+                        testObserver.assertValue(1.0f);
+                    }
+
+                    @Test
+                    @DisplayName("Execution should not be run")
+                    public void testExecution()
+                    {
+                        clearExecution();
+
+                        execution.subscribe();
+
+                        verifyNoExecution();
+                    }
+
                 }
             }
         }

@@ -69,6 +69,6 @@ public final class ProgressCommand<T, R> extends AbstractCommand<T, R>
                         .doFinally(this::handleComplete))
                 .onErrorResumeNext(this::handleError)
                 .replay()
-                .refCount();
+                .autoConnect();
     }
 }
