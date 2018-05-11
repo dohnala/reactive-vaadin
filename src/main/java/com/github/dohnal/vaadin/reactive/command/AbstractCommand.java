@@ -70,11 +70,8 @@ public abstract class AbstractCommand<T, R> implements ReactiveCommand<T, R>, Re
         final Observable<Boolean> defaultCanExecute = this.isExecuting.asObservable().map(value -> !value);
 
         // Combine default command executability with custom one by performing logical and
-        this.canExecute = createPropertyFrom(
-                Observable.combineLatest(
-                        defaultCanExecute,
-                        canExecute.startWith(true),
-                        (x, y) -> x && y));
+        this.canExecute = createPropertyFrom(Observable
+                .combineLatest(defaultCanExecute, canExecute.startWith(true), (x, y) -> x && y));
 
         this.customProgress = customProgress;
 

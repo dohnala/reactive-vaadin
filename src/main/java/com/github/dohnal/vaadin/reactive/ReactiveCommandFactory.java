@@ -28,6 +28,7 @@ import com.github.dohnal.vaadin.reactive.command.ProgressCommand;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.Scheduler;
+import io.reactivex.schedulers.Schedulers;
 
 /**
  * Factory to create instances of {@link ReactiveCommand}
@@ -81,8 +82,7 @@ public interface ReactiveCommandFactory
         Objects.requireNonNull(canExecute, "CanExecute cannot be null");
         Objects.requireNonNull(execution, "Execution cannot be null");
 
-        return createCommandFromObservable(canExecute, () ->
-                Completable.fromRunnable(execution).toObservable());
+        return createCommand(canExecute, execution, Schedulers.trampoline());
     }
 
     /**
@@ -154,7 +154,7 @@ public interface ReactiveCommandFactory
         Objects.requireNonNull(canExecute, "CanExecute cannot be null");
         Objects.requireNonNull(execution, "Execution cannot be null");
 
-        return createCommandFromObservable(canExecute, () -> Observable.fromCallable(execution::get));
+        return createCommand(canExecute, execution, Schedulers.trampoline());
     }
 
     /**
@@ -227,11 +227,7 @@ public interface ReactiveCommandFactory
         Objects.requireNonNull(canExecute, "CanExecute cannot be null");
         Objects.requireNonNull(execution, "Execution cannot be null");
 
-        return createCommandFromObservable(canExecute, input -> {
-            Objects.requireNonNull(input, "Input cannot be null");
-
-            return Completable.fromRunnable(() -> execution.accept(input)).toObservable();
-        });
+        return createCommand(canExecute, execution, Schedulers.trampoline());
     }
 
     /**
@@ -310,12 +306,7 @@ public interface ReactiveCommandFactory
         Objects.requireNonNull(canExecute, "CanExecute cannot be null");
         Objects.requireNonNull(execution, "Execution cannot be null");
 
-        return createCommandFromObservable(canExecute, input -> {
-            Objects.requireNonNull(input, "Input cannot be null");
-
-            return Observable.fromCallable(() ->
-                    Objects.requireNonNull(execution.apply(input), "Result cannot be null"));
-        });
+        return createCommand(canExecute, execution, Schedulers.trampoline());
     }
 
     /**
@@ -393,8 +384,7 @@ public interface ReactiveCommandFactory
         Objects.requireNonNull(canExecute, "CanExecute cannot be null");
         Objects.requireNonNull(execution, "Execution cannot be null");
 
-        return new Command<>(canExecute, input ->
-                Objects.requireNonNull(execution.get(), "Observable cannot be null"));
+        return createCommandFromObservable(canExecute, execution, Schedulers.trampoline());
     }
 
     /**
@@ -416,7 +406,7 @@ public interface ReactiveCommandFactory
         Objects.requireNonNull(scheduler, "Scheduler cannot be null");
 
         return new Command<>(canExecute, input ->
-                Objects.requireNonNull(execution.get().subscribeOn(scheduler), "Observable cannot be null"));
+                Objects.requireNonNull(execution.get(), "Observable cannot be null"), scheduler);
     }
 
     /**
@@ -470,11 +460,7 @@ public interface ReactiveCommandFactory
         Objects.requireNonNull(canExecute, "CanExecute cannot be null");
         Objects.requireNonNull(execution, "Execution cannot be null");
 
-        return new Command<>(canExecute, input -> {
-            Objects.requireNonNull(input, "Input cannot be null");
-
-            return Objects.requireNonNull(execution.apply(input), "Observable cannot be null");
-        });
+        return createCommandFromObservable(canExecute, execution, Schedulers.trampoline());
     }
 
     /**
@@ -499,9 +485,8 @@ public interface ReactiveCommandFactory
         return new Command<>(canExecute, input -> {
             Objects.requireNonNull(input, "Input cannot be null");
 
-            return Objects.requireNonNull(execution.apply(input).subscribeOn(scheduler),
-                    "Observable cannot be null");
-        });
+            return Objects.requireNonNull(execution.apply(input), "Observable cannot be null");
+        }, scheduler);
     }
 
     /**
@@ -549,11 +534,7 @@ public interface ReactiveCommandFactory
         Objects.requireNonNull(canExecute, "CanExecute cannot be null");
         Objects.requireNonNull(execution, "Execution cannot be null");
 
-        return createProgressCommandFromObservable(canExecute, progressContext -> {
-            Objects.requireNonNull(progressContext, "Progress context cannot be null");
-
-            return Completable.fromRunnable(() -> execution.accept(progressContext)).toObservable();
-        });
+        return createProgressCommand(canExecute, execution, Schedulers.trampoline());
     }
 
     /**
@@ -628,12 +609,7 @@ public interface ReactiveCommandFactory
         Objects.requireNonNull(canExecute, "CanExecute cannot be null");
         Objects.requireNonNull(execution, "Execution cannot be null");
 
-        return createProgressCommandFromObservable(canExecute, progressContext -> {
-            Objects.requireNonNull(progressContext, "Progress context cannot be null");
-
-            return Observable.fromCallable(() ->
-                    Objects.requireNonNull(execution.apply(progressContext), "Result cannot be null"));
-        });
+        return createProgressCommand(canExecute, execution, Schedulers.trampoline());
     }
 
     /**
@@ -710,12 +686,7 @@ public interface ReactiveCommandFactory
         Objects.requireNonNull(canExecute, "CanExecute cannot be null");
         Objects.requireNonNull(execution, "Execution cannot be null");
 
-        return createProgressCommandFromObservable(canExecute, (progressContext, input) -> {
-            Objects.requireNonNull(progressContext, "Progress context cannot be null");
-            Objects.requireNonNull(input, "Input context cannot be null");
-
-            return Completable.fromRunnable(() -> execution.accept(progressContext, input)).toObservable();
-        });
+        return createProgressCommand(canExecute, execution, Schedulers.trampoline());
     }
 
     /**
@@ -795,13 +766,7 @@ public interface ReactiveCommandFactory
         Objects.requireNonNull(canExecute, "CanExecute cannot be null");
         Objects.requireNonNull(execution, "Execution cannot be null");
 
-        return createProgressCommandFromObservable(canExecute, (progressContext, input) -> {
-            Objects.requireNonNull(progressContext, "Progress context cannot be null");
-            Objects.requireNonNull(input, "Input context cannot be null");
-
-            return Observable.fromCallable(() ->
-                    Objects.requireNonNull(execution.apply(progressContext, input), "Result cannot be null"));
-        });
+        return createProgressCommand(canExecute, execution, Schedulers.trampoline());
     }
 
     /**
@@ -883,11 +848,7 @@ public interface ReactiveCommandFactory
         Objects.requireNonNull(canExecute, "CanExecute cannot be null");
         Objects.requireNonNull(execution, "Execution cannot be null");
 
-        return new ProgressCommand<>(canExecute, ((progressContext, input) -> {
-            Objects.requireNonNull(progressContext, "Progress context cannot be null");
-
-            return Objects.requireNonNull(execution.apply(progressContext), "Observable cannot be null");
-        }));
+        return createProgressCommandFromObservable(canExecute, execution, Schedulers.trampoline());
     }
 
     /**
@@ -909,12 +870,11 @@ public interface ReactiveCommandFactory
         Objects.requireNonNull(execution, "Execution cannot be null");
         Objects.requireNonNull(scheduler, "Scheduler cannot be null");
 
-        return new ProgressCommand<>(canExecute, ((progressContext, input) -> {
+        return new ProgressCommand<>(canExecute, (progressContext, input) -> {
             Objects.requireNonNull(progressContext, "Progress context cannot be null");
 
-            return Objects.requireNonNull(execution.apply(progressContext).subscribeOn(scheduler),
-                    "Observable cannot be null");
-        }));
+            return Objects.requireNonNull(execution.apply(progressContext), "Observable cannot be null");
+        }, scheduler);
     }
 
     /**
@@ -971,13 +931,7 @@ public interface ReactiveCommandFactory
         Objects.requireNonNull(canExecute, "CanExecute cannot be null");
         Objects.requireNonNull(execution, "Execution cannot be null");
 
-        return new ProgressCommand<>(canExecute, ((progressContext, input) -> {
-            Objects.requireNonNull(progressContext, "Progress context cannot be null");
-            Objects.requireNonNull(input, "Input context cannot be null");
-
-            return Objects.requireNonNull(execution.apply(progressContext, input),
-                    "Observable cannot be null");
-        }));
+        return createProgressCommandFromObservable(canExecute, execution, Schedulers.trampoline());
     }
 
     /**
@@ -1000,13 +954,12 @@ public interface ReactiveCommandFactory
         Objects.requireNonNull(execution, "Execution cannot be null");
         Objects.requireNonNull(scheduler, "Scheduler cannot be null");
 
-        return new ProgressCommand<>(canExecute, ((progressContext, input) -> {
+        return new ProgressCommand<>(canExecute, (progressContext, input) -> {
             Objects.requireNonNull(progressContext, "Progress context cannot be null");
             Objects.requireNonNull(input, "Input context cannot be null");
 
-            return Objects.requireNonNull(execution.apply(progressContext, input).subscribeOn(scheduler),
-                    "Observable cannot be null");
-        }));
+            return Objects.requireNonNull(execution.apply(progressContext, input), "Observable cannot be null");
+        }, scheduler);
     }
 
     /**
@@ -1028,6 +981,25 @@ public interface ReactiveCommandFactory
     /**
      * Creates a new composite command composed of given commands
      *
+     * @param commands commands to compose
+     * @param scheduler scheduler used to schedule execution
+     * @param <T> type of commands input
+     * @param <R> type of commands result
+     * @return created composite reactive commands
+     */
+    @Nonnull
+    default <T, R> ReactiveCommand<T, List<R>> createCompositeCommand(final @Nonnull List<ReactiveCommand<T, R>> commands,
+                                                                      final @Nonnull Scheduler scheduler)
+    {
+        Objects.requireNonNull(commands, "Commands cannot be null");
+        Objects.requireNonNull(scheduler, "Scheduler cannot be null");
+
+        return createCompositeCommand(Observable.just(true), commands, scheduler);
+    }
+
+    /**
+     * Creates a new composite command composed of given commands
+     *
      * @param canExecute observable which controls command executability
      * @param commands commands to compose
      * @param <T> type of commands input
@@ -1041,6 +1013,28 @@ public interface ReactiveCommandFactory
         Objects.requireNonNull(canExecute, "CanExecute cannot be null");
         Objects.requireNonNull(commands, "Commands cannot be null");
 
-        return new CompositeCommand<>(canExecute, commands);
+        return createCompositeCommand(canExecute, commands, Schedulers.trampoline());
+    }
+
+    /**
+     * Creates a new composite command composed of given commands
+     *
+     * @param canExecute observable which controls command executability
+     * @param commands commands to compose
+     * @param scheduler scheduler used to schedule execution
+     * @param <T> type of commands input
+     * @param <R> type of commands result
+     * @return created composite reactive commands
+     */
+    @Nonnull
+    default <T, R> ReactiveCommand<T, List<R>> createCompositeCommand(final @Nonnull Observable<Boolean> canExecute,
+                                                                      final @Nonnull List<ReactiveCommand<T, R>> commands,
+                                                                      final @Nonnull Scheduler scheduler)
+    {
+        Objects.requireNonNull(canExecute, "CanExecute cannot be null");
+        Objects.requireNonNull(commands, "Commands cannot be null");
+        Objects.requireNonNull(scheduler, "Scheduler cannot be null");
+
+        return new CompositeCommand<>(canExecute, commands, scheduler);
     }
 }

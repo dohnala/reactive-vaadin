@@ -14,17 +14,18 @@
 package com.github.dohnal.vaadin.reactive.command;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
 import io.reactivex.Observable;
+import io.reactivex.Scheduler;
 
 /**
  * Composite implementation of {@link ReactiveCommand}
@@ -44,13 +45,16 @@ public final class CompositeCommand<T, R> implements ReactiveCommand<T, List<R>>
      *
      * @param canExecute observable which controls command executability
      * @param commands child commands this command is composed from
+     * @param scheduler scheduler used to schedule execution
      */
     @SuppressWarnings("unchecked")
     public CompositeCommand(final @Nonnull Observable<Boolean> canExecute,
-                            final @Nonnull List<ReactiveCommand<T, R>> commands)
+                            final @Nonnull List<ReactiveCommand<T, R>> commands,
+                            final @Nonnull Scheduler scheduler)
     {
         Objects.requireNonNull(canExecute, "CanExecute cannot be null");
         Objects.requireNonNull(commands, "Commands cannot be null");
+        Objects.requireNonNull(scheduler, "Scheduler cannot be null");
 
         if (commands.size() == 0)
         {
@@ -83,21 +87,22 @@ public final class CompositeCommand<T, R> implements ReactiveCommand<T, List<R>>
                         values -> computeProgress(Arrays.copyOf(values, values.length, Float[].class)));
 
         final Function<T, Observable<List<R>>> compositeExecution = input -> Observable
-                .concat(getChildExecutions(input))
+                .just(Optional.ofNullable(input))
+                .flatMap(value -> Observable.concat(getChildExecutions(value)))
                 .map(Arrays::asList)
                 .reduce((x, y) -> Stream.concat(x.stream(), y.stream()).collect(Collectors.toList()))
                 .toObservable();
 
-        this.compositeCommand = new Command<>(compositeCanExecute, compositeProgress, compositeExecution);
+        this.compositeCommand = new Command<>(compositeCanExecute, compositeProgress, compositeExecution, scheduler);
     }
 
     @Nonnull
-    private List<Observable<R>> getChildExecutions(final @Nullable T input)
+    private List<Observable<R>> getChildExecutions(final @Nonnull Optional<T> input)
     {
-        if (input != null)
+        if (input.isPresent())
         {
             return commands.stream()
-                    .map(command -> command.execute(input))
+                    .map(command -> command.execute(input.get()))
                     .collect(Collectors.toList());
         }
 

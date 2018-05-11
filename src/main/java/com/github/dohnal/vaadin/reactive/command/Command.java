@@ -19,6 +19,7 @@ import java.util.Optional;
 import java.util.function.Function;
 
 import io.reactivex.Observable;
+import io.reactivex.Scheduler;
 
 /**
  * @author dohnal
@@ -27,6 +28,8 @@ public final class Command<T, R> extends AbstractCommand<T, R>
 {
     private final Function<T, Observable<R>> execution;
 
+    private final Scheduler scheduler;
+
     /**
      * Creates new reactive command with given observable
      *
@@ -34,9 +37,10 @@ public final class Command<T, R> extends AbstractCommand<T, R>
      * @param execution execution
      */
     public Command(final @Nonnull Observable<Boolean> canExecute,
-                   final @Nonnull Function<T, Observable<R>> execution)
+                   final @Nonnull Function<T, Observable<R>> execution,
+                   final @Nonnull Scheduler scheduler)
     {
-        this(canExecute, Observable.empty(), execution);
+        this(canExecute, Observable.empty(), execution, scheduler);
     }
 
     /**
@@ -48,13 +52,16 @@ public final class Command<T, R> extends AbstractCommand<T, R>
      */
     Command(final @Nonnull Observable<Boolean> canExecute,
             final @Nonnull Observable<Float> customProgress,
-            final @Nonnull Function<T, Observable<R>> execution)
+            final @Nonnull Function<T, Observable<R>> execution,
+            final @Nonnull Scheduler scheduler)
     {
         super(canExecute, customProgress);
 
         Objects.requireNonNull(execution, "Execution cannot be null");
+        Objects.requireNonNull(scheduler, "Scheduler cannot be null");
 
         this.execution = execution;
+        this.scheduler = scheduler;
     }
 
     @Nonnull
@@ -62,6 +69,7 @@ public final class Command<T, R> extends AbstractCommand<T, R>
     protected Observable<R> executeInternal(final @Nonnull Optional<T> input)
     {
         return Observable.just(input)
+                .subscribeOn(scheduler)
                 .filter(value -> Boolean.TRUE.equals(isExecuting.getValue()))
                 .flatMap(value -> execution.apply(value.orElse(null)))
                 .onErrorResumeNext(this::handleError)

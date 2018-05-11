@@ -244,7 +244,7 @@ public interface CompositeExecutionSpecification extends ExecuteSpecification
                     @Override
                     protected Observable<?> executeChild()
                     {
-                       return AbstractCompositeExecuteSpecification.this.executeChild();
+                        return AbstractCompositeExecuteSpecification.this.executeChild();
                     }
 
                     @Nonnull

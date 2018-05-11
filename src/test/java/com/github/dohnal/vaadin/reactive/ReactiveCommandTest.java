@@ -61,7 +61,8 @@ public class ReactiveCommandTest
 
         @Nested
         @DisplayName("From runnable with CanExecute and scheduler")
-        class FromRunnableWithCanExecuteAndScheduler extends AbstractFromRunnableWithCanExecuteAndSchedulerSpecification {}
+        class FromRunnableWithCanExecuteAndScheduler extends
+                AbstractFromRunnableWithCanExecuteAndSchedulerSpecification {}
 
         @Nested
         @DisplayName("From supplier")
@@ -77,7 +78,8 @@ public class ReactiveCommandTest
 
         @Nested
         @DisplayName("From supplier with CanExecute and scheduler")
-        class FromSupplierWithCanExecuteAndScheduler extends AbstractFromSupplierWithCanExecuteAndSchedulerSpecification {}
+        class FromSupplierWithCanExecuteAndScheduler extends
+                AbstractFromSupplierWithCanExecuteAndSchedulerSpecification {}
 
         @Nested
         @DisplayName("From consumer")
@@ -93,7 +95,8 @@ public class ReactiveCommandTest
 
         @Nested
         @DisplayName("From consumer with CanExecute and scheduler")
-        class FromConsumerWithCanExecuteAndScheduler extends AbstractFromConsumerWithCanExecuteAndSchedulerSpecification {}
+        class FromConsumerWithCanExecuteAndScheduler extends
+                AbstractFromConsumerWithCanExecuteAndSchedulerSpecification {}
 
         @Nested
         @DisplayName("From function")
@@ -109,7 +112,8 @@ public class ReactiveCommandTest
 
         @Nested
         @DisplayName("From function with CanExecute and scheduler")
-        class FromFunctionWithCanExecuteAndScheduler extends AbstractFromFunctionWithCanExecuteAndSchedulerSpecification {}
+        class FromFunctionWithCanExecuteAndScheduler extends
+                AbstractFromFunctionWithCanExecuteAndSchedulerSpecification {}
 
         @Nested
         @DisplayName("From observable supplier")
@@ -125,7 +129,8 @@ public class ReactiveCommandTest
 
         @Nested
         @DisplayName("From observable supplier with CanExecute and scheduler")
-        class FromObservableSupplierWithCanExecuteAndScheduler extends AbstractFromObservableSupplierWithCanExecuteAndSchedulerSpecification {}
+        class FromObservableSupplierWithCanExecuteAndScheduler extends
+                AbstractFromObservableSupplierWithCanExecuteAndSchedulerSpecification {}
 
         @Nested
         @DisplayName("From observable function")
@@ -141,7 +146,8 @@ public class ReactiveCommandTest
 
         @Nested
         @DisplayName("From observable function with CanExecute and scheduler")
-        class FromObservableFunctionWithCanExecuteAndScheduler extends AbstractFromObservableFunctionWithCanExecuteAndSchedulerSpecification {}
+        class FromObservableFunctionWithCanExecuteAndScheduler extends
+                AbstractFromObservableFunctionWithCanExecuteAndSchedulerSpecification {}
     }
 
     @Nested
@@ -168,7 +174,8 @@ public class ReactiveCommandTest
 
         @Nested
         @DisplayName("From consumer with CanExecute and scheduler")
-        class FromConsumerWithCanExecuteAndScheduler extends AbstractProgressFromConsumerWithCanExecuteAndSchedulerSpecification {}
+        class FromConsumerWithCanExecuteAndScheduler extends
+                AbstractProgressFromConsumerWithCanExecuteAndSchedulerSpecification {}
 
         @Nested
         @DisplayName("From function")
@@ -184,7 +191,8 @@ public class ReactiveCommandTest
 
         @Nested
         @DisplayName("From function with CanExecute and scheduler")
-        class FromFunctionWithCanExecuteAndScheduler extends AbstractProgressFromFunctionWithCanExecuteAndSchedulerSpecification {}
+        class FromFunctionWithCanExecuteAndScheduler extends
+                AbstractProgressFromFunctionWithCanExecuteAndSchedulerSpecification {}
 
         @Nested
         @DisplayName("From bi-consumer")
@@ -200,7 +208,8 @@ public class ReactiveCommandTest
 
         @Nested
         @DisplayName("From bi-consumer with CanExecute and scheduler")
-        class FromBiConsumerWithCanExecuteAndScheduler extends AbstractProgressFromBiConsumerWithCanExecuteAndSchedulerSpecification {}
+        class FromBiConsumerWithCanExecuteAndScheduler extends
+                AbstractProgressFromBiConsumerWithCanExecuteAndSchedulerSpecification {}
 
         @Nested
         @DisplayName("From bi-function")
@@ -216,7 +225,8 @@ public class ReactiveCommandTest
 
         @Nested
         @DisplayName("From bi-function with CanExecute and scheduler")
-        class FromBiFunctionWithCanExecuteAndScheduler extends AbstractProgressFromBiFunctionWithCanExecuteAndSchedulerSpecification {}
+        class FromBiFunctionWithCanExecuteAndScheduler extends
+                AbstractProgressFromBiFunctionWithCanExecuteAndSchedulerSpecification {}
 
         @Nested
         @DisplayName("From observable function")
@@ -224,15 +234,18 @@ public class ReactiveCommandTest
 
         @Nested
         @DisplayName("From observable function with scheduler")
-        class FromObservableFunctionWithScheduler extends AbstractProgressFromObservableFunctionWithSchedulerSpecification {}
+        class FromObservableFunctionWithScheduler extends
+                AbstractProgressFromObservableFunctionWithSchedulerSpecification {}
 
         @Nested
         @DisplayName("From observable function with CanExecute")
-        class FromObservableFunctionWithCanExecute extends AbstractProgressFromObservableFunctionWithCanExecuteSpecification {}
+        class FromObservableFunctionWithCanExecute extends
+                AbstractProgressFromObservableFunctionWithCanExecuteSpecification {}
 
         @Nested
         @DisplayName("From observable function with CanExecute and scheduler")
-        class FromObservableFunctionWithCanExecuteAndScheduler extends AbstractProgressFromObservableFunctionWithCanExecuteAndSchedulerSpecification {}
+        class FromObservableFunctionWithCanExecuteAndScheduler extends
+                AbstractProgressFromObservableFunctionWithCanExecuteAndSchedulerSpecification {}
 
         @Nested
         @DisplayName("From observable bi-function")
@@ -240,15 +253,18 @@ public class ReactiveCommandTest
 
         @Nested
         @DisplayName("From observable bi-function with scheduler")
-        class FromObservableBiFunctionWithScheduler extends AbstractProgressFromObservableBiFunctionWithSchedulerSpecification {}
+        class FromObservableBiFunctionWithScheduler extends
+                AbstractProgressFromObservableBiFunctionWithSchedulerSpecification {}
 
         @Nested
         @DisplayName("From observable bi-function with CanExecute")
-        class FromObservableBiFunctionWithCanExecute extends AbstractProgressFromObservableBiFunctionWithCanExecuteSpecification {}
+        class FromObservableBiFunctionWithCanExecute extends
+                AbstractProgressFromObservableBiFunctionWithCanExecuteSpecification {}
 
         @Nested
         @DisplayName("From observable bi-function with CanExecute and scheduler")
-        class FromObservableBiFunctionWithCanExecuteAndScheduler extends AbstractProgressFromObservableBiFunctionWithCanExecuteAndSchedulerSpecification {}
+        class FromObservableBiFunctionWithCanExecuteAndScheduler extends
+                AbstractProgressFromObservableBiFunctionWithCanExecuteAndSchedulerSpecification {}
     }
 
     @Nested
@@ -260,19 +276,43 @@ public class ReactiveCommandTest
         class FromNoCommands extends AbstractCompositeFromNoCommandsSpecification {}
 
         @Nested
+        @DisplayName("From no commands with scheduler")
+        class FromNoCommandsWithScheduler extends AbstractCompositeFromNoCommandsWithSchedulerSpecification {}
+
+        @Nested
         @DisplayName("From no commands with CanExecute")
         class FromNoCommandsWithCanExecute extends AbstractCompositeFromNoCommandsWithCanExecuteSpecification {}
+
+        @Nested
+        @DisplayName("From no commands with CanExecute and scheduler")
+        class FromNoCommandsWithCanExecuteAndScheduler extends
+                AbstractCompositeFromNoCommandsWithCanExecuteAndSchedulerSpecification {}
 
         @Nested
         @DisplayName("From commands with no input")
         class FromCommandsWithNoInput extends AbstractCompositeFromCommandsWithNoInputSpecification {}
 
         @Nested
-        @DisplayName("From commands with input")
-        class FromCommandsWithInput extends AbstractCompositeFromCommandsWithInputSpecification {}
+        @DisplayName("From commands with no input and scheduler")
+        class FromCommandsWithNoInputAndScheduler extends
+                AbstractCompositeFromCommandsWithNoInputAndSchedulerSpecification {}
+
+        @Nested
+        @DisplayName("From commands with no result")
+        class FromCommandsWithNoResult extends AbstractCompositeFromCommandsWithNoResultSpecification {}
+
+        @Nested
+        @DisplayName("From commands with no result and scheduler")
+        class FromCommandsWithNoResultAndSchduler extends
+                AbstractCompositeFromCommandsWithNoResultAndSchedulerSpecification {}
 
         @Nested
         @DisplayName("From commands with CanExecute")
         class FromCommandsWithCanExecute extends AbstractCompositeFromCommandsWithCanExecuteSpecification {}
+
+        @Nested
+        @DisplayName("From commands with CanExecute and scheduler")
+        class FromCommandsWithCanExecuteAndScheduler extends
+                AbstractCompositeFromCommandsWithCanExecuteAndSchedulerSpecification {}
     }
 }

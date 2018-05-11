@@ -18,7 +18,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.Function;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
@@ -27,7 +27,9 @@ import com.github.dohnal.vaadin.reactive.command.CompositeCanExecuteEmitsValueSp
 import com.github.dohnal.vaadin.reactive.command.CompositeExecutionSpecification;
 import com.github.dohnal.vaadin.reactive.command.CreateSpecification;
 import io.reactivex.Observable;
+import io.reactivex.Scheduler;
 import io.reactivex.observers.TestObserver;
+import io.reactivex.schedulers.Schedulers;
 import io.reactivex.schedulers.TestScheduler;
 import io.reactivex.subjects.PublishSubject;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,6 +44,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  * Specification for {@link ReactiveCommand} created by
  * {@link ReactiveCommandFactory#createCompositeCommand(List)}
  * {@link ReactiveCommandFactory#createCompositeCommand(Observable, List)}
+ * {@link ReactiveCommandFactory#createCompositeCommand(List, Scheduler)}
+ * {@link ReactiveCommandFactory#createCompositeCommand(Observable, List, Scheduler)}
  *
  * @author dohnal
  */
@@ -71,16 +75,39 @@ public interface CompositeFromCommandsSpecification extends
         }
     }
 
+    abstract class AbstractCompositeFromNoCommandsWithSchedulerSpecification implements ReactiveCommandFactory
+    {
+        @Test
+        @DisplayName("IllegalArgumentException should be thrown")
+        public void testCreate()
+        {
+            assertThrows(IllegalArgumentException.class, () ->
+                    createCompositeCommand(new ArrayList<>(), Schedulers.from(Runnable::run)));
+        }
+    }
+
+    abstract class AbstractCompositeFromNoCommandsWithCanExecuteAndSchedulerSpecification
+            implements ReactiveCommandFactory
+    {
+        @Test
+        @DisplayName("IllegalArgumentException should be thrown")
+        public void testCreate()
+        {
+            assertThrows(IllegalArgumentException.class, () -> createCompositeCommand(
+                    PublishSubject.create(), new ArrayList<>(), Schedulers.from(Runnable::run)));
+        }
+    }
+
     abstract class AbstractCompositeFromCommandsWithNoInputSpecification extends
             AbstractCreateSpecification<Void, List<Integer>> implements ReactiveCommandFactory
     {
-        private Supplier<Integer> executionA;
-        private ReactiveCommand<Void, Integer> commandA;
+        protected Supplier<Integer> executionA;
+        protected ReactiveCommand<Void, Integer> commandA;
 
-        private Supplier<Integer> executionB;
-        private ReactiveCommand<Void, Integer> commandB;
+        protected Supplier<Integer> executionB;
+        protected ReactiveCommand<Void, Integer> commandB;
 
-        private ReactiveCommand<Void, List<Integer>> command;
+        protected ReactiveCommand<Void, List<Integer>> command;
 
         @BeforeEach
         @SuppressWarnings("unchecked")
@@ -211,25 +238,43 @@ public interface CompositeFromCommandsSpecification extends
         }
     }
 
-    abstract class AbstractCompositeFromCommandsWithInputSpecification extends
-            AbstractCreateSpecification<Integer, List<Integer>> implements ReactiveCommandFactory
+    abstract class AbstractCompositeFromCommandsWithNoInputAndSchedulerSpecification extends
+            AbstractCompositeFromCommandsWithNoInputSpecification
     {
-        private Function<Integer, Integer> executionA;
-        private ReactiveCommand<Integer, Integer> commandA;
+        @Override
+        @BeforeEach
+        @SuppressWarnings("unchecked")
+        void create()
+        {
+            executionA = Mockito.mock(Supplier.class);
+            commandA = createCommand(executionA);
 
-        private Function<Integer, Integer> executionB;
-        private ReactiveCommand<Integer, Integer> commandB;
+            executionB = Mockito.mock(Supplier.class);
+            commandB = createCommand(executionB);
 
-        private ReactiveCommand<Integer, List<Integer>> command;
+            command = createCompositeCommand(Arrays.asList(commandA, commandB), Schedulers.from(Runnable::run));
+        }
+    }
+
+    abstract class AbstractCompositeFromCommandsWithNoResultSpecification extends
+            AbstractCreateSpecification<Integer, List<Void>> implements ReactiveCommandFactory
+    {
+        protected Consumer<Integer> executionA;
+        protected ReactiveCommand<Integer, Void> commandA;
+
+        protected Consumer<Integer> executionB;
+        protected ReactiveCommand<Integer, Void> commandB;
+
+        protected ReactiveCommand<Integer, List<Void>> command;
 
         @BeforeEach
         @SuppressWarnings("unchecked")
         void create()
         {
-            executionA = Mockito.mock(Function.class);
+            executionA = Mockito.mock(Consumer.class);
             commandA = createCommand(executionA);
 
-            executionB = Mockito.mock(Function.class);
+            executionB = Mockito.mock(Consumer.class);
             commandB = createCommand(executionB);
 
             command = createCompositeCommand(Arrays.asList(commandA, commandB));
@@ -237,7 +282,7 @@ public interface CompositeFromCommandsSpecification extends
 
         @Nonnull
         @Override
-        public ReactiveCommand<Integer, List<Integer>> getCommand()
+        public ReactiveCommand<Integer, List<Void>> getCommand()
         {
             return command;
         }
@@ -246,8 +291,8 @@ public interface CompositeFromCommandsSpecification extends
         @DisplayName("Child commands should not be executed")
         public void testChildCommands()
         {
-            Mockito.verify(executionA, Mockito.never()).apply(Mockito.anyInt());
-            Mockito.verify(executionB, Mockito.never()).apply(Mockito.anyInt());
+            Mockito.verify(executionA, Mockito.never()).accept(Mockito.anyInt());
+            Mockito.verify(executionB, Mockito.never()).accept(Mockito.anyInt());
         }
 
         @Nested
@@ -268,48 +313,45 @@ public interface CompositeFromCommandsSpecification extends
 
         @Nested
         @DisplayName("Execute specification")
-        class Execute extends AbstractCompositeExecuteSpecification<Integer, List<Integer>>
+        class Execute extends AbstractCompositeExecuteSpecification<Integer, List<Void>>
         {
             private final Integer INPUT = 5;
-            private final Integer RESULT_A = 7;
-            private final Integer RESULT_B = 9;
-            private final List<Integer> RESULT = Arrays.asList(RESULT_A, RESULT_B);
             private final Throwable ERROR_A = new RuntimeException("Error A");
             private final Throwable ERROR_B = new RuntimeException("Error B");
 
             @Nonnull
             @Override
-            public ReactiveCommand<Integer, List<Integer>> getCommand()
+            public ReactiveCommand<Integer, List<Void>> getCommand()
             {
                 return command;
             }
 
             @Nonnull
             @Override
-            protected Observable<List<Integer>> execute()
+            protected Observable<List<Void>> execute()
             {
-                Mockito.when(executionA.apply(INPUT)).thenReturn(RESULT_A);
-                Mockito.when(executionB.apply(INPUT)).thenReturn(RESULT_B);
+                Mockito.doNothing().when(executionA).accept(INPUT);
+                Mockito.doNothing().when(executionB).accept(INPUT);
 
                 return command.execute(INPUT);
             }
 
             @Nonnull
             @Override
-            protected Observable<List<Integer>> executeWithError()
+            protected Observable<List<Void>> executeWithError()
             {
-                Mockito.when(executionA.apply(INPUT)).thenThrow(ERROR_A);
-                Mockito.when(executionB.apply(INPUT)).thenReturn(RESULT_B);
+                Mockito.doThrow(ERROR_A).when(executionA).accept(INPUT);
+                Mockito.doNothing().when(executionB).accept(INPUT);
 
                 return command.execute(INPUT);
             }
 
             @Nonnull
             @Override
-            protected Observable<List<Integer>> executeWithMultipleErrors()
+            protected Observable<List<Void>> executeWithMultipleErrors()
             {
-                Mockito.when(executionA.apply(INPUT)).thenThrow(ERROR_A);
-                Mockito.when(executionB.apply(INPUT)).thenThrow(ERROR_B);
+                Mockito.doThrow(ERROR_A).when(executionA).accept(INPUT);
+                Mockito.doThrow(ERROR_B).when(executionB).accept(INPUT);
 
                 return command.execute(INPUT);
             }
@@ -317,10 +359,10 @@ public interface CompositeFromCommandsSpecification extends
             @Nonnull
             @Override
             @SuppressWarnings("unchecked")
-            protected Observable<Integer> executeChild()
+            protected Observable<Void> executeChild()
             {
                 Mockito.reset(executionA);
-                Mockito.when(executionA.apply(INPUT)).thenReturn(RESULT_A);
+                Mockito.doNothing().when(executionA).accept(INPUT);
 
                 return commandA.execute(INPUT);
             }
@@ -328,10 +370,10 @@ public interface CompositeFromCommandsSpecification extends
             @Nonnull
             @Override
             @SuppressWarnings("unchecked")
-            protected Observable<Integer> executeChildWithError()
+            protected Observable<Void> executeChildWithError()
             {
                 Mockito.reset(executionA);
-                Mockito.when(executionA.apply(INPUT)).thenThrow(ERROR_A);
+                Mockito.doThrow(ERROR_A).when(executionA).accept(INPUT);
 
                 commandA.getError().test();
 
@@ -340,9 +382,9 @@ public interface CompositeFromCommandsSpecification extends
 
             @Nullable
             @Override
-            protected List<Integer> getResult()
+            protected List<Void> getResult()
             {
-                return RESULT;
+                return null;
             }
 
             @Nullable
@@ -355,31 +397,49 @@ public interface CompositeFromCommandsSpecification extends
             @Override
             protected void verifyExecution()
             {
-                Mockito.verify(executionA).apply(INPUT);
-                Mockito.verify(executionB).apply(INPUT);
+                Mockito.verify(executionA).accept(INPUT);
+                Mockito.verify(executionB).accept(INPUT);
             }
 
             @Override
             protected void verifyErrorExecution()
             {
-                Mockito.verify(executionA).apply(INPUT);
-                Mockito.verify(executionB, Mockito.never()).apply(INPUT);
+                Mockito.verify(executionA).accept(INPUT);
+                Mockito.verify(executionB, Mockito.never()).accept(INPUT);
             }
+        }
+    }
+
+    abstract class AbstractCompositeFromCommandsWithNoResultAndSchedulerSpecification extends
+            AbstractCompositeFromCommandsWithNoResultSpecification
+    {
+        @Override
+        @BeforeEach
+        @SuppressWarnings("unchecked")
+        void create()
+        {
+            executionA = Mockito.mock(Consumer.class);
+            commandA = createCommand(executionA);
+
+            executionB = Mockito.mock(Consumer.class);
+            commandB = createCommand(executionB);
+
+            command = createCompositeCommand(Arrays.asList(commandA, commandB), Schedulers.from(Runnable::run));
         }
     }
 
     abstract class AbstractCompositeFromCommandsWithCanExecuteSpecification
             extends AbstractCreateSpecification<Void, List<Integer>> implements ReactiveCommandFactory
     {
-        private Supplier<Integer> executionA;
-        private ReactiveCommand<Void, Integer> commandA;
+        protected Supplier<Integer> executionA;
+        protected ReactiveCommand<Void, Integer> commandA;
 
-        private Supplier<Integer> executionB;
-        private ReactiveCommand<Void, Integer> commandB;
+        protected Supplier<Integer> executionB;
+        protected ReactiveCommand<Void, Integer> commandB;
 
-        private TestScheduler testScheduler;
-        private PublishSubject<Boolean> testSubject;
-        private ReactiveCommand<Void, List<Integer>> command;
+        protected TestScheduler testScheduler;
+        protected PublishSubject<Boolean> testSubject;
+        protected ReactiveCommand<Void, List<Integer>> command;
 
         @BeforeEach
         @SuppressWarnings("unchecked")
@@ -444,6 +504,28 @@ public interface CompositeFromCommandsSpecification extends
 
                 return commandA.execute();
             }
+        }
+    }
+
+    abstract class AbstractCompositeFromCommandsWithCanExecuteAndSchedulerSpecification extends
+            AbstractCompositeFromCommandsWithCanExecuteSpecification
+    {
+        @Override
+        @BeforeEach
+        @SuppressWarnings("unchecked")
+        void create()
+        {
+            executionA = Mockito.mock(Supplier.class);
+            commandA = createCommand(executionA);
+
+            executionB = Mockito.mock(Supplier.class);
+            commandB = createCommand(executionB);
+
+            testScheduler = new TestScheduler();
+            testSubject = PublishSubject.create();
+            testSubject.observeOn(testScheduler);
+            command = createCompositeCommand(testSubject, Arrays.asList(commandA, commandB),
+                    Schedulers.from(Runnable::run));
         }
     }
 }

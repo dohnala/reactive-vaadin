@@ -21,6 +21,7 @@ import java.util.function.BiFunction;
 import com.github.dohnal.vaadin.reactive.ProgressContext;
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
 import io.reactivex.Observable;
+import io.reactivex.Scheduler;
 
 /**
  * Asynchronous implementation of {@link ReactiveCommand} with support of controlling progress
@@ -33,6 +34,8 @@ public final class ProgressCommand<T, R> extends AbstractCommand<T, R>
 {
     private final BiFunction<ProgressContext, T, Observable<R>> execution;
 
+    private final Scheduler scheduler;
+
     /**
      * Creates new progress reactive command with given execution
      *
@@ -40,14 +43,17 @@ public final class ProgressCommand<T, R> extends AbstractCommand<T, R>
      * @param execution execution
      */
     public ProgressCommand(final @Nonnull Observable<Boolean> canExecute,
-                           final @Nonnull BiFunction<ProgressContext, T, Observable<R>> execution)
+                           final @Nonnull BiFunction<ProgressContext, T, Observable<R>> execution,
+                           final @Nonnull Scheduler scheduler)
     {
         super(canExecute, Observable.empty());
 
         Objects.requireNonNull(canExecute, "CanExecute cannot be null");
         Objects.requireNonNull(execution, "Execution cannot be null");
+        Objects.requireNonNull(scheduler, "Scheduler cannot be null");
 
         this.execution = execution;
+        this.scheduler = scheduler;
     }
 
     @Nonnull
@@ -55,6 +61,7 @@ public final class ProgressCommand<T, R> extends AbstractCommand<T, R>
     protected Observable<R> executeInternal(final @Nonnull Optional<T> input)
     {
         return Observable.just(input)
+                .subscribeOn(scheduler)
                 .filter(value -> Boolean.TRUE.equals(isExecuting.getValue()))
                 .flatMap(value -> execution.apply(new ReactiveProgressContext(progress), value.orElse(null)))
                 .onErrorResumeNext(this::handleError)
