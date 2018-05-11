@@ -49,9 +49,6 @@ public interface CompositeExecutionSpecification extends ExecuteSpecification
         protected abstract Observable<?> executeChildWithError();
 
         @Nonnull
-        protected abstract Observable<R> executeWithMultipleErrors();
-
-        @Nonnull
         @Override
         protected Float[] getProgress()
         {
@@ -106,122 +103,78 @@ public interface CompositeExecutionSpecification extends ExecuteSpecification
                     return AbstractCompositeExecuteSpecification.this.getCommand();
                 }
             }
-        }
-
-        @Nested
-        @DisplayName("When command is executed with multiple errors")
-        class WhenExecuteWithMultipleErrors
-        {
-            @BeforeEach
-            void before()
-            {
-                getCommand().getError().test();
-            }
-
-            @Test
-            @DisplayName("Result observable should not emit any value")
-            public void testResult()
-            {
-                final TestObserver<R> testObserver = getCommand().getResult().test();
-
-                executeWithMultipleErrors().subscribe();
-
-                testObserver.assertNoValues();
-            }
-
-            @Test
-            @DisplayName("Error observable should emit first error")
-            public void testError()
-            {
-                final TestObserver<Throwable> testObserver = getCommand().getError().test();
-
-                executeWithMultipleErrors().subscribe();
-
-                testObserver.assertValue(getError());
-            }
-
-            @Test
-            @DisplayName("CanExecute observable should emit false and then true")
-            public void testCanExecute()
-            {
-                final TestObserver<Boolean> testObserver = getCommand().canExecute().test();
-
-                testObserver.assertValue(true);
-
-                executeWithMultipleErrors().subscribe();
-
-                testObserver.assertValues(true, false, true);
-            }
-
-            @Test
-            @DisplayName("IsExecuting observable should emit true and then false")
-            public void testIsExecuting()
-            {
-                final TestObserver<Boolean> testObserver = getCommand().isExecuting().test();
-
-                testObserver.assertValue(false);
-
-                executeWithMultipleErrors().subscribe();
-
-                testObserver.assertValues(false, true, false);
-            }
-
-            @Test
-            @DisplayName("ExecutionCount observable should emit 1")
-            public void testExecutionCount()
-            {
-                final TestObserver<Integer> testObserver = getCommand().getExecutionCount().test();
-
-                testObserver.assertValue(0);
-
-                executeWithMultipleErrors().subscribe();
-
-                testObserver.assertValues(0, 1);
-            }
-
-            @Test
-            @DisplayName("HasBeenExecuted observable should emit true")
-            public void testHasBeenExecuted()
-            {
-                final TestObserver<Boolean> testObserver = getCommand().hasBeenExecuted().test();
-
-                testObserver.assertValue(false);
-
-                executeWithMultipleErrors().subscribe();
-
-                testObserver.assertValues(false, true);
-            }
-
-            @Test
-            @DisplayName("Progress observable should emit correct values")
-            public void testProgress()
-            {
-                final TestObserver<Float> testObserver = getCommand().getProgress().test();
-
-                testObserver.assertValue(0.0f);
-
-                executeWithMultipleErrors().subscribe();
-
-                testObserver.assertValues(getErrorProgress());
-            }
-
-            @Test
-            @DisplayName("Only first command should be run")
-            public void testExecution()
-            {
-                executeWithMultipleErrors().subscribe();
-
-                verifyErrorExecution();
-            }
 
             @Nested
-            @DisplayName("After command is executed with multiple errors")
+            @DisplayName("After command is executed")
             class AfterExecute
             {
                 @BeforeEach
                 void before()
                 {
-                    executeWithMultipleErrors().subscribe();
+                    execute().subscribe();
+                }
+
+                @Nested
+                @DisplayName("When command is subscribed")
+                class WhenSubscribe extends AbstractSubscribeAfterExecuteSpecification<T, R>
+                {
+                    @Nonnull
+                    @Override
+                    public ReactiveCommand<T, R> getCommand()
+                    {
+                        return AbstractCompositeExecuteSpecification.this.getCommand();
+                    }
+                }
+
+                @Nested
+                @DisplayName("When child command is executed")
+                class WhenExecuteChild extends AbstractExecuteChildAfterExecuteSpecification<T, R>
+                {
+                    @Nonnull
+                    @Override
+                    protected Observable<?> executeChild()
+                    {
+                        return AbstractCompositeExecuteSpecification.this.executeChild();
+                    }
+
+                    @Nonnull
+                    @Override
+                    public ReactiveCommand<T, R> getCommand()
+                    {
+                        return AbstractCompositeExecuteSpecification.this.getCommand();
+                    }
+                }
+
+                @Nested
+                @DisplayName("When child command is executed with error")
+                class WhenExecuteChildWithError extends AbstractExecuteChildAfterExecuteSpecification<T, R>
+                {
+                    @Nonnull
+                    @Override
+                    protected Observable<?> executeChild()
+                    {
+                        return AbstractCompositeExecuteSpecification.this.executeChildWithError();
+                    }
+
+                    @Nonnull
+                    @Override
+                    public ReactiveCommand<T, R> getCommand()
+                    {
+                        return AbstractCompositeExecuteSpecification.this.getCommand();
+                    }
+                }
+            }
+
+            @Nested
+            @DisplayName("After command is executed with error")
+            class AfterExecuteWithError
+            {
+                @BeforeEach
+                void before()
+                {
+                    getCommand().getError().test();
+
+                    executeWithError().subscribe();
                 }
 
                 @Nested

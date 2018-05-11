@@ -176,16 +176,6 @@ public interface CompositeFromCommandsSpecification extends
 
             @Nonnull
             @Override
-            protected Observable<List<Integer>> executeWithMultipleErrors()
-            {
-                Mockito.when(executionA.get()).thenThrow(ERROR_A);
-                Mockito.when(executionB.get()).thenThrow(ERROR_B);
-
-                return command.execute();
-            }
-
-            @Nonnull
-            @Override
             @SuppressWarnings("unchecked")
             protected Observable<Integer> executeChild()
             {
@@ -342,16 +332,6 @@ public interface CompositeFromCommandsSpecification extends
             {
                 Mockito.doThrow(ERROR_A).when(executionA).accept(INPUT);
                 Mockito.doNothing().when(executionB).accept(INPUT);
-
-                return command.execute(INPUT);
-            }
-
-            @Nonnull
-            @Override
-            protected Observable<List<Void>> executeWithMultipleErrors()
-            {
-                Mockito.doThrow(ERROR_A).when(executionA).accept(INPUT);
-                Mockito.doThrow(ERROR_B).when(executionB).accept(INPUT);
 
                 return command.execute(INPUT);
             }
