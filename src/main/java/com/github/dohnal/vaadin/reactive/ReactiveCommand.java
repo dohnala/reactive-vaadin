@@ -72,7 +72,7 @@ public interface ReactiveCommand<T, R>
      * Returns an observable of whether command can be executed right now
      * <p>
      * If custom CanExecute was passed to factory method of {@link ReactiveCommandFactory}
-     * and emits an error, the error is then passed to this observable (which means that this observable
+     * which emits an error, the error is then passed to this observable (which means that this observable
      * will terminate)
      * <p>
      * You should make sure, that your custom CanExecute does not emit errors

@@ -18,13 +18,32 @@ import javax.annotation.Nonnull;
 import com.github.dohnal.vaadin.reactive.ReactiveProperty;
 
 /**
- * Base interface for specifications which needs property
+ * Base interface for all command specifications
  *
- * @param <T> type of property value
  * @author dohnal
  */
-interface RequireProperty<T>
+public interface BasePropertySpecification
 {
-    @Nonnull
-    ReactiveProperty<T> getProperty();
+    /**
+     * Base interface for specifications which needs property
+     *
+     * @param <T> type of property value
+     * @author dohnal
+     */
+    interface RequireProperty<T>
+    {
+        @Nonnull
+        ReactiveProperty<T> getProperty();
+    }
+
+    /**
+     * Base interface for specifications which needs source emitter
+     *
+     * @param <T> type of property value
+     * @author dohnal
+     */
+    interface RequireSource<T> extends RequireProperty<T>
+    {
+        void emitValue(final @Nonnull T value);
+    }
 }

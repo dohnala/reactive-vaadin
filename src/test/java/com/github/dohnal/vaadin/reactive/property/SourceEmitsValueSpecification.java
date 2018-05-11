@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  *
  * @author dohnal
  */
-public interface SourceEmitsValueSpecification
+public interface SourceEmitsValueSpecification extends BasePropertySpecification
 {
     /**
      * Specification that tests behavior of property when created from source (observable / property)

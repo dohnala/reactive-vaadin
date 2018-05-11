@@ -18,6 +18,7 @@ import javax.annotation.Nullable;
 import java.util.function.Function;
 
 import com.github.dohnal.vaadin.reactive.exceptions.ReadOnlyPropertyException;
+import io.reactivex.Observable;
 
 /**
  * Reactive property stores single editable value and also acts as observable
@@ -59,6 +60,20 @@ public interface ReactiveProperty<T> extends ObservableProperty<T>, Suppressible
      */
     @Override
     void setValue(final @Nonnull T value);
+
+    /**
+     * Returns observable which emits values of this property
+     * <p>
+     * If this property is crated from source observable or property passed to factory method of
+     * {@link ReactivePropertyFactory} which emits an error, the error is then passed to this observable
+     * (which means that this observable will terminate)
+     * <p>
+     *
+     * @return observable which emits values of this property
+     */
+    @Nonnull
+    @Override
+    Observable<T> asObservable();
 
     /**
      * Updates a value by given update function
