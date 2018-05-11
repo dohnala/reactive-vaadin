@@ -161,16 +161,8 @@ public class ReactiveCommandTest
             ProgressFromObservableBiFunctionSpecification
     {
         @Nested
-        @DisplayName("From consumer")
-        class FromConsumer extends AbstractProgressFromConsumerSpecification {}
-
-        @Nested
         @DisplayName("From consumer with scheduler")
         class FromConsumerWithScheduler extends AbstractProgressFromConsumerWithSchedulerSpecification {}
-
-        @Nested
-        @DisplayName("From consumer with CanExecute")
-        class FromConsumerWithCanExecute extends AbstractProgressFromConsumerWithCanExecuteSpecification {}
 
         @Nested
         @DisplayName("From consumer with CanExecute and scheduler")
@@ -178,16 +170,8 @@ public class ReactiveCommandTest
                 AbstractProgressFromConsumerWithCanExecuteAndSchedulerSpecification {}
 
         @Nested
-        @DisplayName("From function")
-        class FromFunction extends AbstractProgressFromFunctionSpecification {}
-
-        @Nested
         @DisplayName("From function with scheduler")
         class FromFunctionWithScheduler extends AbstractProgressFromFunctionWithSchedulerSpecification {}
-
-        @Nested
-        @DisplayName("From function with CanExecute")
-        class FromFunctionWithCanExecute extends AbstractProgressFromFunctionWithCanExecuteSpecification {}
 
         @Nested
         @DisplayName("From function with CanExecute and scheduler")
@@ -195,16 +179,8 @@ public class ReactiveCommandTest
                 AbstractProgressFromFunctionWithCanExecuteAndSchedulerSpecification {}
 
         @Nested
-        @DisplayName("From bi-consumer")
-        class FromBiConsumer extends AbstractProgressFromBiConsumerSpecification {}
-
-        @Nested
         @DisplayName("From bi-consumer with scheduler")
         class FromBiConsumerWithScheduler extends AbstractProgressFromBiConsumerWithSchedulerSpecification {}
-
-        @Nested
-        @DisplayName("From bi-consumer with CanExecute")
-        class FromBiConsumerWithCanExecute extends AbstractProgressFromBiConsumerWithCanExecuteSpecification {}
 
         @Nested
         @DisplayName("From bi-consumer with CanExecute and scheduler")
@@ -212,16 +188,8 @@ public class ReactiveCommandTest
                 AbstractProgressFromBiConsumerWithCanExecuteAndSchedulerSpecification {}
 
         @Nested
-        @DisplayName("From bi-function")
-        class FromBiFunction extends AbstractProgressFromBiFunctionSpecification {}
-
-        @Nested
         @DisplayName("From bi-function with scheduler")
         class FromBiFunctionWithScheduler extends AbstractProgressFromBiFunctionWithSchedulerSpecification {}
-
-        @Nested
-        @DisplayName("From bi-function with CanExecute")
-        class FromBiFunctionWithCanExecute extends AbstractProgressFromBiFunctionWithCanExecuteSpecification {}
 
         @Nested
         @DisplayName("From bi-function with CanExecute and scheduler")
@@ -229,18 +197,9 @@ public class ReactiveCommandTest
                 AbstractProgressFromBiFunctionWithCanExecuteAndSchedulerSpecification {}
 
         @Nested
-        @DisplayName("From observable function")
-        class FromObservableFunction extends AbstractProgressFromObservableFunctionSpecification {}
-
-        @Nested
         @DisplayName("From observable function with scheduler")
         class FromObservableFunctionWithScheduler extends
                 AbstractProgressFromObservableFunctionWithSchedulerSpecification {}
-
-        @Nested
-        @DisplayName("From observable function with CanExecute")
-        class FromObservableFunctionWithCanExecute extends
-                AbstractProgressFromObservableFunctionWithCanExecuteSpecification {}
 
         @Nested
         @DisplayName("From observable function with CanExecute and scheduler")
@@ -248,18 +207,9 @@ public class ReactiveCommandTest
                 AbstractProgressFromObservableFunctionWithCanExecuteAndSchedulerSpecification {}
 
         @Nested
-        @DisplayName("From observable bi-function")
-        class FromObservableBiFunction extends AbstractProgressFromObservableBiFunctionSpecification {}
-
-        @Nested
         @DisplayName("From observable bi-function with scheduler")
         class FromObservableBiFunctionWithScheduler extends
                 AbstractProgressFromObservableBiFunctionWithSchedulerSpecification {}
-
-        @Nested
-        @DisplayName("From observable bi-function with CanExecute")
-        class FromObservableBiFunctionWithCanExecute extends
-                AbstractProgressFromObservableBiFunctionWithCanExecuteSpecification {}
 
         @Nested
         @DisplayName("From observable bi-function with CanExecute and scheduler")

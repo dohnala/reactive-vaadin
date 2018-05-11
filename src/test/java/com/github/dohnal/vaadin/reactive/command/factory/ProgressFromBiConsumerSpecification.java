@@ -38,9 +38,7 @@ import org.mockito.Mockito;
 
 /**
  * Tests for {@link ReactiveCommand} created by
- * {@link ReactiveCommandFactory#createProgressCommand(BiConsumer)}
  * {@link ReactiveCommandFactory#createProgressCommand(BiFunction, Scheduler)}
- * {@link ReactiveCommandFactory#createProgressCommand(Observable, BiConsumer)}
  * {@link ReactiveCommandFactory#createProgressCommand(Observable, BiFunction, Scheduler)}
  *
  * @author dohnal
@@ -50,8 +48,8 @@ public interface ProgressFromBiConsumerSpecification extends
         ExecuteSpecification,
         CanExecuteEmitsValueSpecification
 {
-    abstract class AbstractProgressFromBiConsumerSpecification extends AbstractCreateSpecification<Integer, Void>
-            implements ReactiveCommandFactory
+    abstract class AbstractProgressFromBiConsumerWithSchedulerSpecification extends
+            AbstractCreateSpecification<Integer, Void> implements ReactiveCommandFactory
     {
         protected BiConsumer<ProgressContext, Integer> execution;
         protected ReactiveCommand<Integer, Void> command;
@@ -61,7 +59,7 @@ public interface ProgressFromBiConsumerSpecification extends
         void create()
         {
             execution = Mockito.mock(BiConsumer.class);
-            command = createProgressCommand(execution);
+            command = createProgressCommand(execution, Schedulers.from(Runnable::run));
         }
 
         @Nonnull
@@ -178,19 +176,7 @@ public interface ProgressFromBiConsumerSpecification extends
         }
     }
 
-    abstract class AbstractProgressFromBiConsumerWithSchedulerSpecification extends AbstractProgressFromBiConsumerSpecification
-    {
-        @Override
-        @BeforeEach
-        @SuppressWarnings("unchecked")
-        void create()
-        {
-            execution = Mockito.mock(BiConsumer.class);
-            command = createProgressCommand(execution, Schedulers.from(Runnable::run));
-        }
-    }
-
-    abstract class AbstractProgressFromBiConsumerWithCanExecuteSpecification
+    abstract class AbstractProgressFromBiConsumerWithCanExecuteAndSchedulerSpecification
             extends AbstractCreateSpecification<Integer, Void> implements ReactiveCommandFactory
     {
         protected BiConsumer<ProgressContext, Integer> execution;
@@ -206,7 +192,7 @@ public interface ProgressFromBiConsumerSpecification extends
             testScheduler = new TestScheduler();
             testSubject = PublishSubject.create();
             testSubject.observeOn(testScheduler);
-            command = createProgressCommand(testSubject, execution);
+            command = createProgressCommand(testSubject, execution, Schedulers.from(Runnable::run));
         }
 
         @Nonnull
@@ -254,21 +240,6 @@ public interface ProgressFromBiConsumerSpecification extends
 
                 return command.execute(INPUT);
             }
-        }
-    }
-
-    abstract class AbstractProgressFromBiConsumerWithCanExecuteAndSchedulerSpecification
-            extends AbstractProgressFromBiConsumerWithCanExecuteSpecification
-    {
-        @BeforeEach
-        @SuppressWarnings("unchecked")
-        void create()
-        {
-            execution = Mockito.mock(BiConsumer.class);
-            testScheduler = new TestScheduler();
-            testSubject = PublishSubject.create();
-            testSubject.observeOn(testScheduler);
-            command = createProgressCommand(testSubject, execution, Schedulers.from(Runnable::run));
         }
     }
 }

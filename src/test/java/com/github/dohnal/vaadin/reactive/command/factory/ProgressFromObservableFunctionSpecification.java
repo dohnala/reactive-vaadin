@@ -36,9 +36,7 @@ import org.mockito.Mockito;
 
 /**
  * Tests for {@link ReactiveCommand} created by
- * {@link ReactiveCommandFactory#createProgressCommandFromObservable(Function)}
  * {@link ReactiveCommandFactory#createProgressCommandFromObservable(Function, Scheduler)}
- * {@link ReactiveCommandFactory#createProgressCommandFromObservable(Observable, Function)}
  * {@link ReactiveCommandFactory#createProgressCommandFromObservable(Observable, Function, Scheduler)}
  *
  * @author dohnal
@@ -48,8 +46,8 @@ public interface ProgressFromObservableFunctionSpecification extends
         ExecuteSpecification,
         CanExecuteEmitsValueSpecification
 {
-    abstract class AbstractProgressFromObservableFunctionSpecification extends AbstractCreateSpecification<Void, Integer>
-            implements ReactiveCommandFactory
+    abstract class AbstractProgressFromObservableFunctionWithSchedulerSpecification extends
+            AbstractCreateSpecification<Void, Integer> implements ReactiveCommandFactory
     {
         protected Function<ProgressContext, Observable<Integer>> execution;
         protected ReactiveCommand<Void, Integer> command;
@@ -59,7 +57,7 @@ public interface ProgressFromObservableFunctionSpecification extends
         void create()
         {
             execution = Mockito.mock(Function.class);
-            command = createProgressCommandFromObservable(execution);
+            command = createProgressCommandFromObservable(execution, Schedulers.from(Runnable::run));
         }
 
         @Nonnull
@@ -158,20 +156,7 @@ public interface ProgressFromObservableFunctionSpecification extends
         }
     }
 
-    abstract class AbstractProgressFromObservableFunctionWithSchedulerSpecification
-            extends AbstractProgressFromObservableFunctionSpecification
-    {
-        @Override
-        @BeforeEach
-        @SuppressWarnings("unchecked")
-        void create()
-        {
-            execution = Mockito.mock(Function.class);
-            command = createProgressCommandFromObservable(execution, Schedulers.from(Runnable::run));
-        }
-    }
-
-    abstract class AbstractProgressFromObservableFunctionWithCanExecuteSpecification
+    abstract class AbstractProgressFromObservableFunctionWithCanExecuteAndSchedulerSpecification
             extends AbstractCreateSpecification<Void, Integer> implements ReactiveCommandFactory
     {
         protected Function<ProgressContext, Integer> execution;
@@ -187,7 +172,7 @@ public interface ProgressFromObservableFunctionSpecification extends
             testScheduler = new TestScheduler();
             testSubject = PublishSubject.create();
             testSubject.observeOn(testScheduler);
-            command = createProgressCommand(testSubject, execution);
+            command = createProgressCommand(testSubject, execution, Schedulers.from(Runnable::run));
         }
 
         @Nonnull
@@ -233,21 +218,6 @@ public interface ProgressFromObservableFunctionSpecification extends
 
                 return command.execute();
             }
-        }
-    }
-
-    abstract class AbstractProgressFromObservableFunctionWithCanExecuteAndSchedulerSpecification
-            extends AbstractProgressFromObservableFunctionWithCanExecuteSpecification
-    {
-        @BeforeEach
-        @SuppressWarnings("unchecked")
-        void create()
-        {
-            execution = Mockito.mock(Function.class);
-            testScheduler = new TestScheduler();
-            testSubject = PublishSubject.create();
-            testSubject.observeOn(testScheduler);
-            command = createProgressCommand(testSubject, execution, Schedulers.from(Runnable::run));
         }
     }
 }

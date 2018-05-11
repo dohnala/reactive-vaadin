@@ -36,9 +36,7 @@ import org.mockito.Mockito;
 
 /**
  * Tests for {@link ReactiveCommand} created by
- * {@link ReactiveCommandFactory#createProgressCommand(Consumer)}
  * {@link ReactiveCommandFactory#createProgressCommand(Consumer, Scheduler)}
- * {@link ReactiveCommandFactory#createProgressCommand(Observable, Consumer)}
  * {@link ReactiveCommandFactory#createProgressCommand(Observable, Consumer, Scheduler)}
  *
  * @author dohnal
@@ -48,8 +46,8 @@ public interface ProgressFromConsumerSpecification extends
         ExecuteSpecification,
         CanExecuteEmitsValueSpecification
 {
-    abstract class AbstractProgressFromConsumerSpecification extends AbstractCreateSpecification<Void, Void>
-            implements ReactiveCommandFactory
+    abstract class AbstractProgressFromConsumerWithSchedulerSpecification extends
+            AbstractCreateSpecification<Void, Void> implements ReactiveCommandFactory
     {
         protected Consumer<ProgressContext> execution;
         protected ReactiveCommand<Void, Void> command;
@@ -59,7 +57,7 @@ public interface ProgressFromConsumerSpecification extends
         void create()
         {
             execution = Mockito.mock(Consumer.class);
-            command = createProgressCommand(execution);
+            command = createProgressCommand(execution, Schedulers.from(Runnable::run));
         }
 
         @Nonnull
@@ -159,19 +157,7 @@ public interface ProgressFromConsumerSpecification extends
         }
     }
 
-    abstract class AbstractProgressFromConsumerWithSchedulerSpecification extends AbstractProgressFromConsumerSpecification
-    {
-        @Override
-        @BeforeEach
-        @SuppressWarnings("unchecked")
-        void create()
-        {
-            execution = Mockito.mock(Consumer.class);
-            command = createProgressCommand(execution, Schedulers.from(Runnable::run));
-        }
-    }
-
-    abstract class AbstractProgressFromConsumerWithCanExecuteSpecification
+    abstract class AbstractProgressFromConsumerWithCanExecuteAndSchedulerSpecification
             extends AbstractCreateSpecification<Void, Void> implements ReactiveCommandFactory
     {
         protected Consumer<ProgressContext> execution;
@@ -187,7 +173,7 @@ public interface ProgressFromConsumerSpecification extends
             testScheduler = new TestScheduler();
             testSubject = PublishSubject.create();
             testSubject.observeOn(testScheduler);
-            command = createProgressCommand(testSubject, execution);
+            command = createProgressCommand(testSubject, execution, Schedulers.from(Runnable::run));
         }
 
         @Nonnull
@@ -233,21 +219,6 @@ public interface ProgressFromConsumerSpecification extends
 
                 return command.execute();
             }
-        }
-    }
-
-    abstract class AbstractProgressFromConsumerWithCanExecuteAndSchedulerSpecification
-            extends AbstractProgressFromConsumerWithCanExecuteSpecification
-    {
-        @BeforeEach
-        @SuppressWarnings("unchecked")
-        void create()
-        {
-            execution = Mockito.mock(Consumer.class);
-            testScheduler = new TestScheduler();
-            testSubject = PublishSubject.create();
-            testSubject.observeOn(testScheduler);
-            command = createProgressCommand(testSubject, execution, Schedulers.from(Runnable::run));
         }
     }
 }
