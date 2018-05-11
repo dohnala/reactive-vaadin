@@ -21,6 +21,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 /**
  * Tests for {@link ReactiveProgressContext}
  *
@@ -31,6 +33,32 @@ public class ReactiveProgressTest implements ReactivePropertyFactory
 {
     private ReactiveProperty<Float> progressProperty;
     private ReactiveProgressContext progress;
+
+    @Nested
+    @DisplayName("When progress is created without value")
+    class WhenCreateWithoutValue
+    {
+        @BeforeEach
+        public void create()
+        {
+            progressProperty = createProperty();
+            progress = new ReactiveProgressContext(progressProperty);
+        }
+
+        @Test
+        @DisplayName("Progress observable should emit 0")
+        public void testProgressObservable()
+        {
+            progressProperty.asObservable().test().assertValue(0.0f);
+        }
+
+        @Test
+        @DisplayName("Progress should be 0")
+        public void testProgress()
+        {
+            assertEquals(0.0f, progress.getCurrentProgress());
+        }
+    }
 
     @Nested
     @DisplayName("When progress is created")
@@ -44,11 +72,17 @@ public class ReactiveProgressTest implements ReactivePropertyFactory
         }
 
         @Test
-        @DisplayName("Value should be 0")
-        public void testValue()
+        @DisplayName("Progress observable should emit 0")
+        public void testProgressObservable()
         {
-            progressProperty.asObservable().test()
-                    .assertValue(0.0f);
+            progressProperty.asObservable().test().assertValue(0.0f);
+        }
+
+        @Test
+        @DisplayName("Progress should be 0")
+        public void testProgress()
+        {
+            assertEquals(0.0f, progress.getCurrentProgress());
         }
 
         @Nested
@@ -56,8 +90,8 @@ public class ReactiveProgressTest implements ReactivePropertyFactory
         class WhenSetNegativeValue
         {
             @Test
-            @DisplayName("Value should not change")
-            public void testValue()
+            @DisplayName("Progress observable should not emit any value")
+            public void testProgressObservable()
             {
                 final TestObserver<Float> testObserver = progressProperty.asObservable().test();
 
@@ -67,15 +101,24 @@ public class ReactiveProgressTest implements ReactivePropertyFactory
 
                 testObserver.assertValue(0.0f);
             }
+
+            @Test
+            @DisplayName("Progress should be 0")
+            public void testProgress()
+            {
+                progress.set(-0.5f);
+
+                assertEquals(0.0f, progress.getCurrentProgress());
+            }
         }
 
         @Nested
-        @DisplayName("When zero is set")
+        @DisplayName("When 0 is set")
         class WhenSetZero
         {
             @Test
-            @DisplayName("Value should not change")
-            public void testValue()
+            @DisplayName("Progress observable should not emit any value")
+            public void testProgressObservable()
             {
                 final TestObserver<Float> testObserver = progressProperty.asObservable().test();
 
@@ -85,15 +128,24 @@ public class ReactiveProgressTest implements ReactivePropertyFactory
 
                 testObserver.assertValue(0.0f);
             }
+
+            @Test
+            @DisplayName("Progress should be 0")
+            public void testProgress()
+            {
+                progress.set(0.0f);
+
+                assertEquals(0.0f, progress.getCurrentProgress());
+            }
         }
 
         @Nested
-        @DisplayName("When one is set")
+        @DisplayName("When 1 is set")
         class WhenSetOne
         {
             @Test
-            @DisplayName("Value should be one")
-            public void testValue()
+            @DisplayName("Progress observable should emit 1")
+            public void testProgressObservable()
             {
                 final TestObserver<Float> testObserver = progressProperty.asObservable().test();
 
@@ -103,15 +155,24 @@ public class ReactiveProgressTest implements ReactivePropertyFactory
 
                 testObserver.assertValues(0.0f, 1.0f);
             }
+
+            @Test
+            @DisplayName("Progress should be 1")
+            public void testProgress()
+            {
+                progress.set(1.0f);
+
+                assertEquals(1.0f, progress.getCurrentProgress());
+            }
         }
 
         @Nested
-        @DisplayName("when value bigger than one is set")
+        @DisplayName("when value bigger than 1 is set")
         class WhenSetMoreThanOne
         {
             @Test
-            @DisplayName("Value should be one")
-            public void testValue()
+            @DisplayName("Progress observable should emit 1")
+            public void testProgressObservable()
             {
                 final TestObserver<Float> testObserver = progressProperty.asObservable().test();
 
@@ -121,15 +182,24 @@ public class ReactiveProgressTest implements ReactivePropertyFactory
 
                 testObserver.assertValues(0.0f, 1.0f);
             }
+
+            @Test
+            @DisplayName("Progress should be 1")
+            public void testProgress()
+            {
+                progress.set(2.0f);
+
+                assertEquals(1.0f, progress.getCurrentProgress());
+            }
         }
 
         @Nested
-        @DisplayName("When value between zero and one is set")
+        @DisplayName("When value between 0 and 1 is set")
         class WhenSetValue
         {
             @Test
-            @DisplayName("Value should be correct")
-            public void testValue()
+            @DisplayName("Progress observable should emit correct value")
+            public void testProgressObservable()
             {
                 final TestObserver<Float> testObserver = progressProperty.asObservable().test();
 
@@ -140,16 +210,29 @@ public class ReactiveProgressTest implements ReactivePropertyFactory
                 testObserver.assertValues(0.0f, 0.5f);
             }
 
+            @Test
+            @DisplayName("Progress should be correct")
+            public void testProgress()
+            {
+                progress.set(0.5f);
+
+                assertEquals(0.5f, progress.getCurrentProgress());
+            }
+
             @Nested
             @DisplayName("When lesser value is set")
             class WhenSetLesserValue
             {
-                @Test
-                @DisplayName("Value should not change")
-                public void testValue()
+                @BeforeEach
+                void before()
                 {
                     progress.set(0.5f);
+                }
 
+                @Test
+                @DisplayName("Progress observable should not emit any value")
+                public void testProgressObservable()
+                {
                     final TestObserver<Float> testObserver = progressProperty.asObservable().test();
 
                     testObserver.assertValue(0.5f);
@@ -157,6 +240,15 @@ public class ReactiveProgressTest implements ReactivePropertyFactory
                     progress.set(0.3f);
 
                     testObserver.assertValue(0.5f);
+                }
+
+                @Test
+                @DisplayName("Progress should be correct")
+                public void testProgress()
+                {
+                    progress.set(0.3f);
+
+                    assertEquals(0.5f, progress.getCurrentProgress());
                 }
             }
         }
@@ -166,8 +258,8 @@ public class ReactiveProgressTest implements ReactivePropertyFactory
         class WhenAddNegativeValue
         {
             @Test
-            @DisplayName("Value should not change")
-            public void testValue()
+            @DisplayName("Progress observable should not emit any value")
+            public void testProgressObservable()
             {
                 final TestObserver<Float> testObserver = progressProperty.asObservable().test();
 
@@ -177,15 +269,24 @@ public class ReactiveProgressTest implements ReactivePropertyFactory
 
                 testObserver.assertValue(0.0f);
             }
+
+            @Test
+            @DisplayName("Progress should be 0")
+            public void testProgress()
+            {
+                progress.add(-0.5f);
+
+                assertEquals(0.0f, progress.getCurrentProgress());
+            }
         }
 
         @Nested
-        @DisplayName("When zero is added")
+        @DisplayName("When 0 is added")
         class WhenAddZero
         {
             @Test
-            @DisplayName("Value should not change")
-            public void testValue()
+            @DisplayName("Progress observable should not emit any value")
+            public void testProgressObservable()
             {
                 final TestObserver<Float> testObserver = progressProperty.asObservable().test();
 
@@ -195,15 +296,24 @@ public class ReactiveProgressTest implements ReactivePropertyFactory
 
                 testObserver.assertValue(0.0f);
             }
+
+            @Test
+            @DisplayName("Progress should be 0")
+            public void testProgress()
+            {
+                progress.add(0.0f);
+
+                assertEquals(0.0f, progress.getCurrentProgress());
+            }
         }
 
         @Nested
-        @DisplayName("When one is added")
+        @DisplayName("When 1 is added")
         class WhenAddOne
         {
             @Test
-            @DisplayName("Value should be one")
-            public void testValue()
+            @DisplayName("Progress observable should emit 1")
+            public void testProgressObservable()
             {
                 final TestObserver<Float> testObserver = progressProperty.asObservable().test();
 
@@ -213,15 +323,24 @@ public class ReactiveProgressTest implements ReactivePropertyFactory
 
                 testObserver.assertValues(0.0f, 1.0f);
             }
+
+            @Test
+            @DisplayName("Progress should be 1")
+            public void testProgress()
+            {
+                progress.add(1.0f);
+
+                assertEquals(1.0f, progress.getCurrentProgress());
+            }
         }
 
         @Nested
-        @DisplayName("When value bigger than one is added")
+        @DisplayName("When value bigger than 1 is added")
         class WhenAddMoreThanOne
         {
             @Test
-            @DisplayName("Value should be one")
-            public void testValue()
+            @DisplayName("Progress observable should emit 1")
+            public void testProgressObservable()
             {
                 final TestObserver<Float> testObserver = progressProperty.asObservable().test();
 
@@ -231,15 +350,24 @@ public class ReactiveProgressTest implements ReactivePropertyFactory
 
                 testObserver.assertValues(0.0f, 1.0f);
             }
+
+            @Test
+            @DisplayName("Progress should be 1")
+            public void testProgress()
+            {
+                progress.add(2.0f);
+
+                assertEquals(1.0f, progress.getCurrentProgress());
+            }
         }
 
         @Nested
-        @DisplayName("When value between zero and one is added")
+        @DisplayName("When value between 0 and 1 is added")
         class WhenAddValue
         {
             @Test
-            @DisplayName("Value should be correct")
-            public void testValue()
+            @DisplayName("Progress observable should emit correct value")
+            public void testProgressObservable()
             {
                 final TestObserver<Float> testObserver = progressProperty.asObservable().test();
 
@@ -250,16 +378,29 @@ public class ReactiveProgressTest implements ReactivePropertyFactory
                 testObserver.assertValues(0.0f, 0.5f);
             }
 
+            @Test
+            @DisplayName("Progress should be correct")
+            public void testProgress()
+            {
+                progress.add(0.5f);
+
+                assertEquals(0.5f, progress.getCurrentProgress());
+            }
+
             @Nested
             @DisplayName("When negative value is added")
             class WhenSetLesserValue
             {
-                @Test
-                @DisplayName("Value should not change")
-                public void testValue()
+                @BeforeEach
+                void before()
                 {
                     progress.set(0.5f);
+                }
 
+                @Test
+                @DisplayName("Progress observable should not emit any value")
+                public void testProgressObservable()
+                {
                     final TestObserver<Float> testObserver = progressProperty.asObservable().test();
 
                     testObserver.assertValue(0.5f);
@@ -267,6 +408,15 @@ public class ReactiveProgressTest implements ReactivePropertyFactory
                     progress.add(-0.3f);
 
                     testObserver.assertValue(0.5f);
+                }
+
+                @Test
+                @DisplayName("Progress should be correct")
+                public void testProgress()
+                {
+                    progress.add(-0.3f);
+
+                    assertEquals(0.5f, progress.getCurrentProgress());
                 }
             }
         }

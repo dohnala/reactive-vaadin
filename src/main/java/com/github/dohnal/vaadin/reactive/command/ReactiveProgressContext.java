@@ -33,6 +33,11 @@ public final class ReactiveProgressContext implements ProgressContext
         Objects.requireNonNull(property, "Property cannot be null");
 
         this.property = property;
+
+        if (!property.hasValue())
+        {
+            property.setValue(0.0f);
+        }
     }
 
     @Override
@@ -58,5 +63,11 @@ public final class ReactiveProgressContext implements ProgressContext
         Objects.requireNonNull(currentValue);
 
         set(currentValue + value);
+    }
+
+    @Override
+    public float getCurrentProgress()
+    {
+        return property.getValue() != null ? property.getValue() : 0.0f;
     }
 }

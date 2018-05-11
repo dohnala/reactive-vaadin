@@ -33,4 +33,11 @@ public interface ProgressContext
      * @param value value in range 0.0f to 1.0f inclusive
      */
     void add(final float value);
+
+    /**
+     * Returns current progress
+     *
+     * @return current progress
+     */
+    float getCurrentProgress();
 }
