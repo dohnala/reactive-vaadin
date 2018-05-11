@@ -121,9 +121,7 @@ public abstract class AbstractCommand<T, R> implements ReactiveCommand<T, R>, Re
     @Override
     public final Observable<Boolean> hasBeenExecuted()
     {
-        return getExecutionCount()
-                .map(count -> count > 0)
-                .distinctUntilChanged();
+        return getExecutionCount().map(count -> count > 0).distinctUntilChanged();
     }
 
     @Nonnull
@@ -166,6 +164,8 @@ public abstract class AbstractCommand<T, R> implements ReactiveCommand<T, R>, Re
     @Nonnull
     protected final Observable<Optional<T>> checkCanExecute(final @Nonnull Optional<T> input)
     {
+        Objects.requireNonNull(input, "Input cannot be null");
+
         if (Boolean.TRUE.equals(canExecute.getValue()))
         {
             return Observable.just(input);
@@ -181,6 +181,8 @@ public abstract class AbstractCommand<T, R> implements ReactiveCommand<T, R>, Re
      */
     protected final void handleStart(final @Nonnull Optional<T> input)
     {
+        Objects.requireNonNull(input, "Input cannot be null");
+
         progress.setValue(0.0f);
         isExecuting.setValue(true);
 
@@ -194,6 +196,8 @@ public abstract class AbstractCommand<T, R> implements ReactiveCommand<T, R>, Re
      */
     protected final void handleResult(final @Nonnull R result)
     {
+        Objects.requireNonNull(result, "Result cannot be null");
+
         this.result.onNext(result);
     }
 

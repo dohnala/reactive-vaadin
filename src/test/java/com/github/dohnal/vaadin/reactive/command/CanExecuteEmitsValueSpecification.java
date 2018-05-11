@@ -15,6 +15,7 @@ package com.github.dohnal.vaadin.reactive.command;
 
 import javax.annotation.Nonnull;
 
+import com.github.dohnal.vaadin.reactive.ReactiveCommand;
 import com.github.dohnal.vaadin.reactive.exceptions.CannotExecuteCommandException;
 import io.reactivex.Observable;
 import io.reactivex.observers.TestObserver;
@@ -38,6 +39,8 @@ public interface CanExecuteEmitsValueSpecification extends BaseCommandSpecificat
     abstract class AbstractCanExecuteEmitsValueSpecification<T, R> implements RequireCommand<T, R>
     {
         protected abstract void emitValue(final @Nonnull Boolean value);
+
+        protected abstract void emitError(final @Nonnull Throwable error);
 
         @Nonnull
         protected abstract Observable<R> execute();
@@ -127,96 +130,191 @@ public interface CanExecuteEmitsValueSpecification extends BaseCommandSpecificat
 
                 @Nested
                 @DisplayName("When command is executed")
-                class WhenExecute
+                class WhenExecute extends WhenExecuteWhileDisabledSpecification<T, R>
                 {
-                    @Test
-                    @DisplayName("Result observable should not emit any value")
-                    public void testResult()
+                    @Nonnull
+                    @Override
+                    public ReactiveCommand<T, R> getCommand()
                     {
-                        final TestObserver<R> testObserver = getCommand().getResult().test();
+                        return AbstractCanExecuteEmitsValueSpecification.this.getCommand();
+                    }
 
-                        execute().subscribe();
+                    @Nonnull
+                    @Override
+                    protected Observable<R> execute()
+                    {
+                        return AbstractCanExecuteEmitsValueSpecification.this.execute();
+                    }
+                }
+            }
+        }
 
-                        testObserver.assertNoValues();
+        @Nested
+        @DisplayName("When CanExecute observable emits error")
+        class WhenCanExecuteEmitsError
+        {
+            protected final Throwable ERROR = new RuntimeException("Error");
+
+            @BeforeEach
+            void before()
+            {
+                emitValue(true);
+            }
+
+            @Test
+            @DisplayName("CanExecute observable should emit error")
+            public void testCanExecute()
+            {
+                final TestObserver<Boolean> testObserver = getCommand().canExecute().test();
+
+                testObserver.assertValue(true);
+
+                emitError(ERROR);
+
+                testObserver.assertValue(true);
+                testObserver.assertError(ERROR);
+            }
+
+            @Nested
+            @DisplayName("After CanExecute observable emits error")
+            class AfterCanExecuteEmitsError
+            {
+                @BeforeEach
+                void before()
+                {
+                    emitError(ERROR);
+
+                    getCommand().getError().test();
+                }
+
+                @Nested
+                @DisplayName("When command is executed")
+                class WhenExecute extends WhenExecuteWhileDisabledSpecification<T, R>
+                {
+                    @Nonnull
+                    @Override
+                    public ReactiveCommand<T, R> getCommand()
+                    {
+                        return AbstractCanExecuteEmitsValueSpecification.this.getCommand();
+                    }
+
+                    @Nonnull
+                    @Override
+                    protected Observable<R> execute()
+                    {
+                        return AbstractCanExecuteEmitsValueSpecification.this.execute();
                     }
 
                     @Test
-                    @DisplayName("Error observable should emit CannotExecuteCommandException")
-                    public void testError()
-                    {
-                        final TestObserver<Throwable> testObserver = getCommand().getError().test();
-
-                        execute().subscribe();
-
-                        testObserver.assertValue(error -> error.getClass().equals(CannotExecuteCommandException.class));
-                    }
-
-                    @Test
-                    @DisplayName("CanExecute observable should not emit any value")
+                    @Override
+                    @DisplayName("CanExecute observable should emit error")
                     public void testCanExecute()
                     {
                         final TestObserver<Boolean> testObserver = getCommand().canExecute().test();
 
-                        testObserver.assertValue(false);
-
-                        execute().subscribe();
-
-                        testObserver.assertValue(false);
-                    }
-
-                    @Test
-                    @DisplayName("IsExecuting observable should not emit any value")
-                    public void testIsExecuting()
-                    {
-                        final TestObserver<Boolean> testObserver = getCommand().isExecuting().test();
-
-                        testObserver.assertValue(false);
-
-                        execute().subscribe();
-
-                        testObserver.assertValue(false);
-                    }
-
-                    @Test
-                    @DisplayName("ExecutionCount observable should not emit any value")
-                    public void testExecutionCount()
-                    {
-                        final TestObserver<Integer> testObserver = getCommand().getExecutionCount().test();
-
-                        testObserver.assertValue(0);
-
-                        execute().subscribe();
-
-                        testObserver.assertValue(0);
-                    }
-
-                    @Test
-                    @DisplayName("HasBeenExecuted observable should not emit any value")
-                    public void testHasBeenExecuted()
-                    {
-                        final TestObserver<Boolean> testObserver = getCommand().hasBeenExecuted().test();
-
-                        testObserver.assertValue(false);
-
-                        execute().subscribe();
-
-                        testObserver.assertValue(false);
-                    }
-
-                    @Test
-                    @DisplayName("Progress observable should not emit any value")
-                    public void testProgress()
-                    {
-                        final TestObserver<Float> testObserver = getCommand().getProgress().test();
-
-                        testObserver.assertValue(0.0f);
-
-                        execute().subscribe();
-
-                        testObserver.assertValue(0.0f);
+                        testObserver.assertError(ERROR);
                     }
                 }
             }
+        }
+    }
+
+    /**
+     * Specification that tests behavior of command when executed while disabled (CanExecute is not true)
+     *
+     * @param <T> type of command input
+     * @param <R> type of command result
+     */
+    abstract class WhenExecuteWhileDisabledSpecification<T, R> implements RequireCommand<T, R>
+    {
+        @Nonnull
+        protected abstract Observable<R> execute();
+
+        @Test
+        @DisplayName("Result observable should not emit any value")
+        public void testResult()
+        {
+            final TestObserver<R> testObserver = getCommand().getResult().test();
+
+            execute().subscribe();
+
+            testObserver.assertNoValues();
+        }
+
+        @Test
+        @DisplayName("Error observable should emit CannotExecuteCommandException")
+        public void testError()
+        {
+            final TestObserver<Throwable> testObserver = getCommand().getError().test();
+
+            execute().subscribe();
+
+            testObserver.assertValue(error -> error.getClass().equals(CannotExecuteCommandException.class));
+        }
+
+        @Test
+        @DisplayName("CanExecute observable should not emit any value")
+        public void testCanExecute()
+        {
+            final TestObserver<Boolean> testObserver = getCommand().canExecute().test();
+
+            testObserver.assertValue(false);
+
+            execute().subscribe();
+
+            testObserver.assertValue(false);
+        }
+
+        @Test
+        @DisplayName("IsExecuting observable should not emit any value")
+        public void testIsExecuting()
+        {
+            final TestObserver<Boolean> testObserver = getCommand().isExecuting().test();
+
+            testObserver.assertValue(false);
+
+            execute().subscribe();
+
+            testObserver.assertValue(false);
+        }
+
+        @Test
+        @DisplayName("ExecutionCount observable should not emit any value")
+        public void testExecutionCount()
+        {
+            final TestObserver<Integer> testObserver = getCommand().getExecutionCount().test();
+
+            testObserver.assertValue(0);
+
+            execute().subscribe();
+
+            testObserver.assertValue(0);
+        }
+
+        @Test
+        @DisplayName("HasBeenExecuted observable should not emit any value")
+        public void testHasBeenExecuted()
+        {
+            final TestObserver<Boolean> testObserver = getCommand().hasBeenExecuted().test();
+
+            testObserver.assertValue(false);
+
+            execute().subscribe();
+
+            testObserver.assertValue(false);
+        }
+
+        @Test
+        @DisplayName("Progress observable should not emit any value")
+        public void testProgress()
+        {
+            final TestObserver<Float> testObserver = getCommand().getProgress().test();
+
+            testObserver.assertValue(0.0f);
+
+            execute().subscribe();
+
+            testObserver.assertValue(0.0f);
         }
     }
 }

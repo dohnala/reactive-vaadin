@@ -99,6 +99,8 @@ public final class CompositeCommand<T, R> implements ReactiveCommand<T, List<R>>
     @Nonnull
     private List<Observable<R>> getChildExecutions(final @Nonnull Optional<T> input)
     {
+        Objects.requireNonNull(input, "Input cannot be null");
+
         if (input.isPresent())
         {
             return commands.stream()

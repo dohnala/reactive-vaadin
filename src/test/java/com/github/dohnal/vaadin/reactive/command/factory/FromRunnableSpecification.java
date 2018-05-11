@@ -193,6 +193,13 @@ public interface FromRunnableSpecification extends
                 testScheduler.triggerActions();
             }
 
+            @Override
+            protected void emitError(final @Nonnull Throwable error)
+            {
+                testSubject.onError(error);
+                testScheduler.triggerActions();
+            }
+
             @Nonnull
             @Override
             protected Observable<Void> execute()

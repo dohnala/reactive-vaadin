@@ -68,6 +68,8 @@ public final class Command<T, R> extends AbstractCommand<T, R>
     @Override
     protected Observable<R> executeInternal(final @Nonnull Optional<T> input)
     {
+        Objects.requireNonNull(input, "Input cannot be null");
+
         return Observable.just(input)
                 .subscribeOn(scheduler)
                 .flatMap(this::checkCanExecute)

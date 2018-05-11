@@ -70,6 +70,12 @@ public interface ReactiveCommand<T, R>
 
     /**
      * Returns an observable of whether command can be executed right now
+     * <p>
+     * If custom CanExecute was passed to factory method of {@link ReactiveCommandFactory}
+     * and emits an error, the error is then passed to this observable (which means that this observable
+     * will terminate)
+     * <p>
+     * You should make sure, that your custom CanExecute does not emit errors
      *
      * @return an observable of whether command can be executed right now
      */
@@ -86,6 +92,12 @@ public interface ReactiveCommand<T, R>
 
     /**
      * Returns execution pipeline which when subscribed, execute command with no input
+     * <p>
+     * If an error is thrown during command execution and any observer is subscribed to {@link #getError()},
+     * that error will be emitted as value through that observable
+     * <p>
+     * If no observer is subscribed to {@link #getError()}, the error is passed to the execution pipeline
+     * observable returned from this method
      *
      * @return execution pipeline
      * @throws NullPointerException if this command requires input

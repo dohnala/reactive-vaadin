@@ -331,8 +331,107 @@ public interface ExecuteSpecification extends BaseCommandSpecification
         }
 
         @Nested
-        @DisplayName("When command is executed with error")
-        class WhenExecuteWithError
+        @DisplayName("When command is executed with unhandled error")
+        class WhenExecuteWithUnhandledError
+        {
+            @Test
+            @DisplayName("Result observable should not emit any value")
+            public void testResult()
+            {
+                final TestObserver<R> testObserver = getCommand().getResult().test();
+
+                executeWithError().test();
+
+                testObserver.assertNoValues();
+            }
+
+            @Test
+            @DisplayName("CanExecute observable should emit false and then true")
+            public void testCanExecute()
+            {
+                final TestObserver<Boolean> testObserver = getCommand().canExecute().test();
+
+                testObserver.assertValue(true);
+
+                executeWithError().test();
+
+                testObserver.assertValues(true, false, true);
+            }
+
+            @Test
+            @DisplayName("IsExecuting observable should emit true and then false")
+            public void testIsExecuting()
+            {
+                final TestObserver<Boolean> testObserver = getCommand().isExecuting().test();
+
+                testObserver.assertValue(false);
+
+                executeWithError().test();
+
+                testObserver.assertValues(false, true, false);
+            }
+
+            @Test
+            @DisplayName("ExecutionCount observable should emit 1")
+            public void testExecutionCount()
+            {
+                final TestObserver<Integer> testObserver = getCommand().getExecutionCount().test();
+
+                testObserver.assertValue(0);
+
+                executeWithError().test();
+
+                testObserver.assertValues(0, 1);
+            }
+
+            @Test
+            @DisplayName("HasBeenExecuted observable should emit true")
+            public void testHasBeenExecuted()
+            {
+                final TestObserver<Boolean> testObserver = getCommand().hasBeenExecuted().test();
+
+                testObserver.assertValue(false);
+
+                executeWithError().test();
+
+                testObserver.assertValues(false, true);
+            }
+
+            @Test
+            @DisplayName("Progress observable should emit correct values")
+            public void testProgress()
+            {
+                final TestObserver<Float> testObserver = getCommand().getProgress().test();
+
+                testObserver.assertValue(0.0f);
+
+                executeWithError().test();
+
+                testObserver.assertValues(getErrorProgress());
+            }
+
+            @Test
+            @DisplayName("Execution should be run")
+            public void testExecution()
+            {
+                executeWithError().test();
+
+                verifyErrorExecution();
+            }
+
+            @Test
+            @DisplayName("Execution should emit error")
+            public void testExecutionError()
+            {
+                final TestObserver<R> execution = executeWithError().test();
+
+                execution.assertError(getError());
+            }
+        }
+
+        @Nested
+        @DisplayName("When command is executed with handled error")
+        class WhenExecuteWithHandledError
         {
             @BeforeEach
             void before()
