@@ -70,11 +70,13 @@ public final class Command<T, R> extends AbstractCommand<T, R>
     {
         return Observable.just(input)
                 .subscribeOn(scheduler)
-                .filter(value -> Boolean.TRUE.equals(isExecuting.getValue()))
-                .flatMap(value -> execution.apply(value.orElse(null)))
+                .flatMap(this::checkCanExecute)
+                .doOnNext(this::handleStart)
+                .flatMap(value -> execution.apply(value.orElse(null))
+                        .doOnNext(this::handleResult)
+                        .doFinally(this::handleComplete))
                 .onErrorResumeNext(this::handleError)
-                .doOnSubscribe(this::handleStart)
-                .doOnNext(this::handleResult)
-                .doFinally(this::handleComplete);
+                .replay()
+                .refCount();
     }
 }

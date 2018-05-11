@@ -15,6 +15,7 @@ package com.github.dohnal.vaadin.reactive;
 
 import javax.annotation.Nonnull;
 
+import com.github.dohnal.vaadin.reactive.exceptions.CannotExecuteCommandException;
 import io.reactivex.Observable;
 
 /**
@@ -84,19 +85,21 @@ public interface ReactiveCommand<T, R>
     Observable<Float> getProgress();
 
     /**
-     * Executes this command with no input
+     * Returns execution pipeline which when subscribed, execute command with no input
      *
-     * @return execution pipeline which will be executed after its subscribed
+     * @return execution pipeline
      * @throws NullPointerException if this command requires input
+     * @throws CannotExecuteCommandException if command cannot be executed
      */
     @Nonnull
     Observable<R> execute();
 
     /**
-     * Executes this command with given input
+     * Returns execution pipeline which when subscribed, execute command with given input
      *
      * @param input command input
-     * @return execution pipeline which will be executed after its subscribed
+     * @return execution pipeline
+     * @throws CannotExecuteCommandException if command cannot be executed
      */
     @Nonnull
     Observable<R> execute(final @Nonnull T input);

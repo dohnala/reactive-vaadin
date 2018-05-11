@@ -15,6 +15,7 @@ package com.github.dohnal.vaadin.reactive.command;
 
 import javax.annotation.Nonnull;
 
+import com.github.dohnal.vaadin.reactive.exceptions.CannotExecuteCommandException;
 import io.reactivex.Observable;
 import io.reactivex.observers.TestObserver;
 import org.junit.jupiter.api.BeforeEach;
@@ -120,6 +121,8 @@ public interface CanExecuteEmitsValueSpecification extends BaseCommandSpecificat
                 void before()
                 {
                     emitValue(false);
+
+                    getCommand().getError().test();
                 }
 
                 @Nested
@@ -138,14 +141,14 @@ public interface CanExecuteEmitsValueSpecification extends BaseCommandSpecificat
                     }
 
                     @Test
-                    @DisplayName("Error observable should not emit any value")
+                    @DisplayName("Error observable should emit CannotExecuteCommandException")
                     public void testError()
                     {
                         final TestObserver<Throwable> testObserver = getCommand().getError().test();
 
                         execute().subscribe();
 
-                        testObserver.assertNoValues();
+                        testObserver.assertValue(error -> error.getClass().equals(CannotExecuteCommandException.class));
                     }
 
                     @Test

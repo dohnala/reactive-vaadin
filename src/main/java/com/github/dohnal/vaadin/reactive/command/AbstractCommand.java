@@ -20,6 +20,7 @@ import java.util.Optional;
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
 import com.github.dohnal.vaadin.reactive.ReactiveProperty;
 import com.github.dohnal.vaadin.reactive.ReactivePropertyFactory;
+import com.github.dohnal.vaadin.reactive.exceptions.CannotExecuteCommandException;
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.disposables.SerialDisposable;
@@ -156,24 +157,34 @@ public abstract class AbstractCommand<T, R> implements ReactiveCommand<T, R>, Re
     }
 
     /**
-     * Handles start of command execution
+     * Checks whether command can be executed
      *
-     * @param disposable disposable used to dispose command execution
+     * @param input input for command execution
+     * @return input stage of execution pipeline or error if command cannot be executed
+     * @throws CannotExecuteCommandException if command cannot be executed
      */
-    protected final void handleStart(final @Nonnull Disposable disposable)
+    @Nonnull
+    protected final Observable<Optional<T>> checkCanExecute(final @Nonnull Optional<T> input)
     {
         if (Boolean.TRUE.equals(canExecute.getValue()))
         {
-            progress.setValue(0.0f);
-            isExecuting.setValue(true);
-
-            progressDisposable.set(customProgress.subscribe(progress::setValue));
-
+            return Observable.just(input);
         }
-        else if (!disposable.isDisposed())
-        {
-            disposable.dispose();
-        }
+
+        return Observable.error(new CannotExecuteCommandException("Command cannot be executed"));
+    }
+
+    /**
+     * Handles start of command execution
+     *
+     * @param input input for command execution
+     */
+    protected final void handleStart(final @Nonnull Optional<T> input)
+    {
+        progress.setValue(0.0f);
+        isExecuting.setValue(true);
+
+        progressDisposable.set(customProgress.subscribe(progress::setValue));
     }
 
     /**
