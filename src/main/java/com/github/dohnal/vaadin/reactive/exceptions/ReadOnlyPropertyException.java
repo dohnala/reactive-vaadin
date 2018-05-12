@@ -29,6 +29,8 @@ public class ReadOnlyPropertyException extends RuntimeException
 
     public ReadOnlyPropertyException(final @Nonnull ReactiveProperty<?> property)
     {
+        super("Property is read-only");
+
         Objects.requireNonNull(property, "Property cannot be null");
 
         this.property = property;

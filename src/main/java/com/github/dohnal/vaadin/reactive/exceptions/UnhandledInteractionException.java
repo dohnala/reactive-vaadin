@@ -29,6 +29,8 @@ public class UnhandledInteractionException extends RuntimeException
 
     public UnhandledInteractionException(final @Nonnull ReactiveInteraction<?, ?> interaction)
     {
+        super("Interaction is unhandled");
+
         Objects.requireNonNull(interaction, "Interaction cannot be null");
 
         this.interaction = interaction;

@@ -29,6 +29,8 @@ public class AlreadyHandledInteractionException extends RuntimeException
 
     public AlreadyHandledInteractionException(final @Nonnull ReactiveInteraction<?, ?> interaction)
     {
+        super("Interaction is already handled");
+
         Objects.requireNonNull(interaction, "Interaction cannot be null");
 
         this.interaction = interaction;

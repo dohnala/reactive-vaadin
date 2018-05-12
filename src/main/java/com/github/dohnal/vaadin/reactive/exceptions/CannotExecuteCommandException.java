@@ -29,6 +29,8 @@ public class CannotExecuteCommandException extends RuntimeException
 
     public CannotExecuteCommandException(final @Nonnull ReactiveCommand<?, ?> command)
     {
+        super("Command cannot be executed");
+
         Objects.requireNonNull(command, "Command cannot be null");
 
         this.command = command;
