@@ -23,6 +23,7 @@ import com.github.dohnal.vaadin.reactive.ReactivePropertyExtension;
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.TestObserver;
+import io.reactivex.schedulers.Schedulers;
 import io.reactivex.schedulers.TestScheduler;
 import io.reactivex.subjects.PublishSubject;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,10 +41,12 @@ public interface ObservablePropertyBinderSpecification
     abstract class WhenBindObservablePropertyToObservableSpecification
             implements ReactiveBinderExtension, ReactivePropertyExtension
     {
-        private TestScheduler testScheduler;
-        private PublishSubject<Integer> sourceObservable;
-        private ReactiveProperty<Integer> property;
-        private Disposable disposable;
+        protected TestScheduler testScheduler;
+        protected PublishSubject<Integer> sourceObservable;
+        protected ReactiveProperty<Integer> property;
+        protected PublishSubject<Throwable> errorSubject;
+        protected TestObserver<Throwable> errorObserver;
+        protected Disposable disposable;
 
         @BeforeEach
         protected void bind()
@@ -53,15 +56,31 @@ public interface ObservablePropertyBinderSpecification
             sourceObservable.observeOn(testScheduler);
             property = createProperty();
 
+            errorSubject = PublishSubject.create();
+            errorSubject.observeOn(Schedulers.trampoline());
+            errorObserver = errorSubject.test();
+
             disposable = bind(property).to(sourceObservable);
+        }
+
+        @Override
+        public void handleError(final @Nonnull Throwable error)
+        {
+            errorSubject.onNext(error);
         }
 
         @Test
         @DisplayName("Property value should not be set")
         public void testPropertyValue()
         {
-            property.asObservable().test()
-                    .assertNoValues();
+            property.asObservable().test().assertNoValues();
+        }
+
+        @Test
+        @DisplayName("No error should be handled")
+        public void testHandleError()
+        {
+            errorObserver.assertNoValues();
         }
 
         @Nested
@@ -79,35 +98,121 @@ public interface ObservablePropertyBinderSpecification
 
                 testObserver.assertValue(7);
             }
+
+            @Test
+            @DisplayName("No error should be handled")
+            public void testHandleError()
+            {
+                sourceObservable.onNext(7);
+                testScheduler.triggerActions();
+
+                errorObserver.assertNoValues();
+            }
         }
 
         @Nested
-        @DisplayName("When source observable emits value after property is unbound from observable")
-        class WhenSourceObservableEmitsValueAfterUnbind
+        @DisplayName("When source observable emits error")
+        class WhenSourceObservableEmitsError
         {
+            private final Throwable ERROR = new RuntimeException("Error");
+
             @Test
+            @SuppressWarnings("unchecked")
             @DisplayName("Property value should not be set")
             public void testPropertyValue()
             {
                 final TestObserver<Integer> testObserver = property.asObservable().test();
 
-                disposable.dispose();
-                sourceObservable.onNext(7);
+                sourceObservable.onError(ERROR);
                 testScheduler.triggerActions();
 
                 testObserver.assertNoValues();
+            }
+
+            @Test
+            @DisplayName("Correct error should be handled")
+            public void testHandleError()
+            {
+                sourceObservable.onError(ERROR);
+                testScheduler.triggerActions();
+
+                errorObserver.assertValue(ERROR);
+            }
+        }
+
+        @Nested
+        @DisplayName("After property is unbound from observable")
+        class AfterUnbind
+        {
+            @BeforeEach
+            void before()
+            {
+                disposable.dispose();
+            }
+
+            @Nested
+            @DisplayName("When source observable emits value")
+            class WhenSourceObservableEmitsValue
+            {
+                @Test
+                @DisplayName("Property value should not be set")
+                public void testPropertyValue()
+                {
+                    final TestObserver<Integer> testObserver = property.asObservable().test();
+
+                    disposable.dispose();
+                    sourceObservable.onNext(7);
+                    testScheduler.triggerActions();
+
+                    testObserver.assertNoValues();
+                }
+
+                @Test
+                @DisplayName("No error should be handled")
+                public void testHandleError()
+                {
+                    sourceObservable.onNext(7);
+                    testScheduler.triggerActions();
+
+                    errorObserver.assertNoValues();
+                }
+            }
+
+            @Nested
+            @DisplayName("When source observable emits error")
+            class WhenSourceObservableEmitsError
+            {
+                private final Throwable ERROR = new RuntimeException("Error");
+
+                @Test
+                @SuppressWarnings("unchecked")
+                @DisplayName("Property value should not be set")
+                public void testPropertyValue()
+                {
+                    final TestObserver<Integer> testObserver = property.asObservable().test();
+
+                    sourceObservable.onError(ERROR);
+                    testScheduler.triggerActions();
+
+                    testObserver.assertNoValues();
+                }
+
+                @Test
+                @DisplayName("No error should be handled")
+                public void testHandleError()
+                {
+                    sourceObservable.onError(ERROR);
+                    testScheduler.triggerActions();
+
+                    errorObserver.assertNoValues();
+                }
             }
         }
     }
 
     abstract class WhenBindObservablePropertyToIsObservableSpecification
-            implements ReactiveBinderExtension, ReactivePropertyExtension
+            extends WhenBindObservablePropertyToObservableSpecification
     {
-        private TestScheduler testScheduler;
-        private PublishSubject<Integer> sourceObservable;
-        private ReactiveProperty<Integer> property;
-        private Disposable disposable;
-
         @BeforeEach
         protected void bind()
         {
@@ -115,6 +220,10 @@ public interface ObservablePropertyBinderSpecification
             sourceObservable = PublishSubject.create();
             sourceObservable.observeOn(testScheduler);
             property = createProperty();
+
+            errorSubject = PublishSubject.create();
+            errorSubject.observeOn(testScheduler);
+            errorObserver = errorSubject.test();
 
             disposable = bind(property).to(new IsObservable<Integer>()
             {
@@ -126,49 +235,6 @@ public interface ObservablePropertyBinderSpecification
                 }
             });
         }
-
-        @Test
-        @DisplayName("Property value should not be set")
-        public void testPropertyValue()
-        {
-            property.asObservable().test()
-                    .assertNoValues();
-        }
-
-        @Nested
-        @DisplayName("When source observable emits value")
-        class WhenSourceObservableEmitsValue
-        {
-            @Test
-            @DisplayName("Property value should be set with correct value")
-            public void testPropertyValue()
-            {
-                final TestObserver<Integer> testObserver = property.asObservable().test();
-
-                sourceObservable.onNext(7);
-                testScheduler.triggerActions();
-
-                testObserver.assertValue(7);
-            }
-        }
-
-        @Nested
-        @DisplayName("When source observable emits value after property is unbound from observable")
-        class WhenSourceObservableEmitsValueAfterUnbind
-        {
-            @Test
-            @DisplayName("Property value should not be set")
-            public void testPropertyValue()
-            {
-                final TestObserver<Integer> testObserver = property.asObservable().test();
-
-                disposable.dispose();
-                sourceObservable.onNext(7);
-                testScheduler.triggerActions();
-
-                testObserver.assertNoValues();
-            }
-        }
     }
 
     abstract class WhenBindObservablePropertyToObservablePropertySpecification
@@ -176,6 +242,8 @@ public interface ObservablePropertyBinderSpecification
     {
         private ReactiveProperty<Integer> sourceProperty;
         private ReactiveProperty<Integer> property;
+        private PublishSubject<Throwable> errorSubject;
+        private TestObserver<Throwable> errorObserver;
         private Disposable disposable;
 
         @BeforeEach
@@ -184,23 +252,38 @@ public interface ObservablePropertyBinderSpecification
             sourceProperty = createProperty();
             property = createProperty();
 
+            errorSubject = PublishSubject.create();
+            errorSubject.observeOn(Schedulers.trampoline());
+            errorObserver = errorSubject.test();
+
             disposable = bind(property).to(sourceProperty);
+        }
+
+        @Override
+        public void handleError(final @Nonnull Throwable error)
+        {
+            errorSubject.onNext(error);
         }
 
         @Test
         @DisplayName("Property value should not be set")
         public void testPropertyValue()
         {
-            property.asObservable().test()
-                    .assertNoValues();
+            property.asObservable().test().assertNoValues();
         }
 
         @Test
         @DisplayName("Source property value should not be set")
         public void testSourcePropertyValue()
         {
-            sourceProperty.asObservable().test()
-                    .assertNoValues();
+            sourceProperty.asObservable().test().assertNoValues();
+        }
+
+        @Test
+        @DisplayName("No error should be handled")
+        public void testHandleError()
+        {
+            errorObserver.assertNoValues();
         }
 
         @Nested
@@ -216,6 +299,13 @@ public interface ObservablePropertyBinderSpecification
                 sourceProperty.setValue(7);
 
                 testObserver.assertValue(7);
+            }
+
+            @Test
+            @DisplayName("No error should be handled")
+            public void testHandleError()
+            {
+                errorObserver.assertNoValues();
             }
         }
 
@@ -233,39 +323,55 @@ public interface ObservablePropertyBinderSpecification
 
                 testObserver.assertValue(7);
             }
-        }
 
-        @Nested
-        @DisplayName("When source property emits value after property is unbound from source property")
-        class WhenSourceObservableEmitsValueAfterUnbind
-        {
             @Test
-            @DisplayName("Property value should not be set")
-            public void testPropertyValue()
+            @DisplayName("No error should be handled")
+            public void testHandleError()
             {
-                final TestObserver<Integer> testObserver = property.asObservable().test();
-
-                disposable.dispose();
-                sourceProperty.setValue(7);
-
-                testObserver.assertNoValues();
+                errorObserver.assertNoValues();
             }
         }
 
         @Nested
-        @DisplayName("When property emits value after property is unbound from source property")
-        class WhenObservableEmitsValueAfterUnbind
+        @DisplayName("After property is unbound from source property")
+        class AfterUnbind
         {
-            @Test
-            @DisplayName("Source property value should not be set")
-            public void testPropertyValue()
+            @BeforeEach
+            void before()
             {
-                final TestObserver<Integer> testObserver = sourceProperty.asObservable().test();
-
                 disposable.dispose();
-                property.setValue(7);
+            }
 
-                testObserver.assertNoValues();
+            @Nested
+            @DisplayName("When source property emits value")
+            class WhenSourceObservableEmitsValue
+            {
+                @Test
+                @DisplayName("Property value should not be set")
+                public void testPropertyValue()
+                {
+                    final TestObserver<Integer> testObserver = property.asObservable().test();
+
+                    sourceProperty.setValue(7);
+
+                    testObserver.assertNoValues();
+                }
+            }
+
+            @Nested
+            @DisplayName("When property emits value")
+            class WhenObservableEmitsValue
+            {
+                @Test
+                @DisplayName("Source property value should not be set")
+                public void testPropertyValue()
+                {
+                    final TestObserver<Integer> testObserver = sourceProperty.asObservable().test();
+
+                    property.setValue(7);
+
+                    testObserver.assertNoValues();
+                }
             }
         }
     }

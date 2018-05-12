@@ -15,6 +15,7 @@ package com.github.dohnal.vaadin.reactive.binder;
 
 import javax.annotation.Nonnull;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 import com.github.dohnal.vaadin.reactive.IsObservable;
 import com.github.dohnal.vaadin.reactive.Property;
@@ -28,12 +29,15 @@ import io.reactivex.disposables.Disposable;
  * @param <T> type of value
  * @author dohnal
  */
-public final class DefaultPropertyBinder<T> implements PropertyBinder<T>
+public final class DefaultPropertyBinder<T> extends AbstractBinder implements PropertyBinder<T>
 {
     private final Property<T> property;
 
-    public DefaultPropertyBinder(final @Nonnull Property<T> property)
+    public DefaultPropertyBinder(final @Nonnull Property<T> property,
+                                 final @Nonnull Consumer<? super Throwable> errorHandler)
     {
+        super(errorHandler);
+
         Objects.requireNonNull(property, "Property cannot be null");
 
         this.property = property;
@@ -45,7 +49,7 @@ public final class DefaultPropertyBinder<T> implements PropertyBinder<T>
     {
         Objects.requireNonNull(observable, "Observable cannot be null");
 
-        return observable.subscribe(property::setValue);
+        return subscribeWithErrorHandler(observable, property::setValue);
     }
 
     @Nonnull

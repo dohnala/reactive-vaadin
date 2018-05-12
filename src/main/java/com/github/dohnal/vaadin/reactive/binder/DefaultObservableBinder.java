@@ -27,12 +27,15 @@ import io.reactivex.disposables.Disposable;
  * @param <T> type of value
  * @author dohnal
  */
-public final class DefaultObservableBinder<T> implements ObservableBinder<T>
+public final class DefaultObservableBinder<T> extends AbstractBinder implements ObservableBinder<T>
 {
     private final Observable<T> observable;
 
-    public DefaultObservableBinder(final @Nonnull Observable<T> observable)
+    public DefaultObservableBinder(final @Nonnull Observable<T> observable,
+                                   final @Nonnull Consumer<? super Throwable> errorHandler)
     {
+        super(errorHandler);
+
         Objects.requireNonNull(observable, "Observable cannot be null");
 
         this.observable = observable;
@@ -44,7 +47,7 @@ public final class DefaultObservableBinder<T> implements ObservableBinder<T>
     {
         Objects.requireNonNull(action, "Action cannot be null");
 
-        return observable.subscribe(action::accept);
+        return subscribeWithErrorHandler(observable, action);
     }
 
     @Nonnull
@@ -53,6 +56,6 @@ public final class DefaultObservableBinder<T> implements ObservableBinder<T>
     {
         Objects.requireNonNull(action, "Action cannot be null");
 
-        return observable.subscribe(value -> action.run());
+        return subscribeWithErrorHandler(observable, value -> action.run());
     }
 }

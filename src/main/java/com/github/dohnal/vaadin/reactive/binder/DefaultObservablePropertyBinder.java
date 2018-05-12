@@ -15,6 +15,7 @@ package com.github.dohnal.vaadin.reactive.binder;
 
 import javax.annotation.Nonnull;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 import com.github.dohnal.vaadin.reactive.IsObservable;
 import com.github.dohnal.vaadin.reactive.ObservableProperty;
@@ -29,12 +30,15 @@ import io.reactivex.internal.disposables.ListCompositeDisposable;
  * @param <T> type of value
  * @author dohnal
  */
-public final class DefaultObservablePropertyBinder<T> implements ObservablePropertyBinder<T>
+public final class DefaultObservablePropertyBinder<T> extends AbstractBinder implements ObservablePropertyBinder<T>
 {
     private final ObservableProperty<T> property;
 
-    public DefaultObservablePropertyBinder(final @Nonnull ObservableProperty<T> property)
+    public DefaultObservablePropertyBinder(final @Nonnull ObservableProperty<T> property,
+                                           final @Nonnull Consumer<? super Throwable> errorHandler)
     {
+        super(errorHandler);
+
         Objects.requireNonNull(property, "Property cannot be null");
 
         this.property = property;
@@ -42,12 +46,11 @@ public final class DefaultObservablePropertyBinder<T> implements ObservablePrope
 
     @Nonnull
     @Override
-    @SuppressWarnings("Convert2MethodRef")
     public final Disposable to(final @Nonnull Observable<? extends T> observable)
     {
         Objects.requireNonNull(observable, "Observable cannot be null");
 
-        return observable.subscribe(value -> property.setValue(value));
+        return subscribeWithErrorHandler(observable, property::setValue);
     }
 
     @Nonnull
@@ -61,13 +64,12 @@ public final class DefaultObservablePropertyBinder<T> implements ObservablePrope
 
     @Nonnull
     @Override
-    @SuppressWarnings("Convert2MethodRef")
     public final Disposable to(final @Nonnull ObservableProperty<T> anotherProperty)
     {
         Objects.requireNonNull(anotherProperty, "Another property cannot be null");
 
         return new ListCompositeDisposable(
-                property.asObservable().subscribe(anotherProperty::setValue),
-                anotherProperty.asObservable().subscribe(value -> property.setValue(value)));
+                subscribeWithErrorHandler(property.asObservable(), anotherProperty::setValue),
+                subscribeWithErrorHandler(anotherProperty.asObservable(), property::setValue));
     }
 }

@@ -29,6 +29,13 @@ import io.reactivex.Observable;
 public interface ReactiveBinderExtension extends EventExtension, ActionExtension
 {
     /**
+     * Handles all unhandled errors caught by binders created by this extension
+     *
+     * @param error error
+     */
+    void handleError(final @Nonnull Throwable error);
+
+    /**
      * Returns binder for given property
      *
      * @param property property
@@ -40,7 +47,7 @@ public interface ReactiveBinderExtension extends EventExtension, ActionExtension
     {
         Objects.requireNonNull(property, "Property cannot be null");
 
-        return new DefaultPropertyBinder<>(property);
+        return new DefaultPropertyBinder<>(property, this::handleError);
     }
 
     /**
@@ -55,7 +62,7 @@ public interface ReactiveBinderExtension extends EventExtension, ActionExtension
     {
         Objects.requireNonNull(property, "Property cannot be null");
 
-        return new DefaultObservablePropertyBinder<>(property);
+        return new DefaultObservablePropertyBinder<>(property, this::handleError);
     }
 
     /**
@@ -70,7 +77,7 @@ public interface ReactiveBinderExtension extends EventExtension, ActionExtension
     {
         Objects.requireNonNull(observable, "Observable cannot be null");
 
-        return new DefaultObservableBinder<>(observable);
+        return new DefaultObservableBinder<>(observable, this::handleError);
     }
 
     /**

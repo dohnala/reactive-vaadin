@@ -13,16 +13,34 @@
 
 package com.github.dohnal.vaadin.mvvm;
 
+import javax.annotation.Nonnull;
+import java.util.Objects;
+
 import com.github.dohnal.vaadin.reactive.ReactiveBinderExtension;
 import com.github.dohnal.vaadin.reactive.ReactiveCommandExtension;
 import com.github.dohnal.vaadin.reactive.ReactiveInteractionExtension;
 import com.github.dohnal.vaadin.reactive.ReactivePropertyExtension;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Base class for all view models in MVVM pattern
  *
  * @author dohnal
  */
-public class AbstractViewModel implements ReactiveBinderExtension, ReactivePropertyExtension, ReactiveCommandExtension,
+public abstract class AbstractViewModel implements
+        ReactiveBinderExtension,
+        ReactivePropertyExtension,
+        ReactiveCommandExtension,
         ReactiveInteractionExtension
-{}
+{
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractViewModel.class);
+
+    @Override
+    public void handleError(final @Nonnull Throwable error)
+    {
+        Objects.requireNonNull(error, "Error cannot be null");
+
+        LOGGER.error("Unhandled error", error);
+    }
+}

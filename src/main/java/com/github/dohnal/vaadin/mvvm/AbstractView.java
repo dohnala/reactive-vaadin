@@ -29,6 +29,8 @@ import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.UI;
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Base class for all view in MVVM pattern
@@ -36,10 +38,14 @@ import io.reactivex.disposables.Disposable;
  * @param <M> type of view model
  * @author dohnal
  */
-public abstract class AbstractView<M extends AbstractViewModel>
-        extends CustomComponent
-        implements ReactiveBinderExtension, ComponentEventExtension, ComponentPropertyExtension, ComponentActionExtension
+public abstract class AbstractView<M extends AbstractViewModel> extends CustomComponent implements
+        ReactiveBinderExtension,
+        ComponentEventExtension,
+        ComponentPropertyExtension,
+        ComponentActionExtension
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractView.class);
+
     private M viewModel;
 
     /**
@@ -52,6 +58,14 @@ public abstract class AbstractView<M extends AbstractViewModel>
         Objects.requireNonNull(viewModel, "View model cannot be null");
 
         this.viewModel = viewModel;
+    }
+
+    @Override
+    public void handleError(final @Nonnull Throwable error)
+    {
+        Objects.requireNonNull(error, "Error cannot be null");
+
+        LOGGER.error("Unhandled error", error);
     }
 
     /**

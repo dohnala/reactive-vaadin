@@ -21,6 +21,8 @@ import com.github.dohnal.vaadin.reactive.PropertyBinder;
 import com.github.dohnal.vaadin.reactive.ReactiveBinderExtension;
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.observers.TestObserver;
+import io.reactivex.schedulers.Schedulers;
 import io.reactivex.schedulers.TestScheduler;
 import io.reactivex.subjects.PublishSubject;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,10 +40,12 @@ public interface PropertyBinderSpecification
 {
     abstract class WhenBindPropertyToObservableSpecification implements ReactiveBinderExtension
     {
-        private TestScheduler testScheduler;
-        private PublishSubject<Integer> sourceObservable;
-        private Property<Integer> property;
-        private Disposable disposable;
+        protected TestScheduler testScheduler;
+        protected PublishSubject<Integer> sourceObservable;
+        protected Property<Integer> property;
+        protected PublishSubject<Throwable> errorSubject;
+        protected TestObserver<Throwable> errorObserver;
+        protected Disposable disposable;
 
         @BeforeEach
         @SuppressWarnings("unchecked")
@@ -52,7 +56,17 @@ public interface PropertyBinderSpecification
             sourceObservable.observeOn(testScheduler);
             property = Mockito.mock(Property.class);
 
+            errorSubject = PublishSubject.create();
+            errorSubject.observeOn(Schedulers.trampoline());
+            errorObserver = errorSubject.test();
+
             disposable = bind(property).to(sourceObservable);
+        }
+
+        @Override
+        public void handleError(final @Nonnull Throwable error)
+        {
+            errorSubject.onNext(error);
         }
 
         @Test
@@ -60,6 +74,13 @@ public interface PropertyBinderSpecification
         public void testPropertyValue()
         {
             Mockito.verify(property, Mockito.never()).setValue(Mockito.any());
+        }
+
+        @Test
+        @DisplayName("No error should be handled")
+        public void testHandleError()
+        {
+            errorObserver.assertNoValues();
         }
 
         @Nested
@@ -78,12 +99,47 @@ public interface PropertyBinderSpecification
 
                 Mockito.verify(property).setValue(7);
             }
+
+            @Test
+            @DisplayName("No error should be handled")
+            public void testHandleError()
+            {
+                sourceObservable.onNext(7);
+                testScheduler.triggerActions();
+
+                errorObserver.assertNoValues();
+            }
+
+            @Nested
+            @DisplayName("When property throws error")
+            class WhenPropertyThrowsError
+            {
+                private final Throwable ERROR = new RuntimeException("Error");
+
+                @BeforeEach
+                void before()
+                {
+                    Mockito.doThrow(ERROR).when(property).setValue(7);
+                }
+
+                @Test
+                @DisplayName("Correct error should be handled")
+                public void testHandleError()
+                {
+                    sourceObservable.onNext(7);
+                    testScheduler.triggerActions();
+
+                    errorObserver.assertValue(ERROR);
+                }
+            }
         }
 
         @Nested
-        @DisplayName("When source observable emits value after property is unbound from observable")
-        class WhenSourceObservableEmitsValueAfterUnbind
+        @DisplayName("When source observable emits error")
+        class WhenSourceObservableEmitsError
         {
+            private final Throwable ERROR = new RuntimeException("Error");
+
             @Test
             @SuppressWarnings("unchecked")
             @DisplayName("Property value should not be set")
@@ -91,23 +147,95 @@ public interface PropertyBinderSpecification
             {
                 Mockito.clearInvocations(property);
 
-                disposable.dispose();
-
-                sourceObservable.onNext(7);
+                sourceObservable.onError(ERROR);
                 testScheduler.triggerActions();
 
                 Mockito.verify(property, Mockito.never()).setValue(Mockito.any());
             }
+
+            @Test
+            @DisplayName("Correct error should be handled")
+            public void testHandleError()
+            {
+                sourceObservable.onError(ERROR);
+                testScheduler.triggerActions();
+
+                errorObserver.assertValue(ERROR);
+            }
+        }
+
+        @Nested
+        @DisplayName("After property is unbound from observable")
+        class AfterUnbind
+        {
+            @BeforeEach
+            void before()
+            {
+                disposable.dispose();
+            }
+
+            @Nested
+            @DisplayName("When source observable emits value")
+            class WhenSourceObservableEmitsValue
+            {
+                @Test
+                @SuppressWarnings("unchecked")
+                @DisplayName("Property value should not be set")
+                public void testPropertyValue()
+                {
+                    Mockito.clearInvocations(property);
+
+                    sourceObservable.onNext(7);
+                    testScheduler.triggerActions();
+
+                    Mockito.verify(property, Mockito.never()).setValue(Mockito.any());
+                }
+
+                @Test
+                @DisplayName("No error should be handled")
+                public void testHandleError()
+                {
+                    sourceObservable.onNext(7);
+                    testScheduler.triggerActions();
+
+                    errorObserver.assertNoValues();
+                }
+            }
+
+            @Nested
+            @DisplayName("When source observable emits error")
+            class WhenSourceObservableEmitsError
+            {
+                private final Throwable ERROR = new RuntimeException("Error");
+
+                @Test
+                @SuppressWarnings("unchecked")
+                @DisplayName("Property value should not be set")
+                public void testPropertyValue()
+                {
+                    Mockito.clearInvocations(property);
+
+                    sourceObservable.onError(ERROR);
+                    testScheduler.triggerActions();
+
+                    Mockito.verify(property, Mockito.never()).setValue(Mockito.any());
+                }
+
+                @Test
+                @DisplayName("No error should be handled")
+                public void testHandleError()
+                {
+                    sourceObservable.onError(ERROR);
+                    testScheduler.triggerActions();
+
+                    errorObserver.assertNoValues();
+                }
+            }
         }
     }
 
-    abstract class WhenBindPropertyToIsObservableSpecification implements ReactiveBinderExtension
+    abstract class WhenBindPropertyToIsObservableSpecification extends WhenBindPropertyToObservableSpecification
     {
-        private TestScheduler testScheduler;
-        private PublishSubject<Integer> sourceObservable;
-        private Property<Integer> property;
-        private Disposable disposable;
-
         @BeforeEach
         @SuppressWarnings("unchecked")
         protected void bind()
@@ -116,6 +244,10 @@ public interface PropertyBinderSpecification
             sourceObservable = PublishSubject.create();
             sourceObservable.observeOn(testScheduler);
             property = Mockito.mock(Property.class);
+
+            errorSubject = PublishSubject.create();
+            errorSubject.observeOn(Schedulers.trampoline());
+            errorObserver = errorSubject.test();
 
             disposable = bind(property).to(new IsObservable<Integer>()
             {
@@ -126,51 +258,6 @@ public interface PropertyBinderSpecification
                     return sourceObservable;
                 }
             });
-        }
-
-        @Test
-        @DisplayName("Property value should not be set")
-        public void testPropertyValue()
-        {
-            Mockito.verify(property, Mockito.never()).setValue(Mockito.any());
-        }
-
-        @Nested
-        @DisplayName("When source observable emits value")
-        class WhenSourceObservableEmitsValue
-        {
-            @Test
-            @SuppressWarnings("unchecked")
-            @DisplayName("Property value should be set with correct value")
-            public void testPropertyValue()
-            {
-                Mockito.clearInvocations(property);
-
-                sourceObservable.onNext(7);
-                testScheduler.triggerActions();
-
-                Mockito.verify(property).setValue(7);
-            }
-        }
-
-        @Nested
-        @DisplayName("When source observable emits value after property is unbound from observable")
-        class WhenSourceObservableEmitsValueAfterUnbind
-        {
-            @Test
-            @SuppressWarnings("unchecked")
-            @DisplayName("Property value should not be set")
-            public void testPropertyValue()
-            {
-                Mockito.clearInvocations(property);
-
-                disposable.dispose();
-
-                sourceObservable.onNext(7);
-                testScheduler.triggerActions();
-
-                Mockito.verify(property, Mockito.never()).setValue(Mockito.any());
-            }
         }
     }
 }

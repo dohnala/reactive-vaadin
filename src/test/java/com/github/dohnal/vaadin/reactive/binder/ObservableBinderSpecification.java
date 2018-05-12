@@ -21,6 +21,8 @@ import com.github.dohnal.vaadin.reactive.ObservableBinder;
 import com.github.dohnal.vaadin.reactive.ReactiveBinderExtension;
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.observers.TestObserver;
+import io.reactivex.schedulers.Schedulers;
 import io.reactivex.schedulers.TestScheduler;
 import io.reactivex.subjects.PublishSubject;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,10 +40,12 @@ public interface ObservableBinderSpecification
 {
     abstract class WhenBindObservableToConsumerSpecification implements ReactiveBinderExtension
     {
-        private TestScheduler testScheduler;
-        private PublishSubject<Integer> observable;
-        private Consumer<Integer> consumer;
-        private Disposable disposable;
+        protected TestScheduler testScheduler;
+        protected PublishSubject<Integer> observable;
+        protected Consumer<Integer> consumer;
+        protected PublishSubject<Throwable> errorSubject;
+        protected TestObserver<Throwable> errorObserver;
+        protected Disposable disposable;
 
         @BeforeEach
         @SuppressWarnings("unchecked")
@@ -52,7 +56,17 @@ public interface ObservableBinderSpecification
             observable.observeOn(testScheduler);
             consumer = Mockito.mock(Consumer.class);
 
+            errorSubject = PublishSubject.create();
+            errorSubject.observeOn(Schedulers.trampoline());
+            errorObserver = errorSubject.test();
+
             disposable = when(observable).then(consumer);
+        }
+
+        @Override
+        public void handleError(final @Nonnull Throwable error)
+        {
+            errorSubject.onNext(error);
         }
 
         @Test
@@ -62,107 +76,148 @@ public interface ObservableBinderSpecification
             Mockito.verify(consumer, Mockito.never()).accept(Mockito.any());
         }
 
+        @Test
+        @DisplayName("No error should be handled")
+        public void testHandleError()
+        {
+            errorObserver.assertNoValues();
+        }
+
         @Nested
         @DisplayName("When observable emits value")
         class WhenObservableEmitsValue
         {
             @Test
             @DisplayName("Consumer should be called with correct value")
-            public void testPropertyValue()
+            public void testConsumer()
             {
                 observable.onNext(7);
                 testScheduler.triggerActions();
 
                 Mockito.verify(consumer).accept(7);
             }
+
+            @Test
+            @DisplayName("No error should be handled")
+            public void testHandleError()
+            {
+                errorObserver.assertNoValues();
+            }
+
+            @Nested
+            @DisplayName("When consumer throws error")
+            class WhenConsumerThrowsError
+            {
+                private final Throwable ERROR = new RuntimeException("Error");
+
+                @BeforeEach
+                void before()
+                {
+                    Mockito.doThrow(ERROR).when(consumer).accept(7);
+                }
+
+                @Test
+                @DisplayName("Correct error should be handled")
+                public void testHandleError()
+                {
+                    observable.onNext(7);
+                    testScheduler.triggerActions();
+
+                    errorObserver.assertValue(ERROR);
+                }
+            }
         }
 
         @Nested
-        @DisplayName("When observable emits value after observable is unbound from consumer")
-        class WhenObservableEmitsValueAfterUnbind
+        @DisplayName("When observable emits error")
+        class WhenObservableEmitsError
         {
-            @Test
-            @SuppressWarnings("unchecked")
-            @DisplayName("Consumer should not be called")
-            public void testPropertyValue()
-            {
-                disposable.dispose();
+            private final Throwable ERROR = new RuntimeException("Error");
 
-                observable.onNext(7);
+            @Test
+            @DisplayName("Consumer should not be called")
+            public void testConsumer()
+            {
+                observable.onError(ERROR);
                 testScheduler.triggerActions();
 
                 Mockito.verify(consumer, Mockito.never()).accept(Mockito.any());
             }
-        }
-    }
 
-    abstract class WhenBindObservableToRunnableSpecification implements ReactiveBinderExtension
-    {
-        private TestScheduler testScheduler;
-        private PublishSubject<Integer> observable;
-        private Runnable runnable;
-        private Disposable disposable;
-
-        @BeforeEach
-        @SuppressWarnings("unchecked")
-        protected void bind()
-        {
-            testScheduler = new TestScheduler();
-            observable = PublishSubject.create();
-            observable.observeOn(testScheduler);
-            runnable = Mockito.mock(Runnable.class);
-
-            disposable = when(observable).then(runnable);
-        }
-
-        @Test
-        @DisplayName("Runnable should not be called")
-        public void testConsumer()
-        {
-            Mockito.verify(runnable, Mockito.never()).run();
-        }
-
-        @Nested
-        @DisplayName("When observable emits value")
-        class WhenObservableEmitsValue
-        {
             @Test
-            @DisplayName("Runnable should be called")
-            public void testPropertyValue()
+            @DisplayName("Correct error should be handled")
+            public void testHandleError()
             {
-                observable.onNext(7);
+                observable.onError(ERROR);
                 testScheduler.triggerActions();
 
-                Mockito.verify(runnable).run();
+                errorObserver.assertValue(ERROR);
             }
         }
 
         @Nested
-        @DisplayName("When observable emits value after observable is unbound from runnable")
-        class WhenObservableEmitsValueAfterUnbind
+        @DisplayName("After observable is unbound from consumer")
+        class AfterUnbind
         {
-            @Test
-            @SuppressWarnings("unchecked")
-            @DisplayName("Runnable should not be called")
-            public void testPropertyValue()
+            @BeforeEach
+            void before()
             {
                 disposable.dispose();
+            }
 
-                observable.onNext(7);
-                testScheduler.triggerActions();
+            @Nested
+            @DisplayName("When observable emits value")
+            class WhenObservableEmitsValue
+            {
+                @Test
+                @DisplayName("Consumer should not be called")
+                public void testConsumer()
+                {
+                    observable.onNext(7);
+                    testScheduler.triggerActions();
 
-                Mockito.verify(runnable, Mockito.never()).run();
+                    Mockito.verify(consumer, Mockito.never()).accept(Mockito.any());
+                }
+
+                @Test
+                @DisplayName("No error should be handled")
+                public void testHandleError()
+                {
+                    errorObserver.assertNoValues();
+                }
+            }
+
+            @Nested
+            @DisplayName("When source observable emits error")
+            class WhenSourceObservableEmitsError
+            {
+                private final Throwable ERROR = new RuntimeException("Error");
+
+                @Test
+                @DisplayName("Consumer should not be called")
+                public void testConsumer()
+                {
+                    observable.onError(ERROR);
+                    testScheduler.triggerActions();
+
+                    Mockito.verify(consumer, Mockito.never()).accept(Mockito.any());
+                }
+
+                @Test
+                @DisplayName("No error should be handled")
+                public void testHandleError()
+                {
+                    observable.onError(ERROR);
+                    testScheduler.triggerActions();
+
+                    errorObserver.assertNoValues();
+                }
             }
         }
     }
 
-    abstract class WhenBindIsObservableToConsumerSpecification implements ReactiveBinderExtension
+    abstract class WhenBindIsObservableToConsumerSpecification extends WhenBindObservableToConsumerSpecification
     {
-        private TestScheduler testScheduler;
-        private PublishSubject<Integer> observable;
-        private Consumer<Integer> consumer;
-        private Disposable disposable;
-
         @BeforeEach
         @SuppressWarnings("unchecked")
         protected void bind()
@@ -171,6 +226,10 @@ public interface ObservableBinderSpecification
             observable = PublishSubject.create();
             observable.observeOn(testScheduler);
             consumer = Mockito.mock(Consumer.class);
+
+            errorSubject = PublishSubject.create();
+            errorSubject.observeOn(Schedulers.trampoline());
+            errorObserver = errorSubject.test();
 
             disposable = when(new IsObservable<Integer>()
             {
@@ -182,54 +241,16 @@ public interface ObservableBinderSpecification
                 }
             }).then(consumer);
         }
-
-        @Test
-        @DisplayName("Consumer should not be called")
-        public void testConsumer()
-        {
-            Mockito.verify(consumer, Mockito.never()).accept(Mockito.any());
-        }
-
-        @Nested
-        @DisplayName("When observable emits value")
-        class WhenObservableEmitsValue
-        {
-            @Test
-            @DisplayName("Consumer should be called with correct value")
-            public void testPropertyValue()
-            {
-                observable.onNext(7);
-                testScheduler.triggerActions();
-
-                Mockito.verify(consumer).accept(7);
-            }
-        }
-
-        @Nested
-        @DisplayName("When observable emits value after observable is unbound from consumer")
-        class WhenObservableEmitsValueAfterUnbind
-        {
-            @Test
-            @SuppressWarnings("unchecked")
-            @DisplayName("Consumer should not be called")
-            public void testPropertyValue()
-            {
-                disposable.dispose();
-
-                observable.onNext(7);
-                testScheduler.triggerActions();
-
-                Mockito.verify(consumer, Mockito.never()).accept(Mockito.any());
-            }
-        }
     }
 
-    abstract class WhenBindIsObservableToRunnableSpecification implements ReactiveBinderExtension
+    abstract class WhenBindObservableToRunnableSpecification implements ReactiveBinderExtension
     {
-        private TestScheduler testScheduler;
-        private PublishSubject<Integer> observable;
-        private Runnable runnable;
-        private Disposable disposable;
+        protected TestScheduler testScheduler;
+        protected PublishSubject<Integer> observable;
+        protected Runnable runnable;
+        protected PublishSubject<Throwable> errorSubject;
+        protected TestObserver<Throwable> errorObserver;
+        protected Disposable disposable;
 
         @BeforeEach
         @SuppressWarnings("unchecked")
@@ -240,6 +261,181 @@ public interface ObservableBinderSpecification
             observable.observeOn(testScheduler);
             runnable = Mockito.mock(Runnable.class);
 
+            errorSubject = PublishSubject.create();
+            errorSubject.observeOn(Schedulers.trampoline());
+            errorObserver = errorSubject.test();
+
+            disposable = when(observable).then(runnable);
+        }
+
+        @Override
+        public void handleError(final @Nonnull Throwable error)
+        {
+            errorSubject.onNext(error);
+        }
+
+        @Test
+        @DisplayName("Runnable should not be called")
+        public void testRunnable()
+        {
+            Mockito.verify(runnable, Mockito.never()).run();
+        }
+
+        @Test
+        @DisplayName("No error should be handled")
+        public void testHandleError()
+        {
+            errorObserver.assertNoValues();
+        }
+
+        @Nested
+        @DisplayName("When observable emits value")
+        class WhenObservableEmitsValue
+        {
+            @Test
+            @DisplayName("Runnable should be called")
+            public void testRunnable()
+            {
+                observable.onNext(7);
+                testScheduler.triggerActions();
+
+                Mockito.verify(runnable).run();
+            }
+
+            @Test
+            @DisplayName("No error should be handled")
+            public void testHandleError()
+            {
+                errorObserver.assertNoValues();
+            }
+
+            @Nested
+            @DisplayName("When runnable throws error")
+            class WhenRunnableThrowsError
+            {
+                private final Throwable ERROR = new RuntimeException("Error");
+
+                @BeforeEach
+                void before()
+                {
+                    Mockito.doThrow(ERROR).when(runnable).run();
+                }
+
+                @Test
+                @DisplayName("Correct error should be handled")
+                public void testHandleError()
+                {
+                    observable.onNext(7);
+                    testScheduler.triggerActions();
+
+                    errorObserver.assertValue(ERROR);
+                }
+            }
+        }
+
+        @Nested
+        @DisplayName("When observable emits error")
+        class WhenObservableEmitsError
+        {
+            private final Throwable ERROR = new RuntimeException("Error");
+
+            @Test
+            @DisplayName("Runnable should not be called")
+            public void testRunnable()
+            {
+                observable.onError(ERROR);
+                testScheduler.triggerActions();
+
+                Mockito.verify(runnable, Mockito.never()).run();
+            }
+
+            @Test
+            @DisplayName("Correct error should be handled")
+            public void testHandleError()
+            {
+                observable.onError(ERROR);
+                testScheduler.triggerActions();
+
+                errorObserver.assertValue(ERROR);
+            }
+        }
+
+        @Nested
+        @DisplayName("After observable is unbound from runnable")
+        class AfterUnbind
+        {
+            @BeforeEach
+            void before()
+            {
+                disposable.dispose();
+            }
+
+            @Nested
+            @DisplayName("When observable emits value")
+            class WhenObservableEmitsValue
+            {
+                @Test
+                @DisplayName("Runnable should not be called")
+                public void testRunnable()
+                {
+                    observable.onNext(7);
+                    testScheduler.triggerActions();
+
+                    Mockito.verify(runnable, Mockito.never()).run();
+                }
+
+                @Test
+                @DisplayName("No error should be handled")
+                public void testHandleError()
+                {
+                    errorObserver.assertNoValues();
+                }
+            }
+
+            @Nested
+            @DisplayName("When source observable emits error")
+            class WhenSourceObservableEmitsError
+            {
+                private final Throwable ERROR = new RuntimeException("Error");
+
+                @Test
+                @DisplayName("Runnable should not be called")
+                public void testRunnable()
+                {
+                    observable.onError(ERROR);
+                    testScheduler.triggerActions();
+
+                    Mockito.verify(runnable, Mockito.never()).run();
+                }
+
+                @Test
+                @DisplayName("No error should be handled")
+                public void testHandleError()
+                {
+                    observable.onError(ERROR);
+                    testScheduler.triggerActions();
+
+                    errorObserver.assertNoValues();
+                }
+            }
+        }
+    }
+
+    abstract class WhenBindIsObservableToRunnableSpecification extends WhenBindObservableToRunnableSpecification
+    {
+        @BeforeEach
+        @SuppressWarnings("unchecked")
+        protected void bind()
+        {
+            testScheduler = new TestScheduler();
+            observable = PublishSubject.create();
+            observable.observeOn(testScheduler);
+            runnable = Mockito.mock(Runnable.class);
+
+            errorSubject = PublishSubject.create();
+            errorSubject.observeOn(Schedulers.trampoline());
+            errorObserver = errorSubject.test();
+
             disposable = when(new IsObservable<Integer>()
             {
                 @Nonnull
@@ -249,46 +445,6 @@ public interface ObservableBinderSpecification
                     return observable;
                 }
             }).then(runnable);
-        }
-
-        @Test
-        @DisplayName("Runnable should not be called")
-        public void testConsumer()
-        {
-            Mockito.verify(runnable, Mockito.never()).run();
-        }
-
-        @Nested
-        @DisplayName("When observable emits value")
-        class WhenObservableEmitsValue
-        {
-            @Test
-            @DisplayName("Runnable should be called")
-            public void testPropertyValue()
-            {
-                observable.onNext(7);
-                testScheduler.triggerActions();
-
-                Mockito.verify(runnable).run();
-            }
-        }
-
-        @Nested
-        @DisplayName("When observable emits value after observable is unbound from runnable")
-        class WhenObservableEmitsValueAfterUnbind
-        {
-            @Test
-            @SuppressWarnings("unchecked")
-            @DisplayName("Runnable should not be called")
-            public void testPropertyValue()
-            {
-                disposable.dispose();
-
-                observable.onNext(7);
-                testScheduler.triggerActions();
-
-                Mockito.verify(runnable, Mockito.never()).run();
-            }
         }
     }
 }
