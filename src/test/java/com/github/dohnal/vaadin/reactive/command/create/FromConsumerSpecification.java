@@ -150,12 +150,6 @@ public interface FromConsumerSpecification extends
             {
                 Mockito.verify(execution).accept(INPUT);
             }
-
-            @Override
-            protected void verifyNoExecution()
-            {
-                Mockito.verify(execution, Mockito.never()).accept(Mockito.any());
-            }
         }
     }
 

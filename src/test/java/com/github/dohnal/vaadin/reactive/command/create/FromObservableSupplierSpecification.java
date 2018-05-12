@@ -133,12 +133,6 @@ public interface FromObservableSupplierSpecification extends
             {
                 Mockito.verify(execution).get();
             }
-
-            @Override
-            protected void verifyNoExecution()
-            {
-                Mockito.verify(execution, Mockito.never()).get();
-            }
         }
     }
 

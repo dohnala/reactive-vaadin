@@ -178,12 +178,6 @@ public interface ProgressFromObservableBiFunctionSpecification extends
             {
                 Mockito.verify(execution).apply(Mockito.any(ProgressContext.class), Mockito.eq(INPUT));
             }
-
-            @Override
-            protected void verifyNoExecution()
-            {
-                Mockito.verify(execution, Mockito.never()).apply(Mockito.any(), Mockito.any());
-            }
         }
     }
 

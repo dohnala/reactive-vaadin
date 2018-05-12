@@ -151,12 +151,6 @@ public interface FromObservableFunctionSpecification extends
             {
                 Mockito.verify(execution).apply(INPUT);
             }
-
-            @Override
-            protected void verifyNoExecution()
-            {
-                Mockito.verify(execution, Mockito.never()).apply(Mockito.any());
-            }
         }
     }
 

@@ -16,6 +16,7 @@ package com.github.dohnal.vaadin.reactive.binder;
 import javax.annotation.Nonnull;
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import com.github.dohnal.vaadin.reactive.ObservableBinder;
 import io.reactivex.Observable;
@@ -56,6 +57,17 @@ public final class DefaultObservableBinder<T> extends AbstractBinder implements 
     {
         Objects.requireNonNull(action, "Action cannot be null");
 
-        return subscribeWithErrorHandler(observable, value -> action.run());
+        return subscribeWithErrorHandler(observable, value -> {
+            action.run();
+        });
+    }
+
+    @Nonnull
+    @Override
+    public Disposable then(final @Nonnull Function<? super T, Observable<?>> action)
+    {
+        Objects.requireNonNull(action, "Action cannot be null");
+
+        return subscribeWithErrorHandler(observable, action);
     }
 }

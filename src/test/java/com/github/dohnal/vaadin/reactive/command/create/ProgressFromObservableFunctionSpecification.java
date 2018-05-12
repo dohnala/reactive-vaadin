@@ -160,12 +160,6 @@ public interface ProgressFromObservableFunctionSpecification extends
             {
                 Mockito.verify(execution).apply(Mockito.any(ProgressContext.class));
             }
-
-            @Override
-            protected void verifyNoExecution()
-            {
-                Mockito.verify(execution, Mockito.never()).apply(Mockito.any());
-            }
         }
     }
 

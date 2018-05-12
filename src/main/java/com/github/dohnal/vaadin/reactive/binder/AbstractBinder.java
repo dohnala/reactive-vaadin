@@ -16,6 +16,7 @@ package com.github.dohnal.vaadin.reactive.binder;
 import javax.annotation.Nonnull;
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import io.reactivex.Completable;
 import io.reactivex.Observable;
@@ -45,17 +46,34 @@ public abstract class AbstractBinder
 
     @Nonnull
     protected <T> Disposable subscribeWithErrorHandler(final @Nonnull Observable<? extends T> observable,
-                                                       final @Nonnull Consumer<? super T> consumer)
+                                                       final @Nonnull Consumer<? super T> action)
     {
         Objects.requireNonNull(observable, "Observable cannot be null");
-        Objects.requireNonNull(consumer, "Consumer cannot be null");
+        Objects.requireNonNull(action, "Action cannot be null");
 
         return observable
                 .flatMap(value -> Completable
-                        .fromRunnable(() -> consumer.accept(value))
+                        .fromRunnable(() -> action.accept(value))
                         .doOnError(errorHandler::accept)
                         .onErrorComplete()
                         .toObservable())
+                .ignoreElements()
+                .subscribe(Functions.EMPTY_ACTION, errorHandler::accept);
+    }
+
+    @Nonnull
+    protected <T> Disposable subscribeWithErrorHandler(final @Nonnull Observable<? extends T> observable,
+                                                       final @Nonnull Function<? super T, Observable<?>> action)
+    {
+        Objects.requireNonNull(observable, "Observable cannot be null");
+        Objects.requireNonNull(action, "Action cannot be null");
+
+        return Observable.switchOnNext(observable
+                .map(value -> action.apply(value)
+                        .ignoreElements()
+                        .doOnError(errorHandler::accept)
+                        .onErrorComplete()
+                        .toObservable()))
                 .ignoreElements()
                 .subscribe(Functions.EMPTY_ACTION, errorHandler::accept);
     }

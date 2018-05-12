@@ -13,8 +13,9 @@
 
 package com.github.dohnal.vaadin.reactive;
 
-import java.util.function.Consumer;
+import java.util.function.Function;
 
+import io.reactivex.Observable;
 import io.reactivex.observers.TestObserver;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -36,7 +37,7 @@ public class ActionExtensionTest implements ActionExtension
         private final Integer RESULT = 7;
 
         private ReactiveCommand<Void, Integer> command;
-        private Runnable action;
+        private Function<?, Observable<?>> action;
 
         @BeforeEach
         @SuppressWarnings("unchecked")
@@ -63,7 +64,7 @@ public class ActionExtensionTest implements ActionExtension
             {
                 final TestObserver<Integer> testObserver = command.getResult().test();
 
-                action.run();
+                action.apply(null).subscribe();
 
                 testObserver.assertValue(RESULT);
             }
@@ -78,7 +79,7 @@ public class ActionExtensionTest implements ActionExtension
         private final Integer RESULT = 7;
 
         private ReactiveCommand<Integer, Integer> command;
-        private Runnable action;
+        private Function<?, Observable<?>> action;
 
         @BeforeEach
         @SuppressWarnings("unchecked")
@@ -105,7 +106,7 @@ public class ActionExtensionTest implements ActionExtension
             {
                 final TestObserver<Integer> testObserver = command.getResult().test();
 
-                action.run();
+                action.apply(null).subscribe();
 
                 testObserver.assertValue(RESULT);
             }
@@ -120,7 +121,7 @@ public class ActionExtensionTest implements ActionExtension
         private final Integer RESULT = 7;
 
         private ReactiveCommand<Integer, Integer> command;
-        private Consumer<Integer> action;
+        private Function<Integer, Observable<?>> action;
 
         @BeforeEach
         @SuppressWarnings("unchecked")
@@ -148,7 +149,7 @@ public class ActionExtensionTest implements ActionExtension
             {
                 final TestObserver<Integer> testObserver = command.getResult().test();
 
-                action.accept(INPUT);
+                action.apply(INPUT).subscribe();
 
                 testObserver.assertValue(RESULT);
             }

@@ -130,12 +130,6 @@ public interface FromRunnableSpecification extends
             {
                 Mockito.verify(execution).run();
             }
-
-            @Override
-            protected void verifyNoExecution()
-            {
-                Mockito.verifyNoMoreInteractions(execution);
-            }
         }
     }
 

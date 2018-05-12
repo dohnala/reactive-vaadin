@@ -14,7 +14,9 @@
 package com.github.dohnal.vaadin.reactive.binder;
 
 import javax.annotation.Nonnull;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import com.github.dohnal.vaadin.reactive.IsObservable;
 import com.github.dohnal.vaadin.reactive.ObservableBinder;
@@ -188,8 +190,8 @@ public interface ObservableBinderSpecification
             }
 
             @Nested
-            @DisplayName("When source observable emits error")
-            class WhenSourceObservableEmitsError
+            @DisplayName("When observable emits error")
+            class WhenObservableEmitsError
             {
                 private final Throwable ERROR = new RuntimeException("Error");
 
@@ -393,8 +395,8 @@ public interface ObservableBinderSpecification
             }
 
             @Nested
-            @DisplayName("When source observable emits error")
-            class WhenSourceObservableEmitsError
+            @DisplayName("When observable emits error")
+            class WhenObservableEmitsError
             {
                 private final Throwable ERROR = new RuntimeException("Error");
 
@@ -445,6 +447,365 @@ public interface ObservableBinderSpecification
                     return observable;
                 }
             }).then(runnable);
+        }
+    }
+
+    abstract class WhenBindObservableToObservableFunctionSpecification implements ReactiveBinderExtension
+    {
+        protected TestScheduler observableScheduler;
+        protected TestScheduler actionScheduler;
+        protected PublishSubject<Integer> observable;
+        protected PublishSubject<Integer> actionResult;
+        protected Function<Integer, Observable<?>> function;
+        protected Observable<Integer> action;
+        protected PublishSubject<Throwable> errorSubject;
+        protected TestObserver<Throwable> errorObserver;
+        protected Disposable disposable;
+
+        @BeforeEach
+        @SuppressWarnings("unchecked")
+        protected void bind()
+        {
+            observableScheduler = new TestScheduler();
+            actionScheduler = new TestScheduler();
+            observable = PublishSubject.create();
+            observable.observeOn(observableScheduler);
+            actionResult = PublishSubject.create();
+            function = Mockito.mock(Function.class);
+
+            errorSubject = PublishSubject.create();
+            errorSubject.observeOn(Schedulers.trampoline());
+            errorObserver = errorSubject.test();
+
+            disposable = when(observable).then(function);
+        }
+
+        @Override
+        public void handleError(final @Nonnull Throwable error)
+        {
+            errorSubject.onNext(error);
+        }
+
+        @Test
+        @DisplayName("Function should not be called")
+        public void testFunction()
+        {
+            Mockito.verify(function, Mockito.never()).apply(Mockito.any());
+        }
+
+        @Test
+        @DisplayName("No error should be handled")
+        public void testHandleError()
+        {
+            errorObserver.assertNoValues();
+        }
+
+        @Nested
+        @DisplayName("When observable emits value")
+        class WhenObservableEmitsValue
+        {
+            @Test
+            @DisplayName("Function should be called with correct value")
+            public void testFunction()
+            {
+                observable.onNext(5);
+                observableScheduler.triggerActions();
+
+                Mockito.verify(function).apply(5);
+            }
+
+            @Test
+            @DisplayName("No error should be handled")
+            public void testHandleError()
+            {
+                errorObserver.assertNoValues();
+            }
+
+            @Test
+            @DisplayName("Action result should be correct")
+            public void testActionResult()
+            {
+                Mockito.when(function.apply(5)).thenReturn(Observable
+                        .timer(2, TimeUnit.SECONDS, actionScheduler)
+                        .doOnNext(time -> actionResult.onNext(5))
+                        .ignoreElements()
+                        .toObservable());
+
+                final TestObserver<Integer> testObserver = actionResult.test();
+
+                observable.onNext(5);
+                observableScheduler.triggerActions();
+
+                actionScheduler.advanceTimeBy(2, TimeUnit.SECONDS);
+
+                testObserver.assertValue(5);
+            }
+
+            @Nested
+            @DisplayName("When observable emits error")
+            class WhenObservableEmitsError
+            {
+                private final Throwable ERROR = new RuntimeException("Error");
+
+                @BeforeEach
+                void before()
+                {
+                    Mockito.when(function.apply(5)).thenReturn(Observable.error(ERROR));
+                }
+
+                @Test
+                @DisplayName("Correct error should be handled")
+                public void testHandleError()
+                {
+                    observable.onNext(5);
+                    observableScheduler.triggerActions();
+
+                    errorObserver.assertValue(ERROR);
+                }
+
+                @Test
+                @DisplayName("Action result should not emit any value")
+                public void testActionResult()
+                {
+                    final TestObserver<Integer> testObserver = actionResult.test();
+
+                    observable.onNext(5);
+                    observableScheduler.triggerActions();
+
+                    testObserver.assertNoValues();
+                }
+            }
+
+            @Nested
+            @DisplayName("After observable emits value")
+            class AfterObservableEmitsValue
+            {
+                @BeforeEach
+                void before()
+                {
+                    Mockito.when(function.apply(5)).thenReturn(Observable
+                            .timer(2, TimeUnit.SECONDS, actionScheduler)
+                            .doOnNext(time -> actionResult.onNext(5))
+                            .ignoreElements()
+                            .toObservable());
+
+                    observable.onNext(5);
+                    observableScheduler.triggerActions();
+                }
+
+                @Nested
+                @DisplayName("When observable emits another value before action completes")
+                class WhenObservableEmitsAnotherValueBeforeActionCompletes
+                {
+                    @BeforeEach
+                    void before()
+                    {
+                        actionScheduler.advanceTimeBy(1, TimeUnit.SECONDS);
+
+                        Mockito.when(function.apply(7)).thenReturn(Observable
+                                .timer(2, TimeUnit.SECONDS, actionScheduler)
+                                .doOnNext(time -> actionResult.onNext(7))
+                                .ignoreElements()
+                                .toObservable());
+                    }
+
+                    @Test
+                    @DisplayName("Function should be called with correct value")
+                    public void testFunction()
+                    {
+                        observable.onNext(7);
+                        observableScheduler.triggerActions();
+
+                        Mockito.verify(function).apply(7);
+                    }
+
+                    @Test
+                    @DisplayName("No error should be handled")
+                    public void testHandleError()
+                    {
+                        errorObserver.assertNoValues();
+                    }
+
+                    @Test
+                    @DisplayName("Action result should be correct")
+                    public void testActionResult()
+                    {
+                        final TestObserver<Integer> testObserver = actionResult.test();
+
+                        observable.onNext(7);
+                        observableScheduler.triggerActions();
+
+                        actionScheduler.advanceTimeBy(2, TimeUnit.SECONDS);
+
+                        testObserver.assertValue(7);
+                    }
+                }
+
+                @Nested
+                @DisplayName("When observable emits another value after action completes")
+                class WhenObservableEmitsAnotherValueAfterActionCompletes
+                {
+                    @BeforeEach
+                    void before()
+                    {
+                        actionScheduler.advanceTimeBy(2, TimeUnit.SECONDS);
+
+                        Mockito.when(function.apply(7)).thenReturn(Observable
+                                .timer(2, TimeUnit.SECONDS, actionScheduler)
+                                .doOnNext(time -> actionResult.onNext(7))
+                                .ignoreElements()
+                                .toObservable());
+                    }
+
+                    @Test
+                    @DisplayName("Function should be called with correct value")
+                    public void testFunction()
+                    {
+                        observable.onNext(7);
+                        observableScheduler.triggerActions();
+
+                        Mockito.verify(function).apply(7);
+                    }
+
+                    @Test
+                    @DisplayName("No error should be handled")
+                    public void testHandleError()
+                    {
+                        errorObserver.assertNoValues();
+                    }
+
+                    @Test
+                    @DisplayName("Action result should be correct")
+                    public void testActionResult()
+                    {
+                        final TestObserver<Integer> testObserver = actionResult.test();
+
+                        observable.onNext(7);
+                        observableScheduler.triggerActions();
+
+                        actionScheduler.advanceTimeBy(2, TimeUnit.SECONDS);
+
+                        testObserver.assertValue(7);
+                    }
+                }
+            }
+        }
+
+        @Nested
+        @DisplayName("When observable emits error")
+        class WhenObservableEmitsError
+        {
+            private final Throwable ERROR = new RuntimeException("Error");
+
+            @Test
+            @DisplayName("Function should not be called")
+            public void testFunction()
+            {
+                observable.onError(ERROR);
+                observableScheduler.triggerActions();
+
+                Mockito.verify(function, Mockito.never()).apply(Mockito.any());
+            }
+
+            @Test
+            @DisplayName("Correct error should be handled")
+            public void testHandleError()
+            {
+                observable.onError(ERROR);
+                observableScheduler.triggerActions();
+
+                errorObserver.assertValue(ERROR);
+            }
+        }
+
+        @Nested
+        @DisplayName("After observable is unbound from observable function")
+        class AfterUnbind
+        {
+            @BeforeEach
+            void before()
+            {
+                disposable.dispose();
+            }
+
+            @Nested
+            @DisplayName("When observable emits value")
+            class WhenObservableEmitsValue
+            {
+                @Test
+                @DisplayName("Function should not be called")
+                public void testFunction()
+                {
+                    observable.onNext(5);
+                    observableScheduler.triggerActions();
+
+                    Mockito.verify(function, Mockito.never()).apply(Mockito.any());
+                }
+
+                @Test
+                @DisplayName("No error should be handled")
+                public void testHandleError()
+                {
+                    errorObserver.assertNoValues();
+                }
+            }
+
+            @Nested
+            @DisplayName("When observable emits error")
+            class WhenObservableEmitsError
+            {
+                private final Throwable ERROR = new RuntimeException("Error");
+
+                @Test
+                @DisplayName("Function should not be called")
+                public void testFunction()
+                {
+                    observable.onError(ERROR);
+                    observableScheduler.triggerActions();
+
+                    Mockito.verify(function, Mockito.never()).apply(Mockito.any());
+                }
+
+                @Test
+                @DisplayName("No error should be handled")
+                public void testHandleError()
+                {
+                    observable.onError(ERROR);
+                    observableScheduler.triggerActions();
+
+                    errorObserver.assertNoValues();
+                }
+            }
+        }
+    }
+
+    abstract class WhenBindIsObservableToObservableFunctionSpecification extends
+            WhenBindObservableToObservableFunctionSpecification
+    {
+        @BeforeEach
+        @SuppressWarnings("unchecked")
+        protected void bind()
+        {
+            observableScheduler = new TestScheduler();
+            actionScheduler = new TestScheduler();
+            observable = PublishSubject.create();
+            observable.observeOn(observableScheduler);
+            actionResult = PublishSubject.create();
+            function = Mockito.mock(Function.class);
+
+            errorSubject = PublishSubject.create();
+            errorSubject.observeOn(Schedulers.trampoline());
+            errorObserver = errorSubject.test();
+
+            disposable = when(new IsObservable<Integer>()
+            {
+                @Nonnull
+                @Override
+                public Observable<Integer> asObservable()
+                {
+                    return observable;
+                }
+            }).then(function);
         }
     }
 }

@@ -227,13 +227,6 @@ public interface CompositeFromCommandsSpecification extends
             }
 
             @Override
-            protected void verifyNoExecution()
-            {
-                Mockito.verify(executionA, Mockito.never()).get();
-                Mockito.verify(executionB, Mockito.never()).get();
-            }
-
-            @Override
             protected void verifyErrorExecution()
             {
                 Mockito.verify(executionA).get();
@@ -400,13 +393,6 @@ public interface CompositeFromCommandsSpecification extends
             {
                 Mockito.verify(executionA).accept(INPUT);
                 Mockito.verify(executionB).accept(INPUT);
-            }
-
-            @Override
-            protected void verifyNoExecution()
-            {
-                Mockito.verify(executionA, Mockito.never()).accept(Mockito.any());
-                Mockito.verify(executionB, Mockito.never()).accept(Mockito.any());
             }
 
             @Override

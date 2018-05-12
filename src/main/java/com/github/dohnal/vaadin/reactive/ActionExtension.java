@@ -15,7 +15,9 @@ package com.github.dohnal.vaadin.reactive;
 
 import javax.annotation.Nonnull;
 import java.util.Objects;
-import java.util.function.Consumer;
+import java.util.function.Function;
+
+import io.reactivex.Observable;
 
 /**
  * Extension with actions
@@ -31,11 +33,11 @@ public interface ActionExtension
      * @return action
      */
     @Nonnull
-    default Runnable execute(final @Nonnull ReactiveCommand<Void, ?> command)
+    default Function<Object, Observable<?>> execute(final @Nonnull ReactiveCommand<Void, ?> command)
     {
         Objects.requireNonNull(command, "Command cannot be null");
 
-        return () -> command.execute().ignoreElements().subscribe();
+        return value -> command.execute();
     }
 
     /**
@@ -47,13 +49,13 @@ public interface ActionExtension
      * @return action
      */
     @Nonnull
-    default <T> Runnable executeWithInput(final @Nonnull ReactiveCommand<? super T, ?> command,
-                                          final @Nonnull T input)
+    default <T> Function<Object, Observable<?>> executeWithInput(final @Nonnull ReactiveCommand<? super T, ?> command,
+                                                                 final @Nonnull T input)
     {
         Objects.requireNonNull(command, "Command cannot be null");
         Objects.requireNonNull(input, "Input cannot be null");
 
-        return () -> command.execute(input).ignoreElements().subscribe();
+        return value -> command.execute(input);
     }
 
     /**
@@ -65,10 +67,10 @@ public interface ActionExtension
      * @return action
      */
     @Nonnull
-    default <T> Consumer<T> executeWithInput(final @Nonnull ReactiveCommand<? super T, ?> command)
+    default <T> Function<T, Observable<?>> executeWithInput(final @Nonnull ReactiveCommand<? super T, ?> command)
     {
         Objects.requireNonNull(command, "Command cannot be null");
 
-        return input -> command.execute(input).ignoreElements().subscribe();
+        return command::execute;
     }
 }

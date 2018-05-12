@@ -14,8 +14,10 @@
 package com.github.dohnal.vaadin.reactive.binder;
 
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import com.github.dohnal.vaadin.reactive.ObservableBinder;
+import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -91,6 +93,26 @@ public class ObservableBinderDecoratorTest
                 assertEquals(disposable, decorator.then(runnable));
 
                 Mockito.verify(binder).then(runnable);
+            }
+        }
+
+        @Nested
+        @DisplayName("When then is called with observable function")
+        class WhenThenWithObservableFunction
+        {
+            @Test
+            @SuppressWarnings("unchecked")
+            @DisplayName("Binder should be called with correct argument")
+            public void testBinder()
+            {
+                final Function<Integer, Observable<?>> function = Mockito.mock(Function.class);
+                final Disposable disposable = Mockito.mock(Disposable.class);
+
+                Mockito.when(binder.then(function)).thenReturn(disposable);
+
+                assertEquals(disposable, decorator.then(function));
+
+                Mockito.verify(binder).then(function);
             }
         }
     }

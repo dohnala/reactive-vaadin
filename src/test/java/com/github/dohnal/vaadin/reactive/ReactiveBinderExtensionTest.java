@@ -66,11 +66,15 @@ public class ReactiveBinderExtensionTest implements
     {
         @Nested
         @DisplayName("to consumer")
-        class ToObservable extends WhenBindObservableToConsumerSpecification {}
+        class ToConsumer extends WhenBindObservableToConsumerSpecification {}
 
         @Nested
         @DisplayName("to runnable")
-        class ToIsObservable extends WhenBindObservableToRunnableSpecification {}
+        class ToRunnable extends WhenBindObservableToRunnableSpecification {}
+
+        @Nested
+        @DisplayName("to observable function")
+        class ToObservableFunction extends WhenBindObservableToObservableFunctionSpecification {}
     }
 
     @Nested
@@ -79,10 +83,14 @@ public class ReactiveBinderExtensionTest implements
     {
         @Nested
         @DisplayName("to consumer")
-        class ToObservable extends WhenBindIsObservableToConsumerSpecification {}
+        class ToConsumer extends WhenBindIsObservableToConsumerSpecification {}
 
         @Nested
         @DisplayName("to runnable")
-        class ToIsObservable extends WhenBindIsObservableToRunnableSpecification {}
+        class ToRunnable extends WhenBindIsObservableToRunnableSpecification {}
+
+        @Nested
+        @DisplayName("to observable function")
+        class ToObservableFunction extends WhenBindIsObservableToObservableFunctionSpecification {}
     }
 }

@@ -65,12 +65,12 @@ public final class ProgressCommand<T, R> extends AbstractCommand<T, R>
         return Observable.just(input)
                 .subscribeOn(scheduler)
                 .flatMap(this::checkCanExecute)
-                .doOnNext(this::handleStart)
                 .flatMap(value -> execution.apply(new ReactiveProgressContext(progress), value.orElse(null))
+                        .doOnSubscribe(disposable -> handleStart(value))
                         .doOnNext(this::handleResult)
                         .doFinally(this::handleComplete))
                 .onErrorResumeNext(this::handleError)
                 .replay()
-                .autoConnect();
+                .refCount();
     }
 }

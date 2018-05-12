@@ -15,7 +15,10 @@ package com.github.dohnal.vaadin.mvvm;
 
 import javax.annotation.Nonnull;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import com.github.dohnal.vaadin.reactive.ObservableBinder;
 import com.github.dohnal.vaadin.reactive.ObservableProperty;
@@ -134,7 +137,9 @@ public abstract class AbstractView<M extends AbstractViewModel> extends CustomCo
             @Override
             public Disposable then(final @Nonnull Consumer<? super T> action)
             {
-                return super.then(value -> withUIAccess(() -> action.accept(value)));
+                return super.then(value -> {
+                    withUIAccess(() -> action.accept(value));
+                });
             }
 
             @Nonnull
@@ -142,6 +147,15 @@ public abstract class AbstractView<M extends AbstractViewModel> extends CustomCo
             public Disposable then(final @Nonnull Runnable action)
             {
                 return super.then(() -> withUIAccess(action));
+            }
+
+            @Nonnull
+            @Override
+            public Disposable then(final @Nonnull Function<? super T, Observable<?>> action)
+            {
+                return binder.then(value -> {
+                    return withUIAccess(() -> action.apply(value));
+                });
             }
         };
     }
@@ -211,6 +225,33 @@ public abstract class AbstractView<M extends AbstractViewModel> extends CustomCo
         else
         {
             action.run();
+        }
+    }
+
+    /**
+     * Runs given action while holding the session lock to ensure exclusive access
+     * to UI this view is attached to
+     *
+     * @param action action
+     * @return action result
+     */
+    protected <T> T withUIAccess(final @Nonnull Supplier<T> action)
+    {
+        Objects.requireNonNull(action, "Action cannot be null");
+
+        final UI ui = getUI();
+
+        if (ui != null && ui.isAttached())
+        {
+            final AtomicReference<T> result = new AtomicReference<>();
+
+            ui.accessSynchronously(() -> result.set(action.get()));
+
+            return result.get();
+        }
+        else
+        {
+            return action.get();
         }
     }
 }
