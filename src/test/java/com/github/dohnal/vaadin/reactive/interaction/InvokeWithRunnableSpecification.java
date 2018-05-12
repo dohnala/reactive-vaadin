@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -130,7 +131,10 @@ public interface InvokeWithRunnableSpecification
             @DisplayName("AlreadyHandledInteractionException should be thrown")
             public void testError()
             {
-                assertThrows(AlreadyHandledInteractionException.class, () -> interactionContext.handle());
+                final AlreadyHandledInteractionException error = assertThrows(AlreadyHandledInteractionException.class,
+                        () -> interactionContext.handle());
+
+                assertEquals(interaction, error.getInteraction());
             }
 
             @Test()
@@ -173,7 +177,10 @@ public interface InvokeWithRunnableSpecification
         @DisplayName("UnhandledInteractionException should be thrown")
         public void testError()
         {
-            assertThrows(UnhandledInteractionException.class, () -> interaction.invoke(runnable));
+            final UnhandledInteractionException error = assertThrows(UnhandledInteractionException.class, () ->
+                    interaction.invoke(runnable));
+
+            assertEquals(interaction, error.getInteraction());
         }
 
         @Test()

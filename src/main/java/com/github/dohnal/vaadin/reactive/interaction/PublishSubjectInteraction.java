@@ -92,7 +92,7 @@ public final class PublishSubjectInteraction<T, R> implements ReactiveInteractio
 
         if (!subject.hasObservers())
         {
-            throw new UnhandledInteractionException("No handler is subscribed");
+            throw new UnhandledInteractionException(this);
         }
 
         subject.onNext(interactionContext);
@@ -177,7 +177,7 @@ public final class PublishSubjectInteraction<T, R> implements ReactiveInteractio
             }
             else
             {
-                throw new AlreadyHandledInteractionException("Interaction is already handled");
+                throw new AlreadyHandledInteractionException(PublishSubjectInteraction.this);
             }
         }
     }

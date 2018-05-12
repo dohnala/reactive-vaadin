@@ -169,7 +169,10 @@ public interface SetValueSpecification extends BasePropertySpecification
             @DisplayName("ReadOnlyPropertyException should be thrown")
             public void testError()
             {
-                assertThrows(ReadOnlyPropertyException.class, () -> getProperty().setValue(5));
+                final ReadOnlyPropertyException error = assertThrows(ReadOnlyPropertyException.class, () ->
+                        getProperty().setValue(5));
+
+                assertEquals(getProperty(), error.getProperty());
             }
         }
     }

@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
+import com.github.dohnal.vaadin.reactive.exceptions.CannotExecuteCommandException;
 import io.reactivex.Observable;
 import io.reactivex.Scheduler;
 
@@ -124,7 +125,7 @@ public final class CompositeCommand<T, R> implements ReactiveCommand<T, List<R>>
     @Override
     public Observable<Throwable> getError()
     {
-        return compositeCommand.getError();
+        return compositeCommand.getError().map(this::correctCanExecuteException);
     }
 
     @Nonnull
@@ -166,7 +167,9 @@ public final class CompositeCommand<T, R> implements ReactiveCommand<T, List<R>>
     @Override
     public Observable<List<R>> execute()
     {
-        return compositeCommand.execute();
+        return compositeCommand.execute().onErrorResumeNext(error -> {
+            return Observable.error(correctCanExecuteException(error));
+        });
     }
 
     @Nonnull
@@ -175,7 +178,9 @@ public final class CompositeCommand<T, R> implements ReactiveCommand<T, List<R>>
     {
         Objects.requireNonNull(input, "Input cannot be null");
 
-        return compositeCommand.execute(input);
+        return compositeCommand.execute(input).onErrorResumeNext(error -> {
+            return Observable.error(correctCanExecuteException(error));
+        });
     }
 
     @Nonnull
@@ -184,5 +189,19 @@ public final class CompositeCommand<T, R> implements ReactiveCommand<T, List<R>>
         Objects.requireNonNull(values, "Values cannot be null");
 
         return Arrays.stream(values).reduce(0.0f, (x, y) -> x + y) / commands.size();
+    }
+
+    @Nonnull
+    private Throwable correctCanExecuteException(final @Nonnull Throwable error)
+    {
+        if (error instanceof CannotExecuteCommandException)
+        {
+            if (((CannotExecuteCommandException) error).getCommand().equals(compositeCommand))
+            {
+                return new CannotExecuteCommandException(this);
+            }
+        }
+
+        return error;
     }
 }

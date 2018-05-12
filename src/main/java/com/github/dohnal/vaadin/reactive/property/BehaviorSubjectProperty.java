@@ -117,7 +117,7 @@ public final class BehaviorSubjectProperty<T> implements ReactiveProperty<T>
 
         if (isReadOnly())
         {
-            throw new ReadOnlyPropertyException("Property is read-only");
+            throw new ReadOnlyPropertyException(this);
         }
 
         subject.onNext(value);

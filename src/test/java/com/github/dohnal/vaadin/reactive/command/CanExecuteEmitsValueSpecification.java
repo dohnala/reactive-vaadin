@@ -249,7 +249,9 @@ public interface CanExecuteEmitsValueSpecification extends BaseCommandSpecificat
 
             execute().subscribe();
 
-            testObserver.assertValue(error -> error.getClass().equals(CannotExecuteCommandException.class));
+            testObserver.assertValue(error ->
+                    error.getClass().equals(CannotExecuteCommandException.class) &&
+                            ((CannotExecuteCommandException) error).getCommand().equals(getCommand()));
         }
 
         @Test

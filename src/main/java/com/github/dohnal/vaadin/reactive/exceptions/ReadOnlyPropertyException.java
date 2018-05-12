@@ -16,15 +16,32 @@ package com.github.dohnal.vaadin.reactive.exceptions;
 import javax.annotation.Nonnull;
 import java.util.Objects;
 
+import com.github.dohnal.vaadin.reactive.ReactiveProperty;
+
 /**
+ * Indicates that read-only property is modified
+ *
  * @author dohnal
  */
 public class ReadOnlyPropertyException extends RuntimeException
 {
-    public ReadOnlyPropertyException(final @Nonnull String message)
-    {
-        super(message);
+    private final ReactiveProperty<?> property;
 
-        Objects.requireNonNull(message, "Message cannot be null");
+    public ReadOnlyPropertyException(final @Nonnull ReactiveProperty<?> property)
+    {
+        Objects.requireNonNull(property, "Property cannot be null");
+
+        this.property = property;
+    }
+
+    /**
+     * Returns property which this exception was thrown for
+     *
+     * @return property
+     */
+    @Nonnull
+    public ReactiveProperty<?> getProperty()
+    {
+        return property;
     }
 }

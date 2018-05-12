@@ -171,7 +171,10 @@ public interface UpdateValueSpecification extends BasePropertySpecification
             @DisplayName("ReadOnlyPropertyException should be thrown")
             public void testValue()
             {
-                assertThrows(ReadOnlyPropertyException.class, () -> getProperty().updateValue(value -> 5));
+                final ReadOnlyPropertyException error = assertThrows(ReadOnlyPropertyException.class, () ->
+                        getProperty().updateValue(value -> 5));
+
+                assertEquals(getProperty(), error.getProperty());
             }
         }
     }

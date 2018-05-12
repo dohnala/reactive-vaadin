@@ -16,6 +16,8 @@ package com.github.dohnal.vaadin.reactive.exceptions;
 import javax.annotation.Nonnull;
 import java.util.Objects;
 
+import com.github.dohnal.vaadin.reactive.ReactiveCommand;
+
 /**
  * Indicates that an command cannot be executed
  *
@@ -23,10 +25,23 @@ import java.util.Objects;
  */
 public class CannotExecuteCommandException extends RuntimeException
 {
-    public CannotExecuteCommandException(final @Nonnull String message)
-    {
-        super(message);
+    private final ReactiveCommand<?, ?> command;
 
-        Objects.requireNonNull(message, "Command cannot be executed");
+    public CannotExecuteCommandException(final @Nonnull ReactiveCommand<?, ?> command)
+    {
+        Objects.requireNonNull(command, "Command cannot be null");
+
+        this.command = command;
+    }
+
+    /**
+     * Returns command which this exception was thrown for
+     *
+     * @return command
+     */
+    @Nonnull
+    public ReactiveCommand<?, ?> getCommand()
+    {
+        return command;
     }
 }

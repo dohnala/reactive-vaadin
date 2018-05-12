@@ -171,7 +171,7 @@ public abstract class AbstractCommand<T, R> implements ReactiveCommand<T, R>, Re
             return Observable.just(input);
         }
 
-        return Observable.error(new CannotExecuteCommandException("Command cannot be executed"));
+        return Observable.error(new CannotExecuteCommandException(this));
     }
 
     /**
