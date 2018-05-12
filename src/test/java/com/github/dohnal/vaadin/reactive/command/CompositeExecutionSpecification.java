@@ -17,7 +17,7 @@ import javax.annotation.Nonnull;
 import java.util.List;
 
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
-import com.github.dohnal.vaadin.reactive.ReactiveCommandFactory;
+import com.github.dohnal.vaadin.reactive.ReactiveCommandExtension;
 import io.reactivex.Observable;
 import io.reactivex.observers.TestObserver;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,8 +27,8 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Specification for {@link ReactiveCommand#execute()}, {@link ReactiveCommand#execute(Object)} created by
- * {@link ReactiveCommandFactory#createCompositeCommand(List)}
- * {@link ReactiveCommandFactory#createCompositeCommand(Observable, List)}
+ * {@link ReactiveCommandExtension#createCompositeCommand(List)}
+ * {@link ReactiveCommandExtension#createCompositeCommand(Observable, List)}
  *
  * @author dohnal
  */

@@ -22,7 +22,7 @@ import com.github.dohnal.vaadin.reactive.ObservableProperty;
 import com.github.dohnal.vaadin.reactive.ObservablePropertyBinder;
 import com.github.dohnal.vaadin.reactive.Property;
 import com.github.dohnal.vaadin.reactive.PropertyBinder;
-import com.github.dohnal.vaadin.reactive.ReactiveBinder;
+import com.github.dohnal.vaadin.reactive.ReactiveBinderExtension;
 import com.github.dohnal.vaadin.reactive.binder.ObservableBinderDecorator;
 import com.github.dohnal.vaadin.reactive.binder.ObservablePropertyBinderDecorator;
 import com.vaadin.ui.CustomComponent;
@@ -38,7 +38,7 @@ import io.reactivex.disposables.Disposable;
  */
 public abstract class AbstractView<M extends AbstractViewModel>
         extends CustomComponent
-        implements ReactiveBinder, ComponentEvents, ComponentProperties, ComponentActions
+        implements ReactiveBinderExtension, ComponentEventExtension, ComponentPropertyExtension, ComponentActionExtension
 {
     private M viewModel;
 
@@ -68,7 +68,7 @@ public abstract class AbstractView<M extends AbstractViewModel>
     {
         Objects.requireNonNull(property, "Property cannot be null");
 
-        return ReactiveBinder.super.bind(withUIAccess(property));
+        return ReactiveBinderExtension.super.bind(withUIAccess(property));
     }
 
     /**
@@ -85,7 +85,7 @@ public abstract class AbstractView<M extends AbstractViewModel>
     {
         Objects.requireNonNull(property, "Property cannot be null");
 
-        final ObservablePropertyBinder<T> binder = ReactiveBinder.super.bind(withUIAccess(property));
+        final ObservablePropertyBinder<T> binder = ReactiveBinderExtension.super.bind(withUIAccess(property));
 
         return new ObservablePropertyBinderDecorator<T>(binder)
         {
@@ -112,7 +112,7 @@ public abstract class AbstractView<M extends AbstractViewModel>
     {
         Objects.requireNonNull(observable, "Observable cannot be null");
 
-        final ObservableBinder<T> binder = ReactiveBinder.super.when(observable);
+        final ObservableBinder<T> binder = ReactiveBinderExtension.super.when(observable);
 
         return new ObservableBinderDecorator<T>(binder)
         {

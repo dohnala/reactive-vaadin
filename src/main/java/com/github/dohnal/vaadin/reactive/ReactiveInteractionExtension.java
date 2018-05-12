@@ -11,18 +11,29 @@
  * the License for the specific language governing permissions and limitations under the License.
  */
 
-package com.github.dohnal.vaadin.mvvm;
+package com.github.dohnal.vaadin.reactive;
 
-import com.github.dohnal.vaadin.reactive.ReactiveBinderExtension;
-import com.github.dohnal.vaadin.reactive.ReactiveCommandExtension;
-import com.github.dohnal.vaadin.reactive.ReactiveInteractionExtension;
-import com.github.dohnal.vaadin.reactive.ReactivePropertyExtension;
+import javax.annotation.Nonnull;
+
+import com.github.dohnal.vaadin.reactive.interaction.PublishSubjectInteraction;
 
 /**
- * Base class for all view models in MVVM pattern
+ * Extension to create instances of {@link ReactiveInteraction}
  *
  * @author dohnal
  */
-public class AbstractViewModel implements ReactiveBinderExtension, ReactivePropertyExtension, ReactiveCommandExtension,
-        ReactiveInteractionExtension
-{}
+public interface ReactiveInteractionExtension
+{
+    /**
+     * Creates new interaction
+     *
+     * @param <T> type of input
+     * @param <R> type of result
+     * @return created interaction
+     */
+    @Nonnull
+    default <T, R> ReactiveInteraction<T, R> createInteraction()
+    {
+        return new PublishSubjectInteraction<>();
+    }
+}

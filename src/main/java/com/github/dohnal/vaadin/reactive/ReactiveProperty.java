@@ -64,8 +64,8 @@ public interface ReactiveProperty<T> extends ObservableProperty<T>, Suppressible
     /**
      * Returns observable which emits values of this property
      * <p>
-     * If this property is crated from source observable or property passed to factory method of
-     * {@link ReactivePropertyFactory} which emits an error, the error is then passed to this observable
+     * If this property is created from source observable or property passed to extension method of
+     * {@link ReactivePropertyExtension} which emits an error, the error is then passed to this observable
      * (which means that this observable will terminate)
      * <p>
      *

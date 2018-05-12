@@ -19,7 +19,7 @@ import java.util.Optional;
 
 import com.github.dohnal.vaadin.reactive.ReactiveCommand;
 import com.github.dohnal.vaadin.reactive.ReactiveProperty;
-import com.github.dohnal.vaadin.reactive.ReactivePropertyFactory;
+import com.github.dohnal.vaadin.reactive.ReactivePropertyExtension;
 import com.github.dohnal.vaadin.reactive.exceptions.CannotExecuteCommandException;
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
@@ -33,7 +33,7 @@ import io.reactivex.subjects.PublishSubject;
  * @param <R> type of command result
  * @author dohnal
  */
-public abstract class AbstractCommand<T, R> implements ReactiveCommand<T, R>, ReactivePropertyFactory
+public abstract class AbstractCommand<T, R> implements ReactiveCommand<T, R>, ReactivePropertyExtension
 {
     protected final PublishSubject<R> result;
 

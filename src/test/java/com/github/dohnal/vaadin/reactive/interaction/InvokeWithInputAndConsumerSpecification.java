@@ -17,7 +17,7 @@ import java.util.function.Consumer;
 
 import com.github.dohnal.vaadin.reactive.InteractionContext;
 import com.github.dohnal.vaadin.reactive.ReactiveInteraction;
-import com.github.dohnal.vaadin.reactive.ReactiveInteractionFactory;
+import com.github.dohnal.vaadin.reactive.ReactiveInteractionExtension;
 import com.github.dohnal.vaadin.reactive.exceptions.AlreadyHandledInteractionException;
 import com.github.dohnal.vaadin.reactive.exceptions.UnhandledInteractionException;
 import io.reactivex.observers.TestObserver;
@@ -38,7 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 public interface InvokeWithInputAndConsumerSpecification
 {
-    abstract class InvokeWithInputAndConsumerWhenSubscriberSpecification implements ReactiveInteractionFactory
+    abstract class InvokeWithInputAndConsumerWhenSubscriberSpecification implements ReactiveInteractionExtension
     {
         protected final Integer INPUT = 5;
 
@@ -195,7 +195,7 @@ public interface InvokeWithInputAndConsumerSpecification
         }
     }
 
-    abstract class InvokeWithInputAndConsumerWhenNoSubscriberSpecification implements ReactiveInteractionFactory
+    abstract class InvokeWithInputAndConsumerWhenNoSubscriberSpecification implements ReactiveInteractionExtension
     {
         protected final Integer INPUT = 5;
 

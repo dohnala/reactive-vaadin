@@ -17,9 +17,9 @@ import javax.annotation.Nonnull;
 
 import com.github.dohnal.vaadin.reactive.IsObservable;
 import com.github.dohnal.vaadin.reactive.ObservablePropertyBinder;
-import com.github.dohnal.vaadin.reactive.ReactiveBinder;
+import com.github.dohnal.vaadin.reactive.ReactiveBinderExtension;
 import com.github.dohnal.vaadin.reactive.ReactiveProperty;
-import com.github.dohnal.vaadin.reactive.ReactivePropertyFactory;
+import com.github.dohnal.vaadin.reactive.ReactivePropertyExtension;
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.TestObserver;
@@ -38,7 +38,7 @@ import org.junit.jupiter.api.Test;
 public interface ObservablePropertyBinderSpecification
 {
     abstract class WhenBindObservablePropertyToObservableSpecification
-            implements ReactiveBinder, ReactivePropertyFactory
+            implements ReactiveBinderExtension, ReactivePropertyExtension
     {
         private TestScheduler testScheduler;
         private PublishSubject<Integer> sourceObservable;
@@ -101,7 +101,7 @@ public interface ObservablePropertyBinderSpecification
     }
 
     abstract class WhenBindObservablePropertyToIsObservableSpecification
-            implements ReactiveBinder, ReactivePropertyFactory
+            implements ReactiveBinderExtension, ReactivePropertyExtension
     {
         private TestScheduler testScheduler;
         private PublishSubject<Integer> sourceObservable;
@@ -172,7 +172,7 @@ public interface ObservablePropertyBinderSpecification
     }
 
     abstract class WhenBindObservablePropertyToObservablePropertySpecification
-            implements ReactiveBinder, ReactivePropertyFactory
+            implements ReactiveBinderExtension, ReactivePropertyExtension
     {
         private ReactiveProperty<Integer> sourceProperty;
         private ReactiveProperty<Integer> property;

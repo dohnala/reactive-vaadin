@@ -18,7 +18,7 @@ import javax.annotation.Nonnull;
 import com.github.dohnal.vaadin.reactive.IsObservable;
 import com.github.dohnal.vaadin.reactive.Property;
 import com.github.dohnal.vaadin.reactive.PropertyBinder;
-import com.github.dohnal.vaadin.reactive.ReactiveBinder;
+import com.github.dohnal.vaadin.reactive.ReactiveBinderExtension;
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.TestScheduler;
@@ -36,7 +36,7 @@ import org.mockito.Mockito;
  */
 public interface PropertyBinderSpecification
 {
-    abstract class WhenBindPropertyToObservableSpecification implements ReactiveBinder
+    abstract class WhenBindPropertyToObservableSpecification implements ReactiveBinderExtension
     {
         private TestScheduler testScheduler;
         private PublishSubject<Integer> sourceObservable;
@@ -101,7 +101,7 @@ public interface PropertyBinderSpecification
         }
     }
 
-    abstract class WhenBindPropertyToIsObservableSpecification implements ReactiveBinder
+    abstract class WhenBindPropertyToIsObservableSpecification implements ReactiveBinderExtension
     {
         private TestScheduler testScheduler;
         private PublishSubject<Integer> sourceObservable;

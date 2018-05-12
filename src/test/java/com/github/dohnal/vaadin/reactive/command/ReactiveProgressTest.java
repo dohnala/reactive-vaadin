@@ -14,7 +14,7 @@
 package com.github.dohnal.vaadin.reactive.command;
 
 import com.github.dohnal.vaadin.reactive.ReactiveProperty;
-import com.github.dohnal.vaadin.reactive.ReactivePropertyFactory;
+import com.github.dohnal.vaadin.reactive.ReactivePropertyExtension;
 import io.reactivex.observers.TestObserver;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -29,7 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * @author dohnal
  */
 @DisplayName("Reactive progress specification")
-public class ReactiveProgressTest implements ReactivePropertyFactory
+public class ReactiveProgressTest implements ReactivePropertyExtension
 {
     private ReactiveProperty<Float> progressProperty;
     private ReactiveProgressContext progress;

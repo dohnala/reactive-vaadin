@@ -18,7 +18,7 @@ import java.util.function.Consumer;
 
 import com.github.dohnal.vaadin.reactive.IsObservable;
 import com.github.dohnal.vaadin.reactive.ObservableBinder;
-import com.github.dohnal.vaadin.reactive.ReactiveBinder;
+import com.github.dohnal.vaadin.reactive.ReactiveBinderExtension;
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.TestScheduler;
@@ -36,7 +36,7 @@ import org.mockito.Mockito;
  */
 public interface ObservableBinderSpecification
 {
-    abstract class WhenBindObservableToConsumerSpecification implements ReactiveBinder
+    abstract class WhenBindObservableToConsumerSpecification implements ReactiveBinderExtension
     {
         private TestScheduler testScheduler;
         private PublishSubject<Integer> observable;
@@ -96,7 +96,7 @@ public interface ObservableBinderSpecification
         }
     }
 
-    abstract class WhenBindObservableToRunnableSpecification implements ReactiveBinder
+    abstract class WhenBindObservableToRunnableSpecification implements ReactiveBinderExtension
     {
         private TestScheduler testScheduler;
         private PublishSubject<Integer> observable;
@@ -156,7 +156,7 @@ public interface ObservableBinderSpecification
         }
     }
 
-    abstract class WhenBindIsObservableToConsumerSpecification implements ReactiveBinder
+    abstract class WhenBindIsObservableToConsumerSpecification implements ReactiveBinderExtension
     {
         private TestScheduler testScheduler;
         private PublishSubject<Integer> observable;
@@ -224,7 +224,7 @@ public interface ObservableBinderSpecification
         }
     }
 
-    abstract class WhenBindIsObservableToRunnableSpecification implements ReactiveBinder
+    abstract class WhenBindIsObservableToRunnableSpecification implements ReactiveBinderExtension
     {
         private TestScheduler testScheduler;
         private PublishSubject<Integer> observable;
