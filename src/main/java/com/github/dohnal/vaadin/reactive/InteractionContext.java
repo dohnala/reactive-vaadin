@@ -45,7 +45,7 @@ public interface InteractionContext<T, R>
     /**
      * Handles interaction with no result
      *
-     * @throws IllegalArgumentException if the interaction requires result
+     * @throws NullPointerException if the interaction requires result
      * @throws AlreadyHandledInteractionException if the interaction is already handled
      */
     void handle();

@@ -96,10 +96,10 @@ public interface InvokeWithInputAndConsumerSpecification
             }
 
             @Test()
-            @DisplayName("IllegalArgumentException should be thrown")
+            @DisplayName("NullPointerException should be thrown")
             public void testHandle()
             {
-                assertThrows(IllegalArgumentException.class, () -> interactionContext.handle());
+                assertThrows(NullPointerException.class, () -> interactionContext.handle());
             }
         }
 

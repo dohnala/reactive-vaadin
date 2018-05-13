@@ -50,7 +50,7 @@ public final class PublishSubjectInteraction<T, R> implements ReactiveInteractio
     {
         Objects.requireNonNull(action, "Action cannot be null");
 
-        invokeInternal(new DefaultInteractionContext(null, action));
+        invokeInternal(new DefaultInteractionContext(null, result -> action.run()));
     }
 
     @Override
@@ -58,7 +58,11 @@ public final class PublishSubjectInteraction<T, R> implements ReactiveInteractio
     {
         Objects.requireNonNull(action, "Action cannot be null");
 
-        invokeInternal(new DefaultInteractionContext(null, action));
+        invokeInternal(new DefaultInteractionContext(null, result -> {
+            Objects.requireNonNull(result, "Result cannot be null");
+
+            action.accept(result);
+        }));
     }
 
     @Override
@@ -67,7 +71,7 @@ public final class PublishSubjectInteraction<T, R> implements ReactiveInteractio
         Objects.requireNonNull(input, "Input cannot be null");
         Objects.requireNonNull(action, "Action cannot be null");
 
-        invokeInternal(new DefaultInteractionContext(input, action));
+        invokeInternal(new DefaultInteractionContext(input, result -> action.run()));
     }
 
     @Override
@@ -76,7 +80,11 @@ public final class PublishSubjectInteraction<T, R> implements ReactiveInteractio
         Objects.requireNonNull(input, "Input cannot be null");
         Objects.requireNonNull(action, "Action cannot be null");
 
-        invokeInternal(new DefaultInteractionContext(input, action));
+        invokeInternal(new DefaultInteractionContext(input, result -> {
+            Objects.requireNonNull(result, "Result cannot be null");
+
+            action.accept(result);
+        }));
     }
 
     @Nonnull
@@ -102,22 +110,9 @@ public final class PublishSubjectInteraction<T, R> implements ReactiveInteractio
     {
         private final T input;
 
-        private final Runnable noInputAction;
-
-        private final Consumer<? super R> inputAction;
+        private final Consumer<? super R> action;
 
         private final AtomicReference<Boolean> isHandled;
-
-        public DefaultInteractionContext(final @Nullable T input,
-                                         final @Nonnull Runnable action)
-        {
-            Objects.requireNonNull(action, "Action cannot be null");
-
-            this.input = input;
-            this.noInputAction = action;
-            this.inputAction = null;
-            this.isHandled = new AtomicReference<>(false);
-        }
 
         public DefaultInteractionContext(final @Nullable T input,
                                          final @Nonnull Consumer<? super R> action)
@@ -125,8 +120,7 @@ public final class PublishSubjectInteraction<T, R> implements ReactiveInteractio
             Objects.requireNonNull(action, "Action cannot be null");
 
             this.input = input;
-            this.noInputAction = null;
-            this.inputAction = action;
+            this.action = action;
             this.isHandled = new AtomicReference<>(false);
         }
 
@@ -161,19 +155,7 @@ public final class PublishSubjectInteraction<T, R> implements ReactiveInteractio
         {
             if (isHandled.compareAndSet(false, true))
             {
-                if (result == null)
-                {
-                    if (noInputAction == null)
-                    {
-                        throw new IllegalArgumentException("Interaction requires input");
-                    }
-
-                    noInputAction.run();
-                }
-                else
-                {
-                    inputAction.accept(result);
-                }
+                action.accept(result);
             }
             else
             {
