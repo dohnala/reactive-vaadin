@@ -15,6 +15,7 @@ package com.github.dohnal.vaadin.reactive.binder;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import com.github.dohnal.vaadin.reactive.ObservableBinder;
 import io.reactivex.Observable;
@@ -58,6 +59,25 @@ public class ObservableBinderDecoratorTest
         }
 
         @Nested
+        @DisplayName("When then is called with runnable")
+        class WhenThenWithRunnable
+        {
+            @Test
+            @DisplayName("Binder should be called with correct argument")
+            public void testBinder()
+            {
+                final Runnable runnable = Mockito.mock(Runnable.class);
+                final Disposable disposable = Mockito.mock(Disposable.class);
+
+                Mockito.when(binder.then(runnable)).thenReturn(disposable);
+
+                assertEquals(disposable, decorator.then(runnable));
+
+                Mockito.verify(binder).then(runnable);
+            }
+        }
+
+        @Nested
         @DisplayName("When then is called with consumer")
         class WhenThenWithConsumer
         {
@@ -78,21 +98,22 @@ public class ObservableBinderDecoratorTest
         }
 
         @Nested
-        @DisplayName("When then is called with runnable")
-        class WhenThenWithRunnable
+        @DisplayName("When then is called with observable supplier")
+        class WhenThenWithObservableSupplier
         {
             @Test
+            @SuppressWarnings("unchecked")
             @DisplayName("Binder should be called with correct argument")
             public void testBinder()
             {
-                final Runnable runnable = Mockito.mock(Runnable.class);
+                final Supplier<Observable<?>> supplier = Mockito.mock(Supplier.class);
                 final Disposable disposable = Mockito.mock(Disposable.class);
 
-                Mockito.when(binder.then(runnable)).thenReturn(disposable);
+                Mockito.when(binder.then(supplier)).thenReturn(disposable);
 
-                assertEquals(disposable, decorator.then(runnable));
+                assertEquals(disposable, decorator.then(supplier));
 
-                Mockito.verify(binder).then(runnable);
+                Mockito.verify(binder).then(supplier);
             }
         }
 

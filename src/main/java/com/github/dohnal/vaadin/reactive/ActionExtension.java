@@ -16,6 +16,7 @@ package com.github.dohnal.vaadin.reactive;
 import javax.annotation.Nonnull;
 import java.util.Objects;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import io.reactivex.Observable;
 
@@ -33,11 +34,11 @@ public interface ActionExtension
      * @return action
      */
     @Nonnull
-    default Function<Object, Observable<?>> execute(final @Nonnull ReactiveCommand<Void, ?> command)
+    default Supplier<Observable<?>> execute(final @Nonnull ReactiveCommand<Void, ?> command)
     {
         Objects.requireNonNull(command, "Command cannot be null");
 
-        return value -> command.execute();
+        return command::execute;
     }
 
     /**
@@ -49,13 +50,13 @@ public interface ActionExtension
      * @return action
      */
     @Nonnull
-    default <T> Function<Object, Observable<?>> executeWithInput(final @Nonnull ReactiveCommand<? super T, ?> command,
-                                                                 final @Nonnull T input)
+    default <T> Supplier<Observable<?>> executeWithInput(final @Nonnull ReactiveCommand<? super T, ?> command,
+                                                         final @Nonnull T input)
     {
         Objects.requireNonNull(command, "Command cannot be null");
         Objects.requireNonNull(input, "Input cannot be null");
 
-        return value -> command.execute(input);
+        return () -> command.execute(input);
     }
 
     /**

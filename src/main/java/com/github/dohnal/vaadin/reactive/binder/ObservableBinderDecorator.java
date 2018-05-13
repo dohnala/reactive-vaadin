@@ -17,6 +17,7 @@ import javax.annotation.Nonnull;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import com.github.dohnal.vaadin.reactive.ObservableBinder;
 import io.reactivex.Observable;
@@ -47,6 +48,15 @@ public class ObservableBinderDecorator<T> implements ObservableBinder<T>
 
     @Nonnull
     @Override
+    public Disposable then(final @Nonnull Runnable action)
+    {
+        Objects.requireNonNull(action, "Action cannot be null");
+
+        return binder.then(action);
+    }
+
+    @Nonnull
+    @Override
     public Disposable then(final @Nonnull Consumer<? super T> action)
     {
         Objects.requireNonNull(action, "Action cannot be null");
@@ -56,7 +66,7 @@ public class ObservableBinderDecorator<T> implements ObservableBinder<T>
 
     @Nonnull
     @Override
-    public Disposable then(final @Nonnull Runnable action)
+    public Disposable then(final @Nonnull Supplier<Observable<?>> action)
     {
         Objects.requireNonNull(action, "Action cannot be null");
 

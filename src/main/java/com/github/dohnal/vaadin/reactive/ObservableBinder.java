@@ -16,6 +16,7 @@ package com.github.dohnal.vaadin.reactive;
 import javax.annotation.Nonnull;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
@@ -35,6 +36,15 @@ public interface ObservableBinder<T>
      * @return disposable to unbind observable from given action
      */
     @Nonnull
+    Disposable then(final @Nonnull Runnable action);
+
+    /**
+     * Binds observable to given action which is called whenever observable emits new value
+     *
+     * @param action action
+     * @return disposable to unbind observable from given action
+     */
+    @Nonnull
     Disposable then(final @Nonnull Consumer<? super T> action);
 
     /**
@@ -44,7 +54,7 @@ public interface ObservableBinder<T>
      * @return disposable to unbind observable from given action
      */
     @Nonnull
-    Disposable then(final @Nonnull Runnable action);
+    Disposable then(final @Nonnull Supplier<Observable<?>> action);
 
     /**
      * Binds observable to given action which is called whenever observable emits new value

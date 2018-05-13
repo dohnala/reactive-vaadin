@@ -135,6 +135,13 @@ public abstract class AbstractView<M extends AbstractViewModel> extends CustomCo
         {
             @Nonnull
             @Override
+            public Disposable then(final @Nonnull Runnable action)
+            {
+                return super.then(() -> withUIAccess(action));
+            }
+
+            @Nonnull
+            @Override
             public Disposable then(final @Nonnull Consumer<? super T> action)
             {
                 return super.then(value -> {
@@ -144,9 +151,11 @@ public abstract class AbstractView<M extends AbstractViewModel> extends CustomCo
 
             @Nonnull
             @Override
-            public Disposable then(final @Nonnull Runnable action)
+            public Disposable then(final @Nonnull Supplier<Observable<?>> action)
             {
-                return super.then(() -> withUIAccess(action));
+                return binder.then(value -> {
+                    return withUIAccess(action);
+                });
             }
 
             @Nonnull

@@ -14,6 +14,7 @@
 package com.github.dohnal.vaadin.reactive;
 
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import io.reactivex.Observable;
 import io.reactivex.observers.TestObserver;
@@ -37,7 +38,7 @@ public class ActionExtensionTest implements ActionExtension
         private final Integer RESULT = 7;
 
         private ReactiveCommand<Void, Integer> command;
-        private Function<?, Observable<?>> action;
+        private Supplier<Observable<?>> action;
 
         @BeforeEach
         @SuppressWarnings("unchecked")
@@ -64,7 +65,7 @@ public class ActionExtensionTest implements ActionExtension
             {
                 final TestObserver<Integer> testObserver = command.getResult().test();
 
-                action.apply(null).subscribe();
+                action.get().subscribe();
 
                 testObserver.assertValue(RESULT);
             }
@@ -79,7 +80,7 @@ public class ActionExtensionTest implements ActionExtension
         private final Integer RESULT = 7;
 
         private ReactiveCommand<Integer, Integer> command;
-        private Function<?, Observable<?>> action;
+        private Supplier<Observable<?>> action;
 
         @BeforeEach
         @SuppressWarnings("unchecked")
@@ -106,7 +107,7 @@ public class ActionExtensionTest implements ActionExtension
             {
                 final TestObserver<Integer> testObserver = command.getResult().test();
 
-                action.apply(null).subscribe();
+                action.get().subscribe();
 
                 testObserver.assertValue(RESULT);
             }

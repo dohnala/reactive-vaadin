@@ -17,6 +17,7 @@ import javax.annotation.Nonnull;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import com.github.dohnal.vaadin.reactive.ObservableBinder;
 import io.reactivex.Observable;
@@ -44,6 +45,17 @@ public final class DefaultObservableBinder<T> extends AbstractBinder implements 
 
     @Nonnull
     @Override
+    public final Disposable then(final @Nonnull Runnable action)
+    {
+        Objects.requireNonNull(action, "Action cannot be null");
+
+        return subscribeWithErrorHandler(observable, value -> {
+            action.run();
+        });
+    }
+
+    @Nonnull
+    @Override
     public final Disposable then(final @Nonnull Consumer<? super T> action)
     {
         Objects.requireNonNull(action, "Action cannot be null");
@@ -53,12 +65,12 @@ public final class DefaultObservableBinder<T> extends AbstractBinder implements 
 
     @Nonnull
     @Override
-    public final Disposable then(final @Nonnull Runnable action)
+    public Disposable then(final @Nonnull Supplier<Observable<?>> action)
     {
         Objects.requireNonNull(action, "Action cannot be null");
 
         return subscribeWithErrorHandler(observable, value -> {
-            action.run();
+            return action.get();
         });
     }
 
