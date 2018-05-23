@@ -41,7 +41,7 @@ public interface ComponentEventExtension
     {
         Objects.requireNonNull(button, "Button cannot be null");
 
-        return toObservable(consumer -> consumer::accept, button::addClickListener);
+        return fromEvent(consumer -> button.addClickListener(consumer::accept));
     }
 
     /**
@@ -56,30 +56,23 @@ public interface ComponentEventExtension
     {
         Objects.requireNonNull(field, "Field cannot be null");
 
-        return toObservable(consumer -> consumer::accept, field::addValueChangeListener);
+        return fromEvent(consumer -> field.addValueChangeListener(consumer::accept));
     }
 
     /**
-     * Converts given functions to create and register listener to observable of values given listener
-     * produces
+     * Returns events captured by given listener as observable
      *
-     * @param createListener function to create listener
-     * @param registerListener function to register listener
-     * @param <T> type of value given listener produces
-     * @param <L> type of listener
-     * @return observable of values given listener produces
+     * @param registerListener function which create and register listener
+     * @param <T> type of event
+     * @return observable of events
      */
     @Nonnull
-    default <T, L> Observable<T> toObservable(final @Nonnull Function<Consumer<T>, L> createListener,
-                                              final @Nonnull Function<L, Registration> registerListener)
+    default <T> Observable<T> fromEvent(final @Nonnull Function<Consumer<T>, Registration> registerListener)
     {
-        Objects.requireNonNull(createListener, "Create listener cannot be null");
         Objects.requireNonNull(registerListener, "Register listener cannot be null");
 
         return Observable.create(eventEmitter -> {
-            final L listener = createListener.apply(eventEmitter::onNext);
-
-            final Registration registration = registerListener.apply(listener);
+            final Registration registration = registerListener.apply(eventEmitter::onNext);
 
             eventEmitter.setCancellable(registration::remove);
         });
