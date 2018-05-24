@@ -288,7 +288,7 @@ public interface ObservablePropertyBinderSpecification
 
         @Nested
         @DisplayName("When source property emits value")
-        class WhenSourceObservableEmitsValue
+        class WhenSourcePropertyEmitsValue
         {
             @Test
             @DisplayName("Property value should be set with correct value")
@@ -311,7 +311,7 @@ public interface ObservablePropertyBinderSpecification
 
         @Nested
         @DisplayName("When property emits value")
-        class WhenObservableEmitsValue
+        class WhenPropertyEmitsValue
         {
             @Test
             @DisplayName("Source property value should be set with correct value")
@@ -344,7 +344,7 @@ public interface ObservablePropertyBinderSpecification
 
             @Nested
             @DisplayName("When source property emits value")
-            class WhenSourceObservableEmitsValue
+            class WhenSourcePropertyEmitsValue
             {
                 @Test
                 @DisplayName("Property value should not be set")
@@ -360,11 +360,11 @@ public interface ObservablePropertyBinderSpecification
 
             @Nested
             @DisplayName("When property emits value")
-            class WhenObservableEmitsValue
+            class WhenPropertyEmitsValue
             {
                 @Test
                 @DisplayName("Source property value should not be set")
-                public void testPropertyValue()
+                public void testSourcePropertyValue()
                 {
                     final TestObserver<Integer> testObserver = sourceProperty.asObservable().test();
 
