@@ -31,12 +31,12 @@ import io.reactivex.disposables.Disposable;
  * @param <T> type of value
  * @author dohnal
  */
-public final class ActivableObservablePropertyDecorator<T> extends ObservablePropertyBinderDecorator<T>
+public final class ActivableObservablePropertyBinder<T> extends ObservablePropertyBinderDecorator<T>
 {
     private CompositeActivable compositeActivable;
 
-    public ActivableObservablePropertyDecorator(final @Nonnull ObservablePropertyBinder<T> binder,
-                                                final @Nonnull CompositeActivable compositeActivable)
+    public ActivableObservablePropertyBinder(final @Nonnull ObservablePropertyBinder<T> binder,
+                                             final @Nonnull CompositeActivable compositeActivable)
     {
         super(binder);
 

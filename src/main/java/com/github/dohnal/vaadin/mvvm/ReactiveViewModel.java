@@ -18,7 +18,7 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.github.dohnal.vaadin.mvvm.binder.ActivableObservableBinder;
-import com.github.dohnal.vaadin.mvvm.binder.ActivableObservablePropertyDecorator;
+import com.github.dohnal.vaadin.mvvm.binder.ActivableObservablePropertyBinder;
 import com.github.dohnal.vaadin.mvvm.binder.ActivablePropertyBinder;
 import com.github.dohnal.vaadin.reactive.ObservableBinder;
 import com.github.dohnal.vaadin.reactive.ObservableProperty;
@@ -104,7 +104,7 @@ public class ReactiveViewModel implements
 
         final ObservablePropertyBinder<T> binder = ReactiveBinderExtension.super.bind(property);
 
-        return new ActivableObservablePropertyDecorator<>(binder, compositeActivable);
+        return new ActivableObservablePropertyBinder<>(binder, compositeActivable);
     }
 
     @Nonnull

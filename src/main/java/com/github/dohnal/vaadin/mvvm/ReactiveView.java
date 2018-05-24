@@ -18,7 +18,7 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 import com.github.dohnal.vaadin.mvvm.binder.ActivableObservableBinder;
-import com.github.dohnal.vaadin.mvvm.binder.ActivableObservablePropertyDecorator;
+import com.github.dohnal.vaadin.mvvm.binder.ActivableObservablePropertyBinder;
 import com.github.dohnal.vaadin.mvvm.binder.ActivablePropertyBinder;
 import com.github.dohnal.vaadin.reactive.ObservableBinder;
 import com.github.dohnal.vaadin.reactive.ObservableProperty;
@@ -140,7 +140,7 @@ public abstract class ReactiveView<M extends ReactiveViewModel> extends CustomCo
             }
         };
 
-        return new ActivableObservablePropertyDecorator<>(viewDecorator, compositeActivable);
+        return new ActivableObservablePropertyBinder<>(viewDecorator, compositeActivable);
     }
 
     @Nonnull
