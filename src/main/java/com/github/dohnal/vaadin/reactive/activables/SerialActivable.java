@@ -15,6 +15,7 @@ package com.github.dohnal.vaadin.reactive.activables;
 
 import javax.annotation.Nonnull;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import io.reactivex.disposables.Disposable;
@@ -53,7 +54,7 @@ public final class SerialActivable implements Activable
     @Override
     public void deactivate()
     {
-        disposable.dispose();
+        Optional.ofNullable(disposable.get()).ifPresent(Disposable::dispose);
     }
 
     @Override

@@ -62,7 +62,7 @@ public abstract class ReactiveView<M extends ReactiveViewModel> extends CustomCo
     protected abstract void initView(final @Nonnull M viewModel);
 
     @Nonnull
-    public ReactiveView<M> withViewModel(final @Nonnull M viewModel)
+    public final ReactiveView<M> withViewModel(final @Nonnull M viewModel)
     {
         Objects.requireNonNull(viewModel, "View model cannot be null");
 
@@ -71,7 +71,7 @@ public abstract class ReactiveView<M extends ReactiveViewModel> extends CustomCo
         return this;
     }
 
-    public void setViewModel(final @Nonnull M viewModel)
+    public final void setViewModel(final @Nonnull M viewModel)
     {
         Objects.requireNonNull(viewModel, "View model cannot be null");
 

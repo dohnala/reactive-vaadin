@@ -17,7 +17,7 @@ import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
@@ -31,12 +31,18 @@ public final class CompositeActivable implements Activable
 {
     private final List<Activable> activables;
 
+    private final CompositeDisposable compositeDisposable;
+
+    private final AtomicBoolean isActivated;
+
     /**
      * Creates new composite activable with empty activables
      */
     public CompositeActivable()
     {
         this.activables = new ArrayList<>();
+        this.compositeDisposable = new CompositeDisposable();
+        this.isActivated = new AtomicBoolean(false);
     }
 
     /**
@@ -49,6 +55,7 @@ public final class CompositeActivable implements Activable
         Objects.requireNonNull(activable, "Activable cannot be null");
 
         activables.add(activable);
+        compositeDisposable.add(activable.asDisposable());
     }
 
     /**
@@ -59,32 +66,34 @@ public final class CompositeActivable implements Activable
         deactivate();
 
         activables.clear();
+        compositeDisposable.clear();
     }
 
     @Override
     public void activate()
     {
+        isActivated.set(true);
         activables.forEach(Activable::activate);
     }
 
     @Override
     public void deactivate()
     {
+        isActivated.set(false);
         activables.forEach(Activable::deactivate);
     }
 
     @Override
     public boolean isActivated()
     {
-        return activables.stream().allMatch(Activable::isActivated);
+
+        return !compositeDisposable.isDisposed() && isActivated.get();
     }
 
     @Nonnull
     @Override
     public Disposable asDisposable()
     {
-        return new CompositeDisposable(activables.stream()
-                .map(Activable::asDisposable)
-                .collect(Collectors.toList()));
+        return compositeDisposable;
     }
 }
