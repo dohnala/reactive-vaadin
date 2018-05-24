@@ -30,6 +30,7 @@ import com.github.dohnal.vaadin.reactive.activables.CompositeActivable;
 import com.github.dohnal.vaadin.reactive.activables.SerialActivable;
 import com.github.dohnal.vaadin.reactive.binder.ObservableBinderDecorator;
 import com.github.dohnal.vaadin.reactive.binder.ObservablePropertyBinderDecorator;
+import com.vaadin.shared.communication.PushMode;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.UI;
 import io.reactivex.Observable;
@@ -233,10 +234,11 @@ public abstract class ReactiveView<M extends ReactiveViewModel> extends CustomCo
         if (ui != null && ui.isAttached())
         {
             ui.access(action);
-        }
-        else
-        {
-            action.run();
+
+            if (ui.getPushConfiguration().getPushMode().equals(PushMode.MANUAL))
+            {
+                ui.push();
+            }
         }
     }
 }
