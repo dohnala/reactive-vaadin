@@ -21,6 +21,7 @@ import javax.annotation.Nonnull;
  * @param <T> type of value
  * @author dohnal
  */
+@FunctionalInterface
 public interface Property<T>
 {
     /**

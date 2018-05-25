@@ -23,6 +23,7 @@ import io.reactivex.Observable;
  * @param <T> type of value
  * @author dohnal
  */
+@FunctionalInterface
 public interface IsObservable<T>
 {
     /**
