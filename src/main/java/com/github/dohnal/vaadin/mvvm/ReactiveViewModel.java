@@ -14,12 +14,16 @@
 package com.github.dohnal.vaadin.mvvm;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import com.github.dohnal.vaadin.mvvm.binder.ActivableObservableBinder;
 import com.github.dohnal.vaadin.mvvm.binder.ActivableObservablePropertyBinder;
 import com.github.dohnal.vaadin.mvvm.binder.ActivablePropertyBinder;
+import com.github.dohnal.vaadin.reactive.Delayable;
 import com.github.dohnal.vaadin.reactive.ObservableBinder;
 import com.github.dohnal.vaadin.reactive.ObservableProperty;
 import com.github.dohnal.vaadin.reactive.ObservablePropertyBinder;
@@ -30,8 +34,10 @@ import com.github.dohnal.vaadin.reactive.ReactiveCommandExtension;
 import com.github.dohnal.vaadin.reactive.ReactiveInteractionExtension;
 import com.github.dohnal.vaadin.reactive.ReactiveProperty;
 import com.github.dohnal.vaadin.reactive.ReactivePropertyExtension;
+import com.github.dohnal.vaadin.reactive.Suppressible;
 import com.github.dohnal.vaadin.reactive.activable.CompositeActivable;
 import io.reactivex.Observable;
+import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.disposables.Disposables;
 import org.slf4j.Logger;
@@ -43,6 +49,8 @@ import org.slf4j.LoggerFactory;
  * @author dohnal
  */
 public class ReactiveViewModel implements
+        Suppressible,
+        Delayable,
         ReactiveBinderExtension,
         ReactivePropertyExtension,
         ReactiveCommandExtension,
@@ -56,33 +64,64 @@ public class ReactiveViewModel implements
 
     private final CompositeActivable compositeActivable;
 
+    private final List<ReactiveProperty<?>> properties;
+
+    private final AtomicInteger suppressed;
+
+    private final AtomicInteger delayed;
+
     public ReactiveViewModel()
     {
         this.viewCount = new AtomicInteger(0);
         this.activation = createProperty();
         this.compositeActivable = new CompositeActivable();
+        this.properties = new ArrayList<>();
+        this.suppressed = new AtomicInteger(0);
+        this.delayed = new AtomicInteger(0);
     }
 
-    /**
-     * Returns an event which will happen when this view model is activated
-     *
-     * @return event
-     */
-    @Nonnull
-    protected final Observable<Boolean> activated()
+    @Override
+    public final boolean isSuppressed()
     {
-        return activation.asObservable().filter(Boolean.TRUE::equals);
+        return suppressed.get() > 0;
     }
 
-    /**
-     * Returns an event which will happen when this view model is deactivated
-     *
-     * @return event
-     */
     @Nonnull
-    protected final Observable<Boolean> deactivated()
+    @Override
+    public final Disposable suppress()
     {
-        return activation.asObservable().filter(Boolean.FALSE::equals);
+        suppressed.incrementAndGet();
+
+        final Disposable disposable = new CompositeDisposable(properties.stream()
+                .map(ReactiveProperty::suppress)
+                .collect(Collectors.toList()));
+
+        return Disposables.fromRunnable(() -> {
+            disposable.dispose();
+            suppressed.decrementAndGet();
+        });
+    }
+
+    @Override
+    public final boolean isDelayed()
+    {
+        return delayed.get() > 0;
+    }
+
+    @Nonnull
+    @Override
+    public final Disposable delay()
+    {
+        delayed.incrementAndGet();
+
+        final Disposable disposable = new CompositeDisposable(properties.stream()
+                .map(ReactiveProperty::delay)
+                .collect(Collectors.toList()));
+
+        return Disposables.fromRunnable(() -> {
+            disposable.dispose();
+            delayed.decrementAndGet();
+        });
     }
 
     @Nonnull
@@ -124,6 +163,39 @@ public class ReactiveViewModel implements
         Objects.requireNonNull(error, "Error cannot be null");
 
         LOGGER.error("Unhandled error", error);
+    }
+
+    @Nonnull
+    @Override
+    public <T> ReactiveProperty<T> onCreateProperty(final @Nonnull ReactiveProperty<T> property)
+    {
+        Objects.requireNonNull(property, "Property cannot be null");
+
+        properties.add(property);
+
+        return property;
+    }
+
+    /**
+     * Returns an event which will happen when this view model is activated
+     *
+     * @return event
+     */
+    @Nonnull
+    protected final Observable<Boolean> activated()
+    {
+        return activation.asObservable().filter(Boolean.TRUE::equals);
+    }
+
+    /**
+     * Returns an event which will happen when this view model is deactivated
+     *
+     * @return event
+     */
+    @Nonnull
+    protected final Observable<Boolean> deactivated()
+    {
+        return activation.asObservable().filter(Boolean.FALSE::equals);
     }
 
     @Nonnull
