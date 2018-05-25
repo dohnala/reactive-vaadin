@@ -32,6 +32,7 @@ import io.reactivex.observers.TestObserver;
 import io.reactivex.schedulers.Schedulers;
 import io.reactivex.schedulers.TestScheduler;
 import io.reactivex.subjects.PublishSubject;
+import io.reactivex.subjects.ReplaySubject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -56,16 +57,50 @@ public interface CompositeFromCommandsSpecification extends
 {
     abstract class AbstractCompositeFromNoCommandsSpecification implements ReactiveCommandExtension
     {
+        protected ReplaySubject<ReactiveCommand<?, ?>> capturedCommands;
+
+        @BeforeEach
+        void before()
+        {
+            capturedCommands = ReplaySubject.create();
+        }
+
         @Test
         @DisplayName("IllegalArgumentException should be thrown")
         public void testCreate()
         {
             assertThrows(IllegalArgumentException.class, () -> createCompositeCommand(new ArrayList<>()));
         }
+
+        @Nonnull
+        @Override
+        public  <T, R> ReactiveCommand<T, R> onCreateCommand(final @Nonnull ReactiveCommand<T, R> command)
+        {
+            final ReactiveCommand<T, R> created = ReactiveCommandExtension.super.onCreateCommand(command);
+
+            capturedCommands.onNext(created);
+
+            return created;
+        }
+
+        @Test
+        @DisplayName("Created command should not be captured")
+        public void testCreatedCommand()
+        {
+            capturedCommands.test().assertNoValues();
+        }
     }
 
     abstract class AbstractCompositeFromNoCommandsWithCanExecuteSpecification implements ReactiveCommandExtension
     {
+        protected ReplaySubject<ReactiveCommand<?, ?>> capturedCommands;
+
+        @BeforeEach
+        void before()
+        {
+            capturedCommands = ReplaySubject.create();
+        }
+
         @Test
         @DisplayName("IllegalArgumentException should be thrown")
         public void testCreate()
@@ -73,10 +108,36 @@ public interface CompositeFromCommandsSpecification extends
             assertThrows(IllegalArgumentException.class, () -> createCompositeCommand(
                     PublishSubject.create(), new ArrayList<>()));
         }
+
+        @Nonnull
+        @Override
+        public  <T, R> ReactiveCommand<T, R> onCreateCommand(final @Nonnull ReactiveCommand<T, R> command)
+        {
+            final ReactiveCommand<T, R> created = ReactiveCommandExtension.super.onCreateCommand(command);
+
+            capturedCommands.onNext(created);
+
+            return created;
+        }
+
+        @Test
+        @DisplayName("Created command should not be captured")
+        public void testCreatedCommand()
+        {
+            capturedCommands.test().assertNoValues();
+        }
     }
 
     abstract class AbstractCompositeFromNoCommandsWithSchedulerSpecification implements ReactiveCommandExtension
     {
+        protected ReplaySubject<ReactiveCommand<?, ?>> capturedCommands;
+
+        @BeforeEach
+        void before()
+        {
+            capturedCommands = ReplaySubject.create();
+        }
+
         @Test
         @DisplayName("IllegalArgumentException should be thrown")
         public void testCreate()
@@ -84,11 +145,37 @@ public interface CompositeFromCommandsSpecification extends
             assertThrows(IllegalArgumentException.class, () ->
                     createCompositeCommand(new ArrayList<>(), Schedulers.from(Runnable::run)));
         }
+
+        @Nonnull
+        @Override
+        public  <T, R> ReactiveCommand<T, R> onCreateCommand(final @Nonnull ReactiveCommand<T, R> command)
+        {
+            final ReactiveCommand<T, R> created = ReactiveCommandExtension.super.onCreateCommand(command);
+
+            capturedCommands.onNext(created);
+
+            return created;
+        }
+
+        @Test
+        @DisplayName("Created command should not be captured")
+        public void testCreatedCommand()
+        {
+            capturedCommands.test().assertNoValues();
+        }
     }
 
     abstract class AbstractCompositeFromNoCommandsWithCanExecuteAndSchedulerSpecification
             implements ReactiveCommandExtension
     {
+        protected ReplaySubject<ReactiveCommand<?, ?>> capturedCommands;
+
+        @BeforeEach
+        void before()
+        {
+            capturedCommands = ReplaySubject.create();
+        }
+
         @Test
         @DisplayName("IllegalArgumentException should be thrown")
         public void testCreate()
@@ -96,11 +183,31 @@ public interface CompositeFromCommandsSpecification extends
             assertThrows(IllegalArgumentException.class, () -> createCompositeCommand(
                     PublishSubject.create(), new ArrayList<>(), Schedulers.from(Runnable::run)));
         }
+
+        @Nonnull
+        @Override
+        public  <T, R> ReactiveCommand<T, R> onCreateCommand(final @Nonnull ReactiveCommand<T, R> command)
+        {
+            final ReactiveCommand<T, R> created = ReactiveCommandExtension.super.onCreateCommand(command);
+
+            capturedCommands.onNext(created);
+
+            return created;
+        }
+
+        @Test
+        @DisplayName("Created command should not be captured")
+        public void testCreatedCommand()
+        {
+            capturedCommands.test().assertNoValues();
+        }
     }
 
     abstract class AbstractCompositeFromCommandsWithNoInputSpecification extends
             AbstractCreateSpecification<Void, List<Integer>> implements ReactiveCommandExtension
     {
+        protected ReplaySubject<ReactiveCommand<?, ?>> capturedCommands;
+
         protected Supplier<Integer> executionA;
         protected ReactiveCommand<Void, Integer> commandA;
 
@@ -113,6 +220,8 @@ public interface CompositeFromCommandsSpecification extends
         @SuppressWarnings("unchecked")
         void create()
         {
+            capturedCommands = ReplaySubject.create();
+
             executionA = Mockito.mock(Supplier.class);
             commandA = createCommand(executionA);
 
@@ -120,6 +229,24 @@ public interface CompositeFromCommandsSpecification extends
             commandB = createCommand(executionB);
 
             command = createCompositeCommand(Arrays.asList(commandA, commandB));
+        }
+
+        @Nonnull
+        @Override
+        public  <T, R> ReactiveCommand<T, R> onCreateCommand(final @Nonnull ReactiveCommand<T, R> command)
+        {
+            final ReactiveCommand<T, R> created = ReactiveCommandExtension.super.onCreateCommand(command);
+
+            capturedCommands.onNext(created);
+
+            return created;
+        }
+
+        @Test
+        @DisplayName("Created command should be captured")
+        public void testCreatedCommand()
+        {
+            capturedCommands.test().assertValues(commandA, commandB, command);
         }
 
         @Nonnull
@@ -243,6 +370,8 @@ public interface CompositeFromCommandsSpecification extends
         @SuppressWarnings("unchecked")
         void create()
         {
+            capturedCommands = ReplaySubject.create();
+
             executionA = Mockito.mock(Supplier.class);
             commandA = createCommand(executionA);
 
@@ -256,6 +385,8 @@ public interface CompositeFromCommandsSpecification extends
     abstract class AbstractCompositeFromCommandsWithNoResultSpecification extends
             AbstractCreateSpecification<Integer, List<Void>> implements ReactiveCommandExtension
     {
+        protected ReplaySubject<ReactiveCommand<?, ?>> capturedCommands;
+
         protected Consumer<Integer> executionA;
         protected ReactiveCommand<Integer, Void> commandA;
 
@@ -268,6 +399,8 @@ public interface CompositeFromCommandsSpecification extends
         @SuppressWarnings("unchecked")
         void create()
         {
+            capturedCommands = ReplaySubject.create();
+
             executionA = Mockito.mock(Consumer.class);
             commandA = createCommand(executionA);
 
@@ -275,6 +408,24 @@ public interface CompositeFromCommandsSpecification extends
             commandB = createCommand(executionB);
 
             command = createCompositeCommand(Arrays.asList(commandA, commandB));
+        }
+
+        @Nonnull
+        @Override
+        public  <T, R> ReactiveCommand<T, R> onCreateCommand(final @Nonnull ReactiveCommand<T, R> command)
+        {
+            final ReactiveCommand<T, R> created = ReactiveCommandExtension.super.onCreateCommand(command);
+
+            capturedCommands.onNext(created);
+
+            return created;
+        }
+
+        @Test
+        @DisplayName("Created command should be captured")
+        public void testCreatedCommand()
+        {
+            capturedCommands.test().assertValues(commandA, commandB, command);
         }
 
         @Nonnull
@@ -412,6 +563,8 @@ public interface CompositeFromCommandsSpecification extends
         @SuppressWarnings("unchecked")
         void create()
         {
+            capturedCommands = ReplaySubject.create();
+
             executionA = Mockito.mock(Consumer.class);
             commandA = createCommand(executionA);
 
@@ -425,6 +578,8 @@ public interface CompositeFromCommandsSpecification extends
     abstract class AbstractCompositeFromCommandsWithCanExecuteSpecification
             extends AbstractCreateSpecification<Void, List<Integer>> implements ReactiveCommandExtension
     {
+        protected ReplaySubject<ReactiveCommand<?, ?>> capturedCommands;
+
         protected Supplier<Integer> executionA;
         protected ReactiveCommand<Void, Integer> commandA;
 
@@ -439,6 +594,8 @@ public interface CompositeFromCommandsSpecification extends
         @SuppressWarnings("unchecked")
         void create()
         {
+            capturedCommands = ReplaySubject.create();
+
             executionA = Mockito.mock(Supplier.class);
             commandA = createCommand(executionA);
 
@@ -449,6 +606,24 @@ public interface CompositeFromCommandsSpecification extends
             testSubject = PublishSubject.create();
             testSubject.observeOn(testScheduler);
             command = createCompositeCommand(testSubject, Arrays.asList(commandA, commandB));
+        }
+
+        @Nonnull
+        @Override
+        public  <T, R> ReactiveCommand<T, R> onCreateCommand(final @Nonnull ReactiveCommand<T, R> command)
+        {
+            final ReactiveCommand<T, R> created = ReactiveCommandExtension.super.onCreateCommand(command);
+
+            capturedCommands.onNext(created);
+
+            return created;
+        }
+
+        @Test
+        @DisplayName("Created command should be captured")
+        public void testCreatedCommand()
+        {
+            capturedCommands.test().assertValues(commandA, commandB, command);
         }
 
         @Nonnull
@@ -516,6 +691,8 @@ public interface CompositeFromCommandsSpecification extends
         @SuppressWarnings("unchecked")
         void create()
         {
+            capturedCommands = ReplaySubject.create();
+
             executionA = Mockito.mock(Supplier.class);
             commandA = createCommand(executionA);
 

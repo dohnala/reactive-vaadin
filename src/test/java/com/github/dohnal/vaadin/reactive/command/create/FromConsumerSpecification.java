@@ -28,6 +28,7 @@ import io.reactivex.observers.TestObserver;
 import io.reactivex.schedulers.Schedulers;
 import io.reactivex.schedulers.TestScheduler;
 import io.reactivex.subjects.PublishSubject;
+import io.reactivex.subjects.ReplaySubject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -51,6 +52,7 @@ public interface FromConsumerSpecification extends
     abstract class AbstractFromConsumerSpecification extends AbstractCreateSpecification<Integer, Void>
             implements ReactiveCommandExtension
     {
+        protected ReplaySubject<ReactiveCommand<?, ?>> capturedCommands;
         protected Consumer<Integer> execution;
         protected ReactiveCommand<Integer, Void> command;
 
@@ -58,8 +60,27 @@ public interface FromConsumerSpecification extends
         @SuppressWarnings("unchecked")
         void create()
         {
+            capturedCommands = ReplaySubject.create();
             execution = Mockito.mock(Consumer.class);
             command = createCommand(execution);
+        }
+
+        @Nonnull
+        @Override
+        public  <T, R> ReactiveCommand<T, R> onCreateCommand(final @Nonnull ReactiveCommand<T, R> command)
+        {
+            final ReactiveCommand<T, R> created = ReactiveCommandExtension.super.onCreateCommand(command);
+
+            capturedCommands.onNext(created);
+
+            return created;
+        }
+
+        @Test
+        @DisplayName("Created command should be captured")
+        public void testCreatedCommand()
+        {
+            capturedCommands.test().assertValue(command);
         }
 
         @Nonnull
@@ -160,6 +181,7 @@ public interface FromConsumerSpecification extends
         @SuppressWarnings("unchecked")
         void create()
         {
+            capturedCommands = ReplaySubject.create();
             execution = Mockito.mock(Consumer.class);
             command = createCommand(execution, Schedulers.from(Runnable::run));
         }
@@ -168,6 +190,7 @@ public interface FromConsumerSpecification extends
     abstract class AbstractFromConsumerWithCanExecuteSpecification
             extends AbstractCreateSpecification<Integer, Void> implements ReactiveCommandExtension
     {
+        protected ReplaySubject<ReactiveCommand<?, ?>> capturedCommands;
         protected Consumer<Integer> execution;
         protected TestScheduler testScheduler;
         protected PublishSubject<Boolean> testSubject;
@@ -177,11 +200,30 @@ public interface FromConsumerSpecification extends
         @SuppressWarnings("unchecked")
         void create()
         {
+            capturedCommands = ReplaySubject.create();
             execution = Mockito.mock(Consumer.class);
             testScheduler = new TestScheduler();
             testSubject = PublishSubject.create();
             testSubject.observeOn(testScheduler);
             command = createCommand(testSubject, execution);
+        }
+
+        @Nonnull
+        @Override
+        public  <T, R> ReactiveCommand<T, R> onCreateCommand(final @Nonnull ReactiveCommand<T, R> command)
+        {
+            final ReactiveCommand<T, R> created = ReactiveCommandExtension.super.onCreateCommand(command);
+
+            capturedCommands.onNext(created);
+
+            return created;
+        }
+
+        @Test
+        @DisplayName("Created command should be captured")
+        public void testCreatedCommand()
+        {
+            capturedCommands.test().assertValue(command);
         }
 
         @Nonnull
@@ -236,6 +278,7 @@ public interface FromConsumerSpecification extends
         @SuppressWarnings("unchecked")
         void create()
         {
+            capturedCommands = ReplaySubject.create();
             execution = Mockito.mock(Consumer.class);
             testScheduler = new TestScheduler();
             testSubject = PublishSubject.create();

@@ -29,6 +29,7 @@ import io.reactivex.observers.TestObserver;
 import io.reactivex.schedulers.Schedulers;
 import io.reactivex.schedulers.TestScheduler;
 import io.reactivex.subjects.PublishSubject;
+import io.reactivex.subjects.ReplaySubject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -50,6 +51,7 @@ public interface ProgressFromBiFunctionSpecification extends
     abstract class AbstractProgressFromBiFunctionWithSchedulerSpecification extends
             AbstractCreateSpecification<Integer, Integer> implements ReactiveCommandExtension
     {
+        protected ReplaySubject<ReactiveCommand<?, ?>> capturedCommands;
         protected BiFunction<ProgressContext, Integer, Integer> execution;
         protected ReactiveCommand<Integer, Integer> command;
 
@@ -57,8 +59,27 @@ public interface ProgressFromBiFunctionSpecification extends
         @SuppressWarnings("unchecked")
         void create()
         {
+            capturedCommands = ReplaySubject.create();
             execution = Mockito.mock(BiFunction.class);
             command = createProgressCommand(execution, Schedulers.from(Runnable::run));
+        }
+
+        @Nonnull
+        @Override
+        public  <T, R> ReactiveCommand<T, R> onCreateCommand(final @Nonnull ReactiveCommand<T, R> command)
+        {
+            final ReactiveCommand<T, R> created = ReactiveCommandExtension.super.onCreateCommand(command);
+
+            capturedCommands.onNext(created);
+
+            return created;
+        }
+
+        @Test
+        @DisplayName("Created command should be captured")
+        public void testCreatedCommand()
+        {
+            capturedCommands.test().assertValue(command);
         }
 
         @Nonnull
@@ -186,6 +207,7 @@ public interface ProgressFromBiFunctionSpecification extends
     abstract class AbstractProgressFromBiFunctionWithCanExecuteAndSchedulerSpecification
             extends AbstractCreateSpecification<Integer, Integer> implements ReactiveCommandExtension
     {
+        protected ReplaySubject<ReactiveCommand<?, ?>> capturedCommands;
         protected BiFunction<ProgressContext, Integer, Integer> execution;
         protected TestScheduler testScheduler;
         protected PublishSubject<Boolean> testSubject;
@@ -195,11 +217,30 @@ public interface ProgressFromBiFunctionSpecification extends
         @SuppressWarnings("unchecked")
         void create()
         {
+            capturedCommands = ReplaySubject.create();
             execution = Mockito.mock(BiFunction.class);
             testScheduler = new TestScheduler();
             testSubject = PublishSubject.create();
             testSubject.observeOn(testScheduler);
             command = createProgressCommand(testSubject, execution, Schedulers.from(Runnable::run));
+        }
+
+        @Nonnull
+        @Override
+        public  <T, R> ReactiveCommand<T, R> onCreateCommand(final @Nonnull ReactiveCommand<T, R> command)
+        {
+            final ReactiveCommand<T, R> created = ReactiveCommandExtension.super.onCreateCommand(command);
+
+            capturedCommands.onNext(created);
+
+            return created;
+        }
+
+        @Test
+        @DisplayName("Created command should be captured")
+        public void testCreatedCommand()
+        {
+            capturedCommands.test().assertValue(command);
         }
 
         @Nonnull

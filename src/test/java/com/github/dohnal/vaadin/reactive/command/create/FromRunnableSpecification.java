@@ -26,6 +26,7 @@ import io.reactivex.Scheduler;
 import io.reactivex.schedulers.Schedulers;
 import io.reactivex.schedulers.TestScheduler;
 import io.reactivex.subjects.PublishSubject;
+import io.reactivex.subjects.ReplaySubject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -49,14 +50,34 @@ public interface FromRunnableSpecification extends
     abstract class AbstractFromRunnableSpecification extends AbstractCreateSpecification<Void, Void>
             implements ReactiveCommandExtension
     {
+        protected ReplaySubject<ReactiveCommand<?, ?>> capturedCommands;
         protected Runnable execution;
         protected ReactiveCommand<Void, Void> command;
 
         @BeforeEach
         void create()
         {
+            capturedCommands = ReplaySubject.create();
             execution = Mockito.mock(Runnable.class);
             command = createCommand(execution);
+        }
+
+        @Nonnull
+        @Override
+        public  <T, R> ReactiveCommand<T, R> onCreateCommand(final @Nonnull ReactiveCommand<T, R> command)
+        {
+            final ReactiveCommand<T, R> created = ReactiveCommandExtension.super.onCreateCommand(command);
+
+            capturedCommands.onNext(created);
+
+            return created;
+        }
+
+        @Test
+        @DisplayName("Created command should be captured")
+        public void testCreatedCommand()
+        {
+            capturedCommands.test().assertValue(command);
         }
 
         @Nonnull
@@ -139,6 +160,7 @@ public interface FromRunnableSpecification extends
         @BeforeEach
         void create()
         {
+            capturedCommands = ReplaySubject.create();
             execution = Mockito.mock(Runnable.class);
             command = createCommand(execution, Schedulers.from(Runnable::run));
         }
@@ -147,6 +169,7 @@ public interface FromRunnableSpecification extends
     abstract class AbstractFromRunnableWithCanExecuteSpecification
             extends AbstractCreateSpecification<Void, Void> implements ReactiveCommandExtension
     {
+        protected ReplaySubject<ReactiveCommand<?, ?>> capturedCommands;
         protected Runnable execution;
         protected TestScheduler testScheduler;
         protected PublishSubject<Boolean> testSubject;
@@ -155,11 +178,30 @@ public interface FromRunnableSpecification extends
         @BeforeEach
         void create()
         {
+            capturedCommands = ReplaySubject.create();
             execution = Mockito.mock(Runnable.class);
             testScheduler = new TestScheduler();
             testSubject = PublishSubject.create();
             testSubject.observeOn(testScheduler);
             command = createCommand(testSubject, execution);
+        }
+
+        @Nonnull
+        @Override
+        public  <T, R> ReactiveCommand<T, R> onCreateCommand(final @Nonnull ReactiveCommand<T, R> command)
+        {
+            final ReactiveCommand<T, R> created = ReactiveCommandExtension.super.onCreateCommand(command);
+
+            capturedCommands.onNext(created);
+
+            return created;
+        }
+
+        @Test
+        @DisplayName("Created command should be captured")
+        public void testCreatedCommand()
+        {
+            capturedCommands.test().assertValue(command);
         }
 
         @Nonnull
@@ -211,6 +253,7 @@ public interface FromRunnableSpecification extends
         @BeforeEach
         void create()
         {
+            capturedCommands = ReplaySubject.create();
             execution = Mockito.mock(Runnable.class);
             testScheduler = new TestScheduler();
             testSubject = PublishSubject.create();

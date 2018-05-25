@@ -28,6 +28,7 @@ import io.reactivex.observers.TestObserver;
 import io.reactivex.schedulers.Schedulers;
 import io.reactivex.schedulers.TestScheduler;
 import io.reactivex.subjects.PublishSubject;
+import io.reactivex.subjects.ReplaySubject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -51,6 +52,7 @@ public interface FromObservableFunctionSpecification extends
     abstract class AbstractFromObservableFunctionSpecification extends AbstractCreateSpecification<Integer, Integer>
             implements ReactiveCommandExtension
     {
+        protected ReplaySubject<ReactiveCommand<?, ?>> capturedCommands;
         protected Function<Integer, Observable<Integer>> execution;
         protected ReactiveCommand<Integer, Integer> command;
 
@@ -58,8 +60,27 @@ public interface FromObservableFunctionSpecification extends
         @SuppressWarnings("unchecked")
         void create()
         {
+            capturedCommands = ReplaySubject.create();
             execution = Mockito.mock(Function.class);
             command = createCommandFromObservable(execution);
+        }
+
+        @Nonnull
+        @Override
+        public  <T, R> ReactiveCommand<T, R> onCreateCommand(final @Nonnull ReactiveCommand<T, R> command)
+        {
+            final ReactiveCommand<T, R> created = ReactiveCommandExtension.super.onCreateCommand(command);
+
+            capturedCommands.onNext(created);
+
+            return created;
+        }
+
+        @Test
+        @DisplayName("Created command should be captured")
+        public void testCreatedCommand()
+        {
+            capturedCommands.test().assertValue(command);
         }
 
         @Nonnull
@@ -161,6 +182,7 @@ public interface FromObservableFunctionSpecification extends
         @SuppressWarnings("unchecked")
         void create()
         {
+            capturedCommands = ReplaySubject.create();
             execution = Mockito.mock(Function.class);
             command = createCommandFromObservable(execution, Schedulers.from(Runnable::run));
         }
@@ -169,6 +191,7 @@ public interface FromObservableFunctionSpecification extends
     abstract class AbstractFromObservableFunctionWithCanExecuteSpecification
             extends AbstractCreateSpecification<Integer, Integer> implements ReactiveCommandExtension
     {
+        protected ReplaySubject<ReactiveCommand<?, ?>> capturedCommands;
         protected Function<Integer, Observable<Integer>> execution;
         protected TestScheduler testScheduler;
         protected PublishSubject<Boolean> testSubject;
@@ -178,11 +201,30 @@ public interface FromObservableFunctionSpecification extends
         @SuppressWarnings("unchecked")
         void create()
         {
+            capturedCommands = ReplaySubject.create();
             execution = Mockito.mock(Function.class);
             testScheduler = new TestScheduler();
             testSubject = PublishSubject.create();
             testSubject.observeOn(testScheduler);
             command = createCommandFromObservable(testSubject, execution);
+        }
+
+        @Nonnull
+        @Override
+        public  <T, R> ReactiveCommand<T, R> onCreateCommand(final @Nonnull ReactiveCommand<T, R> command)
+        {
+            final ReactiveCommand<T, R> created = ReactiveCommandExtension.super.onCreateCommand(command);
+
+            capturedCommands.onNext(created);
+
+            return created;
+        }
+
+        @Test
+        @DisplayName("Created command should be captured")
+        public void testCreatedCommand()
+        {
+            capturedCommands.test().assertValue(command);
         }
 
         @Nonnull
@@ -238,6 +280,7 @@ public interface FromObservableFunctionSpecification extends
         @SuppressWarnings("unchecked")
         void create()
         {
+            capturedCommands = ReplaySubject.create();
             execution = Mockito.mock(Function.class);
             testScheduler = new TestScheduler();
             testSubject = PublishSubject.create();

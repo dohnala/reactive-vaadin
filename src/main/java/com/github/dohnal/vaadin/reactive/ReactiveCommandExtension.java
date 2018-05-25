@@ -405,8 +405,8 @@ public interface ReactiveCommandExtension
         Objects.requireNonNull(execution, "Execution cannot be null");
         Objects.requireNonNull(scheduler, "Scheduler cannot be null");
 
-        return new Command<>(canExecute, input ->
-                Objects.requireNonNull(execution.get(), "Observable cannot be null"), scheduler);
+        return onCreateCommand(new Command<>(canExecute, input ->
+                Objects.requireNonNull(execution.get(), "Observable cannot be null"), scheduler));
     }
 
     /**
@@ -482,11 +482,11 @@ public interface ReactiveCommandExtension
         Objects.requireNonNull(execution, "Execution cannot be null");
         Objects.requireNonNull(scheduler, "Scheduler cannot be null");
 
-        return new Command<>(canExecute, input -> {
+        return onCreateCommand(new Command<>(canExecute, input -> {
             Objects.requireNonNull(input, "Input cannot be null");
 
             return Objects.requireNonNull(execution.apply(input), "Observable cannot be null");
-        }, scheduler);
+        }, scheduler));
     }
 
     /**
@@ -703,11 +703,11 @@ public interface ReactiveCommandExtension
         Objects.requireNonNull(execution, "Execution cannot be null");
         Objects.requireNonNull(scheduler, "Scheduler cannot be null");
 
-        return new ProgressCommand<>(canExecute, (progressContext, input) -> {
+        return onCreateCommand(new ProgressCommand<>(canExecute, (progressContext, input) -> {
             Objects.requireNonNull(progressContext, "Progress context cannot be null");
 
             return Objects.requireNonNull(execution.apply(progressContext), "Observable cannot be null");
-        }, scheduler);
+        }, scheduler));
     }
 
     /**
@@ -750,12 +750,12 @@ public interface ReactiveCommandExtension
         Objects.requireNonNull(execution, "Execution cannot be null");
         Objects.requireNonNull(scheduler, "Scheduler cannot be null");
 
-        return new ProgressCommand<>(canExecute, (progressContext, input) -> {
+        return onCreateCommand(new ProgressCommand<>(canExecute, (progressContext, input) -> {
             Objects.requireNonNull(progressContext, "Progress context cannot be null");
             Objects.requireNonNull(input, "Input context cannot be null");
 
             return Objects.requireNonNull(execution.apply(progressContext, input), "Observable cannot be null");
-        }, scheduler);
+        }, scheduler));
     }
 
     /**
@@ -831,6 +831,22 @@ public interface ReactiveCommandExtension
         Objects.requireNonNull(commands, "Commands cannot be null");
         Objects.requireNonNull(scheduler, "Scheduler cannot be null");
 
-        return new CompositeCommand<>(canExecute, commands, scheduler);
+        return onCreateCommand(new CompositeCommand<>(canExecute, commands, scheduler));
+    }
+
+    /**
+     * Extension method with is called when new command has been created
+     *
+     * @param command created command
+     * @param <T> type of command input
+     * @param <R> type of command result
+     * @return created command
+     */
+    @Nonnull
+    default <T, R> ReactiveCommand<T, R> onCreateCommand(final @Nonnull ReactiveCommand<T, R> command)
+    {
+        Objects.requireNonNull(command, "Command cannot be null");
+
+        return command;
     }
 }
