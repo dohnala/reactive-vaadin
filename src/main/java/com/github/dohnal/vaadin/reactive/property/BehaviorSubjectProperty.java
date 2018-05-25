@@ -155,14 +155,14 @@ public final class BehaviorSubjectProperty<T> implements ReactiveProperty<T>
     }
 
     @Override
-    public boolean isSuppressed()
+    public final boolean isSuppressed()
     {
         return suppressed.get() > 0;
     }
 
     @Nonnull
     @Override
-    public Disposable suppress()
+    public final Disposable suppress()
     {
         suppressed.incrementAndGet();
 
@@ -170,14 +170,14 @@ public final class BehaviorSubjectProperty<T> implements ReactiveProperty<T>
     }
 
     @Override
-    public boolean isDelayed()
+    public final boolean isDelayed()
     {
         return delayed.get() > 0;
     }
 
     @Nonnull
     @Override
-    public Disposable delay()
+    public final Disposable delay()
     {
         if (delayed.incrementAndGet() == 1)
         {
