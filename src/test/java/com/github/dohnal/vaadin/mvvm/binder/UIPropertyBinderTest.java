@@ -14,11 +14,11 @@
 package com.github.dohnal.vaadin.mvvm.binder;
 
 import javax.annotation.Nonnull;
+import java.util.function.Consumer;
 
 import com.github.dohnal.vaadin.reactive.Property;
 import com.github.dohnal.vaadin.reactive.PropertyBinder;
 import com.github.dohnal.vaadin.reactive.ReactiveBinderExtension;
-import com.github.dohnal.vaadin.reactive.activable.CompositeActivable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.TestScheduler;
 import io.reactivex.subjects.PublishSubject;
@@ -26,21 +26,22 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 /**
- * Tests for {@link ActivablePropertyBinder}
+ * Tests for {@link UIPropertyBinder}
  *
  * @author dohnal
  */
-@DisplayName("Activable property binder specification")
-public class ActivablePropertyBinderTest
+@DisplayName("UI property binder specification")
+public class UIPropertyBinderTest
 {
     @Nested
-    @DisplayName("When activable property binder is created")
+    @DisplayName("When UI property binder is created")
     class WhenCreate implements ReactiveBinderExtension
     {
-        private CompositeActivable compositeActivable;
+        private Consumer<Runnable> withUIAccess;
         private Property<Integer> property;
         private PublishSubject<Throwable> errorSubject;
 
@@ -50,17 +51,36 @@ public class ActivablePropertyBinderTest
         @SuppressWarnings("unchecked")
         void before()
         {
-            compositeActivable = new CompositeActivable();
+            withUIAccess = Mockito.mock(Consumer.class);
             property = Mockito.mock(Property.class);
             errorSubject = PublishSubject.create();
 
-            binder = new ActivablePropertyBinder<>(compositeActivable, bind(property));
+            binder = new UIPropertyBinder<>(withUIAccess, bind(new UIProperty<>(withUIAccess, property)));
         }
 
         @Override
         public void handleError(final @Nonnull Throwable error)
         {
             errorSubject.onNext(error);
+        }
+
+        @Nested
+        @DisplayName("When GetProperty is called")
+        class WhenGetProperty
+        {
+            @Nested
+            @DisplayName("When value is set")
+            class WhenSetValue
+            {
+                @Test
+                @DisplayName("Property value should be set with UI access")
+                public void testWithUIAccess()
+                {
+                    binder.getProperty().setValue(7);
+
+                    Mockito.verify(withUIAccess).accept(Mockito.any(Runnable.class));
+                }
+            }
         }
 
         @Nested
@@ -86,74 +106,29 @@ public class ActivablePropertyBinderTest
             class WhenSourceObservableEmitsValue
             {
                 @Test
-                @SuppressWarnings("unchecked")
-                @DisplayName("Property value should not be set")
+                @DisplayName("Property value should be set with UI access")
+                public void testWithUIAccess()
+                {
+                    sourceObservable.onNext(7);
+                    testScheduler.triggerActions();
+
+                    Mockito.verify(withUIAccess).accept(Mockito.any(Runnable.class));
+                }
+
+                @Test
+                @DisplayName("Property value should be set with correct value")
                 public void testPropertyValue()
                 {
-                    Mockito.clearInvocations(property);
+                    final ArgumentCaptor<Runnable> captor = ArgumentCaptor.forClass(Runnable.class);
 
                     sourceObservable.onNext(7);
                     testScheduler.triggerActions();
 
-                    Mockito.verify(property, Mockito.never()).setValue(Mockito.any());
-                }
-            }
+                    Mockito.verify(withUIAccess).accept(captor.capture());
 
-            @Nested
-            @DisplayName("When activated")
-            class WhenActivate
-            {
-                @BeforeEach
-                void before()
-                {
-                    compositeActivable.activate();
-                }
+                    captor.getValue().run();
 
-                @Nested
-                @DisplayName("When source observable emits value")
-                class WhenSourceObservableEmitsValue
-                {
-                    @Test
-                    @SuppressWarnings("unchecked")
-                    @DisplayName("Property value should be set with correct value")
-                    public void testPropertyValue()
-                    {
-                        Mockito.clearInvocations(property);
-
-                        sourceObservable.onNext(7);
-                        testScheduler.triggerActions();
-
-                        Mockito.verify(property).setValue(7);
-                    }
-                }
-
-                @Nested
-                @DisplayName("When activated")
-                class WhenDeactivate
-                {
-                    @BeforeEach
-                    void before()
-                    {
-                        compositeActivable.deactivate();
-                    }
-
-                    @Nested
-                    @DisplayName("When source observable emits value")
-                    class WhenSourceObservableEmitsValue
-                    {
-                        @Test
-                        @SuppressWarnings("unchecked")
-                        @DisplayName("Property value should not be set")
-                        public void testPropertyValue()
-                        {
-                            Mockito.clearInvocations(property);
-
-                            sourceObservable.onNext(7);
-                            testScheduler.triggerActions();
-
-                            Mockito.verify(property, Mockito.never()).setValue(Mockito.any());
-                        }
-                    }
+                    Mockito.verify(property).setValue(7);
                 }
             }
         }
@@ -163,6 +138,7 @@ public class ActivablePropertyBinderTest
         class WhenBindToIsObservable extends WhenBindToObservable
         {
             @BeforeEach
+            @SuppressWarnings("unchecked")
             void before()
             {
                 testScheduler = new TestScheduler();

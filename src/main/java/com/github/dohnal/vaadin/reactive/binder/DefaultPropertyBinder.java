@@ -56,7 +56,7 @@ public final class DefaultPropertyBinder<T> extends AbstractBinder implements Pr
     {
         Objects.requireNonNull(observable, "Observable cannot be null");
 
-        return subscribeWithErrorHandler(observable, property::setValue);
+        return subscribeWithErrorHandler(observable, getProperty()::setValue);
     }
 
     @Nonnull

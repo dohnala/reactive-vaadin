@@ -58,26 +58,26 @@ public class ReactiveViewModel implements
 {
     protected static final Logger LOGGER = LoggerFactory.getLogger(ReactiveViewModel.class);
 
-    private final AtomicInteger viewCount;
-
-    private final ReactiveProperty<Boolean> activation;
-
-    private final CompositeActivable compositeActivable;
-
     private final List<ReactiveProperty<?>> properties;
 
     private final AtomicInteger suppressed;
 
     private final AtomicInteger delayed;
 
+    private final AtomicInteger viewCount;
+
+    private final ReactiveProperty<Boolean> activation;
+
+    private final CompositeActivable compositeActivable;
+
     public ReactiveViewModel()
     {
-        this.viewCount = new AtomicInteger(0);
-        this.activation = createProperty();
-        this.compositeActivable = new CompositeActivable();
         this.properties = new ArrayList<>();
         this.suppressed = new AtomicInteger(0);
         this.delayed = new AtomicInteger(0);
+        this.viewCount = new AtomicInteger(0);
+        this.activation = createProperty();
+        this.compositeActivable = new CompositeActivable();
     }
 
     @Override
@@ -130,9 +130,8 @@ public class ReactiveViewModel implements
     {
         Objects.requireNonNull(property, "Property cannot be null");
 
-        final PropertyBinder<T> binder = ReactiveBinderExtension.super.bind(property);
-
-        return new ActivablePropertyBinder<>(binder, compositeActivable);
+        return new ActivablePropertyBinder<>(compositeActivable,
+                ReactiveBinderExtension.super.bind(property));
     }
 
     @Nonnull
@@ -141,9 +140,8 @@ public class ReactiveViewModel implements
     {
         Objects.requireNonNull(property, "Property cannot be null");
 
-        final ObservablePropertyBinder<T> binder = ReactiveBinderExtension.super.bind(property);
-
-        return new ActivableObservablePropertyBinder<>(binder, compositeActivable);
+        return new ActivableObservablePropertyBinder<>(compositeActivable,
+                ReactiveBinderExtension.super.bind(property));
     }
 
     @Nonnull
@@ -152,9 +150,8 @@ public class ReactiveViewModel implements
     {
         Objects.requireNonNull(observable, "Observable cannot be null");
 
-        final ObservableBinder<T> binder = ReactiveBinderExtension.super.when(observable);
-
-        return new ActivableObservableBinder<>(binder, compositeActivable);
+        return new ActivableObservableBinder<>(compositeActivable,
+                ReactiveBinderExtension.super.when(observable));
     }
 
     @Override

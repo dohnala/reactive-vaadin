@@ -13,8 +13,6 @@
 
 package com.github.dohnal.vaadin.reactive;
 
-import javax.annotation.Nonnull;
-
 import io.reactivex.Observable;
 import io.reactivex.observers.TestObserver;
 import io.reactivex.schedulers.TestScheduler;
@@ -93,15 +91,7 @@ public class EventExtensionTest implements EventExtension
             testSubject = PublishSubject.create();
             testSubject.observeOn(testScheduler);
 
-            event = changed(new IsObservable<Integer>()
-            {
-                @Nonnull
-                @Override
-                public Observable<Integer> asObservable()
-                {
-                    return testSubject;
-                }
-            });
+            event = changed(() -> testSubject);
         }
 
         @Test

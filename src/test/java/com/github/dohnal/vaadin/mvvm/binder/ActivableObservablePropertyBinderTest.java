@@ -15,13 +15,11 @@ package com.github.dohnal.vaadin.mvvm.binder;
 
 import javax.annotation.Nonnull;
 
-import com.github.dohnal.vaadin.reactive.IsObservable;
 import com.github.dohnal.vaadin.reactive.ObservablePropertyBinder;
 import com.github.dohnal.vaadin.reactive.ReactiveBinderExtension;
 import com.github.dohnal.vaadin.reactive.ReactiveProperty;
 import com.github.dohnal.vaadin.reactive.ReactivePropertyExtension;
 import com.github.dohnal.vaadin.reactive.activable.CompositeActivable;
-import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.TestObserver;
 import io.reactivex.schedulers.TestScheduler;
@@ -57,7 +55,7 @@ public class ActivableObservablePropertyBinderTest
             property = createProperty();
             errorSubject = PublishSubject.create();
 
-            binder = new ActivableObservablePropertyBinder<>(bind(property), compositeActivable);
+            binder = new ActivableObservablePropertyBinder<>(compositeActivable, bind(property));
         }
 
         @Override
@@ -174,15 +172,7 @@ public class ActivableObservablePropertyBinderTest
                 sourceObservable = PublishSubject.create();
                 sourceObservable.observeOn(testScheduler);
 
-                disposable = binder.to(new IsObservable<Integer>()
-                {
-                    @Nonnull
-                    @Override
-                    public Observable<Integer> asObservable()
-                    {
-                        return sourceObservable;
-                    }
-                });
+                disposable = binder.to(() -> sourceObservable);
             }
         }
 

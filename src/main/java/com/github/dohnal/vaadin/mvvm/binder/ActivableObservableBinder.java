@@ -34,10 +34,10 @@ import io.reactivex.disposables.Disposable;
  */
 public final class ActivableObservableBinder<T> extends ObservableBinderDecorator<T>
 {
-    private CompositeActivable compositeActivable;
+    private final CompositeActivable compositeActivable;
 
-    public ActivableObservableBinder(final @Nonnull ObservableBinder<T> binder,
-                                     final @Nonnull CompositeActivable compositeActivable)
+    public ActivableObservableBinder(final @Nonnull CompositeActivable compositeActivable,
+                                     final @Nonnull ObservableBinder<T> binder)
     {
         super(binder);
 
@@ -48,7 +48,7 @@ public final class ActivableObservableBinder<T> extends ObservableBinderDecorato
 
     @Nonnull
     @Override
-    public Disposable then(final @Nonnull Runnable action)
+    public final Disposable then(final @Nonnull Runnable action)
     {
         final SerialActivable activable = new SerialActivable(() -> super.then(action));
 
@@ -59,7 +59,7 @@ public final class ActivableObservableBinder<T> extends ObservableBinderDecorato
 
     @Nonnull
     @Override
-    public Disposable then(final @Nonnull Consumer<? super T> action)
+    public final Disposable then(final @Nonnull Consumer<? super T> action)
     {
         final SerialActivable activable = new SerialActivable(() -> super.then(action));
 
@@ -70,7 +70,7 @@ public final class ActivableObservableBinder<T> extends ObservableBinderDecorato
 
     @Nonnull
     @Override
-    public Disposable then(final @Nonnull Supplier<Observable<?>> action)
+    public final Disposable then(final @Nonnull Supplier<Observable<?>> action)
     {
         final SerialActivable activable = new SerialActivable(() -> super.then(action));
 
@@ -81,7 +81,7 @@ public final class ActivableObservableBinder<T> extends ObservableBinderDecorato
 
     @Nonnull
     @Override
-    public Disposable then(final @Nonnull Function<? super T, Observable<?>> action)
+    public final Disposable then(final @Nonnull Function<? super T, Observable<?>> action)
     {
         final SerialActivable activable = new SerialActivable(() -> super.then(action));
 

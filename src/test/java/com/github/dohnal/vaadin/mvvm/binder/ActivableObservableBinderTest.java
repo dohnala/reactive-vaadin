@@ -18,7 +18,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import com.github.dohnal.vaadin.reactive.IsObservable;
 import com.github.dohnal.vaadin.reactive.ObservableBinder;
 import com.github.dohnal.vaadin.reactive.ReactiveBinderExtension;
 import com.github.dohnal.vaadin.reactive.activable.CompositeActivable;
@@ -61,7 +60,7 @@ public class ActivableObservableBinderTest
             observable.observeOn(testScheduler);
             errorSubject = PublishSubject.create();
 
-            binder = new ActivableObservableBinder<>(when(observable), compositeActivable);
+            binder = new ActivableObservableBinder<>(compositeActivable, when(observable));
         }
 
         @Override
@@ -433,15 +432,7 @@ public class ActivableObservableBinderTest
             observable.observeOn(testScheduler);
             errorSubject = PublishSubject.create();
 
-            binder = new ActivableObservableBinder<>(when(new IsObservable<Integer>()
-            {
-                @Nonnull
-                @Override
-                public Observable<Integer> asObservable()
-                {
-                    return observable;
-                }
-            }), compositeActivable);
+            binder = new ActivableObservableBinder<>(compositeActivable, when(() -> observable));
         }
     }
 }

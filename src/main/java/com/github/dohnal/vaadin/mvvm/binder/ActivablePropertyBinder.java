@@ -32,10 +32,10 @@ import io.reactivex.disposables.Disposable;
  */
 public final class ActivablePropertyBinder<T> extends PropertyBinderDecorator<T>
 {
-    private CompositeActivable compositeActivable;
+    private final CompositeActivable compositeActivable;
 
-    public ActivablePropertyBinder(final @Nonnull PropertyBinder<T> binder,
-                                   final @Nonnull CompositeActivable compositeActivable)
+    public ActivablePropertyBinder(final @Nonnull CompositeActivable compositeActivable,
+                                   final @Nonnull PropertyBinder<T> binder)
     {
         super(binder);
 
@@ -46,7 +46,7 @@ public final class ActivablePropertyBinder<T> extends PropertyBinderDecorator<T>
 
     @Nonnull
     @Override
-    public Disposable to(final @Nonnull Observable<? extends T> observable)
+    public final Disposable to(final @Nonnull Observable<? extends T> observable)
     {
         final SerialActivable activable = new SerialActivable(() -> super.to(observable));
 
@@ -57,7 +57,7 @@ public final class ActivablePropertyBinder<T> extends PropertyBinderDecorator<T>
 
     @Nonnull
     @Override
-    public Disposable to(final @Nonnull IsObservable<? extends T> isObservable)
+    public final Disposable to(final @Nonnull IsObservable<? extends T> isObservable)
     {
         final SerialActivable activable = new SerialActivable(() -> super.to(isObservable));
 

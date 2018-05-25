@@ -36,6 +36,7 @@ public interface Activable
 
     /**
      * Returns true if this resource has been activated
+     *
      * @return true if this resource has been activated
      */
     boolean isActivated();

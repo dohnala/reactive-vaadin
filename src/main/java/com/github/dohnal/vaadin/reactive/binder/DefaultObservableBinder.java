@@ -56,7 +56,7 @@ public final class DefaultObservableBinder<T> extends AbstractBinder implements 
     {
         Objects.requireNonNull(action, "Action cannot be null");
 
-        return subscribeWithErrorHandler(observable, value -> {
+        return subscribeWithErrorHandler(getObservable(), value -> {
             action.run();
         });
     }
@@ -67,7 +67,7 @@ public final class DefaultObservableBinder<T> extends AbstractBinder implements 
     {
         Objects.requireNonNull(action, "Action cannot be null");
 
-        return subscribeWithErrorHandler(observable, action);
+        return subscribeWithErrorHandler(getObservable(), action);
     }
 
     @Nonnull
@@ -76,7 +76,7 @@ public final class DefaultObservableBinder<T> extends AbstractBinder implements 
     {
         Objects.requireNonNull(action, "Action cannot be null");
 
-        return subscribeWithErrorHandler(observable, value -> {
+        return subscribeWithErrorHandler(getObservable(), value -> {
             return action.get();
         });
     }
@@ -87,6 +87,6 @@ public final class DefaultObservableBinder<T> extends AbstractBinder implements 
     {
         Objects.requireNonNull(action, "Action cannot be null");
 
-        return subscribeWithErrorHandler(observable, action);
+        return subscribeWithErrorHandler(getObservable(), action);
     }
 }

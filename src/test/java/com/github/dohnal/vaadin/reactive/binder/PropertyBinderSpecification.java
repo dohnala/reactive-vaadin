@@ -15,11 +15,9 @@ package com.github.dohnal.vaadin.reactive.binder;
 
 import javax.annotation.Nonnull;
 
-import com.github.dohnal.vaadin.reactive.IsObservable;
 import com.github.dohnal.vaadin.reactive.Property;
 import com.github.dohnal.vaadin.reactive.PropertyBinder;
 import com.github.dohnal.vaadin.reactive.ReactiveBinderExtension;
-import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.TestObserver;
 import io.reactivex.schedulers.Schedulers;
@@ -261,15 +259,7 @@ public interface PropertyBinderSpecification
             errorObserver = errorSubject.test();
 
             binder = bind(property);
-            disposable = binder.to(new IsObservable<Integer>()
-            {
-                @Nonnull
-                @Override
-                public Observable<Integer> asObservable()
-                {
-                    return sourceObservable;
-                }
-            });
+            disposable = binder.to(() -> sourceObservable);
         }
     }
 }

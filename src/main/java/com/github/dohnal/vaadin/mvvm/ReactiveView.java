@@ -15,11 +15,15 @@ package com.github.dohnal.vaadin.mvvm;
 
 import javax.annotation.Nonnull;
 import java.util.Objects;
-import java.util.function.Consumer;
 
 import com.github.dohnal.vaadin.mvvm.binder.ActivableObservableBinder;
 import com.github.dohnal.vaadin.mvvm.binder.ActivableObservablePropertyBinder;
 import com.github.dohnal.vaadin.mvvm.binder.ActivablePropertyBinder;
+import com.github.dohnal.vaadin.mvvm.binder.UIObservableBinder;
+import com.github.dohnal.vaadin.mvvm.binder.UIObservableProperty;
+import com.github.dohnal.vaadin.mvvm.binder.UIObservablePropertyBinder;
+import com.github.dohnal.vaadin.mvvm.binder.UIProperty;
+import com.github.dohnal.vaadin.mvvm.binder.UIPropertyBinder;
 import com.github.dohnal.vaadin.reactive.ObservableBinder;
 import com.github.dohnal.vaadin.reactive.ObservableProperty;
 import com.github.dohnal.vaadin.reactive.ObservablePropertyBinder;
@@ -28,13 +32,10 @@ import com.github.dohnal.vaadin.reactive.PropertyBinder;
 import com.github.dohnal.vaadin.reactive.ReactiveBinderExtension;
 import com.github.dohnal.vaadin.reactive.activable.CompositeActivable;
 import com.github.dohnal.vaadin.reactive.activable.SerialActivable;
-import com.github.dohnal.vaadin.reactive.binder.ObservableBinderDecorator;
-import com.github.dohnal.vaadin.reactive.binder.ObservablePropertyBinderDecorator;
 import com.vaadin.shared.communication.PushMode;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.UI;
 import io.reactivex.Observable;
-import io.reactivex.disposables.Disposable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -118,29 +119,22 @@ public abstract class ReactiveView<M extends ReactiveViewModel> extends CustomCo
     {
         Objects.requireNonNull(property, "Property cannot be null");
 
-        final PropertyBinder<T> binder = ReactiveBinderExtension.super.bind(withUIAccess(property));
-
-        return new ActivablePropertyBinder<>(binder, compositeActivable);
+        return new ActivablePropertyBinder<>(compositeActivable,
+                new UIPropertyBinder<>(this::withUIAccess,
+                        ReactiveBinderExtension.super.bind(
+                                new UIProperty<>(this::withUIAccess, property))));
     }
+
     @Nonnull
     @Override
     public <T> ObservablePropertyBinder<T> bind(final @Nonnull ObservableProperty<T> property)
     {
         Objects.requireNonNull(property, "Property cannot be null");
 
-        final ObservablePropertyBinder<T> binder = ReactiveBinderExtension.super.bind(withUIAccess(property));
-
-        final ObservablePropertyBinderDecorator<T> viewDecorator = new ObservablePropertyBinderDecorator<T>(binder)
-        {
-            @Nonnull
-            @Override
-            public Disposable to(final @Nonnull ObservableProperty<T> anotherProperty)
-            {
-                return super.to(withUIAccess(anotherProperty));
-            }
-        };
-
-        return new ActivableObservablePropertyBinder<>(viewDecorator, compositeActivable);
+        return new ActivableObservablePropertyBinder<>(compositeActivable,
+                new UIObservablePropertyBinder<>(this::withUIAccess,
+                        ReactiveBinderExtension.super.bind(
+                                new UIObservableProperty<>(this::withUIAccess, property))));
     }
 
     @Nonnull
@@ -149,74 +143,9 @@ public abstract class ReactiveView<M extends ReactiveViewModel> extends CustomCo
     {
         Objects.requireNonNull(observable, "Observable cannot be null");
 
-        final ObservableBinder<T> binder = ReactiveBinderExtension.super.when(observable);
-
-        final ObservableBinderDecorator<T> viewDecorator = new ObservableBinderDecorator<T>(binder)
-        {
-            @Nonnull
-            @Override
-            public Disposable then(final @Nonnull Runnable action)
-            {
-                return super.then(() -> withUIAccess(action));
-            }
-
-            @Nonnull
-            @Override
-            public Disposable then(final @Nonnull Consumer<? super T> action)
-            {
-                return super.then(value -> {
-                    withUIAccess(() -> action.accept(value));
-                });
-            }
-        };
-
-        return new ActivableObservableBinder<>(viewDecorator, compositeActivable);
-    }
-
-    /**
-     * Wraps given property to set its value while holding the session lock
-     * to ensure exclusive access to UI this view is attached to
-     *
-     * @param property property
-     * @param <T> type of value
-     * @return wrapped property
-     */
-    @Nonnull
-    protected final <T> Property<T> withUIAccess(final @Nonnull Property<T> property)
-    {
-        Objects.requireNonNull(property, "Property cannot be null");
-
-        return value -> withUIAccess(() -> property.setValue(value));
-    }
-
-    /**
-     * Wraps given observable property to set its value while holding the session lock
-     * to ensure exclusive access to UI this view is attached to
-     *
-     * @param property property
-     * @param <T> type of value
-     * @return wrapped property
-     */
-    @Nonnull
-    protected final <T> ObservableProperty<T> withUIAccess(final @Nonnull ObservableProperty<T> property)
-    {
-        Objects.requireNonNull(property, "Property cannot be null");
-
-        return new ObservableProperty<T>()
-        {
-            @Nonnull
-            @Override
-            public Observable<T> asObservable()
-            {
-                return property.asObservable();
-            }
-
-            @Override
-            public void setValue(final @Nonnull T value)
-            {
-                withUIAccess(() -> property.setValue(value));
-            }
-        };
+        return new ActivableObservableBinder<>(compositeActivable,
+                new UIObservableBinder<>(this::withUIAccess,
+                        ReactiveBinderExtension.super.when(observable)));
     }
 
     /**
