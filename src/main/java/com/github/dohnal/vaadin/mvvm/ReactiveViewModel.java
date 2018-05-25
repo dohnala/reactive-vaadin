@@ -50,7 +50,7 @@ public class ReactiveViewModel implements
 {
     protected static final Logger LOGGER = LoggerFactory.getLogger(ReactiveViewModel.class);
 
-    private final AtomicInteger refCount;
+    private final AtomicInteger viewCount;
 
     private final ReactiveProperty<Boolean> activation;
 
@@ -58,7 +58,7 @@ public class ReactiveViewModel implements
 
     public ReactiveViewModel()
     {
-        this.refCount = new AtomicInteger(0);
+        this.viewCount = new AtomicInteger(0);
         this.activation = createProperty();
         this.compositeActivable = new CompositeActivable();
     }
@@ -129,7 +129,7 @@ public class ReactiveViewModel implements
     @Nonnull
     final Disposable activate()
     {
-        if (refCount.getAndIncrement() == 0)
+        if (viewCount.getAndIncrement() == 0)
         {
             compositeActivable.activate();
 
@@ -137,7 +137,7 @@ public class ReactiveViewModel implements
         }
 
         return Disposables.fromRunnable(() -> {
-            if (refCount.decrementAndGet() == 0)
+            if (viewCount.decrementAndGet() == 0)
             {
                 activation.setValue(false);
 
