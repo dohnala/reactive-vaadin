@@ -19,7 +19,7 @@ import com.github.dohnal.vaadin.reactive.IsObservable;
 import com.github.dohnal.vaadin.reactive.Property;
 import com.github.dohnal.vaadin.reactive.PropertyBinder;
 import com.github.dohnal.vaadin.reactive.ReactiveBinderExtension;
-import com.github.dohnal.vaadin.reactive.activables.CompositeActivable;
+import com.github.dohnal.vaadin.reactive.activable.CompositeActivable;
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.TestScheduler;

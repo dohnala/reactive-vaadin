@@ -11,7 +11,7 @@
  * the License for the specific language governing permissions and limitations under the License.
  */
 
-package com.github.dohnal.vaadin.reactive.activables;
+package com.github.dohnal.vaadin.reactive.activable;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -19,11 +19,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import com.github.dohnal.vaadin.reactive.Activable;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 
 /**
- * Composite implementation of {@link Activable} for multiple activables
+ * Composite implementation of {@link Activable} for multiple activable
  *
  * @author dohnal
  */
@@ -36,7 +37,7 @@ public final class CompositeActivable implements Activable
     private final AtomicBoolean isActivated;
 
     /**
-     * Creates new composite activable with empty activables
+     * Creates new composite activable with empty activable
      */
     public CompositeActivable()
     {
@@ -59,7 +60,7 @@ public final class CompositeActivable implements Activable
     }
 
     /**
-     * Deactivates all activables and clear them
+     * Deactivates all activable and clear them
      */
     public void clear()
     {

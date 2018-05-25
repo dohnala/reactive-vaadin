@@ -11,7 +11,7 @@
  * the License for the specific language governing permissions and limitations under the License.
  */
 
-package com.github.dohnal.vaadin.reactive.activables;
+package com.github.dohnal.vaadin.reactive.activable;
 
 import io.reactivex.disposables.Disposables;
 import org.junit.jupiter.api.BeforeEach;
@@ -57,7 +57,7 @@ public class CompositeActivableTest
         }
 
         @Nested
-        @DisplayName("When activables are added")
+        @DisplayName("When activable are added")
         class WhenAdd
         {
             private SerialActivable firstActivable;
@@ -350,7 +350,7 @@ public class CompositeActivableTest
             }
 
             @Nested
-            @DisplayName("When activables are cleared")
+            @DisplayName("When activable are cleared")
             class WhenClear
             {
                 @BeforeEach

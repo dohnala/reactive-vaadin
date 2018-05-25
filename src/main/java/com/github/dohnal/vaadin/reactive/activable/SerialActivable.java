@@ -11,13 +11,14 @@
  * the License for the specific language governing permissions and limitations under the License.
  */
 
-package com.github.dohnal.vaadin.reactive.activables;
+package com.github.dohnal.vaadin.reactive.activable;
 
 import javax.annotation.Nonnull;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import com.github.dohnal.vaadin.reactive.Activable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.disposables.SerialDisposable;
 

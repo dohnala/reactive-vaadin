@@ -20,8 +20,8 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.github.dohnal.vaadin.reactive.ObservableBinder;
-import com.github.dohnal.vaadin.reactive.activables.CompositeActivable;
-import com.github.dohnal.vaadin.reactive.activables.SerialActivable;
+import com.github.dohnal.vaadin.reactive.activable.CompositeActivable;
+import com.github.dohnal.vaadin.reactive.activable.SerialActivable;
 import com.github.dohnal.vaadin.reactive.binder.ObservableBinderDecorator;
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;

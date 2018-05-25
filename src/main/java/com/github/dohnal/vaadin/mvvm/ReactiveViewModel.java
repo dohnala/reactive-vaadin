@@ -30,7 +30,7 @@ import com.github.dohnal.vaadin.reactive.ReactiveCommandExtension;
 import com.github.dohnal.vaadin.reactive.ReactiveInteractionExtension;
 import com.github.dohnal.vaadin.reactive.ReactiveProperty;
 import com.github.dohnal.vaadin.reactive.ReactivePropertyExtension;
-import com.github.dohnal.vaadin.reactive.activables.CompositeActivable;
+import com.github.dohnal.vaadin.reactive.activable.CompositeActivable;
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.disposables.Disposables;
