@@ -14,6 +14,7 @@
 package com.github.dohnal.vaadin.reactive;
 
 import javax.annotation.Nonnull;
+import java.util.Objects;
 
 import com.github.dohnal.vaadin.reactive.interaction.PublishSubjectInteraction;
 
@@ -27,13 +28,29 @@ public interface ReactiveInteractionExtension
     /**
      * Creates new interaction
      *
-     * @param <T> type of input
-     * @param <R> type of result
+     * @param <T> type of interaction input
+     * @param <R> type of interaction result
      * @return created interaction
      */
     @Nonnull
     default <T, R> ReactiveInteraction<T, R> createInteraction()
     {
-        return new PublishSubjectInteraction<>();
+        return onCreateInteraction(new PublishSubjectInteraction<>());
+    }
+
+    /**
+     * Extension method with is called when new interaction has been created
+     *
+     * @param interaction created interaction
+     * @param <T> type of interaction input
+     * @param <R> type of interaction result
+     * @return created interaction
+     */
+    @Nonnull
+    default <T, R> ReactiveInteraction<T, R> onCreateInteraction(final @Nonnull ReactiveInteraction<T, R> interaction)
+    {
+        Objects.requireNonNull(interaction, "Interaction cannot be null");
+
+        return interaction;
     }
 }

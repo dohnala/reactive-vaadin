@@ -13,6 +13,7 @@
 
 package com.github.dohnal.vaadin.reactive.interaction;
 
+import javax.annotation.Nonnull;
 import java.util.function.Consumer;
 
 import com.github.dohnal.vaadin.reactive.InteractionContext;
@@ -21,6 +22,7 @@ import com.github.dohnal.vaadin.reactive.ReactiveInteractionExtension;
 import com.github.dohnal.vaadin.reactive.exceptions.AlreadyHandledInteractionException;
 import com.github.dohnal.vaadin.reactive.exceptions.UnhandledInteractionException;
 import io.reactivex.observers.TestObserver;
+import io.reactivex.subjects.ReplaySubject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -40,6 +42,7 @@ public interface InvokeWithConsumerSpecification
 {
     abstract class InvokeWithConsumerWhenSubscriberSpecification implements ReactiveInteractionExtension
     {
+        private ReplaySubject<ReactiveInteraction<?, ?>> capturedInteractions;
         private ReactiveInteraction<Void, Boolean> interaction;
         private Consumer<Boolean> consumer;
 
@@ -47,8 +50,27 @@ public interface InvokeWithConsumerSpecification
         @SuppressWarnings("unchecked")
         protected void create()
         {
+            capturedInteractions = ReplaySubject.create();
             interaction = createInteraction();
             consumer = Mockito.mock(Consumer.class);
+        }
+
+        @Nonnull
+        @Override
+        public <T, R> ReactiveInteraction<T, R> onCreateInteraction(final @Nonnull ReactiveInteraction<T, R> interaction)
+        {
+            final ReactiveInteraction<T, R> created = ReactiveInteractionExtension.super.onCreateInteraction(interaction);
+
+            capturedInteractions.onNext(created);
+
+            return created;
+        }
+
+        @Test
+        @DisplayName("Created interaction should be captured")
+        public void testCreatedInteraction()
+        {
+            capturedInteractions.test().assertValue(interaction);
         }
 
         @Test
@@ -191,6 +213,7 @@ public interface InvokeWithConsumerSpecification
 
     abstract class InvokeWithConsumerWhenNoSubscriberSpecification implements ReactiveInteractionExtension
     {
+        private ReplaySubject<ReactiveInteraction<?, ?>> capturedInteractions;
         private ReactiveInteraction<Integer, Boolean> interaction;
         private Consumer<Boolean> consumer;
 
@@ -198,8 +221,27 @@ public interface InvokeWithConsumerSpecification
         @SuppressWarnings("unchecked")
         protected void create()
         {
+            capturedInteractions = ReplaySubject.create();
             interaction = createInteraction();
             consumer = Mockito.mock(Consumer.class);
+        }
+
+        @Nonnull
+        @Override
+        public <T, R> ReactiveInteraction<T, R> onCreateInteraction(final @Nonnull ReactiveInteraction<T, R> interaction)
+        {
+            final ReactiveInteraction<T, R> created = ReactiveInteractionExtension.super.onCreateInteraction(interaction);
+
+            capturedInteractions.onNext(created);
+
+            return created;
+        }
+
+        @Test
+        @DisplayName("Created interaction should be captured")
+        public void testCreatedInteraction()
+        {
+            capturedInteractions.test().assertValue(interaction);
         }
 
         @Test
