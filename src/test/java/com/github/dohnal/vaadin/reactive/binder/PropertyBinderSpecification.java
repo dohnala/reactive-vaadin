@@ -31,6 +31,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 /**
  * Specification for binding property by {@link PropertyBinder}
  *
@@ -45,6 +47,7 @@ public interface PropertyBinderSpecification
         protected Property<Integer> property;
         protected PublishSubject<Throwable> errorSubject;
         protected TestObserver<Throwable> errorObserver;
+        protected PropertyBinder<Integer> binder;
         protected Disposable disposable;
 
         @BeforeEach
@@ -60,13 +63,21 @@ public interface PropertyBinderSpecification
             errorSubject.observeOn(Schedulers.trampoline());
             errorObserver = errorSubject.test();
 
-            disposable = bind(property).to(sourceObservable);
+            binder = bind(property);
+            disposable = binder.to(sourceObservable);
         }
 
         @Override
         public void handleError(final @Nonnull Throwable error)
         {
             errorSubject.onNext(error);
+        }
+
+        @Test
+        @DisplayName("GetProperty should return correct property")
+        public void testGetProperty()
+        {
+            assertEquals(property, binder.getProperty());
         }
 
         @Test
@@ -249,7 +260,8 @@ public interface PropertyBinderSpecification
             errorSubject.observeOn(Schedulers.trampoline());
             errorObserver = errorSubject.test();
 
-            disposable = bind(property).to(new IsObservable<Integer>()
+            binder = bind(property);
+            disposable = binder.to(new IsObservable<Integer>()
             {
                 @Nonnull
                 @Override

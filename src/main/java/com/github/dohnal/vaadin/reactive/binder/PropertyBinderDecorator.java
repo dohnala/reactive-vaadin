@@ -17,6 +17,7 @@ import javax.annotation.Nonnull;
 import java.util.Objects;
 
 import com.github.dohnal.vaadin.reactive.IsObservable;
+import com.github.dohnal.vaadin.reactive.Property;
 import com.github.dohnal.vaadin.reactive.PropertyBinder;
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
@@ -42,6 +43,13 @@ public class PropertyBinderDecorator<T> implements PropertyBinder<T>
         Objects.requireNonNull(binder, "Binder cannot be null");
 
         this.binder = binder;
+    }
+
+    @Nonnull
+    @Override
+    public Property<T> getProperty()
+    {
+        return binder.getProperty();
     }
 
     @Nonnull

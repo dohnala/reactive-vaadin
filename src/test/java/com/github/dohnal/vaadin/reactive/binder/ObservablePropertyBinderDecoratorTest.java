@@ -57,6 +57,25 @@ public class ObservablePropertyBinderDecoratorTest
         }
 
         @Nested
+        @DisplayName("When GetProperty is called")
+        class WhenGetProperty
+        {
+            @Test
+            @SuppressWarnings("unchecked")
+            @DisplayName("Binder should be called")
+            public void testBinder()
+            {
+                final ObservableProperty<Integer> property = Mockito.mock(ObservableProperty.class);
+
+                Mockito.when(binder.getProperty()).thenReturn(property);
+
+                assertEquals(property, decorator.getProperty());
+
+                Mockito.verify(binder).getProperty();
+            }
+        }
+
+        @Nested
         @DisplayName("When to is called with observable")
         class WhenToWithObservable
         {

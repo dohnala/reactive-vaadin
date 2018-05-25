@@ -46,6 +46,13 @@ public final class DefaultObservablePropertyBinder<T> extends AbstractBinder imp
 
     @Nonnull
     @Override
+    public ObservableProperty<T> getProperty()
+    {
+        return property;
+    }
+
+    @Nonnull
+    @Override
     public final Disposable to(final @Nonnull Observable<? extends T> observable)
     {
         Objects.requireNonNull(observable, "Observable cannot be null");

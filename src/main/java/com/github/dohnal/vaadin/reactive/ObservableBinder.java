@@ -30,6 +30,14 @@ import io.reactivex.disposables.Disposable;
 public interface ObservableBinder<T>
 {
     /**
+     * Returns observable which is going to be bound
+     *
+     * @return observable which is going to be bound
+     */
+    @Nonnull
+    Observable<T> getObservable();
+
+    /**
      * Binds observable to given action which is called whenever observable emits new value
      *
      * @param action action

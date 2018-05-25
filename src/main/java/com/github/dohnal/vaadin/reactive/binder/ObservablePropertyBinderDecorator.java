@@ -47,6 +47,13 @@ public class ObservablePropertyBinderDecorator<T> implements ObservablePropertyB
 
     @Nonnull
     @Override
+    public ObservableProperty<T> getProperty()
+    {
+        return binder.getProperty();
+    }
+
+    @Nonnull
+    @Override
     public Disposable to(final @Nonnull Observable<? extends T> observable)
     {
         Objects.requireNonNull(observable, "Observable cannot be null");

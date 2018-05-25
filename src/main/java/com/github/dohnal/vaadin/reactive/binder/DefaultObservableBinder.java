@@ -45,6 +45,13 @@ public final class DefaultObservableBinder<T> extends AbstractBinder implements 
 
     @Nonnull
     @Override
+    public Observable<T> getObservable()
+    {
+        return observable;
+    }
+
+    @Nonnull
+    @Override
     public final Disposable then(final @Nonnull Runnable action)
     {
         Objects.requireNonNull(action, "Action cannot be null");

@@ -19,7 +19,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import com.github.dohnal.vaadin.reactive.IsObservable;
 import com.github.dohnal.vaadin.reactive.ObservableBinder;
 import com.github.dohnal.vaadin.reactive.ReactiveBinderExtension;
 import io.reactivex.Observable;
@@ -33,6 +32,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Specification for binding observable by {@link ObservableBinder}
@@ -48,6 +49,7 @@ public interface ObservableBinderSpecification
         protected Runnable runnable;
         protected PublishSubject<Throwable> errorSubject;
         protected TestObserver<Throwable> errorObserver;
+        protected ObservableBinder<Integer> binder;
         protected Disposable disposable;
 
         @BeforeEach
@@ -63,7 +65,15 @@ public interface ObservableBinderSpecification
             errorSubject.observeOn(Schedulers.trampoline());
             errorObserver = errorSubject.test();
 
-            disposable = when(observable).then(runnable);
+            binder = when(observable);
+            disposable = binder.then(runnable);
+        }
+
+        @Test
+        @DisplayName("GetObservable should return correct observable")
+        public void testGetObservable()
+        {
+            assertEquals(observable, binder.getObservable());
         }
 
         @Override
@@ -234,15 +244,8 @@ public interface ObservableBinderSpecification
             errorSubject.observeOn(Schedulers.trampoline());
             errorObserver = errorSubject.test();
 
-            disposable = when(new IsObservable<Integer>()
-            {
-                @Nonnull
-                @Override
-                public Observable<Integer> asObservable()
-                {
-                    return observable;
-                }
-            }).then(runnable);
+            binder = when(() -> observable);
+            disposable = binder.then(runnable);
         }
     }
 
@@ -253,6 +256,7 @@ public interface ObservableBinderSpecification
         protected Consumer<Integer> consumer;
         protected PublishSubject<Throwable> errorSubject;
         protected TestObserver<Throwable> errorObserver;
+        protected ObservableBinder<Integer> binder;
         protected Disposable disposable;
 
         @BeforeEach
@@ -268,13 +272,21 @@ public interface ObservableBinderSpecification
             errorSubject.observeOn(Schedulers.trampoline());
             errorObserver = errorSubject.test();
 
-            disposable = when(observable).then(consumer);
+            binder = when(observable);
+            disposable = binder.then(consumer);
         }
 
         @Override
         public void handleError(final @Nonnull Throwable error)
         {
             errorSubject.onNext(error);
+        }
+
+        @Test
+        @DisplayName("GetObservable should return correct observable")
+        public void testGetObservable()
+        {
+            assertEquals(observable, binder.getObservable());
         }
 
         @Test
@@ -439,15 +451,8 @@ public interface ObservableBinderSpecification
             errorSubject.observeOn(Schedulers.trampoline());
             errorObserver = errorSubject.test();
 
-            disposable = when(new IsObservable<Integer>()
-            {
-                @Nonnull
-                @Override
-                public Observable<Integer> asObservable()
-                {
-                    return observable;
-                }
-            }).then(consumer);
+            binder = when(() -> observable);
+            disposable = binder.then(consumer);
         }
     }
 
@@ -461,6 +466,7 @@ public interface ObservableBinderSpecification
         protected Observable<Integer> action;
         protected PublishSubject<Throwable> errorSubject;
         protected TestObserver<Throwable> errorObserver;
+        protected ObservableBinder<Integer> binder;
         protected Disposable disposable;
 
         @BeforeEach
@@ -478,13 +484,21 @@ public interface ObservableBinderSpecification
             errorSubject.observeOn(Schedulers.trampoline());
             errorObserver = errorSubject.test();
 
-            disposable = when(observable).then(supplier);
+            binder = when(observable);
+            disposable = binder.then(supplier);
         }
 
         @Override
         public void handleError(final @Nonnull Throwable error)
         {
             errorSubject.onNext(error);
+        }
+
+        @Test
+        @DisplayName("GetObservable should return correct observable")
+        public void testGetObservable()
+        {
+            assertEquals(observable, binder.getObservable());
         }
 
         @Test
@@ -804,15 +818,8 @@ public interface ObservableBinderSpecification
             errorSubject.observeOn(Schedulers.trampoline());
             errorObserver = errorSubject.test();
 
-            disposable = when(new IsObservable<Integer>()
-            {
-                @Nonnull
-                @Override
-                public Observable<Integer> asObservable()
-                {
-                    return observable;
-                }
-            }).then(supplier);
+            binder = when(() -> observable);
+            disposable = binder.then(supplier);
         }
     }
 
@@ -826,6 +833,7 @@ public interface ObservableBinderSpecification
         protected Observable<Integer> action;
         protected PublishSubject<Throwable> errorSubject;
         protected TestObserver<Throwable> errorObserver;
+        protected ObservableBinder<Integer> binder;
         protected Disposable disposable;
 
         @BeforeEach
@@ -843,13 +851,21 @@ public interface ObservableBinderSpecification
             errorSubject.observeOn(Schedulers.trampoline());
             errorObserver = errorSubject.test();
 
-            disposable = when(observable).then(function);
+            binder = when(observable);
+            disposable = binder.then(function);
         }
 
         @Override
         public void handleError(final @Nonnull Throwable error)
         {
             errorSubject.onNext(error);
+        }
+
+        @Test
+        @DisplayName("GetObservable should return correct observable")
+        public void testGetObservable()
+        {
+            assertEquals(observable, binder.getObservable());
         }
 
         @Test
@@ -1163,15 +1179,8 @@ public interface ObservableBinderSpecification
             errorSubject.observeOn(Schedulers.trampoline());
             errorObserver = errorSubject.test();
 
-            disposable = when(new IsObservable<Integer>()
-            {
-                @Nonnull
-                @Override
-                public Observable<Integer> asObservable()
-                {
-                    return observable;
-                }
-            }).then(function);
+            binder = when(() -> observable);
+            disposable = binder.then(function);
         }
     }
 }

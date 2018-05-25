@@ -14,6 +14,7 @@
 package com.github.dohnal.vaadin.reactive.binder;
 
 import com.github.dohnal.vaadin.reactive.IsObservable;
+import com.github.dohnal.vaadin.reactive.Property;
 import com.github.dohnal.vaadin.reactive.PropertyBinder;
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
@@ -53,6 +54,25 @@ public class PropertyBinderDecoratorTest
         public void testBinder()
         {
             Mockito.verifyZeroInteractions(binder);
+        }
+
+        @Nested
+        @DisplayName("When GetProperty is called")
+        class WhenGetProperty
+        {
+            @Test
+            @SuppressWarnings("unchecked")
+            @DisplayName("Binder should be called")
+            public void testBinder()
+            {
+                final Property<Integer> property = Mockito.mock(Property.class);
+
+                Mockito.when(binder.getProperty()).thenReturn(property);
+
+                assertEquals(property, decorator.getProperty());
+
+                Mockito.verify(binder).getProperty();
+            }
         }
 
         @Nested

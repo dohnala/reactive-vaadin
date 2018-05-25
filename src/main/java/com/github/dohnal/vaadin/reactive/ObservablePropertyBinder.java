@@ -27,6 +27,14 @@ import io.reactivex.disposables.Disposable;
 public interface ObservablePropertyBinder<T>
 {
     /**
+     * Returns observable property which is going to be bound
+     *
+     * @return observable property which is going to be bound
+     */
+    @Nonnull
+    ObservableProperty<T> getProperty();
+
+    /**
      * Binds property to given observable which updates property value whenever observable emits new value
      *
      * @param observable observable

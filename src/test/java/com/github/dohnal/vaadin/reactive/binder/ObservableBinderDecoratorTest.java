@@ -59,6 +59,25 @@ public class ObservableBinderDecoratorTest
         }
 
         @Nested
+        @DisplayName("When GetObservable is called")
+        class WhenGetObservable
+        {
+            @Test
+            @SuppressWarnings("unchecked")
+            @DisplayName("Binder should be called")
+            public void testBinder()
+            {
+                final Observable<Integer> observable = Mockito.mock(Observable.class);
+
+                Mockito.when(binder.getObservable()).thenReturn(observable);
+
+                assertEquals(observable, decorator.getObservable());
+
+                Mockito.verify(binder).getObservable();
+            }
+        }
+
+        @Nested
         @DisplayName("When then is called with runnable")
         class WhenThenWithRunnable
         {

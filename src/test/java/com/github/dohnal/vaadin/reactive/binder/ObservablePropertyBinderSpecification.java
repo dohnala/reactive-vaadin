@@ -31,6 +31,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 /**
  * Specification for binding observable property by {@link ObservablePropertyBinder}
  *
@@ -46,6 +48,7 @@ public interface ObservablePropertyBinderSpecification
         protected ReactiveProperty<Integer> property;
         protected PublishSubject<Throwable> errorSubject;
         protected TestObserver<Throwable> errorObserver;
+        protected ObservablePropertyBinder<Integer> binder;
         protected Disposable disposable;
 
         @BeforeEach
@@ -60,13 +63,21 @@ public interface ObservablePropertyBinderSpecification
             errorSubject.observeOn(Schedulers.trampoline());
             errorObserver = errorSubject.test();
 
-            disposable = bind(property).to(sourceObservable);
+            binder = bind(property);
+            disposable = binder.to(sourceObservable);
         }
 
         @Override
         public void handleError(final @Nonnull Throwable error)
         {
             errorSubject.onNext(error);
+        }
+
+        @Test
+        @DisplayName("GetProperty should return correct property")
+        public void testGetProperty()
+        {
+            assertEquals(property, binder.getProperty());
         }
 
         @Test
@@ -225,7 +236,8 @@ public interface ObservablePropertyBinderSpecification
             errorSubject.observeOn(testScheduler);
             errorObserver = errorSubject.test();
 
-            disposable = bind(property).to(new IsObservable<Integer>()
+            binder = bind(property);
+            disposable = binder.to(new IsObservable<Integer>()
             {
                 @Nonnull
                 @Override
@@ -244,6 +256,7 @@ public interface ObservablePropertyBinderSpecification
         private ReactiveProperty<Integer> property;
         private PublishSubject<Throwable> errorSubject;
         private TestObserver<Throwable> errorObserver;
+        protected ObservablePropertyBinder<Integer> binder;
         private Disposable disposable;
 
         @BeforeEach
@@ -256,13 +269,21 @@ public interface ObservablePropertyBinderSpecification
             errorSubject.observeOn(Schedulers.trampoline());
             errorObserver = errorSubject.test();
 
-            disposable = bind(property).to(sourceProperty);
+            binder = bind(property);
+            disposable = binder.to(sourceProperty);
         }
 
         @Override
         public void handleError(final @Nonnull Throwable error)
         {
             errorSubject.onNext(error);
+        }
+
+        @Test
+        @DisplayName("GetProperty should return correct property")
+        public void testGetProperty()
+        {
+            assertEquals(property, binder.getProperty());
         }
 
         @Test

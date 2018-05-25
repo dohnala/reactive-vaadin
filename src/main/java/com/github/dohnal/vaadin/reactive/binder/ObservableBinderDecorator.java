@@ -48,6 +48,13 @@ public class ObservableBinderDecorator<T> implements ObservableBinder<T>
 
     @Nonnull
     @Override
+    public Observable<T> getObservable()
+    {
+        return binder.getObservable();
+    }
+
+    @Nonnull
+    @Override
     public Disposable then(final @Nonnull Runnable action)
     {
         Objects.requireNonNull(action, "Action cannot be null");
