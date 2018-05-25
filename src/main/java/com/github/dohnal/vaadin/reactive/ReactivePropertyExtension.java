@@ -40,7 +40,7 @@ public interface ReactivePropertyExtension
     @Nonnull
     default <T> ReactiveProperty<T> createProperty()
     {
-        return new BehaviorSubjectProperty<>();
+        return onCreateProperty(new BehaviorSubjectProperty<>());
     }
 
     /**
@@ -55,7 +55,7 @@ public interface ReactivePropertyExtension
     {
         Objects.requireNonNull(defaultValue, "Default value cannot be null");
 
-        return new BehaviorSubjectProperty<>(defaultValue);
+        return onCreateProperty(new BehaviorSubjectProperty<>(defaultValue));
     }
 
     /**
@@ -70,7 +70,7 @@ public interface ReactivePropertyExtension
     {
         Objects.requireNonNull(observable, "Source observable cannot be null");
 
-        return new BehaviorSubjectProperty<>(observable);
+        return onCreateProperty(new BehaviorSubjectProperty<>(observable));
     }
 
     /**
@@ -85,7 +85,7 @@ public interface ReactivePropertyExtension
     {
         Objects.requireNonNull(property, "Source property cannot be null");
 
-        return new BehaviorSubjectProperty<>(property.asObservable());
+        return onCreateProperty(new BehaviorSubjectProperty<>(property.asObservable()));
     }
 
     /**
@@ -219,5 +219,20 @@ public interface ReactivePropertyExtension
                         .map(ReactiveProperty::asObservable)
                         .collect(Collectors.toList()),
                 combiner::apply));
+    }
+
+    /**
+     * Extension method with is called when new property has been created
+     *
+     * @param property created property
+     * @param <T> type of property value
+     * @return created property
+     */
+    @Nonnull
+    default <T> ReactiveProperty<T> onCreateProperty(final @Nonnull ReactiveProperty<T> property)
+    {
+        Objects.requireNonNull(property, "Property cannot be null");
+
+        return property;
     }
 }

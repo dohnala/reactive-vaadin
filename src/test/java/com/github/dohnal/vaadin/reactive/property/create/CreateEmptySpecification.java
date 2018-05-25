@@ -23,6 +23,7 @@ import com.github.dohnal.vaadin.reactive.property.SetValueSpecification;
 import com.github.dohnal.vaadin.reactive.property.SuppressActionSpecification;
 import com.github.dohnal.vaadin.reactive.property.SuppressSpecification;
 import com.github.dohnal.vaadin.reactive.property.UpdateValueSpecification;
+import io.reactivex.subjects.ReplaySubject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -46,12 +47,32 @@ public interface CreateEmptySpecification extends
 {
     abstract class AbstractCreateEmptySpecification implements ReactivePropertyExtension
     {
+        private ReplaySubject<ReactiveProperty<?>> capturedProperties;
         private ReactiveProperty<Integer> property;
 
         @BeforeEach
         void createEmpty()
         {
+            capturedProperties = ReplaySubject.create();
             property = createProperty();
+        }
+
+        @Nonnull
+        @Override
+        public  <T> ReactiveProperty<T> onCreateProperty(final @Nonnull ReactiveProperty<T> property)
+        {
+            final ReactiveProperty<T> created = ReactivePropertyExtension.super.onCreateProperty(property);
+
+            capturedProperties.onNext(created);
+
+            return created;
+        }
+
+        @Test
+        @DisplayName("Created property should be captured")
+        public void testCreatedProperty()
+        {
+            capturedProperties.test().assertValue(property);
         }
 
         @Test

@@ -21,6 +21,7 @@ import com.github.dohnal.vaadin.reactive.ReactivePropertyExtension;
 import com.github.dohnal.vaadin.reactive.property.SetValueSpecification;
 import com.github.dohnal.vaadin.reactive.property.UpdateValueSpecification;
 import io.reactivex.observers.TestObserver;
+import io.reactivex.subjects.ReplaySubject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -43,14 +44,34 @@ public interface CreateFromPropertyWithFunctionSpecification extends
 {
     abstract class AbstractCreateFromPropertyWithFunctionSpecification implements ReactivePropertyExtension
     {
+        private ReplaySubject<ReactiveProperty<?>> capturedProperties;
         private ReactiveProperty<Integer> sourceProperty;
         private ReactiveProperty<Integer> property;
 
         @BeforeEach
         void createFromEmptyProperty()
         {
+            capturedProperties = ReplaySubject.create();
             sourceProperty = createProperty();
             property = createPropertyFrom(sourceProperty, value -> value * 2);
+        }
+
+        @Nonnull
+        @Override
+        public  <T> ReactiveProperty<T> onCreateProperty(final @Nonnull ReactiveProperty<T> property)
+        {
+            final ReactiveProperty<T> created = ReactivePropertyExtension.super.onCreateProperty(property);
+
+            capturedProperties.onNext(created);
+
+            return created;
+        }
+
+        @Test
+        @DisplayName("Created property should be captured")
+        public void testCreatedProperty()
+        {
+            capturedProperties.test().assertValues(sourceProperty, property);
         }
 
         @Test

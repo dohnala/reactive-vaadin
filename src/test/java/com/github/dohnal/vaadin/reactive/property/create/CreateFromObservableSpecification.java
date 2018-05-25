@@ -24,6 +24,7 @@ import io.reactivex.Observable;
 import io.reactivex.observers.TestObserver;
 import io.reactivex.schedulers.TestScheduler;
 import io.reactivex.subjects.PublishSubject;
+import io.reactivex.subjects.ReplaySubject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -45,6 +46,7 @@ public interface CreateFromObservableSpecification extends
 {
     abstract class AbstractCreateFromObservableSpecification implements ReactivePropertyExtension
     {
+        private ReplaySubject<ReactiveProperty<?>> capturedProperties;
         private TestScheduler testScheduler;
         private PublishSubject<Integer> testSubject;
         private ReactiveProperty<Integer> property;
@@ -52,10 +54,29 @@ public interface CreateFromObservableSpecification extends
         @BeforeEach
         void createFromObservable()
         {
+            capturedProperties = ReplaySubject.create();
             testScheduler = new TestScheduler();
             testSubject = PublishSubject.create();
             testSubject.observeOn(testScheduler);
             property = createPropertyFrom(testSubject);
+        }
+
+        @Nonnull
+        @Override
+        public  <T> ReactiveProperty<T> onCreateProperty(final @Nonnull ReactiveProperty<T> property)
+        {
+            final ReactiveProperty<T> created = ReactivePropertyExtension.super.onCreateProperty(property);
+
+            capturedProperties.onNext(created);
+
+            return created;
+        }
+
+        @Test
+        @DisplayName("Created property should be captured")
+        public void testCreatedProperty()
+        {
+            capturedProperties.test().assertValue(property);
         }
 
         @Test
