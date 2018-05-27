@@ -56,14 +56,14 @@ public interface EventExtension
     }
 
     /**
-     * Returns event that represents that given command has succeed
+     * Returns event that represents that given command has succeeded
      *
      * @param command command
      * @param <R> type of command result
      * @return event
      */
     @Nonnull
-    default <R> Observable<R> succeed(final @Nonnull ReactiveCommand<?, R> command)
+    default <R> Observable<R> succeeded(final @Nonnull ReactiveCommand<?, R> command)
     {
         Objects.requireNonNull(command, "Command cannot be null");
 
@@ -85,14 +85,14 @@ public interface EventExtension
     }
 
     /**
-     * Returns event that represents that given command has completed (succeed or failed)
+     * Returns event that represents that given command has finished (succeeded or failed)
      * Parameter is current execution count
      *
      * @param command command
      * @return event
      */
     @Nonnull
-    default Observable<Integer> completed(final @Nonnull ReactiveCommand<?, ?> command)
+    default Observable<Integer> finished(final @Nonnull ReactiveCommand<?, ?> command)
     {
         Objects.requireNonNull(command, "Command cannot be null");
 

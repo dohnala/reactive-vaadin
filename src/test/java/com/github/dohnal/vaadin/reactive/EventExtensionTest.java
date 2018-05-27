@@ -120,8 +120,8 @@ public class EventExtensionTest implements EventExtension
     }
 
     @Nested
-    @DisplayName("When succeed event is created with command")
-    class WhenCreateSucceed implements ReactiveCommandExtension
+    @DisplayName("When succeeded event is created with command")
+    class WhenCreateSucceeded implements ReactiveCommandExtension
     {
         private ReactiveCommand<Integer, Integer> command;
         private Observable<Integer> event;
@@ -131,7 +131,7 @@ public class EventExtensionTest implements EventExtension
         protected void create()
         {
             command = createCommand(input -> input + 1);
-            event = succeed(command);
+            event = succeeded(command);
         }
 
         @Test
@@ -202,11 +202,11 @@ public class EventExtensionTest implements EventExtension
     }
 
     @Nested
-    @DisplayName("When completed event is created")
-    class WhenCreateCompleted implements ReactiveCommandExtension
+    @DisplayName("When finished event is created")
+    class WhenCreateFinished implements ReactiveCommandExtension
     {
         @Nested
-        @DisplayName("With command which succeed")
+        @DisplayName("With command which succeeded")
         class WithCommand
         {
             private ReactiveCommand<Integer, Integer> command;
@@ -217,7 +217,7 @@ public class EventExtensionTest implements EventExtension
             protected void create()
             {
                 command = createCommand(input -> input + 1);
-                event = completed(command);
+                event = finished(command);
             }
 
             @Test
@@ -260,7 +260,7 @@ public class EventExtensionTest implements EventExtension
                 command = createCommand(() -> {
                     throw ERROR;
                 });
-                event = completed(command);
+                event = finished(command);
             }
 
             @Test
