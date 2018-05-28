@@ -181,7 +181,7 @@ public class ReactiveViewModel implements
     @Nonnull
     protected final Observable<Boolean> activated()
     {
-        return activation.asObservable().filter(Boolean.TRUE::equals);
+        return activation.asObservable().filter(Boolean.TRUE::equals).map(value -> true);
     }
 
     /**
@@ -192,7 +192,7 @@ public class ReactiveViewModel implements
     @Nonnull
     protected final Observable<Boolean> deactivated()
     {
-        return activation.asObservable().filter(Boolean.FALSE::equals);
+        return activation.asObservable().filter(Boolean.FALSE::equals).map(value -> true);
     }
 
     @Nonnull
