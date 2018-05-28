@@ -66,7 +66,7 @@ public interface FromSupplierSpecification extends
 
         @Nonnull
         @Override
-        public  <T, R> ReactiveCommand<T, R> onCreateCommand(final @Nonnull ReactiveCommand<T, R> command)
+        public <T, R> ReactiveCommand<T, R> onCreateCommand(final @Nonnull ReactiveCommand<T, R> command)
         {
             final ReactiveCommand<T, R> created = ReactiveCommandExtension.super.onCreateCommand(command);
 
@@ -193,7 +193,7 @@ public interface FromSupplierSpecification extends
 
         @Nonnull
         @Override
-        public  <T, R> ReactiveCommand<T, R> onCreateCommand(final @Nonnull ReactiveCommand<T, R> command)
+        public <T, R> ReactiveCommand<T, R> onCreateCommand(final @Nonnull ReactiveCommand<T, R> command)
         {
             final ReactiveCommand<T, R> created = ReactiveCommandExtension.super.onCreateCommand(command);
 

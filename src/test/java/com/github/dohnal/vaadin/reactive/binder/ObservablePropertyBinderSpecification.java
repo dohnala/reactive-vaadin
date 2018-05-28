@@ -246,7 +246,7 @@ public interface ObservablePropertyBinderSpecification
         private ReactiveProperty<Integer> property;
         private PublishSubject<Throwable> errorSubject;
         private TestObserver<Throwable> errorObserver;
-        protected ObservablePropertyBinder<Integer> binder;
+        private ObservablePropertyBinder<Integer> binder;
         private Disposable disposable;
 
         @BeforeEach

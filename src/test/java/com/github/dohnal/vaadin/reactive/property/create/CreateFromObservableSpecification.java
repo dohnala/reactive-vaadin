@@ -63,7 +63,7 @@ public interface CreateFromObservableSpecification extends
 
         @Nonnull
         @Override
-        public  <T> ReactiveProperty<T> onCreateProperty(final @Nonnull ReactiveProperty<T> property)
+        public <T> ReactiveProperty<T> onCreateProperty(final @Nonnull ReactiveProperty<T> property)
         {
             final ReactiveProperty<T> created = ReactivePropertyExtension.super.onCreateProperty(property);
 
