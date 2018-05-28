@@ -102,7 +102,7 @@ public interface ComponentPropertyExtension extends ComponentEventExtension
             @Override
             public void setValue(final @Nonnull Boolean value)
             {
-                popupView.setVisible(Boolean.TRUE.equals(value));
+                popupView.setPopupVisible(Boolean.TRUE.equals(value));
             }
         };
     }
@@ -338,7 +338,7 @@ public interface ComponentPropertyExtension extends ComponentEventExtension
             @SuppressWarnings("unchecked")
             public void setValue(final @Nonnull Set<T> value)
             {
-                multiSelect.select(value.toArray((T[]) new Objects[value.size()]));
+                multiSelect.setValue(value);
             }
         };
     }

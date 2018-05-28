@@ -89,7 +89,7 @@ public interface ComponentEventExtension
      * @return observable of focus events for given component
      */
     @Nonnull
-    default Observable<FieldEvents.FocusEvent> focuses(final @Nonnull FieldEvents.FocusNotifier component)
+    default Observable<FieldEvents.FocusEvent> focused(final @Nonnull FieldEvents.FocusNotifier component)
     {
         Objects.requireNonNull(component, "Component cannot be null");
 
