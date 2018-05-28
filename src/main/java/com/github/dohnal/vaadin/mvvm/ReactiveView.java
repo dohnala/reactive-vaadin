@@ -67,15 +67,6 @@ public abstract class ReactiveView<M extends ReactiveViewModel> extends CustomCo
     {
         Objects.requireNonNull(viewModel, "View model cannot be null");
 
-        setViewModel(viewModel);
-
-        return this;
-    }
-
-    public final void setViewModel(final @Nonnull M viewModel)
-    {
-        Objects.requireNonNull(viewModel, "View model cannot be null");
-
         compositeActivable.clear();
 
         initView(viewModel);
@@ -87,6 +78,8 @@ public abstract class ReactiveView<M extends ReactiveViewModel> extends CustomCo
         {
             compositeActivable.activate();
         }
+
+        return this;
     }
 
     @Override
