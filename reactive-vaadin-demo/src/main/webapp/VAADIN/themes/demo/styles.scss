@@ -1,0 +1,7 @@
+@import "demo.scss";
+@import "addons.scss";
+
+.demo {
+  @include addons;
+  @include demo;
+}
