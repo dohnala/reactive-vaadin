@@ -57,6 +57,11 @@ public final class CompositeActivable implements Activable
 
         activables.add(activable);
         compositeDisposable.add(activable.asDisposable());
+
+        if (isActivated())
+        {
+            activable.activate();
+        }
     }
 
     /**

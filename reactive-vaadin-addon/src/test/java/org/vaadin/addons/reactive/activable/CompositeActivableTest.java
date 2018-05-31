@@ -390,5 +390,78 @@ public class CompositeActivableTest
                 }
             }
         }
+
+        @Nested
+        @DisplayName("When activated")
+        class WhenActivate
+        {
+            @BeforeEach
+            void before()
+            {
+                activable.activate();
+            }
+
+            @Test
+            @DisplayName("IsActivated should be true")
+            public void testIsActivated()
+            {
+                assertTrue(activable.isActivated());
+            }
+
+            @Test
+            @DisplayName("IsDisposed should be false")
+            public void testIsDisposed()
+            {
+                assertFalse(activable.asDisposable().isDisposed());
+            }
+
+            @Nested
+            @DisplayName("When activables are added")
+            class WhenAdd
+            {
+                private SerialActivable firstActivable;
+                private SerialActivable secondActivable;
+
+                @BeforeEach
+                void before()
+                {
+                    firstActivable = new SerialActivable(Disposables::empty);
+                    secondActivable = new SerialActivable(Disposables::empty);
+
+                    activable.add(firstActivable);
+                    activable.add(secondActivable);
+                }
+
+                @Test
+                @DisplayName("IsActivated should be true")
+                public void testIsActivated()
+                {
+                    assertTrue(activable.isActivated());
+                }
+
+                @Test
+                @DisplayName("IsDisposed should be false")
+                public void testIsDisposed()
+                {
+                    assertFalse(activable.asDisposable().isDisposed());
+                }
+
+                @Test
+                @DisplayName("Children IsActivated should be true")
+                public void testChildrenIsActivated()
+                {
+                    assertTrue(firstActivable.isActivated());
+                    assertTrue(secondActivable.isActivated());
+                }
+
+                @Test
+                @DisplayName("Children IsDisposed should be false")
+                public void testChildrenIsDisposed()
+                {
+                    assertFalse(firstActivable.asDisposable().isDisposed());
+                    assertFalse(secondActivable.asDisposable().isDisposed());
+                }
+            }
+        }
     }
 }
