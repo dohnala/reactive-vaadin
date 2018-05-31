@@ -1,0 +1,153 @@
+name: 'Reactive binder'
+description: >
+  This demo shows you how you can use <b>reactive binder</b> to bind Vaadin component properties to reactive
+  primitives such as <B>observables</b>.
+
+sections:
+  section1:
+    name: 'Binding to observables'
+    description: >
+      This section shows you how you can bind Vaadin component properties to observables.
+    view: |
+      class DemoView extends ReactiveView<DemoViewModel>
+      {
+          @Override
+          protected void initView(final @Nonnull DemoViewModel viewModel)
+          {
+              final Label label = new Label();
+
+              bind(valueOf(label)).to(viewModel.getObservable());
+
+              setCompositionRoot(label);
+          }
+      }
+    viewModel: |
+      class DemoViewModel extends ReactiveViewModel
+      {
+          private final Observable<String> observable;
+
+          public DemoViewModel()
+          {
+              this.observable = Observable.just("Hello Reactive Vaadin");
+          }
+
+          @Nonnull
+          public Observable<String> getObservable()
+          {
+              return observable;
+          }
+      }
+  section2:
+    name: 'Binding to asynchronous observables'
+    description: >
+      This section shows you how you can bind Vaadin component properties to asynchronous observables.
+      You can notice that the code looks exactly the same as for synchronous observables.
+    view: |
+      class DemoView extends ReactiveView<DemoViewModel>
+      {
+          @Override
+          protected void initView(final @Nonnull DemoViewModel viewModel)
+          {
+              final DateTimeField dateTimeField = new DateTimeField();
+              dateTimeField.setReadOnly(true);
+              dateTimeField.setResolution(DateTimeResolution.SECOND);
+
+              bind(valueOf(dateTimeField)).to(viewModel.getObservable());
+
+              setCompositionRoot(dateTimeField);
+          }
+      }
+    viewModel: |
+      class DemoViewModel extends ReactiveViewModel
+      {
+          private final Observable<LocalDateTime> observable;
+
+          public DemoViewModel()
+          {
+              this.observable = Observable.interval(1, TimeUnit.SECONDS)
+                      .map(value -> LocalDateTime.now());
+          }
+
+          @Nonnull
+          public Observable<LocalDateTime> getObservable()
+          {
+              return observable;
+          }
+      }
+  section3:
+    name: 'Binding custom properties'
+    description: >
+      This section shows you how you can bind custom Vaadin component properties e.g. properties for which
+      there don't exist helpers like <B>valueOf</b> or you just don't want to use them.
+    view: |
+      class DemoView extends ReactiveView<DemoViewModel>
+      {
+          @Override
+          protected void initView(final @Nonnull DemoViewModel viewModel)
+          {
+              final Label label = new Label();
+
+              bind(label::setValue).to(viewModel.getObservable());
+
+              setCompositionRoot(label);
+          }
+      }
+    viewModel: |
+      class DemoViewModel extends ReactiveViewModel
+      {
+          private final Observable<String> observable;
+
+          public DemoViewModel()
+          {
+              this.observable = Observable.interval(1, TimeUnit.SECONDS).map(Object::toString);
+          }
+
+          @Nonnull
+          public Observable<String> getObservable()
+          {
+              return observable;
+          }
+      }
+
+  section4:
+    name: 'Handling errors'
+    description: >
+      By default, <b>ReactiveView</b> logs all unhandled errors to the log with <b>ERROR</b> level.
+      This section shows you how you can change this behavior and handle errors signalled from observables by yourself.
+    view: |
+      class DemoView extends ReactiveView<DemoViewModel>
+      {
+          @Override
+          protected void initView(final @Nonnull DemoViewModel viewModel)
+          {
+              final Label label = new Label();
+              final Button button = new Button("Bind", event ->
+                      bind(valueOf(label)).to(viewModel.getObservable()));
+
+              setCompositionRoot(new VerticalLayout(label, button));
+          }
+
+          @Override
+          public void handleError(final @Nonnull Throwable error)
+          {
+              Notification.show("Unexpected error", error.getMessage(),
+                      Notification.Type.ERROR_MESSAGE);
+          }
+      }
+    viewModel: |
+      class DemoViewModel extends ReactiveViewModel
+      {
+          private final Observable<String> observable;
+
+          public DemoViewModel()
+          {
+              this.observable = Observable.error(
+                      new RuntimeException("Error inside observable"));
+          }
+
+          @Nonnull
+          public Observable<String> getObservable()
+          {
+              return observable;
+          }
+      }

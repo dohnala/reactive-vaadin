@@ -32,7 +32,36 @@
 @import "../valo/valo.scss";
 
 @mixin demo {
-  @include valo;
+	@include valo;
 
-  // Insert your own theme rules here
+ 	.no-padding.v-layout {
+		padding: 0px 0px 0px 0px;
+    }
+
+  	.no-padding .v-layout {
+  		padding: 0px 0px 0px 0px;
+  	}
+
+  	.alert {
+  		position: relative;
+        padding: .75rem 1.25rem;
+        border: 1px solid transparent;
+        border-radius: .25rem;
+  	}
+
+  	.alert.alert-info {
+  		color: #0c5460;
+  		background-color: #d1ecf1;
+  		border-color: #bee5eb;
+  	}
+
+  	.v-button-link {
+  		padding: 0;
+          height: 22px;
+  	}
+
+  	pre.prettyprint {
+  		padding: 0 !important
+  		border: none;
+  	}
 }
