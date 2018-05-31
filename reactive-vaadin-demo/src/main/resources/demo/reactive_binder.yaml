@@ -7,7 +7,7 @@ sections:
   section1:
     name: 'Binding to observables'
     description: >
-      This section shows you how you can bind Vaadin component properties to observables.
+      This section shows you how you can bind component properties to observables.
     view: |
       class DemoView extends ReactiveView<DemoViewModel>
       {
@@ -40,7 +40,7 @@ sections:
   section2:
     name: 'Binding to asynchronous observables'
     description: >
-      This section shows you how you can bind Vaadin component properties to asynchronous observables.
+      This section shows you how you can bind component properties to asynchronous observables.
       You can notice that the code looks exactly the same as for synchronous observables.
     view: |
       class DemoView extends ReactiveView<DemoViewModel>
@@ -77,7 +77,7 @@ sections:
   section3:
     name: 'Binding custom properties'
     description: >
-      This section shows you how you can bind custom Vaadin component properties e.g. properties for which
+      This section shows you how you can bind custom component properties e.g. properties for which
       there don't exist helpers like <B>valueOf</b> or you just don't want to use them.
     view: |
       class DemoView extends ReactiveView<DemoViewModel>
@@ -108,11 +108,57 @@ sections:
               return observable;
           }
       }
-
   section4:
+    name: 'Binding between component properties'
+    description: >
+      This section shows you how you can bind component properties to each other.
+    view: |
+      class DemoView extends ReactiveView<DemoViewModel>
+      {
+          @Override
+          protected void initView(final @Nonnull DemoViewModel viewModel)
+          {
+              final CheckBox checkBox = new CheckBox("Enabled", true);
+              final TextField textField = new TextField();
+
+              bind(enabledOf(textField)).to(valueOf(checkBox));
+
+              setCompositionRoot(new VerticalLayout(checkBox, textField));
+          }
+      }
+    viewModel: |
+      class DemoViewModel extends ReactiveViewModel
+      {}
+
+  section5:
+    name: 'Two-way binding between component properties'
+    description: >
+      This section shows you how you can two-way bind component properties to each other.
+    view: |
+      class DemoView extends ReactiveView<DemoViewModel>
+      {
+          @Override
+          protected void initView(final @Nonnull DemoViewModel viewModel)
+          {
+              final TextField textFieldA = new TextField();
+              textFieldA.setPlaceholder("Type...");
+
+              final TextField textFieldB = new TextField();
+              textFieldB.setPlaceholder("Type...");
+
+              bind(valueOf(textFieldA)).to(valueOf(textFieldB));
+
+              setCompositionRoot(new VerticalLayout(textFieldA, textFieldB));
+          }
+      }
+    viewModel: |
+      class DemoViewModel extends ReactiveViewModel
+      {}
+
+  section6:
     name: 'Handling errors'
     description: >
-      By default, <b>ReactiveView</b> logs all unhandled errors to the log with <b>ERROR</b> level.
+      By default, <b>ReactiveView</b> logs all unhandled errors to the log with <b>ERROR</b> level. <br/>
       This section shows you how you can change this behavior and handle errors signalled from observables by yourself.
     view: |
       class DemoView extends ReactiveView<DemoViewModel>
@@ -143,6 +189,50 @@ sections:
           {
               this.observable = Observable.error(
                       new RuntimeException("Error inside observable"));
+          }
+
+          @Nonnull
+          public Observable<String> getObservable()
+          {
+              return observable;
+          }
+      }
+  section7:
+    name: 'Handling subscriptions'
+    description: >
+      By default, <b>ReactiveView</b> activates all subscriptions made by reactive binder when the view is
+      <b>attached</b> to UI. It also automatically disposes active subscriptions when the view is <b>detached</b>
+      from UI. <br/>
+      This section shows you how you can change this behavior and dispose subscriptions returned by reactive
+      binder whenever you want.
+    view: |
+      class DemoView extends ReactiveView<DemoViewModel>
+      {
+          @Override
+          protected void initView(final @Nonnull DemoViewModel viewModel)
+          {
+              final Label label = new Label();
+
+              final Disposable disposable = bind(valueOf(label)).to(viewModel.getObservable());
+
+              final Button button = new Button("Dispose");
+              button.addClickListener(event -> {
+                  disposable.dispose();
+                  button.setEnabled(false);
+              });
+
+              setCompositionRoot(new VerticalLayout(label, button));
+          }
+      }
+    viewModel: |
+      class DemoViewModel extends ReactiveViewModel
+      {
+          private final Observable<String> observable;
+
+          public DemoViewModel()
+          {
+              this.observable = Observable.interval(1, TimeUnit.SECONDS)
+                      .map(Object::toString);
           }
 
           @Nonnull

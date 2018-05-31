@@ -43,8 +43,8 @@ public class CodeWindow extends Window
 
         setContent(tabSheet);
 
-        setHeight(400, Unit.PIXELS);
-        setWidth(800, Unit.PIXELS);
+        setHeight(600, Unit.PIXELS);
+        setWidth(1000, Unit.PIXELS);
 
         center();
     }
