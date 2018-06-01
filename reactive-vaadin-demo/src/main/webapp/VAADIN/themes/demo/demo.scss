@@ -34,6 +34,8 @@
 @mixin demo {
 	@include valo;
 
+	$color-dark: hsl(220, 5%, 38%);
+
  	.no-padding.v-layout {
 		padding: 0px 0px 0px 0px;
     }
@@ -50,9 +52,9 @@
   	}
 
   	.alert.alert-info {
-  		color: #0c5460;
-  		background-color: #d1ecf1;
-  		border-color: #bee5eb;
+  		color: #a5a5a5;
+  		background-color: #5c5f66;
+  		border-color: #d5d5d5;
   	}
 
   	.v-button-link {
@@ -61,7 +63,32 @@
   	}
 
   	pre.prettyprint {
-  		padding: 0 !important
   		border: none;
+		margin: 0px;
+		padding: 0px;
+		font-size: 14px;
   	}
+
+  	.v-panel-caption-color-dark {
+        @include valo-panel-caption-style($background-color: $color-dark);
+    }
+
+    .v-panel-border-straight {
+   		border-radius: 0px;
+
+   		.v-panel-caption {
+   			border-radius: 0px;
+   		}
+    }
+
+    .v-label-section-name {
+		margin-left: 12px;
+		padding-bottom: 12px;
+		color: #197de1;
+    }
+
+    .v-label-section-description {
+   		margin-left: 12px;
+   		white-space: normal;
+    }
 }

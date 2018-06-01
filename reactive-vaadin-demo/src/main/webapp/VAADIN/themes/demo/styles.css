@@ -15066,9 +15066,9 @@ div.v-layout.v-horizontal.v-widget {
 }
 
 .demo .alert.alert-info {
-	color: #0c5460;
-	background-color: #d1ecf1;
-	border-color: #bee5eb;
+	color: #a5a5a5;
+	background-color: #5c5f66;
+	border-color: #d5d5d5;
 }
 
 .demo .v-button-link {
@@ -15078,4 +15078,43 @@ div.v-layout.v-horizontal.v-widget {
 
 .demo pre.prettyprint {
 	border: none;
+	margin: 0px;
+	padding: 0px;
+	font-size: 14px;
+}
+
+.demo .v-panel-caption-color-dark {
+	box-sizing: border-box;
+	padding: 0 12px;
+	line-height: 36px;
+	border-bottom: none;
+	margin-bottom: 1px;
+	background-color: #5c5f66;
+	background-image: -webkit-linear-gradient(top, #5d6068 2%, #595c62 98%);
+	background-image: linear-gradient(to bottom,#5d6068 2%, #595c62 98%);
+	color: #d1d2d4;
+	font-weight: 400;
+	font-size: 14px;
+	-webkit-box-shadow: inset 0 1px 0 #767676, inset 0 -1px 0 #56595f, 0 0 0 1px #4e5157;
+	box-shadow: inset 0 1px 0 #767676, inset 0 -1px 0 #56595f, 0 0 0 1px #4e5157;
+	text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.05);
+}
+
+.demo .v-panel-border-straight {
+	border-radius: 0px;
+}
+
+.demo .v-panel-border-straight .v-panel-caption {
+	border-radius: 0px;
+}
+
+.demo .v-label-section-name {
+	margin-left: 12px;
+	padding-bottom: 12px;
+	color: #197de1;
+}
+
+.demo .v-label-section-description {
+	margin-left: 12px;
+	white-space: normal;
 }

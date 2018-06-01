@@ -8,6 +8,7 @@ import com.vaadin.shared.ui.datefield.DateTimeResolution;
 import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CheckBox;
+import com.vaadin.ui.Component;
 import com.vaadin.ui.DateTimeField;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
@@ -22,21 +23,45 @@ import org.vaadin.addons.reactive.mvvm.ReactiveViewModel;
  * @author dohnal
  */
 @SpringView(name = ReactiveBinderScreen.SCREEN_NAME)
-public class ReactiveBinderScreen extends AbstractDemoScreen
+public class ReactiveBinderScreen extends AbstractDemoSectionScreen
 {
     public static final String SCREEN_NAME = "binder";
+
+    public static final String SECTION_1 = "section1";
+    public static final String SECTION_2 = "section2";
+    public static final String SECTION_3 = "section3";
+    public static final String SECTION_4 = "section4";
+    public static final String SECTION_5 = "section5";
+    public static final String SECTION_6 = "section6";
+    public static final String SECTION_7 = "section7";
 
     public ReactiveBinderScreen()
     {
         super("demo/reactive_binder.yaml");
+    }
 
-        addSection("section1", createSection1());
-        addSection("section2", createSection2());
-        addSection("section3", createSection3());
-        addSection("section4", createSection4());
-        addSection("section5", createSection5());
-        addSection("section6", createSection6());
-        addSection("section7", createSection7());
+    @Override
+    protected Component createSection(final @Nonnull String section)
+    {
+        switch (section)
+        {
+            case SECTION_1:
+                return createSection1();
+            case SECTION_2:
+                return createSection2();
+            case SECTION_3:
+                return createSection3();
+            case SECTION_4:
+                return createSection4();
+            case SECTION_5:
+                return createSection5();
+            case SECTION_6:
+                return createSection6();
+            case SECTION_7:
+                return createSection7();
+        }
+
+        return null;
     }
 
     @Nonnull
@@ -67,7 +92,7 @@ public class ReactiveBinderScreen extends AbstractDemoScreen
 
                 bind(valueOf(label)).to(viewModel.getObservable());
 
-                setCompositionRoot(label);
+                setCompositionRoot(new VerticalLayout(label));
             }
         }
 
@@ -105,7 +130,7 @@ public class ReactiveBinderScreen extends AbstractDemoScreen
 
                 bind(valueOf(dateTimeField)).to(viewModel.getObservable());
 
-                setCompositionRoot(dateTimeField);
+                setCompositionRoot(new VerticalLayout(dateTimeField));
             }
         }
 
@@ -141,7 +166,7 @@ public class ReactiveBinderScreen extends AbstractDemoScreen
 
                 bind(label::setValue).to(viewModel.getObservable());
 
-                setCompositionRoot(label);
+                setCompositionRoot(new VerticalLayout(label));
             }
         }
 
@@ -267,7 +292,8 @@ public class ReactiveBinderScreen extends AbstractDemoScreen
             {
                 final Label label = new Label();
 
-                final Disposable disposable = bind(valueOf(label)).to(viewModel.getObservable());
+                final Disposable disposable =
+                        bind(valueOf(label)).to(viewModel.getObservable());
 
                 final Button button = new Button("Dispose");
                 button.addClickListener(event -> {

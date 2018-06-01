@@ -1,14 +1,9 @@
-name: 'Reactive binder'
-description: >
-  This demo shows you how you can use <b>reactive binder</b> to bind Vaadin component properties to reactive
-  primitives such as <B>observables</b>.
-
 sections:
   section1:
     name: 'Binding to observables'
     description: >
       This section shows you how you can bind component properties to observables.
-    view: |
+    viewCode: |
       class DemoView extends ReactiveView<DemoViewModel>
       {
           @Override
@@ -18,10 +13,10 @@ sections:
 
               bind(valueOf(label)).to(viewModel.getObservable());
 
-              setCompositionRoot(label);
+              setCompositionRoot(new VerticalLayout(label));
           }
       }
-    viewModel: |
+    viewModelCode: |
       class DemoViewModel extends ReactiveViewModel
       {
           private final Observable<String> observable;
@@ -42,7 +37,7 @@ sections:
     description: >
       This section shows you how you can bind component properties to asynchronous observables.
       You can notice that the code looks exactly the same as for synchronous observables.
-    view: |
+    viewCode: |
       class DemoView extends ReactiveView<DemoViewModel>
       {
           @Override
@@ -54,10 +49,10 @@ sections:
 
               bind(valueOf(dateTimeField)).to(viewModel.getObservable());
 
-              setCompositionRoot(dateTimeField);
+              setCompositionRoot(new VerticalLayout(dateTimeField));
           }
       }
-    viewModel: |
+    viewModelCode: |
       class DemoViewModel extends ReactiveViewModel
       {
           private final Observable<LocalDateTime> observable;
@@ -79,7 +74,7 @@ sections:
     description: >
       This section shows you how you can bind custom component properties e.g. properties for which
       there don't exist helpers like <B>valueOf</b> or you just don't want to use them.
-    view: |
+    viewCode: |
       class DemoView extends ReactiveView<DemoViewModel>
       {
           @Override
@@ -89,17 +84,18 @@ sections:
 
               bind(label::setValue).to(viewModel.getObservable());
 
-              setCompositionRoot(label);
+              setCompositionRoot(new VerticalLayout(label));
           }
       }
-    viewModel: |
+    viewModelCode: |
       class DemoViewModel extends ReactiveViewModel
       {
           private final Observable<String> observable;
 
           public DemoViewModel()
           {
-              this.observable = Observable.interval(1, TimeUnit.SECONDS).map(Object::toString);
+              this.observable = Observable.interval(1, TimeUnit.SECONDS)
+                      .map(Object::toString);
           }
 
           @Nonnull
@@ -109,10 +105,10 @@ sections:
           }
       }
   section4:
-    name: 'Binding between component properties'
+    name: 'One-way binding between component properties'
     description: >
       This section shows you how you can bind component properties to each other.
-    view: |
+    viewCode: |
       class DemoView extends ReactiveView<DemoViewModel>
       {
           @Override
@@ -126,7 +122,7 @@ sections:
               setCompositionRoot(new VerticalLayout(checkBox, textField));
           }
       }
-    viewModel: |
+    viewModelCode: |
       class DemoViewModel extends ReactiveViewModel
       {}
 
@@ -134,7 +130,7 @@ sections:
     name: 'Two-way binding between component properties'
     description: >
       This section shows you how you can two-way bind component properties to each other.
-    view: |
+    viewCode: |
       class DemoView extends ReactiveView<DemoViewModel>
       {
           @Override
@@ -151,7 +147,7 @@ sections:
               setCompositionRoot(new VerticalLayout(textFieldA, textFieldB));
           }
       }
-    viewModel: |
+    viewModelCode: |
       class DemoViewModel extends ReactiveViewModel
       {}
 
@@ -160,7 +156,7 @@ sections:
     description: >
       By default, <b>ReactiveView</b> logs all unhandled errors to the log with <b>ERROR</b> level. <br/>
       This section shows you how you can change this behavior and handle errors signalled from observables by yourself.
-    view: |
+    viewCode: |
       class DemoView extends ReactiveView<DemoViewModel>
       {
           @Override
@@ -180,7 +176,7 @@ sections:
                       Notification.Type.ERROR_MESSAGE);
           }
       }
-    viewModel: |
+    viewModelCode: |
       class DemoViewModel extends ReactiveViewModel
       {
           private final Observable<String> observable;
@@ -205,7 +201,7 @@ sections:
       from UI. <br/>
       This section shows you how you can change this behavior and dispose subscriptions returned by reactive
       binder whenever you want.
-    view: |
+    viewCode: |
       class DemoView extends ReactiveView<DemoViewModel>
       {
           @Override
@@ -213,7 +209,8 @@ sections:
           {
               final Label label = new Label();
 
-              final Disposable disposable = bind(valueOf(label)).to(viewModel.getObservable());
+              final Disposable disposable =
+                      bind(valueOf(label)).to(viewModel.getObservable());
 
               final Button button = new Button("Dispose");
               button.addClickListener(event -> {
@@ -224,7 +221,7 @@ sections:
               setCompositionRoot(new VerticalLayout(label, button));
           }
       }
-    viewModel: |
+    viewModelCode: |
       class DemoViewModel extends ReactiveViewModel
       {
           private final Observable<String> observable;
