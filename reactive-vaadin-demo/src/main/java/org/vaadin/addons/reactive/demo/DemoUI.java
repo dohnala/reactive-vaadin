@@ -24,6 +24,7 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.UI;
 import org.apache.commons.lang3.StringUtils;
 import org.vaadin.addons.reactive.demo.screen.ReactiveBinderScreen;
+import org.vaadin.addons.reactive.demo.screen.ReactivePropertyScreen;
 
 /**
  * @author dohnal
@@ -116,6 +117,22 @@ public class DemoUI extends UI implements ViewDisplay
                 ReactiveBinderScreen.SCREEN_NAME + "/" + ReactiveBinderScreen.SECTION_6));
         menuItemsLayout.addComponent(createMenuItem("Handling subscriptions",
                 ReactiveBinderScreen.SCREEN_NAME + "/" + ReactiveBinderScreen.SECTION_7));
+
+        menuItemsLayout.addComponent(createMenuSubTitle("Reactive property"));
+        menuItemsLayout.addComponent(createMenuItem("Capturing field values",
+                ReactivePropertyScreen.SCREEN_NAME + "/" + ReactivePropertyScreen.SECTION_1));
+        menuItemsLayout.addComponent(createMenuItem("Default value",
+                ReactivePropertyScreen.SCREEN_NAME + "/" + ReactivePropertyScreen.SECTION_2));
+        menuItemsLayout.addComponent(createMenuItem("Updating the value",
+                ReactivePropertyScreen.SCREEN_NAME + "/" + ReactivePropertyScreen.SECTION_3));
+        menuItemsLayout.addComponent(createMenuItem("Merging properties",
+                ReactivePropertyScreen.SCREEN_NAME + "/" + ReactivePropertyScreen.SECTION_4));
+        menuItemsLayout.addComponent(createMenuItem("Combining properties",
+                ReactivePropertyScreen.SCREEN_NAME + "/" + ReactivePropertyScreen.SECTION_5));
+        menuItemsLayout.addComponent(createMenuItem("Suppressing notifications",
+                ReactivePropertyScreen.SCREEN_NAME + "/" + ReactivePropertyScreen.SECTION_6));
+        menuItemsLayout.addComponent(createMenuItem("Delaying notifications",
+                ReactivePropertyScreen.SCREEN_NAME + "/" + ReactivePropertyScreen.SECTION_7));
 
         return menu;
     }

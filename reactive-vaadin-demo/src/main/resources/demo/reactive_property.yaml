@@ -1,0 +1,344 @@
+sections:
+  section1:
+    name: 'Capturing field values'
+    description: >
+      <b>Reactive property</b> can be defined in <b>ReactiveViewModel</b> to <b>capture</b> component
+      properties and process them further. This way, the logic stays inside the view model.<br/>
+      This section shows you how you can capture value of field into reactive property.
+    viewCode: |
+      class DemoView extends ReactiveView<DemoViewModel>
+      {
+          @Override
+          protected void initView(final @Nonnull DemoViewModel viewModel)
+          {
+              final TextField textField = new TextField();
+              final Label label = new Label();
+
+              bind(valueOf(textField)).to(viewModel.getProperty());
+              bind(valueOf(label)).to(viewModel.getObservable());
+
+              setCompositionRoot(new VerticalLayout(textField, label));
+          }
+      }
+    viewModelCode: |
+      class DemoViewModel extends ReactiveViewModel
+      {
+          private final ReactiveProperty<String> property;
+
+          public DemoViewModel()
+          {
+              this.property = createProperty();
+          }
+
+          @Nonnull
+          public ReactiveProperty<String> getProperty()
+          {
+              return property;
+          }
+
+          @Nonnull
+          public Observable<String> getObservable()
+          {
+              return property.asObservable().map(String::toLowerCase);
+          }
+      }
+  section2:
+    name: 'Default value'
+    description: >
+      This section shows you how you can define <b>default value</b> for reactive property.
+    viewCode: |
+      class DemoView extends ReactiveView<DemoViewModel>
+      {
+          @Override
+          protected void initView(final @Nonnull DemoViewModel viewModel)
+          {
+              final TextField textField = new TextField();
+
+              bind(valueOf(textField)).to(viewModel.getProperty());
+
+              setCompositionRoot(new VerticalLayout(textField));
+          }
+      }
+    viewModelCode: |
+      class DemoViewModel extends ReactiveViewModel
+      {
+          private final ReactiveProperty<String> property;
+
+          public DemoViewModel()
+          {
+              this.property = createProperty("Default value");
+          }
+
+          @Nonnull
+          public ReactiveProperty<String> getProperty()
+          {
+              return property;
+          }
+      }
+  section3:
+    name: 'Updating the value'
+    description: >
+      This section shows you how you can <b>update</b> the value of reactive property in view model.
+    viewCode: |
+      class DemoView extends ReactiveView<DemoViewModel>
+      {
+          @Override
+          protected void initView(final @Nonnull DemoViewModel viewModel)
+          {
+              final Slider slider = new Slider();
+              slider.setMin(0.0);
+              slider.setMax(100.0);
+              slider.setWidth(200, Unit.PIXELS);
+
+              final Button decrement = new Button(VaadinIcons.MINUS, event ->
+                      viewModel.decrement());
+
+              final Button reset = new Button("Reset", event ->
+                      viewModel.reset());
+
+              final Button increment = new Button(VaadinIcons.PLUS, event ->
+                      viewModel.increment());
+
+              bind(valueOf(slider)).to(viewModel.getProperty());
+
+              setCompositionRoot(new VerticalLayout(slider,
+                      new HorizontalLayout(decrement, reset, increment)));
+          }
+      }
+    viewModelCode: |
+      class DemoViewModel extends ReactiveViewModel
+      {
+          private final ReactiveProperty<Double> property;
+
+          public DemoViewModel()
+          {
+              this.property = createProperty(50.0);
+          }
+
+          @Nonnull
+          public ReactiveProperty<Double> getProperty()
+          {
+              return property;
+          }
+
+          public void reset()
+          {
+              property.setValue(50.0);
+          }
+
+          public void increment()
+          {
+              property.updateValue(value -> Math.min(value + 5, 100.0));
+          }
+
+          public void decrement()
+          {
+              property.updateValue(value -> Math.max(value - 5, 0.0));
+          }
+      }
+  section4:
+    name: 'Merging properties'
+    description: >
+      This section shows you how you can <b>merge</b> multiple properties into the new one.
+    viewCode: |
+      class DemoView extends ReactiveView<DemoViewModel>
+      {
+          @Override
+          protected void initView(final @Nonnull DemoViewModel viewModel)
+          {
+              final TextField textFieldA = new TextField();
+              textFieldA.setPlaceholder("Type...");
+
+              final TextField textFieldB = new TextField();
+              textFieldB.setPlaceholder("Type...");
+
+              final Label result = new Label();
+
+              bind(valueOf(textFieldA)).to(viewModel.getPropertyA());
+              bind(valueOf(textFieldB)).to(viewModel.getPropertyB());
+              bind(valueOf(result)).to(viewModel.getResult());
+
+              setCompositionRoot(new VerticalLayout(textFieldA, textFieldB, result));
+          }
+      }
+    viewModelCode: |
+      class DemoViewModel extends ReactiveViewModel
+      {
+          private final ReactiveProperty<String> propertyA;
+          private final ReactiveProperty<String> propertyB;
+          private final ReactiveProperty<String> result;
+
+          public DemoViewModel()
+          {
+              this.propertyA = createProperty();
+              this.propertyB = createProperty();
+              this.result = createPropertyFrom(propertyA, propertyB);
+          }
+
+          @Nonnull
+          public ReactiveProperty<String> getPropertyA()
+          {
+              return propertyA;
+          }
+
+          @Nonnull
+          public ReactiveProperty<String> getPropertyB()
+          {
+              return propertyB;
+          }
+
+          @Nonnull
+          public ReactiveProperty<String> getResult()
+          {
+              return result;
+          }
+      }
+  section5:
+    name: 'Combining properties'
+    description: >
+      This section shows you how you can <b>combine</b> multiple properties into the new one.
+    viewCode: |
+      class DemoView extends ReactiveView<DemoViewModel>
+      {
+          @Override
+          protected void initView(final @Nonnull DemoViewModel viewModel)
+          {
+              final TextField textFieldA = new TextField();
+              textFieldA.setPlaceholder("Type...");
+
+              final TextField textFieldB = new TextField();
+              textFieldB.setPlaceholder("Type...");
+
+              final Label result = new Label();
+
+              bind(valueOf(textFieldA)).to(viewModel.getPropertyA());
+              bind(valueOf(textFieldB)).to(viewModel.getPropertyB());
+              bind(valueOf(result)).to(viewModel.getResult());
+
+              setCompositionRoot(new VerticalLayout(textFieldA, textFieldB, result));
+          }
+      }
+    viewModelCode: |
+      class DemoViewModel extends ReactiveViewModel
+      {
+          private final ReactiveProperty<String> propertyA;
+          private final ReactiveProperty<String> propertyB;
+          private final ReactiveProperty<String> result;
+
+          public DemoViewModel()
+          {
+              this.propertyA = createProperty();
+              this.propertyB = createProperty();
+              this.result = createPropertyFrom(propertyA, propertyB, (x, y) ->
+                      x.toLowerCase() + "." + y.toLowerCase());
+          }
+
+          @Nonnull
+          public ReactiveProperty<String> getPropertyA()
+          {
+              return propertyA;
+          }
+
+          @Nonnull
+          public ReactiveProperty<String> getPropertyB()
+          {
+              return propertyB;
+          }
+
+          @Nonnull
+          public ReactiveProperty<String> getResult()
+          {
+              return result;
+          }
+      }
+  section6:
+    name: 'Suppressing notifications'
+    description: >
+      This section shows you how you can <b>suppress</b> value change notifications of reactive property.
+      This can be useful in cases where you want to change the value without notifying anyone.
+    viewCode: |
+      class DemoView extends ReactiveView<DemoViewModel>
+      {
+          @Override
+          protected void initView(final @Nonnull DemoViewModel viewModel)
+          {
+              final Label label = new Label();
+              final Button update = new Button("Update", event ->
+                      viewModel.update());
+
+              bind(valueOf(label)).to(viewModel.getObservable());
+
+              setCompositionRoot(new VerticalLayout(label, update));
+          }
+      }
+    viewModelCode: |
+      class DemoViewModel extends ReactiveViewModel
+      {
+          private final ReactiveProperty<Integer> property;
+
+          public DemoViewModel()
+          {
+              this.property = createProperty(0);
+          }
+
+          @Nonnull
+          public Observable<String> getObservable()
+          {
+              return property.asObservable().map(Object::toString);
+          }
+
+          public void update()
+          {
+              property.suppress(() -> {
+                  property.updateValue(value -> value + 1);
+                  property.updateValue(value -> value + 1);
+                  property.updateValue(value -> value + 1);
+              });
+          }
+      }
+  section7:
+    name: 'Delaying notifications'
+    description: >
+      This section shows you how you can <b>delay</b> value change notifications of reactive property.
+      This can be useful in cases where you want to perform operation (like re-initialization) which can
+      change the value multiple times, but you want to notify only the latest value after the operation is done.
+    viewCode: |
+      class DemoView extends ReactiveView<DemoViewModel>
+      {
+          @Override
+          protected void initView(final @Nonnull DemoViewModel viewModel)
+          {
+              final Label label = new Label();
+              final Button update = new Button("Update", event ->
+                      viewModel.update());
+
+              bind(valueOf(label)).to(viewModel.getObservable());
+
+              setCompositionRoot(new VerticalLayout(label, update));
+          }
+      }
+    viewModelCode: |
+      class DemoViewModel extends ReactiveViewModel
+      {
+          private final ReactiveProperty<Integer> property;
+
+          public DemoViewModel()
+          {
+              this.property = createProperty(0);
+          }
+
+          @Nonnull
+          public Observable<String> getObservable()
+          {
+              return property.asObservable().map(Object::toString);
+          }
+
+          public void update()
+          {
+              property.delay(() -> {
+                  property.updateValue(value -> value + 1);
+                  property.updateValue(value -> value + 1);
+                  property.updateValue(value -> value + 1);
+              });
+          }
+      }
