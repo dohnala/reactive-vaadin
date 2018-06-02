@@ -19,6 +19,8 @@ import io.reactivex.disposables.Disposable;
 import org.vaadin.addons.reactive.mvvm.ReactiveView;
 import org.vaadin.addons.reactive.mvvm.ReactiveViewModel;
 
+import static com.vaadin.ui.Notification.Type;
+
 /**
  * @author dohnal
  */
@@ -258,7 +260,7 @@ public class ReactiveBinderScreen extends AbstractDemoSectionScreen
             public void handleError(final @Nonnull Throwable error)
             {
                 Notification.show("Unexpected error", error.getMessage(),
-                        Notification.Type.ERROR_MESSAGE);
+                        Type.ERROR_MESSAGE);
             }
         }
 
