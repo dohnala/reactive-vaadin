@@ -2,7 +2,9 @@ sections:
   section1:
     name: 'Binding to observables'
     description: >
-      This section shows you how you can bind component properties to observables.
+      <b>ReactiveBinder</b> provides an easy way how to bind Vaadin component properties defined in view to
+      reactive primitives (such as <b>Rx Observables</b>) defined in view model.<br/>
+      This section shows you how you can bind component property to observable.
     viewCode: |
       class DemoView extends ReactiveView<DemoViewModel>
       {
@@ -35,8 +37,9 @@ sections:
   section2:
     name: 'Binding to asynchronous observables'
     description: >
-      This section shows you how you can bind component properties to asynchronous observables.
-      You can notice that the code looks exactly the same as for synchronous observables.
+      This section shows you how you can bind component property to <b>asynchronous</b> observable (observable which
+      performs work on different scheduler then the current thread).
+      You can notice that the code looks exactly the same as for synchronous observable in the previous section.
     viewCode: |
       class DemoView extends ReactiveView<DemoViewModel>
       {
@@ -72,8 +75,8 @@ sections:
   section3:
     name: 'Binding custom properties'
     description: >
-      This section shows you how you can bind custom component properties e.g. properties for which
-      there don't exist helpers like <B>valueOf</b> or you just don't want to use them.
+      This section shows you how you can bind <b>custom</b> component property e.g. property for which
+      there doesn't exist any helper like <b>valueOf</b> or you just don't want to use them.
     viewCode: |
       class DemoView extends ReactiveView<DemoViewModel>
       {
@@ -107,7 +110,7 @@ sections:
   section4:
     name: 'One-way binding between component properties'
     description: >
-      This section shows you how you can bind component properties to each other.
+      This section shows you how you can <b>one-way</b> bind component properties to each other.
     viewCode: |
       class DemoView extends ReactiveView<DemoViewModel>
       {
@@ -129,7 +132,9 @@ sections:
   section5:
     name: 'Two-way binding between component properties'
     description: >
-      This section shows you how you can two-way bind component properties to each other.
+      This section shows you how you can <b>two-way</b> bind component properties to each other.
+      The reason it works is that <b>valueOf</b> for <b>TextField</b> returns not only the property
+      (which is used to set value), but also an observable (which is used to listen for value changes).
     viewCode: |
       class DemoView extends ReactiveView<DemoViewModel>
       {
@@ -154,8 +159,10 @@ sections:
   section6:
     name: 'Handling errors'
     description: >
-      By default, <b>ReactiveView</b> logs all unhandled errors to the log with <b>ERROR</b> level. <br/>
-      This section shows you how you can change this behavior and handle errors signalled from observables by yourself.
+      <b>ReactiveBinder</b> passes all unhandled errors to <b>handleError</b> method of <b>ReactiveView</b> which
+      logs them with <b>ERROR</b> level by default.<br/>
+      This section shows you how you can change this behavior and <b>handle errors</b> signalled from reactive binder
+      by yourself.
     viewCode: |
       class DemoView extends ReactiveView<DemoViewModel>
       {
@@ -196,10 +203,10 @@ sections:
   section7:
     name: 'Handling subscriptions'
     description: >
-      By default, <b>ReactiveView</b> activates all subscriptions made by reactive binder when the view is
-      <b>attached</b> to UI. It also automatically disposes active subscriptions when the view is <b>detached</b>
-      from UI. <br/>
-      This section shows you how you can change this behavior and dispose subscriptions returned by reactive
+      <b>ReactiveView</b> activates all subscriptions made by reactive binder when the view is
+      <b>attached</b> to UI. It also automatically disposes and clears active subscriptions when the view is
+      <b>detached</b> from UI. <br/>
+      This section shows you how you can change this behavior and dispose subscription returned by reactive
       binder whenever you want.
     viewCode: |
       class DemoView extends ReactiveView<DemoViewModel>
