@@ -24,6 +24,7 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.UI;
 import org.apache.commons.lang3.StringUtils;
 import org.vaadin.addons.reactive.demo.screen.ReactiveBinderScreen;
+import org.vaadin.addons.reactive.demo.screen.ReactiveCommandScreen;
 import org.vaadin.addons.reactive.demo.screen.ReactivePropertyScreen;
 
 /**
@@ -133,6 +134,34 @@ public class DemoUI extends UI implements ViewDisplay
                 ReactivePropertyScreen.SCREEN_NAME + "/" + ReactivePropertyScreen.SECTION_6));
         menuItemsLayout.addComponent(createMenuItem("Delaying notifications",
                 ReactivePropertyScreen.SCREEN_NAME + "/" + ReactivePropertyScreen.SECTION_7));
+
+        menuItemsLayout.addComponent(createMenuSubTitle("Reactive command"));
+        menuItemsLayout.addComponent(createMenuItem("Executing command",
+                ReactiveCommandScreen.SCREEN_NAME + "/" + ReactiveCommandScreen.SECTION_1));
+        menuItemsLayout.addComponent(createMenuItem("Binding result",
+                ReactiveCommandScreen.SCREEN_NAME + "/" + ReactiveCommandScreen.SECTION_2));
+        menuItemsLayout.addComponent(createMenuItem("Handling success",
+                ReactiveCommandScreen.SCREEN_NAME + "/" + ReactiveCommandScreen.SECTION_3));
+        menuItemsLayout.addComponent(createMenuItem("Handling errors",
+                ReactiveCommandScreen.SCREEN_NAME + "/" + ReactiveCommandScreen.SECTION_4));
+        menuItemsLayout.addComponent(createMenuItem("Controlling executability",
+                ReactiveCommandScreen.SCREEN_NAME + "/" + ReactiveCommandScreen.SECTION_5));
+        menuItemsLayout.addComponent(createMenuItem("Execution count",
+                ReactiveCommandScreen.SCREEN_NAME + "/" + ReactiveCommandScreen.SECTION_6));
+        menuItemsLayout.addComponent(createMenuItem("Input parameters",
+                ReactiveCommandScreen.SCREEN_NAME + "/" + ReactiveCommandScreen.SECTION_7));
+        menuItemsLayout.addComponent(createMenuItem("Long-running command",
+                ReactiveCommandScreen.SCREEN_NAME + "/" + ReactiveCommandScreen.SECTION_8));
+        menuItemsLayout.addComponent(createMenuItem("Asynchronous command",
+                ReactiveCommandScreen.SCREEN_NAME + "/" + ReactiveCommandScreen.SECTION_9));
+        menuItemsLayout.addComponent(createMenuItem("Execution state",
+                ReactiveCommandScreen.SCREEN_NAME + "/" + ReactiveCommandScreen.SECTION_10));
+        menuItemsLayout.addComponent(createMenuItem("Progress",
+                ReactiveCommandScreen.SCREEN_NAME + "/" + ReactiveCommandScreen.SECTION_11));
+        menuItemsLayout.addComponent(createMenuItem("Automatic execution",
+                ReactiveCommandScreen.SCREEN_NAME + "/" + ReactiveCommandScreen.SECTION_12));
+        menuItemsLayout.addComponent(createMenuItem("Composite commands",
+                ReactiveCommandScreen.SCREEN_NAME + "/" + ReactiveCommandScreen.SECTION_13));
 
         return menu;
     }

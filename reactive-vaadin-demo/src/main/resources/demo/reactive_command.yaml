@@ -1,0 +1,630 @@
+sections:
+  section1:
+    name: 'Executing command'
+    description: >
+      <b>Reactive command</b> encapsulates logic executed in response of some event (most often user action).<br/>
+      This section shows you how you can <b>execute</b> command by clicking on button.
+    viewCode: |
+      class DemoView extends ReactiveView<DemoViewModel>
+      {
+          @Override
+          protected void initView(final @Nonnull DemoViewModel viewModel)
+          {
+              final DateTimeField dateTimeField = new DateTimeField();
+              dateTimeField.setReadOnly(true);
+              dateTimeField.setResolution(DateTimeResolution.SECOND);
+
+              final Button button = new Button("Refresh");
+
+              bind(valueOf(dateTimeField)).to(viewModel.getCurrentTime());
+              when(clickedOn(button)).then(execute(viewModel.getRefreshCommand()));
+
+              setCompositionRoot(new VerticalLayout(dateTimeField, button));
+          }
+      }
+    viewModelCode: |
+      class DemoViewModel extends ReactiveViewModel
+      {
+          private final ReactiveProperty<LocalDateTime> currentTime;
+
+          private final ReactiveCommand<Void, Void> refreshCommand;
+
+          public DemoViewModel()
+          {
+              this.currentTime = createProperty(LocalDateTime.now());
+
+              this.refreshCommand = createCommandFromRunnable(() ->
+                      currentTime.setValue(LocalDateTime.now()));
+          }
+
+          @Nonnull
+          public ReactiveProperty<LocalDateTime> getCurrentTime()
+          {
+              return currentTime;
+          }
+
+          @Nonnull
+          public ReactiveCommand<Void, Void> getRefreshCommand()
+          {
+              return refreshCommand;
+          }
+      }
+  section2:
+    name: 'Binding result'
+    description: >
+      This sections shows you how you can bind command <b>result</b> in the same way as any other observable.
+    viewCode: |
+      class DemoView extends ReactiveView<DemoViewModel>
+      {
+          @Override
+          protected void initView(final @Nonnull DemoViewModel viewModel)
+          {
+              final DateTimeField dateTimeField = new DateTimeField();
+              dateTimeField.setReadOnly(true);
+              dateTimeField.setResolution(DateTimeResolution.SECOND);
+
+              final Button button = new Button("Refresh");
+
+              bind(valueOf(dateTimeField)).to(viewModel.getTimeCommand().getResult());
+              when(clickedOn(button)).then(execute(viewModel.getTimeCommand()));
+
+              setCompositionRoot(new VerticalLayout(dateTimeField, button));
+          }
+      }
+    viewModelCode: |
+      class DemoViewModel extends ReactiveViewModel
+      {
+          private final ReactiveCommand<Void, LocalDateTime> timeCommand;
+
+          public DemoViewModel()
+          {
+              this.timeCommand = createCommandFromSupplier(LocalDateTime::now);
+          }
+
+          @Nonnull
+          public ReactiveCommand<Void, LocalDateTime> getTimeCommand()
+          {
+              return timeCommand;
+          }
+      }
+  section3:
+    name: 'Handling success'
+    description: >
+      This sections shows you how you can handle command <b>success</b> by invoking an action (such as showing a
+      notification).
+    viewCode: |
+      class DemoView extends ReactiveView<DemoViewModel>
+      {
+          @Override
+          protected void initView(final @Nonnull DemoViewModel viewModel)
+          {
+              final Button button = new Button("Current time");
+
+              when(clickedOn(button)).then(execute(viewModel.getTimeCommand()));
+              when(succeeded(viewModel.getTimeCommand())).then(show(time ->
+                      new Notification("Current time is " + time)));
+
+              setCompositionRoot(new VerticalLayout(button));
+          }
+      }
+    viewModelCode: |
+      class DemoViewModel extends ReactiveViewModel
+      {
+          private final ReactiveCommand<Void, LocalDateTime> timeCommand;
+
+          public DemoViewModel()
+          {
+              this.timeCommand = createCommandFromSupplier(LocalDateTime::now);
+          }
+
+          @Nonnull
+          public ReactiveCommand<Void, LocalDateTime> getTimeCommand()
+          {
+              return timeCommand;
+          }
+      }
+  section4:
+    name: 'Handling errors'
+    description: >
+      This sections shows you how you can handle command <b>error</b> by invoking an action (such as showing a
+      notification). In case that an error is not handled, it is passed as unhandled error into
+      <b>handleError</b> method of view (see <b>Handling errors</b> section of <b>Reactive binder</b>).
+    viewCode: |
+      class DemoView extends ReactiveView<DemoViewModel>
+      {
+          @Override
+          protected void initView(final @Nonnull DemoViewModel viewModel)
+          {
+              final Button button = new Button("Execute");
+
+              when(clickedOn(button)).then(execute(viewModel.getErrorCommand()));
+              when(failed(viewModel.getErrorCommand())).then(show(error ->
+                      new Notification(error.getMessage(), Type.ERROR_MESSAGE)));
+
+              setCompositionRoot(new VerticalLayout(button));
+          }
+      }
+    viewModelCode: |
+      class DemoViewModel extends ReactiveViewModel
+      {
+          private final ReactiveCommand<Void, Void> errorCommand;
+
+          public DemoViewModel()
+          {
+              this.errorCommand = createCommandFromRunnable(() -> {
+                  throw new RuntimeException("Command error");
+              });
+          }
+
+          @Nonnull
+          public ReactiveCommand<Void, Void> getErrorCommand()
+          {
+              return errorCommand;
+          }
+      }
+  section5:
+    name: 'Controlling executability'
+    description: >
+      There are times you want to control if command can be <b>executable</b> or not by checking some preconditions
+      for example.<br/>
+      This section shows you how you can pass an optional parameter to control command executability and how you
+      can bind it to <b>enabled</b> property of button.
+    viewCode: |
+      class DemoView extends ReactiveView<DemoViewModel>
+      {
+          @Override
+          protected void initView(final @Nonnull DemoViewModel viewModel)
+          {
+              final TextField textField = new TextField();
+              textField.setPlaceholder("Type your name...");
+
+              final Button button = new Button("Say hello");
+
+              bind(valueOf(textField)).to(viewModel.getName());
+              bind(enabledOf(button)).to(viewModel.getHelloCommand().canExecute());
+              when(clickedOn(button)).then(execute(viewModel.getHelloCommand()));
+              when(succeeded(viewModel.getHelloCommand())).then(show(
+                      Notification::new));
+
+              setCompositionRoot(new VerticalLayout(textField, button));
+          }
+      }
+    viewModelCode: |
+      class DemoViewModel extends ReactiveViewModel
+      {
+          private final ReactiveProperty<String> name;
+
+          private final ReactiveCommand<Void, String> helloCommand;
+
+          public DemoViewModel()
+          {
+              this.name = createProperty("");
+
+              final Observable<Boolean> hasName =
+                      name.asObservable().map(StringUtils::hasText);
+
+              this.helloCommand = createCommandFromSupplier(hasName, () ->
+                      "Hello " + name.getValue() + "!");
+          }
+
+          @Nonnull
+          public ReactiveProperty<String> getName()
+          {
+              return name;
+          }
+
+          @Nonnull
+          public ReactiveCommand<Void, String> getHelloCommand()
+          {
+              return helloCommand;
+          }
+      }
+  section6:
+    name: 'Execution count'
+    description: >
+      This section shows you how you can display how many <b>times</b> command has been executed.
+    viewCode: |
+      class DemoView extends ReactiveView<DemoViewModel>
+      {
+          @Override
+          protected void initView(final @Nonnull DemoViewModel viewModel)
+          {
+              final Label label = new Label();
+
+              final Button button = new Button("Execute");
+
+              bind(valueOf(label)).to(viewModel.getCommand().getExecutionCount()
+                      .map(Object::toString));
+              when(clickedOn(button)).then(execute(viewModel.getCommand()));
+
+
+              setCompositionRoot(new VerticalLayout(label, button));
+          }
+      }
+    viewModelCode: |
+      class DemoViewModel extends ReactiveViewModel
+      {
+          private final ReactiveCommand<Void, Void> command;
+
+          public DemoViewModel()
+          {
+              this.command = createCommandFromRunnable(() -> {});
+          }
+
+          @Nonnull
+          public ReactiveCommand<Void, Void> getCommand()
+          {
+              return command;
+          }
+      }
+  section7:
+    name: 'Input parameters'
+    description: >
+      Command execution will mostly depend on the state of view model, but there can be times when
+      you want to pass additional context to command execution which is not available in the view model.<br/>
+      This section shows you how you can pass an <b>input parameter</b> to command.
+    viewCode: |
+      class DemoView extends ReactiveView<DemoViewModel>
+      {
+          @Override
+          protected void initView(final @Nonnull DemoViewModel viewModel)
+          {
+              final Button helloToJohn = new Button("John");
+              final Button helloToAnna = new Button("Anna");
+
+              when(clickedOn(helloToJohn)).then(executeWithInput(
+                      viewModel.getHelloCommand(), "John"));
+
+              when(clickedOn(helloToAnna)).then(executeWithInput(
+                      viewModel.getHelloCommand(), "Anna"));
+
+              when(succeeded(viewModel.getHelloCommand())).then(show(
+                      Notification::new));
+
+              setCompositionRoot(new VerticalLayout(helloToJohn, helloToAnna));
+          }
+      }
+    viewModelCode: |
+      class DemoViewModel extends ReactiveViewModel
+      {
+          private final ReactiveCommand<String, String> helloCommand;
+
+          public DemoViewModel()
+          {
+              this.helloCommand = createCommandFromFunction(name ->
+                      "Hello " + name + "!");
+          }
+
+          @Nonnull
+          public ReactiveCommand<String, String> getHelloCommand()
+          {
+              return helloCommand;
+          }
+      }
+  section8:
+    name: 'Long-running command'
+    description: >
+      This section shows you how you can execute <b>long-running</b> command. As observables, reactive commands
+      are synchronous by default, so the UI is <b>blocked</b> until the command execution is finished.
+    viewCode: |
+      class DemoView extends ReactiveView<DemoViewModel>
+      {
+          @Override
+          protected void initView(final @Nonnull DemoViewModel viewModel)
+          {
+              final Button button = new Button("Execute");
+
+              when(clickedOn(button)).then(execute(viewModel.getCommand()));
+              when(finished(viewModel.getCommand())).then(show(() ->
+                      new Notification("Finished")));
+
+              setCompositionRoot(new VerticalLayout(button));
+          }
+      }
+    viewModelCode: |
+      class DemoViewModel extends ReactiveViewModel
+      {
+          private final ReactiveCommand<Void, Void> command;
+
+          public DemoViewModel()
+          {
+              this.command = createCommandFromRunnable(() ->
+                      // simulates expensive operation
+                      Uninterruptibles.sleepUninterruptibly(2, TimeUnit.SECONDS));
+          }
+
+          @Nonnull
+          public ReactiveCommand<Void, Void> getCommand()
+          {
+              return command;
+          }
+      }
+  section9:
+    name: 'Asynchronous command'
+    description: >
+      In order to execute command <b>asynchronously</b> you have to pass optional <b>Scheduler</b> when creating a
+      command.<br/>
+      This section shows you how you can asynchronously execute command on <b>io</b> scheduler without modifying
+      view. You can also notice how the button is <b>disabled</b> when the command is currently executing.
+    viewCode: |
+      class DemoView extends ReactiveView<DemoViewModel>
+      {
+          @Override
+          protected void initView(final @Nonnull DemoViewModel viewModel)
+          {
+              final Button button = new Button("Execute");
+
+              bind(enabledOf(button)).to(viewModel.getCommand().canExecute());
+
+              when(clickedOn(button)).then(execute(viewModel.getCommand()));
+              when(finished(viewModel.getCommand())).then(show(() ->
+                      new Notification("Finished")));
+
+              setCompositionRoot(new VerticalLayout(button));
+          }
+      }
+    viewModelCode: |
+      class DemoViewModel extends ReactiveViewModel
+      {
+          private final ReactiveCommand<Void, Void> command;
+
+          public DemoViewModel()
+          {
+              this.command = createCommandFromRunnable(() ->
+                      // simulates expensive operation
+                      Uninterruptibles.sleepUninterruptibly(2, TimeUnit.SECONDS),
+                      Schedulers.io());
+          }
+
+          @Nonnull
+          public ReactiveCommand<Void, Void> getCommand()
+          {
+              return command;
+          }
+      }
+  section10:
+    name: 'Execution state'
+    description: >
+      When using asynchronous commands, it is a good practice to make user interface more responsive by displaying
+      command <b>execution state</b>.<br/>
+      This section shows you how you can display command execution state using <b>ProgressBar</b> in
+      <b>indeterminate</b> mode.
+    viewCode: |
+      class DemoView extends ReactiveView<DemoViewModel>
+      {
+          @Override
+          protected void initView(final @Nonnull DemoViewModel viewModel)
+          {
+              final Button button = new Button("Execute");
+              final ProgressBar progress = new ProgressBar();
+              progress.setIndeterminate(true);
+
+              bind(enabledOf(button)).to(viewModel.getCommand().canExecute());
+              bind(visibleOf(progress)).to(viewModel.getCommand().isExecuting());
+
+              when(clickedOn(button)).then(execute(viewModel.getCommand()));
+              when(finished(viewModel.getCommand())).then(show(() ->
+                      new Notification("Finished")));
+
+              setCompositionRoot(new VerticalLayout(row(button, progress)));
+          }
+      }
+    viewModelCode: |
+      class DemoViewModel extends ReactiveViewModel
+      {
+          private final ReactiveCommand<Void, Void> command;
+
+          public DemoViewModel()
+          {
+              this.command = createCommandFromRunnable(() ->
+                      // simulates expensive operation
+                      Uninterruptibles.sleepUninterruptibly(2, TimeUnit.SECONDS),
+                      Schedulers.io());
+          }
+
+          @Nonnull
+          public ReactiveCommand<Void, Void> getCommand()
+          {
+              return command;
+          }
+      }
+  section11:
+    name: 'Progress'
+    description: >
+      This section shows you how you can control command <b>progress</b> and display it using <b>ProgressBar</b>.
+    viewCode: |
+      class DemoView extends ReactiveView<DemoViewModel>
+      {
+          @Override
+          protected void initView(final @Nonnull DemoViewModel viewModel)
+          {
+              final ProgressBar progress = new ProgressBar();
+              final Button button = new Button("Execute");
+
+              bind(enabledOf(button)).to(viewModel.getCommand().canExecute());
+              bind(visibleOf(progress)).to(viewModel.getCommand().isExecuting());
+              bind(valueOf(progress)).to(viewModel.getCommand().getProgress());
+
+              when(clickedOn(button)).then(execute(viewModel.getCommand()));
+              when(finished(viewModel.getCommand())).then(show(() ->
+                      new Notification("Finished")));
+
+              setCompositionRoot(new VerticalLayout(row(progress, button)));
+          }
+      }
+    viewModelCode: |
+      class DemoViewModel extends ReactiveViewModel
+      {
+          private final ReactiveCommand<Void, Void> command;
+
+          public DemoViewModel()
+          {
+              this.command = createProgressCommand(
+                      this::longOperation, Schedulers.io());
+          }
+
+          @Nonnull
+          public ReactiveCommand<Void, Void> getCommand()
+          {
+              return command;
+          }
+
+          private void longOperation(final @Nonnull ProgressContext progress)
+          {
+              for (int i = 0; i < 5; i++)
+              {
+                  Uninterruptibles.sleepUninterruptibly(1, TimeUnit.SECONDS);
+                  progress.add(0.2f);
+              }
+          }
+      }
+  section12:
+    name: 'Automatic execution'
+    description: >
+      This section shows you how you can execute command <b>automatically</b> in view model in terms of other
+      observable
+    viewCode: |
+      class DemoView extends ReactiveView<DemoViewModel>
+      {
+          @Override
+          protected void initView(final @Nonnull DemoViewModel viewModel)
+          {
+              final DateTimeField dateTimeField = new DateTimeField("Last saved");
+              dateTimeField.setReadOnly(true);
+              dateTimeField.setResolution(DateTimeResolution.SECOND);
+
+              final Button button = new Button("Save");
+
+              bind(valueOf(dateTimeField)).to(viewModel.getLastSaved());
+              when(clickedOn(button)).then(execute(viewModel.getSaveCommand()));
+
+              setCompositionRoot(new VerticalLayout(dateTimeField, button));
+          }
+      }
+    viewModelCode: |
+      class DemoViewModel extends ReactiveViewModel
+      {
+          private final ReactiveProperty<LocalDateTime> lastSaved;
+
+          private final ReactiveCommand<Void, Void> saveCommand;
+
+          public DemoViewModel()
+          {
+              this.lastSaved = createProperty();
+
+              this.saveCommand = createCommandFromRunnable(() ->
+                      lastSaved.setValue(LocalDateTime.now()));
+
+              // execute save command every 5 seconds
+              when(Observable.interval(5, TimeUnit.SECONDS))
+                      .then(execute(saveCommand));
+          }
+
+          @Nonnull
+          public Observable<LocalDateTime> getLastSaved()
+          {
+              return lastSaved.asObservable();
+          }
+
+          @Nonnull
+          public ReactiveCommand<Void, Void> getSaveCommand()
+          {
+              return saveCommand;
+          }
+      }
+  section13:
+    name: 'Composite commands'
+    description: >
+      This section shows you how you can <b>compose</b> commands into a new one. When this composite command
+      is executed, it executes all children commands in sequence. Composite command respects all reactive command
+      properties such as results, errors, executability, progress etc...
+    viewCode: |
+      class DemoView extends ReactiveView<DemoViewModel>
+      {
+          @Override
+          protected void initView(final @Nonnull DemoViewModel viewModel)
+          {
+              final TextField textFieldA = new TextField("A:");
+              textFieldA.setPlaceholder("Type...");
+
+              final Button clearA = new Button(VaadinIcons.CLOSE);
+
+              final TextField textFieldB = new TextField("B:");
+              textFieldB.setPlaceholder("Type...");
+
+              final Button clearB = new Button(VaadinIcons.CLOSE);
+
+              final Button clearAll = new Button("Clear all", VaadinIcons.CLOSE);
+
+              bind(valueOf(textFieldA)).to(viewModel.getPropertyA());
+              when(clickedOn(clearA)).then(execute(viewModel.getClearACommand()));
+
+              bind(valueOf(textFieldB)).to(viewModel.getPropertyB());
+              when(clickedOn(clearB)).then(execute(viewModel.getClearBCommand()));
+
+              when(clickedOn(clearAll)).then(execute(viewModel.getClearAllCommand()));
+
+              setCompositionRoot(new VerticalLayout(
+                      row(textFieldA, clearA),
+                      row(textFieldB, clearB),
+                      clearAll));
+          }
+      }
+    viewModelCode: |
+      class DemoViewModel extends ReactiveViewModel
+      {
+          private final ReactiveProperty<String> propertyA;
+
+          private final ReactiveProperty<String> propertyB;
+
+          private final ReactiveCommand<Void, Void> clearACommand;
+
+          private final ReactiveCommand<Void, Void> clearBCommand;
+
+          private final ReactiveCommand<Void, List<Void>> clearAllCommand;
+
+          public DemoViewModel()
+          {
+              this.propertyA = createProperty();
+              this.propertyB = createProperty();
+
+              this.clearACommand = createCommandFromRunnable(() ->
+                      propertyA.setValue(""));
+
+              this.clearBCommand = createCommandFromRunnable(() ->
+                      propertyB.setValue(""));
+
+              this.clearAllCommand = createCompositeCommand(
+                      Lists.newArrayList(clearACommand, clearBCommand));
+          }
+
+          @Nonnull
+          public ReactiveProperty<String> getPropertyA()
+          {
+              return propertyA;
+          }
+
+          @Nonnull
+          public ReactiveProperty<String> getPropertyB()
+          {
+              return propertyB;
+          }
+
+          @Nonnull
+          public ReactiveCommand<Void, Void> getClearACommand()
+          {
+              return clearACommand;
+          }
+
+          @Nonnull
+          public ReactiveCommand<Void, Void> getClearBCommand()
+          {
+              return clearBCommand;
+          }
+
+          @Nonnull
+          public ReactiveCommand<Void, List<Void>> getClearAllCommand()
+          {
+              return clearAllCommand;
+          }
+      }

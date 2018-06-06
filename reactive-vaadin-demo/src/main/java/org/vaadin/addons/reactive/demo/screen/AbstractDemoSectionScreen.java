@@ -3,6 +3,7 @@ package org.vaadin.addons.reactive.demo.screen;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -10,7 +11,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.vaadin.server.Page;
 import com.vaadin.shared.ui.ContentMode;
+import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Component;
+import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Panel;
@@ -85,6 +88,19 @@ public abstract class AbstractDemoSectionScreen extends AbstractScreen
 
         setSizeFull();
         setMargin(false);
+    }
+
+    @Nonnull
+    protected HorizontalLayout row(final @Nonnull Component... components)
+    {
+        final HorizontalLayout rowLayout = new HorizontalLayout(components);
+
+        rowLayout.setHeight(100, Unit.PERCENTAGE);
+
+        Arrays.asList(components).forEach(component ->
+                rowLayout.setComponentAlignment(component, Alignment.MIDDLE_LEFT));
+
+        return rowLayout;
     }
 
     @Nonnull
