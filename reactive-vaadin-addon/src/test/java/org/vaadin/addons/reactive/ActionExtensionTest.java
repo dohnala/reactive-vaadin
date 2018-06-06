@@ -44,7 +44,7 @@ public class ActionExtensionTest implements ActionExtension
         @SuppressWarnings("unchecked")
         protected void create()
         {
-            command = createCommand(() -> RESULT);
+            command = createCommandFromSupplier(() -> RESULT);
             action = execute(command);
         }
 
@@ -86,7 +86,7 @@ public class ActionExtensionTest implements ActionExtension
         @SuppressWarnings("unchecked")
         protected void create()
         {
-            command = createCommand(input -> input + 2);
+            command = createCommandFromFunction(input -> input + 2);
             action = executeWithInput(command, INPUT);
         }
 
@@ -128,7 +128,7 @@ public class ActionExtensionTest implements ActionExtension
         @SuppressWarnings("unchecked")
         protected void create()
         {
-            command = createCommand(input -> input + 2);
+            command = createCommandFromFunction(input -> input + 2);
             action = executeWithInput(command);
         }
 

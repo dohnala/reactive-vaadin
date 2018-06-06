@@ -223,10 +223,10 @@ public interface CompositeFromCommandsSpecification extends
             capturedCommands = ReplaySubject.create();
 
             executionA = Mockito.mock(Supplier.class);
-            commandA = createCommand(executionA);
+            commandA = createCommandFromSupplier(executionA);
 
             executionB = Mockito.mock(Supplier.class);
-            commandB = createCommand(executionB);
+            commandB = createCommandFromSupplier(executionB);
 
             command = createCompositeCommand(Arrays.asList(commandA, commandB));
         }
@@ -373,10 +373,10 @@ public interface CompositeFromCommandsSpecification extends
             capturedCommands = ReplaySubject.create();
 
             executionA = Mockito.mock(Supplier.class);
-            commandA = createCommand(executionA);
+            commandA = createCommandFromSupplier(executionA);
 
             executionB = Mockito.mock(Supplier.class);
-            commandB = createCommand(executionB);
+            commandB = createCommandFromSupplier(executionB);
 
             command = createCompositeCommand(Arrays.asList(commandA, commandB), Schedulers.from(Runnable::run));
         }
@@ -402,10 +402,10 @@ public interface CompositeFromCommandsSpecification extends
             capturedCommands = ReplaySubject.create();
 
             executionA = Mockito.mock(Consumer.class);
-            commandA = createCommand(executionA);
+            commandA = createCommandFromConsumer(executionA);
 
             executionB = Mockito.mock(Consumer.class);
-            commandB = createCommand(executionB);
+            commandB = createCommandFromConsumer(executionB);
 
             command = createCompositeCommand(Arrays.asList(commandA, commandB));
         }
@@ -566,10 +566,10 @@ public interface CompositeFromCommandsSpecification extends
             capturedCommands = ReplaySubject.create();
 
             executionA = Mockito.mock(Consumer.class);
-            commandA = createCommand(executionA);
+            commandA = createCommandFromConsumer(executionA);
 
             executionB = Mockito.mock(Consumer.class);
-            commandB = createCommand(executionB);
+            commandB = createCommandFromConsumer(executionB);
 
             command = createCompositeCommand(Arrays.asList(commandA, commandB), Schedulers.from(Runnable::run));
         }
@@ -597,10 +597,10 @@ public interface CompositeFromCommandsSpecification extends
             capturedCommands = ReplaySubject.create();
 
             executionA = Mockito.mock(Supplier.class);
-            commandA = createCommand(executionA);
+            commandA = createCommandFromSupplier(executionA);
 
             executionB = Mockito.mock(Supplier.class);
-            commandB = createCommand(executionB);
+            commandB = createCommandFromSupplier(executionB);
 
             testScheduler = new TestScheduler();
             testSubject = PublishSubject.create();
@@ -694,10 +694,10 @@ public interface CompositeFromCommandsSpecification extends
             capturedCommands = ReplaySubject.create();
 
             executionA = Mockito.mock(Supplier.class);
-            commandA = createCommand(executionA);
+            commandA = createCommandFromSupplier(executionA);
 
             executionB = Mockito.mock(Supplier.class);
-            commandB = createCommand(executionB);
+            commandB = createCommandFromSupplier(executionB);
 
             testScheduler = new TestScheduler();
             testSubject = PublishSubject.create();

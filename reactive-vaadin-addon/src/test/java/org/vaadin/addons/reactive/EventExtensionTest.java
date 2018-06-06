@@ -130,7 +130,7 @@ public class EventExtensionTest implements EventExtension
         @SuppressWarnings("unchecked")
         protected void create()
         {
-            command = createCommand(input -> input + 1);
+            command = createCommandFromFunction(input -> input + 1);
             event = succeeded(command);
         }
 
@@ -171,7 +171,7 @@ public class EventExtensionTest implements EventExtension
         @SuppressWarnings("unchecked")
         protected void create()
         {
-            command = createCommand(() -> {
+            command = createCommandFromSupplier(() -> {
                 throw ERROR;
             });
             event = failed(command);
@@ -216,7 +216,7 @@ public class EventExtensionTest implements EventExtension
             @SuppressWarnings("unchecked")
             protected void create()
             {
-                command = createCommand(input -> input + 1);
+                command = createCommandFromFunction(input -> input + 1);
                 event = finished(command);
             }
 
@@ -257,7 +257,7 @@ public class EventExtensionTest implements EventExtension
             @SuppressWarnings("unchecked")
             protected void create()
             {
-                command = createCommand(() -> {
+                command = createCommandFromSupplier(() -> {
                     throw ERROR;
                 });
                 event = finished(command);

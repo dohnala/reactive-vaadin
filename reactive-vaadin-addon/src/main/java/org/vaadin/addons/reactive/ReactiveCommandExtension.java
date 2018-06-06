@@ -44,11 +44,11 @@ public interface ReactiveCommandExtension
      * @return created reactive command
      */
     @Nonnull
-    default ReactiveCommand<Void, Void> createCommand(final @Nonnull Runnable execution)
+    default ReactiveCommand<Void, Void> createCommandFromRunnable(final @Nonnull Runnable execution)
     {
         Objects.requireNonNull(execution, "Execution cannot be null");
 
-        return createCommand(Observable.just(true), execution);
+        return createCommandFromRunnable(Observable.just(true), execution);
     }
 
     /**
@@ -59,13 +59,13 @@ public interface ReactiveCommandExtension
      * @return created reactive command
      */
     @Nonnull
-    default ReactiveCommand<Void, Void> createCommand(final @Nonnull Runnable execution,
-                                                      final @Nonnull Scheduler scheduler)
+    default ReactiveCommand<Void, Void> createCommandFromRunnable(final @Nonnull Runnable execution,
+                                                                  final @Nonnull Scheduler scheduler)
     {
         Objects.requireNonNull(execution, "Execution cannot be null");
         Objects.requireNonNull(scheduler, "Scheduler cannot be null");
 
-        return createCommand(Observable.just(true), execution, scheduler);
+        return createCommandFromRunnable(Observable.just(true), execution, scheduler);
     }
 
     /**
@@ -76,13 +76,13 @@ public interface ReactiveCommandExtension
      * @return created reactive command
      */
     @Nonnull
-    default ReactiveCommand<Void, Void> createCommand(final @Nonnull Observable<Boolean> canExecute,
-                                                      final @Nonnull Runnable execution)
+    default ReactiveCommand<Void, Void> createCommandFromRunnable(final @Nonnull Observable<Boolean> canExecute,
+                                                                  final @Nonnull Runnable execution)
     {
         Objects.requireNonNull(canExecute, "CanExecute cannot be null");
         Objects.requireNonNull(execution, "Execution cannot be null");
 
-        return createCommand(canExecute, execution, Schedulers.trampoline());
+        return createCommandFromRunnable(canExecute, execution, Schedulers.trampoline());
     }
 
     /**
@@ -94,9 +94,9 @@ public interface ReactiveCommandExtension
      * @return created reactive command
      */
     @Nonnull
-    default ReactiveCommand<Void, Void> createCommand(final @Nonnull Observable<Boolean> canExecute,
-                                                      final @Nonnull Runnable execution,
-                                                      final @Nonnull Scheduler scheduler)
+    default ReactiveCommand<Void, Void> createCommandFromRunnable(final @Nonnull Observable<Boolean> canExecute,
+                                                                  final @Nonnull Runnable execution,
+                                                                  final @Nonnull Scheduler scheduler)
     {
         Objects.requireNonNull(canExecute, "CanExecute cannot be null");
         Objects.requireNonNull(execution, "Execution cannot be null");
@@ -114,11 +114,11 @@ public interface ReactiveCommandExtension
      * @return created reactive command
      */
     @Nonnull
-    default <R> ReactiveCommand<Void, R> createCommand(final @Nonnull Supplier<R> execution)
+    default <R> ReactiveCommand<Void, R> createCommandFromSupplier(final @Nonnull Supplier<R> execution)
     {
         Objects.requireNonNull(execution, "Execution cannot be null");
 
-        return createCommand(Observable.just(true), execution);
+        return createCommandFromSupplier(Observable.just(true), execution);
     }
 
     /**
@@ -130,13 +130,13 @@ public interface ReactiveCommandExtension
      * @return created reactive command
      */
     @Nonnull
-    default <R> ReactiveCommand<Void, R> createCommand(final @Nonnull Supplier<R> execution,
-                                                       final @Nonnull Scheduler scheduler)
+    default <R> ReactiveCommand<Void, R> createCommandFromSupplier(final @Nonnull Supplier<R> execution,
+                                                                   final @Nonnull Scheduler scheduler)
     {
         Objects.requireNonNull(execution, "Execution cannot be null");
         Objects.requireNonNull(scheduler, "Scheduler cannot be null");
 
-        return createCommand(Observable.just(true), execution, scheduler);
+        return createCommandFromSupplier(Observable.just(true), execution, scheduler);
     }
 
     /**
@@ -148,13 +148,13 @@ public interface ReactiveCommandExtension
      * @return created reactive command
      */
     @Nonnull
-    default <R> ReactiveCommand<Void, R> createCommand(final @Nonnull Observable<Boolean> canExecute,
-                                                       final @Nonnull Supplier<R> execution)
+    default <R> ReactiveCommand<Void, R> createCommandFromSupplier(final @Nonnull Observable<Boolean> canExecute,
+                                                                   final @Nonnull Supplier<R> execution)
     {
         Objects.requireNonNull(canExecute, "CanExecute cannot be null");
         Objects.requireNonNull(execution, "Execution cannot be null");
 
-        return createCommand(canExecute, execution, Schedulers.trampoline());
+        return createCommandFromSupplier(canExecute, execution, Schedulers.trampoline());
     }
 
     /**
@@ -167,9 +167,9 @@ public interface ReactiveCommandExtension
      * @return created reactive command
      */
     @Nonnull
-    default <R> ReactiveCommand<Void, R> createCommand(final @Nonnull Observable<Boolean> canExecute,
-                                                       final @Nonnull Supplier<R> execution,
-                                                       final @Nonnull Scheduler scheduler)
+    default <R> ReactiveCommand<Void, R> createCommandFromSupplier(final @Nonnull Observable<Boolean> canExecute,
+                                                                   final @Nonnull Supplier<R> execution,
+                                                                   final @Nonnull Scheduler scheduler)
     {
         Objects.requireNonNull(canExecute, "CanExecute cannot be null");
         Objects.requireNonNull(execution, "Execution cannot be null");
@@ -187,11 +187,11 @@ public interface ReactiveCommandExtension
      * @return created reactive command
      */
     @Nonnull
-    default <T> ReactiveCommand<T, Void> createCommand(final @Nonnull Consumer<T> execution)
+    default <T> ReactiveCommand<T, Void> createCommandFromConsumer(final @Nonnull Consumer<T> execution)
     {
         Objects.requireNonNull(execution, "Execution cannot be null");
 
-        return createCommand(Observable.just(true), execution);
+        return createCommandFromConsumer(Observable.just(true), execution);
     }
 
     /**
@@ -203,13 +203,13 @@ public interface ReactiveCommandExtension
      * @return created reactive command
      */
     @Nonnull
-    default <T> ReactiveCommand<T, Void> createCommand(final @Nonnull Consumer<T> execution,
-                                                       final @Nonnull Scheduler scheduler)
+    default <T> ReactiveCommand<T, Void> createCommandFromConsumer(final @Nonnull Consumer<T> execution,
+                                                                   final @Nonnull Scheduler scheduler)
     {
         Objects.requireNonNull(execution, "Execution cannot be null");
         Objects.requireNonNull(scheduler, "Scheduler cannot be null");
 
-        return createCommand(Observable.just(true), execution, scheduler);
+        return createCommandFromConsumer(Observable.just(true), execution, scheduler);
     }
 
     /**
@@ -221,13 +221,13 @@ public interface ReactiveCommandExtension
      * @return created reactive command
      */
     @Nonnull
-    default <T> ReactiveCommand<T, Void> createCommand(final @Nonnull Observable<Boolean> canExecute,
-                                                       final @Nonnull Consumer<T> execution)
+    default <T> ReactiveCommand<T, Void> createCommandFromConsumer(final @Nonnull Observable<Boolean> canExecute,
+                                                                   final @Nonnull Consumer<T> execution)
     {
         Objects.requireNonNull(canExecute, "CanExecute cannot be null");
         Objects.requireNonNull(execution, "Execution cannot be null");
 
-        return createCommand(canExecute, execution, Schedulers.trampoline());
+        return createCommandFromConsumer(canExecute, execution, Schedulers.trampoline());
     }
 
     /**
@@ -240,9 +240,9 @@ public interface ReactiveCommandExtension
      * @return created reactive command
      */
     @Nonnull
-    default <T> ReactiveCommand<T, Void> createCommand(final @Nonnull Observable<Boolean> canExecute,
-                                                       final @Nonnull Consumer<T> execution,
-                                                       final @Nonnull Scheduler scheduler)
+    default <T> ReactiveCommand<T, Void> createCommandFromConsumer(final @Nonnull Observable<Boolean> canExecute,
+                                                                   final @Nonnull Consumer<T> execution,
+                                                                   final @Nonnull Scheduler scheduler)
     {
         Objects.requireNonNull(canExecute, "CanExecute cannot be null");
         Objects.requireNonNull(execution, "Execution cannot be null");
@@ -264,11 +264,11 @@ public interface ReactiveCommandExtension
      * @return created reactive command
      */
     @Nonnull
-    default <T, R> ReactiveCommand<T, R> createCommand(final @Nonnull Function<T, R> execution)
+    default <T, R> ReactiveCommand<T, R> createCommandFromFunction(final @Nonnull Function<T, R> execution)
     {
         Objects.requireNonNull(execution, "Execution cannot be null");
 
-        return createCommand(Observable.just(true), execution);
+        return createCommandFromFunction(Observable.just(true), execution);
     }
 
     /**
@@ -281,13 +281,13 @@ public interface ReactiveCommandExtension
      * @return created reactive command
      */
     @Nonnull
-    default <T, R> ReactiveCommand<T, R> createCommand(final @Nonnull Function<T, R> execution,
-                                                       final @Nonnull Scheduler scheduler)
+    default <T, R> ReactiveCommand<T, R> createCommandFromFunction(final @Nonnull Function<T, R> execution,
+                                                                   final @Nonnull Scheduler scheduler)
     {
         Objects.requireNonNull(execution, "Execution cannot be null");
         Objects.requireNonNull(scheduler, "Scheduler cannot be null");
 
-        return createCommand(Observable.just(true), execution, scheduler);
+        return createCommandFromFunction(Observable.just(true), execution, scheduler);
     }
 
     /**
@@ -300,13 +300,13 @@ public interface ReactiveCommandExtension
      * @return created reactive command
      */
     @Nonnull
-    default <T, R> ReactiveCommand<T, R> createCommand(final @Nonnull Observable<Boolean> canExecute,
-                                                       final @Nonnull Function<T, R> execution)
+    default <T, R> ReactiveCommand<T, R> createCommandFromFunction(final @Nonnull Observable<Boolean> canExecute,
+                                                                   final @Nonnull Function<T, R> execution)
     {
         Objects.requireNonNull(canExecute, "CanExecute cannot be null");
         Objects.requireNonNull(execution, "Execution cannot be null");
 
-        return createCommand(canExecute, execution, Schedulers.trampoline());
+        return createCommandFromFunction(canExecute, execution, Schedulers.trampoline());
     }
 
     /**
@@ -320,9 +320,9 @@ public interface ReactiveCommandExtension
      * @return created reactive command
      */
     @Nonnull
-    default <T, R> ReactiveCommand<T, R> createCommand(final @Nonnull Observable<Boolean> canExecute,
-                                                       final @Nonnull Function<T, R> execution,
-                                                       final @Nonnull Scheduler scheduler)
+    default <T, R> ReactiveCommand<T, R> createCommandFromFunction(final @Nonnull Observable<Boolean> canExecute,
+                                                                   final @Nonnull Function<T, R> execution,
+                                                                   final @Nonnull Scheduler scheduler)
     {
         Objects.requireNonNull(canExecute, "CanExecute cannot be null");
         Objects.requireNonNull(execution, "Execution cannot be null");

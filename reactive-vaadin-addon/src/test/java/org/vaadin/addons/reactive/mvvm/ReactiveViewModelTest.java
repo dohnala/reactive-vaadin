@@ -43,7 +43,7 @@ public class ReactiveViewModelTest
         public TestViewModel()
         {
             this.property = createProperty();
-            this.command = createCommand(input -> input * 2);
+            this.command = createCommandFromFunction(input -> input * 2);
 
             when(changed(property)).then(executeWithInput(command));
         }

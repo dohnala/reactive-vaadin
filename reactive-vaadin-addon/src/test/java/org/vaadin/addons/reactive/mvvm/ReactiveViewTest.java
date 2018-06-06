@@ -51,7 +51,7 @@ public class ReactiveViewTest
         public TestViewModel()
         {
             this.property = createProperty();
-            this.command = createCommand(() -> property.getValue() != null ?
+            this.command = createCommandFromSupplier(() -> property.getValue() != null ?
                     property.getValue().toLowerCase() : "");
         }
     }

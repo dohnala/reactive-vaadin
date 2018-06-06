@@ -35,10 +35,10 @@ import org.vaadin.addons.reactive.command.ExecuteSpecification;
 
 /**
  * Specification for {@link ReactiveCommand} created by
- * {@link ReactiveCommandExtension#createCommand(Runnable)}
- * {@link ReactiveCommandExtension#createCommand(Observable, Runnable)}
- * {@link ReactiveCommandExtension#createCommand(Runnable, Scheduler)}
- * {@link ReactiveCommandExtension#createCommand(Observable, Runnable, Scheduler)}
+ * {@link ReactiveCommandExtension#createCommandFromRunnable(Runnable)}
+ * {@link ReactiveCommandExtension#createCommandFromRunnable(Observable, Runnable)}
+ * {@link ReactiveCommandExtension#createCommandFromRunnable(Runnable, Scheduler)}
+ * {@link ReactiveCommandExtension#createCommandFromRunnable(Observable, Runnable, Scheduler)}
  *
  * @author dohnal
  */
@@ -59,7 +59,7 @@ public interface FromRunnableSpecification extends
         {
             capturedCommands = ReplaySubject.create();
             execution = Mockito.mock(Runnable.class);
-            command = createCommand(execution);
+            command = createCommandFromRunnable(execution);
         }
 
         @Nonnull
@@ -162,7 +162,7 @@ public interface FromRunnableSpecification extends
         {
             capturedCommands = ReplaySubject.create();
             execution = Mockito.mock(Runnable.class);
-            command = createCommand(execution, Schedulers.from(Runnable::run));
+            command = createCommandFromRunnable(execution, Schedulers.from(Runnable::run));
         }
     }
 
@@ -183,7 +183,7 @@ public interface FromRunnableSpecification extends
             testScheduler = new TestScheduler();
             testSubject = PublishSubject.create();
             testSubject.observeOn(testScheduler);
-            command = createCommand(testSubject, execution);
+            command = createCommandFromRunnable(testSubject, execution);
         }
 
         @Nonnull
@@ -258,7 +258,7 @@ public interface FromRunnableSpecification extends
             testScheduler = new TestScheduler();
             testSubject = PublishSubject.create();
             testSubject.observeOn(testScheduler);
-            command = createCommand(testSubject, execution, Schedulers.from(Runnable::run));
+            command = createCommandFromRunnable(testSubject, execution, Schedulers.from(Runnable::run));
         }
     }
 }
