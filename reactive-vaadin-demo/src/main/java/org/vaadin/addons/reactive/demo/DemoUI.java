@@ -158,10 +158,12 @@ public class DemoUI extends UI implements ViewDisplay
                 ReactiveCommandScreen.SCREEN_NAME + "/" + ReactiveCommandScreen.SECTION_10));
         menuItemsLayout.addComponent(createMenuItem("Progress",
                 ReactiveCommandScreen.SCREEN_NAME + "/" + ReactiveCommandScreen.SECTION_11));
-        menuItemsLayout.addComponent(createMenuItem("Automatic execution",
+        menuItemsLayout.addComponent(createMenuItem("Cancelling",
                 ReactiveCommandScreen.SCREEN_NAME + "/" + ReactiveCommandScreen.SECTION_12));
-        menuItemsLayout.addComponent(createMenuItem("Composite commands",
+        menuItemsLayout.addComponent(createMenuItem("Automatic execution",
                 ReactiveCommandScreen.SCREEN_NAME + "/" + ReactiveCommandScreen.SECTION_13));
+        menuItemsLayout.addComponent(createMenuItem("Composite commands",
+                ReactiveCommandScreen.SCREEN_NAME + "/" + ReactiveCommandScreen.SECTION_14));
 
         return menu;
     }

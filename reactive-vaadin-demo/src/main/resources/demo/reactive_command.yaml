@@ -479,6 +479,71 @@ sections:
           }
       }
   section12:
+    name: 'Cancelling'
+    description: >
+      Sometimes you want to let the user to <b>cancel</b> currently executing command, especially if it is
+      long-running and without side-effects like network request for example. In order to cancel command, you
+      can take an advantage of <b>takeUntil</b> operator from <b>Rx</b>.<br/>
+      This section shows you how you can cancel long-running command by executing another command. Also notice
+      how you can create command in terms of observable.
+    viewCode: |
+      class DemoView extends ReactiveView<DemoViewModel>
+      {
+          @Override
+          protected void initView(final @Nonnull DemoViewModel viewModel)
+          {
+              final ProgressBar progress = new ProgressBar();
+              final Button execute = new Button("Execute");
+              final Button cancel = new Button("Cancel");
+
+              bind(enabledOf(execute)).to(viewModel.getCommand().canExecute());
+              bind(visibleOf(progress)).to(viewModel.getCommand().isExecuting());
+              bind(valueOf(progress)).to(viewModel.getCommand().getProgress());
+              bind(enabledOf(cancel)).to(viewModel.getCommand().isExecuting());
+
+              when(clickedOn(execute)).then(execute(viewModel.getCommand()));
+              when(clickedOn(cancel)).then(execute(viewModel.getCancelCommand()));
+
+              setCompositionRoot(new VerticalLayout(row(progress, execute, cancel)));
+          }
+      }
+    viewModelCode: |
+      class DemoViewModel extends ReactiveViewModel
+      {
+          private final ReactiveCommand<Void, Void> cancel;
+
+          private final ReactiveCommand<Void, Void> command;
+
+          public DemoViewModel()
+          {
+              this.cancel = createCommandFromRunnable(() -> {});
+
+              this.command = createProgressCommandFromObservable(progress ->
+                      Observable
+                              .range(0, 5)
+                              .concatMap(value -> Observable
+                                      .just(value)
+                                      .delay(1, TimeUnit.SECONDS))
+                              .doOnNext(value -> progress.add(0.2f))
+                              .takeUntil(finished(cancel))
+                              .ignoreElements()
+                              .toObservable(),
+                      Schedulers.io());
+          }
+
+          @Nonnull
+          public ReactiveCommand<Void, Void> getCancelCommand()
+          {
+              return cancel;
+          }
+
+          @Nonnull
+          public ReactiveCommand<Void, Void> getCommand()
+          {
+              return command;
+          }
+      }
+  section13:
     name: 'Automatic execution'
     description: >
       This section shows you how you can execute command <b>automatically</b> in view model in terms of other
@@ -532,7 +597,7 @@ sections:
               return saveCommand;
           }
       }
-  section13:
+  section14:
     name: 'Composite commands'
     description: >
       This section shows you how you can <b>compose</b> commands into a new one. When this composite command

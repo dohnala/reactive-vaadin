@@ -51,6 +51,7 @@ public class ReactiveCommandScreen extends AbstractDemoSectionScreen
     public static final String SECTION_11 = "section11";
     public static final String SECTION_12 = "section12";
     public static final String SECTION_13 = "section13";
+    public static final String SECTION_14 = "section14";
 
     public ReactiveCommandScreen()
     {
@@ -89,6 +90,8 @@ public class ReactiveCommandScreen extends AbstractDemoSectionScreen
                 return createSection12();
             case SECTION_13:
                 return createSection13();
+            case SECTION_14:
+                return createSection14();
         }
 
         return null;
@@ -583,6 +586,69 @@ public class ReactiveCommandScreen extends AbstractDemoSectionScreen
     {
         class DemoViewModel extends ReactiveViewModel
         {
+            private final ReactiveCommand<Void, Void> cancel;
+
+            private final ReactiveCommand<Void, Void> command;
+
+            public DemoViewModel()
+            {
+                this.cancel = createCommandFromRunnable(() -> {});
+
+                this.command = createProgressCommandFromObservable(progress ->
+                                Observable
+                                        .range(0, 5)
+                                        .concatMap(value -> Observable
+                                                .just(value)
+                                                .delay(1, TimeUnit.SECONDS))
+                                        .doOnNext(value -> progress.add(0.2f))
+                                        .takeUntil(finished(cancel))
+                                        .ignoreElements()
+                                        .toObservable(),
+                        Schedulers.io());
+            }
+
+            @Nonnull
+            public ReactiveCommand<Void, Void> getCancelCommand()
+            {
+                return cancel;
+            }
+
+            @Nonnull
+            public ReactiveCommand<Void, Void> getCommand()
+            {
+                return command;
+            }
+        }
+
+        class DemoView extends ReactiveView<DemoViewModel>
+        {
+            @Override
+            protected void initView(final @Nonnull DemoViewModel viewModel)
+            {
+                final ProgressBar progress = new ProgressBar();
+                final Button execute = new Button("Execute");
+                final Button cancel = new Button("Cancel");
+
+                bind(enabledOf(execute)).to(viewModel.getCommand().canExecute());
+                bind(visibleOf(progress)).to(viewModel.getCommand().isExecuting());
+                bind(valueOf(progress)).to(viewModel.getCommand().getProgress());
+                bind(enabledOf(cancel)).to(viewModel.getCommand().isExecuting());
+
+                when(clickedOn(execute)).then(execute(viewModel.getCommand()));
+                when(clickedOn(cancel)).then(execute(viewModel.getCancelCommand()));
+
+                setCompositionRoot(new VerticalLayout(row(progress, execute, cancel)));
+            }
+        }
+
+        return new DemoView().withViewModel(new DemoViewModel());
+    }
+
+    @Nonnull
+    private ReactiveView createSection13()
+    {
+        class DemoViewModel extends ReactiveViewModel
+        {
             private final ReactiveProperty<LocalDateTime> lastSaved;
 
             private final ReactiveCommand<Void, Void> saveCommand;
@@ -634,7 +700,7 @@ public class ReactiveCommandScreen extends AbstractDemoSectionScreen
     }
 
     @Nonnull
-    private ReactiveView createSection13()
+    private ReactiveView createSection14()
     {
         class DemoViewModel extends ReactiveViewModel
         {
