@@ -25,6 +25,7 @@ import com.vaadin.ui.UI;
 import org.apache.commons.lang3.StringUtils;
 import org.vaadin.addons.reactive.demo.screen.ReactiveBinderScreen;
 import org.vaadin.addons.reactive.demo.screen.ReactiveCommandScreen;
+import org.vaadin.addons.reactive.demo.screen.ReactiveInteractionScreen;
 import org.vaadin.addons.reactive.demo.screen.ReactivePropertyScreen;
 
 /**
@@ -164,6 +165,12 @@ public class DemoUI extends UI implements ViewDisplay
                 ReactiveCommandScreen.SCREEN_NAME + "/" + ReactiveCommandScreen.SECTION_13));
         menuItemsLayout.addComponent(createMenuItem("Composite commands",
                 ReactiveCommandScreen.SCREEN_NAME + "/" + ReactiveCommandScreen.SECTION_14));
+
+        menuItemsLayout.addComponent(createMenuSubTitle("Reactive interaction"));
+        menuItemsLayout.addComponent(createMenuItem("Confirmation",
+                ReactiveInteractionScreen.SCREEN_NAME + "/" + ReactiveInteractionScreen.SECTION_1));
+        menuItemsLayout.addComponent(createMenuItem("Input parameters",
+                ReactiveInteractionScreen.SCREEN_NAME + "/" + ReactiveInteractionScreen.SECTION_2));
 
         return menu;
     }

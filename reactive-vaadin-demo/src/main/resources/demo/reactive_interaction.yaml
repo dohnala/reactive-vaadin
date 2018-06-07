@@ -1,0 +1,185 @@
+sections:
+  section1:
+      name: 'Confirmation'
+      description: >
+        <b>Reactive interaction</b> provides an easy way how to interact with a user during command execution.
+        Interaction is defined and <b>invoked</b> in view model, which makes it easily testable. View
+        can choose a way how to handle the interaction, for example by showing a <b>modal dialog</b>.<br/>
+        This section shows you how you can use an interaction to ask user to <b>confirm</b> some danger operation
+        during command execution.
+      viewCode: |
+        class DemoView extends ReactiveView<DemoViewModel>
+        {
+            @Override
+            protected void initView(final @Nonnull DemoViewModel viewModel)
+            {
+                final Button button = new Button("Execute");
+                button.addStyleName(DemoTheme.BUTTON_DANGER);
+
+                when(clickedOn(button)).then(execute(viewModel.getCommand()));
+
+                when(invoked(viewModel.getConfirm())).then(interaction -> {
+                    ConfirmDialog.show(
+                            "Delete",
+                            "Do you want to execute this operation?",
+                            "Yes",
+                            "No")
+                            .withOkListener(event -> interaction.handle(true))
+                            .withCancelListener(event -> interaction.handle(false))
+                            .withCloseListener(event -> interaction.handle(false));
+                });
+
+                setCompositionRoot(new VerticalLayout(button));
+            }
+        }
+      viewModelCode: |
+        class DemoViewModel extends ReactiveViewModel
+        {
+            private final ReactiveInteraction<Void, Boolean> confirm;
+
+            private final ReactiveCommand<Void, Void> command;
+
+            public DemoViewModel()
+            {
+                this.confirm = createInteraction();
+
+                this.command = createCommandFromRunnable(this::execute);
+            }
+
+            @Nonnull
+            public ReactiveInteraction<Void, Boolean> getConfirm()
+            {
+                return confirm;
+            }
+
+            @Nonnull
+            public ReactiveCommand<Void, Void> getCommand()
+            {
+                return command;
+            }
+
+            private void execute()
+            {
+                confirm.invoke(result -> {
+                    if (result)
+                    {
+                        // confirmed
+                    }
+                });
+            }
+        }
+  section2:
+    name: 'Input parameters'
+    description: >
+      This section shows you how you can pass additional <b>input</b> to an interaction from view model which can be
+      displayed in view.
+    viewCode: |
+        class DemoView extends ReactiveView<DemoViewModel>
+        {
+            @Override
+            protected void initView(final @Nonnull DemoViewModel viewModel)
+            {
+                final ComboBox<String> comboBox = new ComboBox<>();
+                comboBox.setPlaceholder("Select...");
+
+                final Button button = new Button("Delete");
+                button.addStyleName(DemoTheme.BUTTON_DANGER);
+
+                bind(itemsOf(comboBox)).to(viewModel.getItems());
+                bind(selectionOf(comboBox)).to(viewModel.getSelectedItem());
+                bind(enabledOf(button)).to(viewModel.getDeleteCommand().canExecute());
+
+                when(clickedOn(button)).then(execute(viewModel.getDeleteCommand()));
+
+                when(invoked(viewModel.getDeleteConfirm())).then(interaction -> {
+                    ConfirmDialog.show(
+                            "Delete",
+                            "Do you want to delete " + interaction.getInput() + "?",
+                            "Yes",
+                            "No")
+                            .withOkListener(event -> interaction.handle(true))
+                            .withCancelListener(event -> interaction.handle(false))
+                            .withCloseListener(event -> interaction.handle(false));
+                });
+
+                setCompositionRoot(new VerticalLayout(row(comboBox, button)));
+            }
+        }
+    viewModelCode: |
+      class DemoViewModel extends ReactiveViewModel
+      {
+          private final List<String> data = Lists.newArrayList(
+                  "Bao Coggins",
+                  "Junie Ashland",
+                  "Gidget Nakatsu",
+                  "Marinda Trongone",
+                  "Henrietta Rossetti",
+                  "Lacresha Yagle",
+                  "Reid Tony",
+                  "Gidget Reynero",
+                  "Susy Mounts");
+
+          private final ReactiveProperty<List<String>> items;
+
+          private final ReactiveProperty<Optional<String>> selectedItem;
+
+          private final ReactiveInteraction<String, Boolean> deleteConfirm;
+
+          private final ReactiveCommand<Void, Void> deleteCommand;
+
+          public DemoViewModel()
+          {
+              this.items = createProperty(data);
+
+              this.selectedItem = createProperty(Optional.empty());
+
+              this.deleteConfirm = createInteraction();
+
+              this.deleteCommand = createCommandFromRunnable(
+                      selectedItem.asObservable().map(Optional::isPresent),
+                      this::delete);
+          }
+
+          @Nonnull
+          public ReactiveProperty<List<String>> getItems()
+          {
+              return items;
+          }
+
+          @Nonnull
+          public ReactiveProperty<Optional<String>> getSelectedItem()
+          {
+              return selectedItem;
+          }
+
+          @Nonnull
+          public ReactiveInteraction<String, Boolean> getDeleteConfirm()
+          {
+              return deleteConfirm;
+          }
+
+          @Nonnull
+          public ReactiveCommand<Void, Void> getDeleteCommand()
+          {
+              return deleteCommand;
+          }
+
+          private void delete()
+          {
+              deleteConfirm.invoke(selectedItem.getValue().get(), result -> {
+                  if (result)
+                  {
+                      selectedItem.getValue().ifPresent(item -> {
+                          // clear selection
+                          selectedItem.setValue(Optional.empty());
+
+                          // remove selected item
+                          items.updateValue(items -> {
+                              items.remove(item);
+                              return items;
+                          });
+                      });
+                  }
+              });
+          }
+      }
