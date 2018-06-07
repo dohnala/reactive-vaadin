@@ -123,7 +123,7 @@ public interface SourceEmitsValueSpecification extends BasePropertySpecification
             }
 
             @Test
-            @DisplayName("Observable should not emit any value")
+            @DisplayName("Observable should emit correct value")
             public void testObservable()
             {
                 final TestObserver<Integer> testObserver = getProperty().asObservable().test();
@@ -132,7 +132,7 @@ public interface SourceEmitsValueSpecification extends BasePropertySpecification
 
                 emitValue(INITIAL_VALUE);
 
-                testObserver.assertValue(INITIAL_VALUE);
+                testObserver.assertValues(INITIAL_VALUE, INITIAL_VALUE);
             }
 
             @Nested

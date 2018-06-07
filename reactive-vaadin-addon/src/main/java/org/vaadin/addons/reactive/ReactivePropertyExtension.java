@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import io.reactivex.Observable;
-import org.vaadin.addons.reactive.property.BehaviorSubjectProperty;
+import org.vaadin.addons.reactive.property.BehaviorProperty;
 
 /**
  * Extension to create instances of {@link ReactiveProperty}
@@ -40,7 +40,7 @@ public interface ReactivePropertyExtension
     @Nonnull
     default <T> ReactiveProperty<T> createProperty()
     {
-        return onCreateProperty(new BehaviorSubjectProperty<>());
+        return onCreateProperty(new BehaviorProperty<>());
     }
 
     /**
@@ -55,7 +55,7 @@ public interface ReactivePropertyExtension
     {
         Objects.requireNonNull(defaultValue, "Default value cannot be null");
 
-        return onCreateProperty(new BehaviorSubjectProperty<>(defaultValue));
+        return onCreateProperty(new BehaviorProperty<>(defaultValue));
     }
 
     /**
@@ -70,7 +70,7 @@ public interface ReactivePropertyExtension
     {
         Objects.requireNonNull(observable, "Source observable cannot be null");
 
-        return onCreateProperty(new BehaviorSubjectProperty<>(observable));
+        return onCreateProperty(new BehaviorProperty<>(observable));
     }
 
     /**
@@ -85,7 +85,7 @@ public interface ReactivePropertyExtension
     {
         Objects.requireNonNull(property, "Source property cannot be null");
 
-        return onCreateProperty(new BehaviorSubjectProperty<>(property.asObservable()));
+        return onCreateProperty(new BehaviorProperty<>(property.asObservable()));
     }
 
     /**

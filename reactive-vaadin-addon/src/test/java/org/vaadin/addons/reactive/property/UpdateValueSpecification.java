@@ -135,7 +135,7 @@ public interface UpdateValueSpecification extends BasePropertySpecification
 
                 getProperty().updateValue(value -> INITIAL_VALUE);
 
-                testObserver.assertValue(INITIAL_VALUE);
+                testObserver.assertValues(INITIAL_VALUE, INITIAL_VALUE);
             }
 
             @Nested

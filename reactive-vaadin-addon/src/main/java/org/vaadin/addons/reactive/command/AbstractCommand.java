@@ -107,14 +107,14 @@ public abstract class AbstractCommand<T, R> implements ReactiveCommand<T, R>, Re
     @Override
     public final Observable<Boolean> isExecuting()
     {
-        return isExecuting.asObservable();
+        return isExecuting.asObservable().distinctUntilChanged();
     }
 
     @Nonnull
     @Override
     public final Observable<Integer> getExecutionCount()
     {
-        return executionCount.asObservable();
+        return executionCount.asObservable().distinctUntilChanged();
     }
 
     @Nonnull
@@ -128,14 +128,14 @@ public abstract class AbstractCommand<T, R> implements ReactiveCommand<T, R>, Re
     @Override
     public final Observable<Boolean> canExecute()
     {
-        return canExecute.asObservable();
+        return canExecute.asObservable().distinctUntilChanged();
     }
 
     @Nonnull
     @Override
     public final Observable<Float> getProgress()
     {
-        return progress.asObservable();
+        return progress.asObservable().distinctUntilChanged();
     }
 
     @Nonnull

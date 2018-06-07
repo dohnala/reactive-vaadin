@@ -18,6 +18,7 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 import io.reactivex.Observable;
+import io.reactivex.disposables.Disposable;
 import org.vaadin.addons.reactive.ObservableProperty;
 
 /**
@@ -53,5 +54,18 @@ public final class UIObservableProperty<T> implements ObservableProperty<T>
     public final void setValue(final @Nonnull T value)
     {
         withUIAccess.accept(() -> property.setValue(value));
+    }
+
+    @Override
+    public boolean isSuppressed()
+    {
+        return property.isSuppressed();
+    }
+
+    @Nonnull
+    @Override
+    public Disposable suppress()
+    {
+        return property.suppress();
     }
 }

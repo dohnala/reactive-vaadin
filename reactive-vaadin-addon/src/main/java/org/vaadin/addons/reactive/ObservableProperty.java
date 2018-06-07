@@ -19,5 +19,5 @@ package org.vaadin.addons.reactive;
  * @param <T> type of value
  * @author dohnal
  */
-public interface ObservableProperty<T> extends Property<T>, IsObservable<T>
+public interface ObservableProperty<T> extends Property<T>, IsObservable<T>, Suppressible
 {}

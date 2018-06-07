@@ -76,7 +76,11 @@ public final class DefaultObservablePropertyBinder<T> extends AbstractBinder imp
         Objects.requireNonNull(anotherProperty, "Another property cannot be null");
 
         return new ListCompositeDisposable(
-                subscribeWithErrorHandler(getProperty().asObservable(), anotherProperty::setValue),
-                subscribeWithErrorHandler(anotherProperty.asObservable(), getProperty()::setValue));
+                subscribeWithErrorHandler(getProperty().asObservable(), value -> {
+                    getProperty().suppress(() -> anotherProperty.setValue(value));
+                }),
+                subscribeWithErrorHandler(anotherProperty.asObservable(), value -> {
+                    anotherProperty.suppress(() -> getProperty().setValue(value));
+                }));
     }
 }

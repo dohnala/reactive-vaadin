@@ -40,9 +40,9 @@ import com.vaadin.ui.ProgressBar;
 import com.vaadin.ui.SingleSelect;
 import com.vaadin.ui.Tree;
 import com.vaadin.ui.TreeGrid;
-import io.reactivex.Observable;
 import org.vaadin.addons.reactive.ObservableProperty;
 import org.vaadin.addons.reactive.Property;
+import org.vaadin.addons.reactive.mvvm.property.ComponentObservableProperty;
 
 /**
  * Extension with component properties
@@ -90,21 +90,9 @@ public interface ComponentPropertyExtension extends ComponentEventExtension
     {
         Objects.requireNonNull(popupView, "PopupView cannot be null");
 
-        return new ObservableProperty<Boolean>()
-        {
-            @Nonnull
-            @Override
-            public Observable<Boolean> asObservable()
-            {
-                return visibilityChangedOf(popupView).map(PopupView.PopupVisibilityEvent::isPopupVisible);
-            }
-
-            @Override
-            public void setValue(final @Nonnull Boolean value)
-            {
-                popupView.setPopupVisible(Boolean.TRUE.equals(value));
-            }
-        };
+        return new ComponentObservableProperty<>(
+                () -> visibilityChangedOf(popupView).map(PopupView.PopupVisibilityEvent::isPopupVisible),
+                value -> popupView.setPopupVisible(Boolean.TRUE.equals(value)));
     }
 
     /**
@@ -176,21 +164,9 @@ public interface ComponentPropertyExtension extends ComponentEventExtension
     {
         Objects.requireNonNull(field, "Field cannot be null");
 
-        return new ObservableProperty<T>()
-        {
-            @Nonnull
-            @Override
-            public Observable<T> asObservable()
-            {
-                return valueChangedOf(field).map(HasValue.ValueChangeEvent::getValue);
-            }
-
-            @Override
-            public void setValue(final @Nonnull T value)
-            {
-                field.setValue(value);
-            }
-        };
+        return new ComponentObservableProperty<>(
+                () -> valueChangedOf(field).map(HasValue.ValueChangeEvent::getValue),
+                field::setValue);
     }
 
     /**
@@ -206,21 +182,9 @@ public interface ComponentPropertyExtension extends ComponentEventExtension
     {
         Objects.requireNonNull(field, "Field cannot be null");
 
-        return new ObservableProperty<Optional<T>>()
-        {
-            @Nonnull
-            @Override
-            public Observable<Optional<T>> asObservable()
-            {
-                return valueChangedOf(field).map(event -> Optional.ofNullable(event.getValue()));
-            }
-
-            @Override
-            public void setValue(final @Nonnull Optional<T> value)
-            {
-                field.setValue(value.orElse(field.getEmptyValue()));
-            }
-        };
+        return new ComponentObservableProperty<>(
+                () -> valueChangedOf(field).map(event -> Optional.ofNullable(event.getValue())),
+                value -> field.setValue(value.orElse(field.getEmptyValue())));
     }
 
     /**
@@ -264,21 +228,9 @@ public interface ComponentPropertyExtension extends ComponentEventExtension
     {
         Objects.requireNonNull(select, "Select cannot be null");
 
-        return new ObservableProperty<Optional<T>>()
-        {
-            @Nonnull
-            @Override
-            public Observable<Optional<T>> asObservable()
-            {
-                return selectionChangedOf(select).map(event -> Optional.ofNullable(event.getValue()));
-            }
-
-            @Override
-            public void setValue(final @Nonnull Optional<T> value)
-            {
-                select.setValue(value.orElse(select.getEmptyValue()));
-            }
-        };
+        return new ComponentObservableProperty<>(
+                () -> selectionChangedOf(select).map(event -> Optional.ofNullable(event.getValue())),
+                value -> select.setValue(value.orElse(select.getEmptyValue())));
     }
 
     /**
@@ -325,22 +277,9 @@ public interface ComponentPropertyExtension extends ComponentEventExtension
     {
         Objects.requireNonNull(multiSelect, "MultiSelect cannot be null");
 
-        return new ObservableProperty<Set<T>>()
-        {
-            @Nonnull
-            @Override
-            public Observable<Set<T>> asObservable()
-            {
-                return selectionChangedOf(multiSelect).map(MultiSelectionEvent::getAllSelectedItems);
-            }
-
-            @Override
-            @SuppressWarnings("unchecked")
-            public void setValue(final @Nonnull Set<T> value)
-            {
-                multiSelect.setValue(value);
-            }
-        };
+        return new ComponentObservableProperty<>(
+                () -> selectionChangedOf(multiSelect).map(MultiSelectionEvent::getAllSelectedItems),
+                multiSelect::setValue);
     }
 
     /**
@@ -366,26 +305,14 @@ public interface ComponentPropertyExtension extends ComponentEventExtension
      * @return expanded property
      */
     @Nonnull
+    @SuppressWarnings("unchecked")
     default <T> ObservableProperty<T> expandedOf(final @Nonnull TreeGrid<T> treeGrid)
     {
         Objects.requireNonNull(treeGrid, "TreeGrid cannot be null");
 
-        return new ObservableProperty<T>()
-        {
-            @Nonnull
-            @Override
-            public Observable<T> asObservable()
-            {
-                return expanded(treeGrid).map(ExpandEvent::getExpandedItem);
-            }
-
-            @Override
-            @SuppressWarnings("unchecked")
-            public void setValue(final @Nonnull T value)
-            {
-                treeGrid.expand(value);
-            }
-        };
+        return new ComponentObservableProperty<>(
+                () -> expanded(treeGrid).map(ExpandEvent::getExpandedItem),
+                treeGrid::expand);
     }
 
     /**
@@ -396,26 +323,14 @@ public interface ComponentPropertyExtension extends ComponentEventExtension
      * @return expanded property
      */
     @Nonnull
+    @SuppressWarnings("unchecked")
     default <T> ObservableProperty<T> expandedOf(final @Nonnull Tree<T> tree)
     {
         Objects.requireNonNull(tree, "Tree cannot be null");
 
-        return new ObservableProperty<T>()
-        {
-            @Nonnull
-            @Override
-            public Observable<T> asObservable()
-            {
-                return expanded(tree).map(ExpandEvent::getExpandedItem);
-            }
-
-            @Override
-            @SuppressWarnings("unchecked")
-            public void setValue(final @Nonnull T value)
-            {
-                tree.expand(value);
-            }
-        };
+        return new ComponentObservableProperty<>(
+                () -> expanded(tree).map(ExpandEvent::getExpandedItem),
+                tree::expand);
     }
 
     /**
@@ -426,26 +341,14 @@ public interface ComponentPropertyExtension extends ComponentEventExtension
      * @return collapsed property
      */
     @Nonnull
+    @SuppressWarnings("unchecked")
     default <T> ObservableProperty<T> collapsedOf(final @Nonnull TreeGrid<T> treeGrid)
     {
         Objects.requireNonNull(treeGrid, "TreeGrid cannot be null");
 
-        return new ObservableProperty<T>()
-        {
-            @Nonnull
-            @Override
-            public Observable<T> asObservable()
-            {
-                return collapsed(treeGrid).map(CollapseEvent::getCollapsedItem);
-            }
-
-            @Override
-            @SuppressWarnings("unchecked")
-            public void setValue(final @Nonnull T value)
-            {
-                treeGrid.collapse(value);
-            }
-        };
+        return new ComponentObservableProperty<>(
+                () -> collapsed(treeGrid).map(CollapseEvent::getCollapsedItem),
+                treeGrid::collapse);
     }
 
     /**
@@ -456,26 +359,14 @@ public interface ComponentPropertyExtension extends ComponentEventExtension
      * @return collapsed property
      */
     @Nonnull
+    @SuppressWarnings("unchecked")
     default <T> ObservableProperty<T> collapsedOf(final @Nonnull Tree<T> tree)
     {
         Objects.requireNonNull(tree, "Tree cannot be null");
 
-        return new ObservableProperty<T>()
-        {
-            @Nonnull
-            @Override
-            public Observable<T> asObservable()
-            {
-                return collapsed(tree).map(CollapseEvent::getCollapsedItem);
-            }
-
-            @Override
-            @SuppressWarnings("unchecked")
-            public void setValue(final @Nonnull T value)
-            {
-                tree.collapse(value);
-            }
-        };
+        return new ComponentObservableProperty<>(
+                () -> collapsed(tree).map(CollapseEvent::getCollapsedItem),
+                tree::collapse);
     }
 
     /**
@@ -503,24 +394,11 @@ public interface ComponentPropertyExtension extends ComponentEventExtension
     {
         Objects.requireNonNull(grid, "Grid cannot be null");
 
-        return new ObservableProperty<List<String>>()
-        {
-            @Nonnull
-            @Override
-            public Observable<List<String>> asObservable()
-            {
-                return columnReorderedOf(grid).map(event -> grid.getColumns().stream()
+        return new ComponentObservableProperty<>(
+                () -> columnReorderedOf(grid).map(event -> grid.getColumns().stream()
                         .map(Grid.Column::getId)
-                        .collect(Collectors.toList()));
-            }
-
-            @Override
-            @SuppressWarnings("unchecked")
-            public void setValue(final @Nonnull List<String> value)
-            {
-                grid.setColumnOrder(value.toArray(new String[value.size()]));
-            }
-        };
+                        .collect(Collectors.toList())),
+                value -> grid.setColumnOrder(value.toArray(new String[value.size()])));
     }
 
     /**
@@ -534,22 +412,9 @@ public interface ComponentPropertyExtension extends ComponentEventExtension
     {
         Objects.requireNonNull(grid, "Grid cannot be null");
 
-        return new ObservableProperty<List<GridSortOrder<T>>>()
-        {
-            @Nonnull
-            @Override
-            public Observable<List<GridSortOrder<T>>> asObservable()
-            {
-                return sortChangedOf(grid).map(SortEvent::getSortOrder);
-            }
-
-            @Override
-            @SuppressWarnings("unchecked")
-            public void setValue(final @Nonnull List<GridSortOrder<T>> value)
-            {
-                grid.setSortOrder(value);
-            }
-        };
+        return new ComponentObservableProperty<>(
+                () -> sortChangedOf(grid).map(SortEvent::getSortOrder),
+                grid::setSortOrder);
     }
 
     /**

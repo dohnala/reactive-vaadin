@@ -17,6 +17,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
 import io.reactivex.Observable;
@@ -33,9 +34,11 @@ import org.vaadin.addons.reactive.exceptions.ReadOnlyPropertyException;
  * @param <T> type of property
  * @author dohnal
  */
-public final class BehaviorSubjectProperty<T> implements ReactiveProperty<T>
+public final class BehaviorProperty<T> implements ReactiveProperty<T>
 {
-    private final BehaviorSubject<T> subject;
+    private final AtomicReference<T> value;
+
+    private final PublishSubject<T> subject;
 
     private final Boolean readOnly;
 
@@ -48,9 +51,10 @@ public final class BehaviorSubjectProperty<T> implements ReactiveProperty<T>
     /**
      * Creates new property with no value
      */
-    public BehaviorSubjectProperty()
+    public BehaviorProperty()
     {
-        this.subject = BehaviorSubject.create();
+        this.value = new AtomicReference<>();
+        this.subject = PublishSubject.create();
         this.readOnly = false;
         this.suppressed = new AtomicInteger(0);
         this.delayed = new AtomicInteger(0);
@@ -62,11 +66,12 @@ public final class BehaviorSubjectProperty<T> implements ReactiveProperty<T>
      *
      * @param defaultValue default value
      */
-    public BehaviorSubjectProperty(final @Nonnull T defaultValue)
+    public BehaviorProperty(final @Nonnull T defaultValue)
     {
         Objects.requireNonNull(defaultValue, "Default value cannot be null");
 
-        this.subject = BehaviorSubject.createDefault(defaultValue);
+        this.value = new AtomicReference<>(defaultValue);
+        this.subject = PublishSubject.create();
         this.readOnly = false;
         this.suppressed = new AtomicInteger(0);
         this.delayed = new AtomicInteger(0);
@@ -78,23 +83,24 @@ public final class BehaviorSubjectProperty<T> implements ReactiveProperty<T>
      *
      * @param observable observable
      */
-    public BehaviorSubjectProperty(final @Nonnull Observable<? extends T> observable)
+    public BehaviorProperty(final @Nonnull Observable<? extends T> observable)
     {
         Objects.requireNonNull(observable, "Observable cannot be null");
 
-        this.subject = BehaviorSubject.create();
+        this.value = new AtomicReference<>();
+        this.subject = PublishSubject.create();
         this.readOnly = true;
         this.suppressed = new AtomicInteger(0);
         this.delayed = new AtomicInteger(0);
         this.delaySubject = BehaviorSubject.createDefault(false);
 
-        observable.subscribe(subject::onNext, subject::onError, subject::onComplete);
+        observable.subscribe(this::setValueInternal, this::setErrorInternal, this::setCompleteInternal);
     }
 
     @Override
     public final boolean hasValue()
     {
-        return subject.hasValue();
+        return value.get() != null;
     }
 
     @Override
@@ -107,7 +113,7 @@ public final class BehaviorSubjectProperty<T> implements ReactiveProperty<T>
     @Override
     public final T getValue()
     {
-        return subject.getValue();
+        return value.get();
     }
 
     @Override
@@ -120,7 +126,7 @@ public final class BehaviorSubjectProperty<T> implements ReactiveProperty<T>
             throw new ReadOnlyPropertyException(this);
         }
 
-        subject.onNext(value);
+        setValueInternal(value);
     }
 
     @Override
@@ -149,9 +155,7 @@ public final class BehaviorSubjectProperty<T> implements ReactiveProperty<T>
                     .map(buffer -> buffer.get(buffer.size() - 1));
         });
 
-        return hasValue() ?
-                observable.startWith(subject.getValue()).distinctUntilChanged() :
-                observable.distinctUntilChanged();
+        return hasValue() ? observable.startWith(value.get()) : observable;
     }
 
     @Override
@@ -190,5 +194,23 @@ public final class BehaviorSubjectProperty<T> implements ReactiveProperty<T>
                 delaySubject.onNext(false);
             }
         });
+    }
+
+    private void setValueInternal(final @Nonnull T value)
+    {
+        this.value.set(value);
+        this.subject.onNext(value);
+    }
+
+    private void setErrorInternal(final @Nonnull Throwable error)
+    {
+        this.value.set(null);
+        this.subject.onError(error);
+    }
+
+    private void setCompleteInternal()
+    {
+        this.value.set(null);
+        this.subject.onComplete();
     }
 }
