@@ -96,7 +96,7 @@ public interface EventExtension
     {
         Objects.requireNonNull(command, "Command cannot be null");
 
-        return command.getExecutionCount().filter(count -> count > 0);
+        return command.getExecutionCount().skip(1);
     }
 
     /**
