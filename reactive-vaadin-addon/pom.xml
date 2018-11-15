@@ -4,7 +4,7 @@
     <groupId>org.vaadin.addons</groupId>
     <artifactId>reactive-vaadin</artifactId>
     <packaging>jar</packaging>
-    <version>1.0</version>
+    <version>1.0-SNAPSHOT</version>
     <name>Reactive Vaadin Add-on</name>
 
     <prerequisites>
